@@ -1,3 +1,8 @@
+
+promt :viết cho tôi một đoạn dự án này thêm cái user
+nhưng chưa có dữ liệu db làm sao nó chạy và in ra cái kết quả đó
+
+
 Add User with Mock Data
 
 
