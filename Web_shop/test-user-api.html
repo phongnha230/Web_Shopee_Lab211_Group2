@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test User API - Không cần Database</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 600;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+        
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+            min-height: 100px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .user-card {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .user-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .user-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        
+        .user-info p {
+            margin: 5px 0;
+            color: #555;
+        }
+        
+        .user-info strong {
+            color: #333;
+        }
+        
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Test User API</h1>
+        <p class="subtitle">Quản lý Users - Không cần Database (Dữ liệu lưu trong bộ nhớ)</p>
+        
+        <!-- Thêm User -->
+        <div class="section">
+            <h2>➕ Thêm User Mới</h2>
+            <div class="form-group">
+                <label>Username:</label>
+                <input type="text" id="username" placeholder="Nhập username...">
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="email" placeholder="Nhập email...">
+            </div>
+            <div class="form-group">
+                <label>Họ và tên:</label>
+                <input type="text" id="fullName" placeholder="Nhập họ và tên...">
+            </div>
+            <div class="form-group">
+                <label>Số điện thoại:</label>
+                <input type="text" id="phone" placeholder="Nhập số điện thoại...">
+            </div>
+            <button onclick="createUser()">Thêm User</button>
+        </div>
+        
+        <!-- Các chức năng khác -->
+        <div class="section">
+            <h2>🔍 Các Chức Năng Khác</h2>
+            <button onclick="getAllUsers()">Xem Tất Cả Users</button>
+            <button class="btn-secondary" onclick="getUserById()">Tìm User Theo ID</button>
+            <button class="btn-danger" onclick="deleteUser()">Xóa User Theo ID</button>
+            <button onclick="testFullDemo()">🎯 Chạy Demo Đầy Đủ</button>
+        </div>
+        
+        <!-- Kết quả -->
+        <div class="section">
+            <h2>📊 Kết Quả</h2>
+            <div id="result">
+                <p style="color: #999; text-align: center;">Kết quả sẽ hiển thị ở đây...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8080/api/users';
+        
+        function showResult(message, isError = false) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<p class="${isError ? 'error' : 'success'}">${message}</p>`;
+        }
+        
+        function displayUsers(users) {
+            const resultDiv = document.getElementById('result');
+            if (users.length === 0) {
+                resultDiv.innerHTML = '<p style="color: #999;">Chưa có user nào trong hệ thống.</p>';
+                return;
+            }
+            
+            let html = '<h3>📋 Danh sách Users:</h3>';
+            users.forEach(user => {
+                html += `
+                    <div class="user-card">
+                        <h3>👤 ${user.fullName}</h3>
+                        <div class="user-info">
+                            <p><strong>ID:</strong> ${user.id}</p>
+                            <p><strong>Username:</strong> ${user.username}</p>
+                            <p><strong>Email:</strong> ${user.email}</p>
+                            <p><strong>Phone:</strong> ${user.phone}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            resultDiv.innerHTML = html;
+        }
+        
+        async function createUser() {
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const fullName = document.getElementById('fullName').value;
+            const phone = document.getElementById('phone').value;
+            
+            if (!username || !email || !fullName || !phone) {
+                showResult('❌ Vui lòng điền đầy đủ thông tin!', true);
+                return;
+            }
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, email, fullName, phone })
+                });
+                
+                const user = await response.json();
+                showResult(`✅ Đã thêm user thành công!<br><pre>${JSON.stringify(user, null, 2)}</pre>`);
+                
+                // Clear form
+                document.getElementById('username').value = '';
+                document.getElementById('email').value = '';
+                document.getElementById('fullName').value = '';
+                document.getElementById('phone').value = '';
+                
+                // Auto refresh list
+                setTimeout(getAllUsers, 500);
+            } catch (error) {
+                showResult('❌ Lỗi: ' + error.message, true);
+            }
+        }
+        
+        async function getAllUsers() {
+            try {
+                const response = await fetch(API_URL);
+                const users = await response.json();
+                displayUsers(users);
+            } catch (error) {
+                showResult('❌ Lỗi: ' + error.message, true);
+            }
+        }
+        
+        async function getUserById() {
+            const id = prompt('Nhập ID của user cần tìm:');
+            if (!id) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/${id}`);
+                if (response.ok) {
+                    const user = await response.json();
+                    displayUsers([user]);
+                } else {
+                    showResult(`❌ Không tìm thấy user với ID: ${id}`, true);
+                }
+            } catch (error) {
+                showResult('❌ Lỗi: ' + error.message, true);
+            }
+        }
+        
+        async function deleteUser() {
+            const id = prompt('Nhập ID của user cần xóa:');
+            if (!id) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showResult(`✅ Đã xóa user ID: ${id} thành công!`);
+                    setTimeout(getAllUsers, 500);
+                } else {
+                    showResult(`❌ Không tìm thấy user với ID: ${id}`, true);
+                }
+            } catch (error) {
+                showResult('❌ Lỗi: ' + error.message, true);
+            }
+        }
+        
+        async function testFullDemo() {
+            showResult('🔄 Đang chạy demo đầy đủ...');
+            
+            try {
+                // 1. Thêm 3 users
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: 'nguyenvana',
+                        email: 'nguyenvana@gmail.com',
+                        fullName: 'Nguyen Van A',
+                        phone: '0123456789'
+                    })
+                });
+                
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: 'tranthib',
+                        email: 'tranthib@gmail.com',
+                        fullName: 'Tran Thi B',
+                        phone: '0987654321'
+                    })
+                });
+                
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: 'levanc',
+                        email: 'levanc@gmail.com',
+                        fullName: 'Le Van C',
+                        phone: '0369852147'
+                    })
+                });
+                
+                showResult('✅ Demo hoàn thành! Đã thêm 3 users mẫu.');
+                setTimeout(getAllUsers, 500);
+            } catch (error) {
+                showResult('❌ Lỗi: ' + error.message, true);
+            }
+        }
+        
+        // Load users khi trang được tải
+        window.onload = getAllUsers;
+    </script>
+</body>
+</html>
