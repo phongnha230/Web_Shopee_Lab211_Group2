@@ -1,0 +1,108 @@
+Bạn là System Analyst và Technical Lead cho một dự án thương mại điện tử.
+Hãy phân tích và mô tả chi tiết các luồng nghiệp vụ của hệ thống,
+chia theo 4 thành viên backend trong team sử dụng Spring Boot + MongoDB.
+
+Bối cảnh hệ thống:
+- Hệ thống TMĐT
+- Backend: Spring Boot
+- Database: MongoDB
+- Authentication: JWT + Google OAuth
+- Không sử dụng Escrow
+- Không có Dispute phức tạp
+- Review chỉ gắn với Product
+- Có Voucher và Flash Sale
+
+Yêu cầu phân tích:
+Phân tích rõ:
+- Trách nhiệm của từng thành viên
+- Các luồng nghiệp vụ chính mà mỗi người xử lý
+- Điểm giao tiếp giữa các luồng
+- Dữ liệu (collection MongoDB) liên quan đến từng luồng
+
+--------------------------------------------------
+
+1. THÀNH VIÊN 1 – AUTH / USER / SECURITY
+
+Phân tích các luồng:
+- Đăng ký / đăng nhập bằng Email – Password
+- Đăng nhập bằng Google OAuth
+- Tạo và quản lý JWT / Session
+- Phân quyền USER theo role: CUSTOMER / SELLER / ADMIN
+- Gửi Notification khi user đăng nhập bằng Google
+- Quản lý trạng thái User (ACTIVE / BLOCKED)
+
+Mô tả dữ liệu:
+- users
+- oauth_accounts
+- user_sessions
+- notifications
+
+--------------------------------------------------
+
+2. THÀNH VIÊN 2 – SHOP / PRODUCT / SELLER
+
+Phân tích các luồng:
+- Seller tạo và quản lý Shop
+- Admin duyệt Shop (approve / reject)
+- CRUD Product
+- Quản lý Product Variant (size, màu, giá, tồn kho)
+- Seller xác nhận đơn hàng
+- User tạo Review cho Product sau khi mua
+
+Mô tả dữ liệu:
+- shops
+- products
+- product_variants
+- product_images
+- reviews
+
+--------------------------------------------------
+
+3. THÀNH VIÊN 3 – CART / ORDER / SHIPPING
+
+Phân tích các luồng:
+- User thêm sản phẩm vào Cart
+- Cập nhật số lượng Cart
+- Checkout
+- Tạo Order
+- Trừ kho sản phẩm
+- Gắn đơn vị vận chuyển
+- Cập nhật trạng thái giao hàng (WAITING → DELIVERING → DELIVERED)
+
+Mô tả dữ liệu:
+- carts
+- cart_items
+- orders
+- order_items
+- order_shipping
+- shipping_providers
+
+--------------------------------------------------
+
+4. THÀNH VIÊN 4 – PAYMENT / PROMOTION / ADMIN
+
+Phân tích các luồng:
+- Chọn phương thức thanh toán (COD / Online Banking)
+- Xử lý kết quả thanh toán (Success / Fail)
+- Quản lý Voucher sàn
+- Quản lý Voucher shop
+- Quản lý Flash Sale
+- Admin giám sát hệ thống và ghi log hành động
+
+Mô tả dữ liệu:
+- payments
+- payment_methods
+- vouchers
+- shop_vouchers
+- flash_sales
+- flash_sale_items
+- admin_action_logs
+
+--------------------------------------------------
+
+Yêu cầu output:
+- Viết bằng tiếng Việt
+- Mỗi luồng mô tả theo từng bước (step-by-step)
+- Giọng văn phân tích hệ thống, phù hợp báo cáo môn học
+- Không sinh code
+- Không thêm nghiệp vụ ngoài phạm vi mô tả
