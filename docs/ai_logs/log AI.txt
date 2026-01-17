@@ -713,37 +713,39 @@ Yêu cầu kỹ thuật:
 Output:
 flowchart TD
 
+flowchart TD
+
 %% ===== USER AUTH =====
-A[User truy cập hệ thống] --> B{Đã đăng nhập?}
-B -->|Chưa| C[Login / Register]
-C --> C1{Đăng nhập bằng gì?}
-C1 -->|Email/Password| C2[Validate Account]
-C1 -->|Google/Facebook| C3[OAuth Verify]
+A[User truy cap he thong] --> B{Da dang nhap?}
+B -->|Chua| C[Login / Register]
+C --> C1{Dang nhap bang gi?}
+C1 -->|Email Password| C2[Validate Account]
+C1 -->|Google Facebook| C3[OAuth Verify]
 C2 --> D[User Session Created]
 C3 --> D
-B -->|Rồi| D
+B -->|Roi| D
 
 %% ===== ROLE CHECK =====
 D --> E{User Role?}
-E -->|Customer| F[Trang mua sắm]
+E -->|Customer| F[Trang mua sam]
 E -->|Seller| S1[Seller Center]
 E -->|Admin| A1[Admin Dashboard]
 
 %% ===== CUSTOMER FLOW =====
-F --> F1[Duyệt danh mục / tìm kiếm]
-F1 --> F2[Xem chi tiết sản phẩm]
-F2 --> F3[Chọn Variant Size/Màu]
-F3 --> F4{Còn hàng?}
-F4 -->|Không| F4a[Thông báo hết hàng]
-F4 -->|Có| F5[Thêm vào giỏ hàng]
+F --> F1[Duyet danh muc va tim kiem]
+F1 --> F2[Xem chi tiet san pham]
+F2 --> F3[Chon Variant Size Mau]
+F3 --> F4{Con hang?}
+F4 -->|Khong| F4a[Thong bao het hang]
+F4 -->|Co| F5[Them vao gio hang]
 
-F5 --> F6[Xem giỏ hàng]
-F6 --> F7[Áp voucher]
+F5 --> F6[Xem gio hang]
+F6 --> F7[Ap voucher]
 F7 --> F8[Checkout]
 
 %% ===== PAYMENT =====
-F8 --> P1{Phương thức thanh toán}
-P1 -->|COD| P2[Tạo Order - Chưa thanh toán]
+F8 --> P1{Phuong thuc thanh toan}
+P1 -->|COD| P2[Tao Order chua thanh toan]
 P1 -->|Online Banking| P3[Redirect Payment Gateway]
 P3 -->|Success| P4[Payment Success]
 P3 -->|Fail| P5[Payment Failed]
@@ -751,44 +753,52 @@ P3 -->|Fail| P5[Payment Failed]
 P4 --> P2
 P5 --> F8
 
-%% ===== ORDER & SHIPPING =====
+%% ===== ORDER AND SHIPPING =====
 P2 --> O1[Order Created]
-O1 --> O2[Trừ kho Product Variant]
+O1 --> O2[Tru kho Product Variant]
 O2 --> O3{Flash Sale?}
-O3 -->|Có| O3a[Trừ FlashSaleStock]
-O3 -->|Không| O3b[Trừ kho thường]
+O3 -->|Co| O3a[Tru Flash Sale Stock]
+O3 -->|Khong| O3b[Tru kho thuong]
 
-O1 --> SH1[Chọn đơn vị vận chuyển]
-SH1 --> SH2[OrderShipping Created]
-SH2 --> SH3[Đang giao]
+O1 --> SH1[Chon don vi van chuyen]
+SH1 --> SH2[Order Shipping Created]
+SH2 --> SH3[Dang giao]
 SH3 --> SH4[Delivered]
 
+%% ===== ORDER COMPLETE =====
+SH4 --> OC1[Hoan tat don hang]
+
+%% ===== REVIEW OPTIONAL =====
+OC1 --> R1{User co muon review?}
+R1 -->|Co| R2[Di toi trang Review]
+R2 --> R3[Chon san pham trong don]
+R3 --> R4[Nhap Rating va Comment va Image optional]
+R4 --> R5[Luu Review]
+R5 --> R6{Con san pham chua review?}
+R6 -->|Co| R3
+R6 -->|Khong| END[Ket thuc]
+
+R1 -->|Khong| END
+
 %% ===== SELLER FLOW =====
-S1 --> S2[Quản lý sản phẩm]
-S2 --> S3[Quản lý Variant & Kho]
-S1 --> S4[Quản lý đơn hàng]
-S4 --> S5[Xác nhận đơn]
+S1 --> S2[Quan ly san pham]
+S2 --> S3[Quan ly Variant va Kho]
+S1 --> S4[Quan ly don hang]
+S4 --> S5[Xac nhan don]
 S5 --> SH3
 
-S1 --> S6[Tạo Voucher Shop]
+S1 --> S6[Tao Voucher Shop]
 S1 --> S7[Tham gia Flash Sale]
 
 %% ===== ADMIN FLOW =====
-A1 --> A2[Duyệt người bán]
+A1 --> A2[Duyet nguoi ban]
 A2 -->|Approve| A3[Shop Active]
-A2 -->|Reject| A4[Reject + Reason]
+A2 -->|Reject| A4[Reject va Ly do]
 
-A1 --> A5[Giám sát gian lận]
-A5 --> A6{Phát hiện vi phạm?}
-A6 -->|Có| A7[Suspend / Ban Shop]
-A6 -->|Không| A8[Theo dõi tiếp]
-
-A1 --> A9[Xử lý dispute & refund]
-A9 --> A10[Hoàn tiền / Phán quyết]
-
-%% ===== END =====
-SH4 --> END[Hoàn tất đơn hàng]
-
+A1 --> A5[Giam sat gian lan]
+A5 --> A6{Phat hien vi pham?}
+A6 -->|Co| A7[Suspend hoac Ban Shop]
+A6 -->|Khong| A8[Tiep tuc theo doi]
 promt: 
 # Role
 Bạn là một Senior Software Architect (Kiến trúc sư phần mềm cấp cao) với 10 năm kinh nghiệm thiết kế hệ thống E-commerce quy mô lớn.
@@ -1129,236 +1139,239 @@ orders → reviews → products.rating
 promt: viết cho tôi scipt mysql luôn để tôi dễ hiểu nhưng trong khi tôi dùng mông thể thiết kế cơ sở dữ liệu và có thể nhập trên drawbd.app 
 
 CREATE TABLE users (
-    id INT PRIMARY KEY,
-    email VARCHAR(255),
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    email VARCHAR(255) UNIQUE,
     password_hash VARCHAR(255),
-    status VARCHAR(20),
-    created_at DATETIME
+    status ENUM('ACTIVE','BLOCKED') DEFAULT 'ACTIVE',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE roles (
-    id INT PRIMARY KEY,
-    name VARCHAR(50)
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) UNIQUE
 );
 
 CREATE TABLE user_roles (
-    user_id INT,
-    role_id INT,
-    PRIMARY KEY (user_id, role_id)
+    user_id BIGINT,
+    role_id BIGINT,
+    PRIMARY KEY (user_id, role_id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (role_id) REFERENCES roles(id)
 );
 
 CREATE TABLE oauth_accounts (
-    id INT PRIMARY KEY,
-    user_id INT,
-    provider VARCHAR(50),
-    provider_user_id VARCHAR(255)
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT,
+    provider ENUM('GOOGLE','FACEBOOK'),
+    provider_user_id VARCHAR(255),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 CREATE TABLE customer_profiles (
-    id INT PRIMARY KEY,
-    user_id INT,
-    wallet_balance DECIMAL(15,2),
-    loyalty_point INT
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT UNIQUE,
+    wallet_balance DECIMAL(12,2) DEFAULT 0,
+    loyalty_point INT DEFAULT 0,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 CREATE TABLE seller_profiles (
-    id INT PRIMARY KEY,
-    user_id INT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT UNIQUE,
     shop_name VARCHAR(255),
-    status VARCHAR(20)
+    status ENUM('PENDING','APPROVED') DEFAULT 'PENDING',
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 CREATE TABLE shops (
-    id INT PRIMARY KEY,
-    seller_id INT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    seller_id BIGINT,
     name VARCHAR(255),
-    rating DECIMAL(2,1),
-    status VARCHAR(20)
+    rating DECIMAL(2,1) DEFAULT 0,
+    status ENUM('ACTIVE','BANNED') DEFAULT 'ACTIVE',
+    FOREIGN KEY (seller_id) REFERENCES seller_profiles(id)
 );
 
 CREATE TABLE categories (
-    id INT PRIMARY KEY,
-    parent_id INT,
-    name VARCHAR(255)
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    parent_id BIGINT,
+    name VARCHAR(255),
+    FOREIGN KEY (parent_id) REFERENCES categories(id)
 );
 
 CREATE TABLE products (
-    id INT PRIMARY KEY,
-    shop_id INT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    shop_id BIGINT,
     name VARCHAR(255),
     description TEXT,
-    status VARCHAR(20)
+    status ENUM('ACTIVE','HIDDEN') DEFAULT 'ACTIVE',
+    FOREIGN KEY (shop_id) REFERENCES shops(id)
 );
 
 CREATE TABLE product_categories (
-    product_id INT,
-    category_id INT,
-    PRIMARY KEY (product_id, category_id)
+    product_id BIGINT,
+    category_id BIGINT,
+    PRIMARY KEY (product_id, category_id),
+    FOREIGN KEY (product_id) REFERENCES products(id),
+    FOREIGN KEY (category_id) REFERENCES categories(id)
 );
 
 CREATE TABLE product_variants (
-    id INT PRIMARY KEY,
-    product_id INT,
-    size VARCHAR(50),
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    product_id BIGINT,
+    size VARCHAR(20),
     color VARCHAR(50),
-    price DECIMAL(15,2),
-    stock INT
+    price DECIMAL(12,2),
+    stock INT,
+    FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
 CREATE TABLE product_images (
-    id INT PRIMARY KEY,
-    product_id INT,
-    image_url VARCHAR(500)
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    product_id BIGINT,
+    image_url TEXT,
+    FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
 CREATE TABLE carts (
-    id INT PRIMARY KEY,
-    user_id INT,
-    created_at DATETIME
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT UNIQUE,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 CREATE TABLE cart_items (
-    id INT PRIMARY KEY,
-    cart_id INT,
-    variant_id INT,
-    quantity INT
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    cart_id BIGINT,
+    variant_id BIGINT,
+    quantity INT,
+    FOREIGN KEY (cart_id) REFERENCES carts(id),
+    FOREIGN KEY (variant_id) REFERENCES product_variants(id)
 );
 
 CREATE TABLE orders (
-    id INT PRIMARY KEY,
-    user_id INT,
-    total_price DECIMAL(15,2),
-    discount DECIMAL(15,2),
-    order_status VARCHAR(20),
-    payment_status VARCHAR(20),
-    created_at DATETIME
-);
-
-CREATE TABLE reviews (
-    id INT PRIMARY KEY,
-    user_id INT,
-    product_id INT,
-    order_id INT,
-    rating INT,
-    comment TEXT,
-    created_at DATETIME
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT,
+    total_price DECIMAL(12,2),
+    discount DECIMAL(12,2) DEFAULT 0,
+    order_status ENUM('PENDING','CONFIRMED','SHIPPING','DELIVERED','CANCELLED'),
+    payment_status ENUM('UNPAID','PAID'),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 CREATE TABLE order_items (
-    id INT PRIMARY KEY,
-    order_id INT,
-    variant_id INT,
-    price DECIMAL(15,2),
-    quantity INT
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    order_id BIGINT,
+    variant_id BIGINT,
+    price DECIMAL(12,2),
+    quantity INT,
+    FOREIGN KEY (order_id) REFERENCES orders(id),
+    FOREIGN KEY (variant_id) REFERENCES product_variants(id)
 );
 
 CREATE TABLE shipping_providers (
-    id INT PRIMARY KEY,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(255),
-    api_endpoint VARCHAR(500)
+    api_endpoint TEXT
 );
 
 CREATE TABLE order_shipping (
-    order_id INT PRIMARY KEY,
-    provider_id INT,
-    tracking_code VARCHAR(100),
-    status VARCHAR(20)
+    order_id BIGINT PRIMARY KEY,
+    provider_id BIGINT,
+    tracking_code VARCHAR(255),
+    status ENUM('WAITING','PICKED','DELIVERING','DELIVERED'),
+    FOREIGN KEY (order_id) REFERENCES orders(id),
+    FOREIGN KEY (provider_id) REFERENCES shipping_providers(id)
 );
 
 CREATE TABLE payment_methods (
-    id INT PRIMARY KEY,
-    code VARCHAR(50),
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    code VARCHAR(50) UNIQUE,
     name VARCHAR(255)
 );
 
 CREATE TABLE payments (
-    id INT PRIMARY KEY,
-    order_id INT,
-    payment_method_id INT,
-    amount DECIMAL(15,2),
-    status VARCHAR(20),
-    paid_at DATETIME
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    order_id BIGINT,
+    payment_method_id BIGINT,
+    amount DECIMAL(12,2),
+    status ENUM('PENDING','PAID','FAILED'),
+    paid_at DATETIME,
+    FOREIGN KEY (order_id) REFERENCES orders(id),
+    FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id)
 );
 
 CREATE TABLE vouchers (
-    id INT PRIMARY KEY,
-    code VARCHAR(50),
-    discount_amount DECIMAL(15,2),
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    discount DECIMAL(12,2),
     quantity INT,
     start_date DATETIME,
     end_date DATETIME
 );
 
 CREATE TABLE shop_vouchers (
-    id INT PRIMARY KEY,
-    shop_id INT,
-    code VARCHAR(50),
-    discount_amount DECIMAL(15,2),
-    quantity INT
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    shop_id BIGINT,
+    discount DECIMAL(12,2),
+    quantity INT,
+    FOREIGN KEY (shop_id) REFERENCES shops(id)
 );
 
 CREATE TABLE flash_sales (
-    id INT PRIMARY KEY,
-    name VARCHAR(255),
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     start_time DATETIME,
     end_time DATETIME
 );
 
 CREATE TABLE flash_sale_items (
-    id INT PRIMARY KEY,
-    flash_sale_id INT,
-    variant_id INT,
-    sale_price DECIMAL(15,2),
-    sale_stock INT
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    flash_sale_id BIGINT,
+    variant_id BIGINT,
+    sale_price DECIMAL(12,2),
+    sale_stock INT,
+    FOREIGN KEY (flash_sale_id) REFERENCES flash_sales(id),
+    FOREIGN KEY (variant_id) REFERENCES product_variants(id)
+);
+
+CREATE TABLE reviews (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT,
+    product_id BIGINT,
+    order_id BIGINT,
+    rating INT,
+    comment TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (product_id) REFERENCES products(id),
+    FOREIGN KEY (order_id) REFERENCES orders(id)
 );
 
 CREATE TABLE notifications (
-    id INT PRIMARY KEY,
-    user_id INT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT,
     title VARCHAR(255),
     content TEXT,
-    is_read BOOLEAN
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 CREATE TABLE admin_action_logs (
-    id INT PRIMARY KEY,
-    admin_id INT,
-    action VARCHAR(255),
-    target_id INT,
-    description TEXT
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    admin_id BIGINT,
+    action TEXT,
+    target_id BIGINT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (admin_id) REFERENCES users(id)
 );
-
--- RELATIONSHIPS (Draw.io sẽ tự vẽ dây dựa vào đây)
-ALTER TABLE user_roles ADD FOREIGN KEY (user_id) REFERENCES users(id);
-ALTER TABLE user_roles ADD FOREIGN KEY (role_id) REFERENCES roles(id);
-ALTER TABLE oauth_accounts ADD FOREIGN KEY (user_id) REFERENCES users(id);
-ALTER TABLE customer_profiles ADD FOREIGN KEY (user_id) REFERENCES users(id);
-ALTER TABLE seller_profiles ADD FOREIGN KEY (user_id) REFERENCES users(id);
-ALTER TABLE shops ADD FOREIGN KEY (seller_id) REFERENCES seller_profiles(id);
-ALTER TABLE categories ADD FOREIGN KEY (parent_id) REFERENCES categories(id);
-ALTER TABLE products ADD FOREIGN KEY (shop_id) REFERENCES shops(id);
-ALTER TABLE product_categories ADD FOREIGN KEY (product_id) REFERENCES products(id);
-ALTER TABLE product_categories ADD FOREIGN KEY (category_id) REFERENCES categories(id);
-ALTER TABLE product_variants ADD FOREIGN KEY (product_id) REFERENCES products(id);
-ALTER TABLE product_images ADD FOREIGN KEY (product_id) REFERENCES products(id);
-ALTER TABLE carts ADD FOREIGN KEY (user_id) REFERENCES users(id);
-ALTER TABLE cart_items ADD FOREIGN KEY (cart_id) REFERENCES carts(id);
-ALTER TABLE cart_items ADD FOREIGN KEY (variant_id) REFERENCES product_variants(id);
-ALTER TABLE orders ADD FOREIGN KEY (user_id) REFERENCES users(id);
-ALTER TABLE reviews ADD FOREIGN KEY (user_id) REFERENCES users(id);
-ALTER TABLE reviews ADD FOREIGN KEY (product_id) REFERENCES products(id);
-ALTER TABLE reviews ADD FOREIGN KEY (order_id) REFERENCES orders(id);
-ALTER TABLE order_items ADD FOREIGN KEY (order_id) REFERENCES orders(id);
-ALTER TABLE order_items ADD FOREIGN KEY (variant_id) REFERENCES product_variants(id);
-ALTER TABLE order_shipping ADD FOREIGN KEY (order_id) REFERENCES orders(id);
-ALTER TABLE order_shipping ADD FOREIGN KEY (provider_id) REFERENCES shipping_providers(id);
-ALTER TABLE payments ADD FOREIGN KEY (order_id) REFERENCES orders(id);
-ALTER TABLE payments ADD FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id);
-ALTER TABLE shop_vouchers ADD FOREIGN KEY (shop_id) REFERENCES shops(id);
-ALTER TABLE flash_sale_items ADD FOREIGN KEY (flash_sale_id) REFERENCES flash_sales(id);
-ALTER TABLE flash_sale_items ADD FOREIGN KEY (variant_id) REFERENCES product_variants(id);
-ALTER TABLE notifications ADD FOREIGN KEY (user_id) REFERENCES users(id);
-ALTER TABLE admin_action_logs ADD FOREIGN KEY (admin_id) REFERENCES users(id);
+ALTER TABLE vouchers
+ADD shop_id BIGINT,
+ADD CONSTRAINT fk_voucher_shop
+FOREIGN KEY (shop_id) REFERENCES shops(id);
+ALTER TABLE orders
+ADD voucher_id BIGINT,
+ADD CONSTRAINT fk_order_voucher
+FOREIGN KEY (voucher_id) REFERENCES vouchers(id);
 
 
 
