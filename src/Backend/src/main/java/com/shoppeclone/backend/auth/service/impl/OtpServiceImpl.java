@@ -1,0 +1,105 @@
+package com.shoppeclone.backend.auth.service.impl;
+
+import com.shoppeclone.backend.auth.model.OtpCode;
+import com.shoppeclone.backend.auth.model.User;
+import com.shoppeclone.backend.auth.repository.OtpCodeRepository;
+import com.shoppeclone.backend.auth.repository.UserRepository;
+import com.shoppeclone.backend.auth.service.OtpService;
+import com.shoppeclone.backend.common.service.EmailService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
+import java.util.Random;
+
+@Service
+@RequiredArgsConstructor
+public class OtpServiceImpl implements OtpService {
+
+    private final UserRepository userRepository;
+    private final OtpCodeRepository otpCodeRepository;
+    private final EmailService emailService;
+
+    @Value("${otp.expiration}")
+    private Long otpExpiration;
+
+    @Override
+    public void sendOtpEmail(String email) {
+        System.out.println("🔍 SEND OTP - Email: " + email);
+
+        // Tìm user
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy user với email: " + email));
+
+        // Xóa OTP cũ nếu có
+        otpCodeRepository.deleteByUser(user);
+        System.out.println("🗑️ Old OTPs deleted");
+
+        // Tạo mã OTP 6 số
+        String otpCode = generateOtpCode();
+        System.out.println("✅ GENERATED OTP: " + otpCode);
+
+        // Lưu vào database
+        OtpCode otp = new OtpCode();
+        otp.setUser(user);
+        otp.setCode(otpCode);
+        otp.setType("EMAIL_VERIFICATION");
+        otp.setExpiresAt(LocalDateTime.now().plusSeconds(otpExpiration / 1000));
+        otp.setCreatedAt(LocalDateTime.now());
+        otpCodeRepository.save(otp);
+        System.out.println("💾 OTP SAVED - Expires: " + otp.getExpiresAt());
+
+        // Gửi email
+        emailService.sendOtpEmail(email, otpCode);
+        System.out.println("📧 EMAIL SENT");
+    }
+
+    @Override
+    public void verifyOtp(String email, String code) {
+        System.out.println("🔍 VERIFY OTP - Email: " + email + ", Code: " + code);
+
+        // Tìm user
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
+
+        System.out.println("✅ User found: " + user.getEmail());
+
+        // Tìm OTP - THÊM DEBUG
+        OtpCode otp = otpCodeRepository.findByUserAndCodeAndTypeAndUsed(
+                user, code, "EMAIL_VERIFICATION", false)
+                .orElseThrow(() -> {
+                    System.out.println("❌ OTP NOT FOUND!");
+                    System.out.println("  User: " + user.getEmail());
+                    System.out.println("  Code: " + code);
+                    System.out.println("  Type: EMAIL_VERIFICATION");
+                    System.out.println("  Used: false");
+                    return new RuntimeException("Mã OTP không hợp lệ");
+                });
+
+        System.out.println("✅ OTP FOUND - Expires: " + otp.getExpiresAt());
+
+        // Kiểm tra hết hạn
+        if (otp.getExpiresAt().isBefore(LocalDateTime.now())) {
+            System.out.println("❌ OTP EXPIRED");
+            throw new RuntimeException("Mã OTP đã hết hạn");
+        }
+
+        System.out.println("✅ OTP VALID - Marking as used");
+
+        // Đánh dấu OTP đã sử dụng
+        otp.setUsed(true);
+        otpCodeRepository.save(otp);
+
+        // Cập nhật user
+        user.setEmailVerified(true);
+        userRepository.save(user);
+
+        System.out.println("🎉 EMAIL VERIFIED SUCCESS: " + user.getEmail());
+    }
+
+    private String generateOtpCode() {
+        Random random = new Random();
+        int otp = 100000 + random.nextInt(900000);
+        return String.valueOf(otp);
+    }
+}
