@@ -7,9 +7,9 @@ import lombok.Data;
 @Data
 public class UpdateProfileRequest {
 
-    @NotBlank(message = "Họ tên không được để trống")
+    @NotBlank(message = "Full name is required")
     private String fullName;
 
-    @Pattern(regexp = "^(0[0-9]{9})$", message = "Số điện thoại không hợp lệ")
+    @Pattern(regexp = "^(0[0-9]{9})$", message = "Invalid phone number")
     private String phone;
 }

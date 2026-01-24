@@ -4,21 +4,25 @@ import com.shoppeclone.backend.auth.dto.request.LoginRequest;
 import com.shoppeclone.backend.auth.dto.request.RegisterRequest;
 import com.shoppeclone.backend.auth.dto.response.AuthResponse;
 import com.shoppeclone.backend.auth.dto.response.UserDto;
+import com.shoppeclone.backend.auth.model.OtpCode;
 import com.shoppeclone.backend.auth.model.Role;
 import com.shoppeclone.backend.auth.model.User;
 import com.shoppeclone.backend.auth.model.UserSession;
+import com.shoppeclone.backend.auth.repository.OtpCodeRepository;
 import com.shoppeclone.backend.auth.repository.RoleRepository;
 import com.shoppeclone.backend.auth.repository.UserRepository;
 import com.shoppeclone.backend.auth.repository.UserSessionRepository;
 import com.shoppeclone.backend.auth.security.JwtUtil;
 import com.shoppeclone.backend.auth.service.AuthService;
 import com.shoppeclone.backend.auth.service.OtpService;
+import com.shoppeclone.backend.common.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,6 +36,8 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final OtpService otpService;
+    private final OtpCodeRepository otpCodeRepository;
+    private final EmailService emailService;
 
     @Override
     public AuthResponse register(RegisterRequest request) {
@@ -185,5 +191,89 @@ public class AuthServiceImpl implements AuthService {
                 .map(Role::getName)
                 .collect(Collectors.toSet()));
         return dto;
+    }
+
+    @Override
+    public void forgotPassword(String email) {
+        System.out.println("========== FORGOT PASSWORD START ==========");
+        System.out.println("Email: " + email);
+
+        // Tìm user
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Email không tồn tại"));
+
+        // Xóa OTP cũ (PASSWORD_RESET type)
+        otpCodeRepository.deleteByUser(user);
+
+        // Tạo OTP 6 số
+        String otpCode = generateOtpCode();
+
+        // Lưu OTP với type PASSWORD_RESET
+        OtpCode otp = new OtpCode();
+        otp.setUser(user);
+        otp.setCode(otpCode);
+        otp.setType("PASSWORD_RESET"); // ⚠️ Khác với EMAIL_VERIFICATION
+        otp.setExpiresAt(LocalDateTime.now().plusMinutes(10)); // 10 phút
+        otp.setCreatedAt(LocalDateTime.now());
+        otp.setUsed(false);
+
+        otpCodeRepository.save(otp);
+
+        // Gửi OTP qua email
+        try {
+            emailService.sendPasswordResetOtp(email, otpCode);
+            System.out.println("✅ Password reset OTP sent to: " + email);
+        } catch (Exception e) {
+            System.err.println("❌ Failed to send email: " + e.getMessage());
+            e.printStackTrace();
+            // Vẫn log ra console để backup
+            System.out.println("\n========================================");
+            System.out.println("📧 PASSWORD RESET OTP (EMAIL FAILED - BACKUP)");
+            System.out.println("To: " + email);
+            System.out.println("OTP Code: " + otpCode);
+            System.out.println("Expires at: " + otp.getExpiresAt());
+            System.out.println("========================================\n");
+        }
+
+        System.out.println("========== FORGOT PASSWORD SUCCESS ==========");
+    }
+
+    @Override
+    public void verifyOtpAndResetPassword(String email, String otp, String newPassword) {
+        System.out.println("========== VERIFY OTP AND RESET PASSWORD START ==========");
+        System.out.println("Email: " + email);
+        System.out.println("OTP: " + otp);
+
+        // Tìm user
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Email không tồn tại"));
+
+        // Tìm OTP với type PASSWORD_RESET
+        OtpCode otpCode = otpCodeRepository.findByUserAndCodeAndTypeAndUsed(
+                user, otp, "PASSWORD_RESET", false)
+                .orElseThrow(() -> new RuntimeException("Mã OTP không hợp lệ hoặc đã được sử dụng"));
+
+        // Kiểm tra hết hạn
+        if (otpCode.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Mã OTP đã hết hạn");
+        }
+
+        // Cập nhật mật khẩu
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+
+        // Đánh dấu OTP đã sử dụng
+        otpCode.setUsed(true);
+        otpCodeRepository.save(otpCode);
+
+        System.out.println("✅ Password updated for: " + user.getEmail());
+        System.out.println("========== VERIFY OTP AND RESET PASSWORD SUCCESS ==========");
+    }
+
+    private String generateOtpCode() {
+        Random random = new Random();
+        int otp = 100000 + random.nextInt(900000);
+        return String.valueOf(otp);
     }
 }
