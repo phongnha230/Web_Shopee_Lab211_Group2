@@ -7,16 +7,18 @@ import lombok.Data;
 
 @Data
 public class RegisterRequest {
-    @Email(message = "Email không hợp lệ")
-    @NotBlank(message = "Email không được để trống")
+    @Email(message = "Invalid email")
+    @NotBlank(message = "Email is required")
     private String email;
-    
-    @NotBlank(message = "Mật khẩu không được để trống")
-    @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
+
+    @NotBlank(message = "Password is required")
+    @Size(min = 8, message = "Password must be at least 8 characters")
+    @jakarta.validation.constraints.Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$", message = "Password must contain at least one uppercase letter, one lowercase letter, and one number")
     private String password;
-    
-    @NotBlank(message = "Họ tên không được để trống")
+
+    @NotBlank(message = "Full name is required")
     private String fullName;
-    
+
+    @jakarta.validation.constraints.Pattern(regexp = "^0\\d{9}$", message = "Phone number must be 10 digits and start with 0")
     private String phone;
 }
