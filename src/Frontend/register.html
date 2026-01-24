@@ -84,7 +84,7 @@
                 <div class="flex-1 h-px bg-gray-400"></div>
             </div>
 
-            <!-- NÚT GOOGLE ĐÚNG - COPY DUY NHẤT -->
+            <!-- CORRECT GOOGLE BUTTON - DO NOT MODIFY -->
             <a id="googleBtn" href="#" onclick="googleLogin(event)">
                 <button
                     class="w-full flex items-center justify-center gap-3 py-3 rounded-full bg-white shadow hover:bg-gray-100 transition">
@@ -109,10 +109,10 @@
             </p>
         </div>
 
-        <!-- RIGHT IMAGE SLIDER (GIỮ NGUYÊN) -->
+        <!-- RIGHT IMAGE SLIDER (KEEP AS IS) -->
         <div class="w-1/2 relative overflow-hidden rounded-r-3xl">
             <div id="slider" class="w-full h-full relative">
-                <!-- 12 hình ảnh giữ nguyên của bạn -->
+                <!-- 12 images keep as is -->
                 <img src="https://i.pinimg.com/1200x/ae/43/cc/ae43cc9f03e4c2993b6dabab06afadb2.jpg"
                     class="slide absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-100">
                 <img src="https://i.pinimg.com/1200x/31/1d/ce/311dcecc2944049d12f3086e1ab985ab.jpg"
@@ -148,13 +148,13 @@
                         const data = await res.json();
 
                         if (data.authUrl) {
-                            // 🔥 CHUYỂN SANG GOOGLE
+                            // 🔥 SWITCH TO GOOGLE
                             window.location.href = data.authUrl;
                         } else {
-                            alert('❌ Không lấy được Google URL');
+                            alert('❌ Could not get Google URL');
                         }
                     } catch (err) {
-                        alert('❌ Lỗi Google Login');
+                        alert('❌ Google Login Error');
                         console.error(err);
                     }
                 }

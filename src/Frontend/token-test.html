@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Storage Test | ShoppeClone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-br from-purple-100 via-white to-purple-200 min-h-screen p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-3xl shadow-xl p-8 mb-6">
+            <h1 class="text-3xl font-bold text-purple-700 mb-6">🧪 Token Storage Test</h1>
+
+            <div class="space-y-4">
+                <div class="p-4 bg-blue-50 rounded-xl">
+                    <h2 class="font-bold text-lg mb-2">📋 Test Instructions:</h2>
+                    <ol class="list-decimal list-inside space-y-2 text-sm">
+                        <li>Open DevTools (F12) → Console tab</li>
+                        <li>Chạy: <code class="bg-gray-200 px-2 py-1 rounded">localStorage.clear()</code></li>
+                        <li>Login with one of the methods</li>
+                        <li>Return to this page and click "Check Token"</li>
+                    </ol>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4">
+                    <a href="/login.html"
+                        class="bg-purple-500 hover:bg-purple-600 text-white p-4 rounded-xl text-center font-semibold transition">
+                        🔐 Email Login
+                    </a>
+                    <a href="/register.html"
+                        class="bg-green-500 hover:bg-green-600 text-white p-4 rounded-xl text-center font-semibold transition">
+                        📝 Register (OTP)
+                    </a>
+                    <button onclick="testGoogleLogin()"
+                        class="bg-red-500 hover:bg-red-600 text-white p-4 rounded-xl text-center font-semibold transition">
+                        🔴 Google Login
+                    </button>
+                </div>
+
+                <button onclick="checkToken()"
+                    class="w-full bg-gradient-to-r from-purple-600 to-purple-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition">
+                    🔍 Check Token
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Display -->
+        <div id="results" class="bg-white rounded-3xl shadow-xl p-8 hidden">
+            <h2 class="text-2xl font-bold text-purple-700 mb-4">Check Result:</h2>
+            <div id="resultContent" class="space-y-4"></div>
+        </div>
+    </div>
+
+    <script>
+        async function testGoogleLogin() {
+            try {
+                const res = await fetch(
+                    'http://localhost:8080/api/auth/oauth/google/url?redirect_uri=http://localhost:3000/auth/callback/google.html'
+                );
+                const data = await res.json();
+                if (data.authUrl) {
+                    window.location.href = data.authUrl;
+                } else {
+                    alert('❌ Could not get Google URL');
+                }
+            } catch (err) {
+                alert('❌ Google Login Error: ' + err.message);
+            }
+        }
+
+        function checkToken() {
+            const results = document.getElementById('results');
+            const content = document.getElementById('resultContent');
+
+            // Get all relevant localStorage items
+            const accessToken = localStorage.getItem('accessToken');
+            const oldToken = localStorage.getItem('token');
+            const userName = localStorage.getItem('userName');
+
+            let html = '';
+
+            // Check accessToken (CORRECT)
+            if (accessToken) {
+                html += `
+                    <div class="p-4 bg-green-50 border-2 border-green-500 rounded-xl">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-2xl">✅</span>
+                            <h3 class="font-bold text-green-700">accessToken: FOUND (CORRECT!)</h3>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">Token saved with correct key name</p>
+                        <div class="bg-white p-3 rounded-lg font-mono text-xs break-all">
+                            ${accessToken.substring(0, 50)}...
+                        </div>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="p-4 bg-red-50 border-2 border-red-500 rounded-xl">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-2xl">❌</span>
+                            <h3 class="font-bold text-red-700">accessToken: NOT FOUND</h3>
+                        </div>
+                        <p class="text-sm text-gray-600">You are not logged in or an error occurred!</p>
+                    </div>
+                `;
+            }
+
+            // Check old token (WRONG - should not exist)
+            if (oldToken) {
+                html += `
+                    <div class="p-4 bg-yellow-50 border-2 border-yellow-500 rounded-xl">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-2xl">⚠️</span>
+                            <h3 class="font-bold text-yellow-700">token: FOUND (INCORRECT!)</h3>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">Token saved with old key name (should not exist)</p>
+                        <div class="bg-white p-3 rounded-lg font-mono text-xs break-all">
+                            ${oldToken.substring(0, 50)}...
+                        </div>
+                        <button onclick="fixOldToken()" 
+                                class="mt-3 bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm font-semibold">
+                            🔧 Fix Now
+                        </button>
+                    </div>
+                `;
+            }
+
+            // Check userName
+            if (userName) {
+                html += `
+                    <div class="p-4 bg-blue-50 border-2 border-blue-500 rounded-xl">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-2xl">👤</span>
+                            <h3 class="font-bold text-blue-700">userName: ${userName}</h3>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Summary
+            const status = accessToken && !oldToken ? 'success' : (accessToken ? 'warning' : 'error');
+            const statusConfig = {
+                success: {
+                    color: 'green',
+                    icon: '🎉',
+                    title: 'PERFECT!',
+                    message: 'Token saved correctly. You can access profile page!'
+                },
+                warning: {
+                    color: 'yellow',
+                    icon: '⚠️',
+                    title: 'NEEDS FIX',
+                    message: 'Both old and new tokens exist. Old token should be removed.'
+                },
+                error: {
+                    color: 'red',
+                    icon: '❌',
+                    title: 'FAILED',
+                    message: 'Token not found. Please login again!'
+                }
+            };
+
+            const config = statusConfig[status];
+            html = `
+                <div class="p-6 bg-${config.color}-100 border-4 border-${config.color}-500 rounded-xl mb-4">
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">${config.icon}</div>
+                        <h2 class="text-2xl font-bold text-${config.color}-700 mb-2">${config.title}</h2>
+                        <p class="text-${config.color}-600">${config.message}</p>
+                    </div>
+                </div>
+            ` + html;
+
+            // Action buttons
+            html += `
+                <div class="flex gap-4 mt-6">
+                    <a href="/profile.html" 
+                       class="flex-1 bg-purple-500 hover:bg-purple-600 text-white py-3 rounded-xl text-center font-semibold transition">
+                        📄 Go to Profile
+                    </a>
+                    <button onclick="clearAll()" 
+                            class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-semibold transition">
+                        🗑️ Clear All
+                    </button>
+                </div>
+            `;
+
+            content.innerHTML = html;
+            results.classList.remove('hidden');
+        }
+
+        function fixOldToken() {
+            const oldToken = localStorage.getItem('token');
+            if (oldToken && !localStorage.getItem('accessToken')) {
+                localStorage.setItem('accessToken', oldToken);
+                localStorage.removeItem('token');
+                alert('✅ Moved token to accessToken!');
+                checkToken();
+            } else if (oldToken) {
+                localStorage.removeItem('token');
+                alert('✅ Old token deleted!');
+                checkToken();
+            }
+        }
+
+        function clearAll() {
+            if (confirm('Are you sure you want to clear all data?')) {
+                localStorage.clear();
+                alert('✅ All data cleared!');
+                location.reload();
+            }
+        }
+
+        // Auto-check on load if there's any token
+        window.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('accessToken') || localStorage.getItem('token')) {
+                checkToken();
+            }
+        });
+    </script>
+
+</body>
+
+</html>

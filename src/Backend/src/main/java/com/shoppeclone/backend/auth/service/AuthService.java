@@ -6,7 +6,14 @@ import com.shoppeclone.backend.auth.dto.response.AuthResponse;
 
 public interface AuthService {
     AuthResponse register(RegisterRequest request);
+
     AuthResponse login(LoginRequest request);
+
     AuthResponse refreshToken(String refreshToken);
+
     void logout(String refreshToken);
+
+    void forgotPassword(String email);
+
+    void verifyOtpAndResetPassword(String email, String otp, String newPassword);
 }

@@ -38,7 +38,7 @@ public class UserController {
             Authentication authentication) {
 
         userService.updateProfile(getEmail(authentication), request);
-        return ResponseEntity.ok("Cập nhật thông tin thành công");
+        return ResponseEntity.ok("Profile updated successfully");
     }
 
     @PutMapping("/change-password")
@@ -47,7 +47,7 @@ public class UserController {
             Authentication authentication) {
 
         userService.changePassword(getEmail(authentication), request);
-        return ResponseEntity.ok("Đổi mật khẩu thành công");
+        return ResponseEntity.ok("Password changed successfully");
     }
 
     // ========= ADDRESS =========
@@ -64,7 +64,7 @@ public class UserController {
             Authentication authentication) {
 
         userService.addAddressByEmail(getEmail(authentication), request);
-        return ResponseEntity.ok("Thêm địa chỉ thành công");
+        return ResponseEntity.ok("Address added successfully");
     }
 
     @PutMapping("/addresses/{addressId}")
@@ -74,7 +74,7 @@ public class UserController {
             Authentication authentication) {
 
         userService.updateAddressByEmail(getEmail(authentication), addressId, request);
-        return ResponseEntity.ok("Cập nhật địa chỉ thành công");
+        return ResponseEntity.ok("Address updated successfully");
     }
 
     @DeleteMapping("/addresses/{addressId}")
@@ -83,6 +83,6 @@ public class UserController {
             Authentication authentication) {
 
         userService.deleteAddressByEmail(getEmail(authentication), addressId);
-        return ResponseEntity.ok("Xóa địa chỉ thành công");
+        return ResponseEntity.ok("Address deleted successfully");
     }
 }

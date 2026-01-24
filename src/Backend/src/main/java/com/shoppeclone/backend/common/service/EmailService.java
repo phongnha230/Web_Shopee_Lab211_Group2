@@ -14,15 +14,32 @@ public class EmailService {
     public void sendOtpEmail(String to, String otpCode) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
-        message.setSubject("Mã xác thực ShoppeClone");
+        message.setSubject("ShoppeClone Verification Code");
         message.setText(
-                "Xin chào,\n\n" +
-                        "Mã OTP của bạn là: " + otpCode + "\n\n" +
-                        "Mã này có hiệu lực trong 5 phút.\n\n" +
-                        "Nếu bạn không yêu cầu mã này, vui lòng bỏ qua email.\n\n" +
-                        "Trân trọng,\n" +
+                "Hello,\n\n" +
+                        "Your OTP code is: " + otpCode + "\n\n" +
+                        "This code is valid for 5 minutes.\n\n" +
+                        "If you did not request this code, please ignore this email.\n\n" +
+                        "Best regards,\n" +
                         "ShoppeClone Team");
 
         mailSender.send(message);
+    }
+
+    public void sendPasswordResetOtp(String to, String otpCode) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Reset Password - ShoppeClone");
+        message.setText(
+                "Hello,\n\n" +
+                        "You have requested to reset your password for your ShoppeClone account.\n\n" +
+                        "Your OTP code is: " + otpCode + "\n\n" +
+                        "This code is valid for 10 minutes.\n\n" +
+                        "If you did not request a password reset, please ignore this email.\n\n" +
+                        "Best regards,\n" +
+                        "ShoppeClone Team");
+
+        mailSender.send(message);
+        System.out.println("✅ Password reset OTP email sent to: " + to);
     }
 }

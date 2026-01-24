@@ -49,11 +49,11 @@ public class UserServiceImpl implements UserService {
         User user = getUserByEmail(email);
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-            throw new RuntimeException("Mật khẩu hiện tại không đúng");
+            throw new RuntimeException("Current password is incorrect");
         }
 
         if (!request.getNewPassword().equals(request.getConfirmPassword())) {
-            throw new RuntimeException("Mật khẩu xác nhận không khớp");
+            throw new RuntimeException("Password confirmation does not match");
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
@@ -102,7 +102,7 @@ public class UserServiceImpl implements UserService {
         User user = getUserByEmail(email);
 
         Address address = addressRepository.findByIdAndUserId(addressId, user.getId())
-                .orElseThrow(() -> new RuntimeException("Địa chỉ không tồn tại"));
+                .orElseThrow(() -> new RuntimeException("Address not found"));
 
         if (request.isDefault()) {
             resetDefaultAddresses(user.getId());
@@ -135,7 +135,7 @@ public class UserServiceImpl implements UserService {
 
     private User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     private void resetDefaultAddresses(String userId) {

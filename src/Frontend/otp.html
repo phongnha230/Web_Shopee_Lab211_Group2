@@ -110,15 +110,15 @@
             const otp = otpInputs.map(id => document.getElementById(id).value).join('');
 
             if (!/^\d{6}$/.test(otp)) {
-                alert('⚠️ Vui lòng nhập đúng 6 chữ số');
+                alert('⚠️ Please enter 6 digits');
                 return;
             }
 
             const email = localStorage.getItem('pendingEmail');
-            const password = localStorage.getItem('pendingPassword'); // 👈 LƯU TỪ REGISTER
+            const password = localStorage.getItem('pendingPassword'); // 👈 SAVED FROM REGISTER
 
             if (!email || !password) {
-                alert('❌ Thiếu thông tin đăng nhập');
+                alert('❌ Missing login info');
                 return;
             }
 
@@ -132,7 +132,7 @@
 
                 if (!verifyRes.ok) {
                     const err = await verifyRes.json();
-                    alert('❌ ' + (err.message || 'OTP không đúng'));
+                    alert('❌ ' + (err.message || 'Invalid OTP'));
                     return;
                 }
 
@@ -146,7 +146,7 @@
                 const loginData = await loginRes.json();
 
                 if (loginRes.ok) {
-                    localStorage.setItem('token', loginData.accessToken);
+                    localStorage.setItem('accessToken', loginData.accessToken);
                     localStorage.setItem(
                         'userName',
                         loginData.user.fullName || email.split('@')[0]
@@ -159,12 +159,12 @@
                     // 🎉 DONE
                     window.location.href = '/index.html';
                 } else {
-                    alert('❌ Không thể tự đăng nhập');
+                    alert('❌ Auto login failed');
                 }
 
             } catch (err) {
                 console.error(err);
-                alert('❌ Lỗi kết nối server');
+                alert('❌ Server connection error');
             }
         }
     </script>

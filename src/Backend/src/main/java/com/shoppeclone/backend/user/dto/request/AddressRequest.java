@@ -7,22 +7,22 @@ import lombok.Data;
 @Data
 public class AddressRequest {
 
-    @NotBlank(message = "Tên người nhận không được để trống")
+    @NotBlank(message = "Recipient name is required")
     private String fullName;
 
-    @Pattern(regexp = "^(0[0-9]{9})$", message = "Số điện thoại không hợp lệ")
+    @Pattern(regexp = "^(0[0-9]{9})$", message = "Invalid phone number")
     private String phone;
 
-    @NotBlank(message = "Địa chỉ không được để trống")
+    @NotBlank(message = "Address is required")
     private String address;
 
-    @NotBlank(message = "Thành phố không được để trống")
+    @NotBlank(message = "City is required")
     private String city;
 
-    @NotBlank(message = "Quận/Huyện không được để trống")
+    @NotBlank(message = "District is required")
     private String district;
 
-    @NotBlank(message = "Phường/Xã không được để trống")
+    @NotBlank(message = "Ward is required")
     private String ward;
 
     private boolean isDefault;
