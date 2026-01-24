@@ -2074,217 +2074,97 @@ ADD voucher_id BIGINT,
 ADD CONSTRAINT fk_order_voucher
 FOREIGN KEY (voucher_id) REFERENCES vouchers(id);
 
-Chuyển đến nội dung
-Lịch sử đoạn chat
+Translate All Vietnamese Text
 
 
 
-Bạn đã nói:
-Đã tải lên ảnh
-mình làm về shoppe và chịu trách nhiệm làm luồng này bây giờ bạn nói cho mình biết là mình cần làm gì với luồng này để mình hiểu mình làm ạ
-ChatGPT đã nói:
-Ok, mình nói theo đúng luồng Shopee giả lập + đúng phần bạn đang phụ trách, không nói lan man nha.
-Bạn đọc xong là biết mình phải code những gì, bảng nào, API nào 👍
+Thought for 5s
 
-1️⃣ Vai trò của bạn trong project này là gì?
-👉 Bạn là backend system chính, chịu trách nhiệm từ lúc user đặt hàng → thanh toán → giao hàng → admin xử lý shop.
 
-Nói ngắn gọn:
 
-Đơn hàng chạy được hay không là do luồng của bạn.
 
-2️⃣ Toàn bộ luồng bạn cần làm (tổng quan)
-Luồng chuẩn kiểu Shopee sẽ là:
 
-User đặt hàng
-   ↓
-Chọn hình thức thanh toán (COD / Online)
-   ↓
-Tạo payment
-   ↓
-Update payment status
-   ↓
-Tạo shipping
-   ↓
-Tracking đơn hàng
-   ↓
-Gửi notification
-   ↓
-Admin duyệt / khoá shop (nếu có vấn đề)
-Bây giờ mình đi từng phần đúng với folder + collection của bạn.
 
-3️⃣ PAYMENT – Thanh toán (payment/)
-3.1 Bạn cần làm gì?
-✅ COD (Thanh toán khi nhận hàng)
-Khi user chọn COD:
+Dưới đây là một mẫu mô tả (description) chuyên nghiệp và đầy đủ cho Pull Request của bạn. Bạn có thể copy và dán vào ô "Add a description" trên GitHub nhé:
 
-Tạo payment record
+markdown
+### 🚀 Changes and Improvements
+#### 1. 🔐 Authentication & Security
+- **Implemented OTP-based Password Reset**: Replaced the old token-link method with a secure 6-digit OTP verification flow sent via email.
+- **Enhanced Email Security**: Moved hardcoded email credentials to environment variables in `application.properties`.
+- **Login Flow**: Updated login to redirect users to the Home page ([index.html](cci:7://file:///c:/webshoppe/Web_Shopee_Lab211_Group2/src/Frontend/index.html:0:0-0:0)) upon success.
+#### 2. 👤 User Profile & Address Management
+- **Address Book**: Added full functionality to Add, Edit, Delete, and Set Default shipping addresses in [addresses.html](cci:7://file:///c:/webshoppe/Web_Shopee_Lab211_Group2/src/Frontend/addresses.html:0:0-0:0).
+- **Profile Updates**: Fixed issues with updating user profile information.
+- **UI Improvements**: Polished [profile.html](cci:7://file:///c:/webshoppe/Web_Shopee_Lab211_Group2/src/Frontend/profile.html:0:0-0:0) and [addresses.html](cci:7://file:///c:/webshoppe/Web_Shopee_Lab211_Group2/src/Frontend/addresses.html:0:0-0:0) interfaces.
+#### 3. 🌍 Global Translation (Vietnam -> English)
+- **Frontend**: Translated ALL HTML files ([index.html](cci:7://file:///c:/webshoppe/Web_Shopee_Lab211_Group2/src/Frontend/index.html:0:0-0:0), [login.html](cci:7://file:///c:/webshoppe/Web_Shopee_Lab211_Group2/src/Frontend/login.html:0:0-0:0), [register.html](cci:7://file:///c:/webshoppe/Web_Shopee_Lab211_Group2/src/Frontend/register.html:0:0-0:0), [profile.html](cci:7://file:///c:/webshoppe/Web_Shopee_Lab211_Group2/src/Frontend/profile.html:0:0-0:0), etc.) and JavaScript alerts from Vietnamese to English.
+- **Backend**: Updated all API response messages, error exceptions, and validation messages to English.
+- **Emails**: Translated email templates to English.
+#### 4. 🧹 Code Cleanup
+- Removed unused files and legacy code.
+- Cleaned up comments and logs.
+### ✅ Verification Checklist
+- [x] Tested Login/Register flow
+- [x] Tested Forgot Password (OTP) flow by email
+- [x] Verified Profile & Address updates
+- [x] Checked all pages for English translation
+Bạn copy nội dung này dán vào là cực kỳ xịn luôn! 😎
 
-Status ban đầu: PENDING
+đơn giainr thôi cơ viết đoạn miêu tả bbằngtienegs anh thôi ạ
 
-Không cần gọi cổng thanh toán
+Thought for <1s
 
-👉 Logic:
 
-Order tạo xong
-→ payment.method = "COD"
-→ payment.status = "PENDING"
-✅ Online payment
-Khi user chọn online:
+Đây là 2 lựa chọn đơn giản, ngắn gọn cho bạn nhé:
 
-Tạo payment
+Option 1 (Ngắn gọn nhất):
 
-Redirect (giả lập) sang cổng thanh toán
+text
+Translated the entire project from Vietnamese to English. Implemented OTP-based password reset and updated user profile features.
+Option 2 (Gạch đầu dòng cho dễ đọc):
 
-Nhận callback / fake response
+text
+- Translated all Frontend and Backend code to English.
+- Implemented OTP flow for Forgot Password.
+- Updated Profile and Address management features.
+- Fixed various bugs and cleaned up code.
+Bạn dùng cái nào cũng được nha!
 
-Update status
+User uploaded video 1
+như này là gộp vào chưa ấy
+Rồi nhé! ✅
 
-👉 Status thường có:
+Bạn nhìn thấy chữ màu tím "Merged" to đùng ở góc trên bên trái không? Và cả dòng thông báo "Pull request successfully merged and closed" nữa.
 
-PENDING
+Điều này có nghĩa là code của bạn đã được gộp thành công vào nhánh main rồi. Chúc mừng bạn nha! 🎉
 
-PAID
+Bây giờ bạn có thể bấm nút "Delete branch" ở bên phải để xóa nhánh mai-fix đi cho gọn (vì code đã vào nhánh chính rồi), hoặc cứ để đó cũng không sao.
 
-FAILED
+Code trên Github giờ đã xịn xò rồi đó! 😎
 
-3.2 Collection payments
-Bạn chắc chắn phải có mấy field này:
+Good
+Bad
+Review Changes
 
-{
-  _id,
-  orderId,
-  userId,
-  method: "COD" | "ONLINE",
-  amount,
-  status: "PENDING" | "PAID" | "FAILED",
-  createdAt,
-  updatedAt
-}
-4️⃣ SHIPPING – Giao hàng (shipping/)
-4.1 Shipping provider
-Bạn không ship thật, chỉ giả lập.
 
-Collection shipping_providers:
 
-{
-  _id,
-  name: "GHN" | "GHTK" | "Shopee Express",
-  isActive: true
-}
-4.2 Tạo đơn giao hàng
-Sau khi:
+Add context
+Media
+Mentions
+Workflows
 
-COD → tạo shipping liền
 
-Online → chỉ tạo shipping khi payment = PAID
+Gemini 3 Pro (High)
 
-👉 Collection order_shipping:
+Model
 
-{
-  _id,
-  orderId,
-  providerId,
-  status: "CREATED" | "SHIPPING" | "DELIVERED" | "FAILED",
-  trackingCode,
-  createdAt,
-  updatedAt
-}
-4.3 Tracking
-Bạn cần:
 
-API xem trạng thái đơn
 
-Update trạng thái theo flow giả lập
 
-Ví dụ:
 
-CREATED → SHIPPING → DELIVERED
-5️⃣ NOTIFICATION – Thông báo hệ thống (notification/)
-Bạn gửi thông báo khi nào?
-Ít nhất phải có mấy case này:
 
-Payment thành công
 
-Đơn đang giao
-
-Đơn giao thành công
-
-Shop bị admin khoá
-
-👉 Notification chỉ cần lưu DB, không cần realtime.
-
-Ví dụ collection:
-
-{
-  _id,
-  userId,
-  title,
-  content,
-  isRead: false,
-  createdAt
-}
-6️⃣ ADMIN – Duyệt / Khoá shop (admin/)
-6.1 Admin duyệt shop
-Shop mới → PENDING
-
-Admin duyệt → ACTIVE
-
-Admin khoá → BLOCKED
-
-👉 Logic bạn cần:
-
-API admin duyệt shop
-
-API admin khoá shop
-
-6.2 Admin logs
-Collection admin_logs:
-
-{
-  _id,
-  adminId,
-  action: "APPROVE_SHOP" | "BLOCK_SHOP",
-  targetId, // shopId
-  reason,
-  createdAt
-}
-7️⃣ Bạn cần làm bao nhiêu API? (để khỏi mơ hồ)
-PAYMENT
-POST /payments
-
-PUT /payments/:id/status
-
-SHIPPING
-POST /shipping
-
-GET /shipping/:orderId
-
-PUT /shipping/:id/status
-
-NOTIFICATION
-GET /notifications
-
-PUT /notifications/:id/read
-
-ADMIN
-PUT /admin/shop/:id/approve
-
-PUT /admin/shop/:id/block
-
-8️⃣ Nếu thầy hỏi: "Em làm phần gì?"
-👉 Bạn trả lời thế này là rất xịn:
-
-Em phụ trách backend luồng thanh toán, giao hàng và admin.
-Em thiết kế payment flow (COD, online), update trạng thái đơn, quản lý shipping, tracking, system notification và các chức năng admin duyệt hoặc khoá shop.
-
-Nếu bạn muốn 👉 mình vẽ cho bạn 1 sơ đồ luồng (diagram) hoặc
-👉 chia task ra từng tuần để bạn làm không rối
-
-chỉ cần nói:
-
-“Vẽ flow cho mình dễ hiểu hơn” hoặc
-“Chia task theo tuần giúp mình”
 
 
 

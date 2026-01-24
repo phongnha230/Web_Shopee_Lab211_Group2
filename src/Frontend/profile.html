@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile | ShoppeClone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+
+<body class="bg-gradient-to-br from-purple-100 via-white to-purple-200 text-gray-800">
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast"
+        class="fixed top-5 right-5 px-6 py-3 rounded-lg shadow-lg text-white font-semibold hidden transition-all z-50">
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 py-10 flex gap-8">
+
+        <!-- SIDEBAR -->
+        <aside class="w-64 bg-gradient-to-b from-purple-700 to-purple-600 rounded-3xl p-6 text-white shadow-xl">
+            <div class="flex items-center gap-3 mb-10">
+                <div id="sidebarAvatar"
+                    class="w-12 h-12 rounded-full border-2 border-white bg-white text-purple-700 flex items-center justify-center font-bold text-xl">
+                    U
+                </div>
+                <div>
+                    <p id="sidebarName" class="font-semibold">Loading...</p>
+                    <p class="text-sm text-purple-200">Silver Member</p>
+                </div>
+            </div>
+
+            <nav class="space-y-4 text-sm">
+                <a href="#" class="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/20">
+                    <i class="fas fa-user"></i> Profile
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-white/20">
+                    <i class="fas fa-box"></i> My Orders
+                </a>
+                <a href="addresses.html" class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-white/20">
+                    <i class="fas fa-map-marker-alt"></i> Shipping Addresses
+                </a>
+                <a href="#" onclick="showChangePasswordModal(); return false;"
+                    class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-white/20">
+                    <i class="fas fa-lock"></i> Change Password
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-white/20">
+                    <i class="fas fa-heart"></i> Wishlist
+                </a>
+                <a href="#" onclick="logout()"
+                    class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-white/20 text-red-200">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 bg-white rounded-3xl shadow-xl p-8">
+
+            <!-- HEADER -->
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-2xl font-bold text-purple-700">Personal Information</h1>
+                <button onclick="saveProfile()"
+                    class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-semibold transition">
+                    💾 Save Changes
+                </button>
+            </div>
+
+            <!-- PROFILE FORM -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+                <!-- AVATAR -->
+                <div class="flex flex-col items-center">
+                    <div id="mainAvatar"
+                        class="w-32 h-32 rounded-full border-4 border-purple-200 mb-4 bg-purple-100 flex items-center justify-center text-purple-700 font-bold text-5xl">
+                        U
+                    </div>
+                    <button class="text-purple-600 font-semibold text-sm hover:underline">Change Avatar</button>
+                </div>
+
+                <!-- FORM -->
+                <div class="md:col-span-2">
+                    <form id="profileForm" class="space-y-6" onsubmit="event.preventDefault(); saveProfile();">
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="text-sm font-medium">Last Name</label>
+                                <input type="text" id="lastName"
+                                    class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-purple-500 focus:outline-none"
+                                    placeholder="Nguyen" required />
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium">First Name</label>
+                                <input type="text" id="firstName"
+                                    class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-purple-500 focus:outline-none"
+                                    placeholder="Van A" required />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-sm font-medium">Email</label>
+                            <input type="email" id="email"
+                                class="w-full mt-1 px-4 py-2 rounded-xl border bg-gray-100 cursor-not-allowed"
+                                placeholder="user@gmail.com" readonly />
+                        </div>
+
+                        <div>
+                            <label class="text-sm font-medium">Phone Number</label>
+                            <input type="text" id="phone"
+                                class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-purple-500 focus:outline-none"
+                                placeholder="+84 123 456 789" />
+                        </div>
+
+                        <h2 class="text-lg font-semibold text-purple-700 pt-4">Shipping Address</h2>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="text-sm font-medium">City / Province</label>
+                                <input type="text" id="city"
+                                    class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-purple-500 focus:outline-none"
+                                    placeholder="Hanoi" />
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium">District</label>
+                                <input type="text" id="district"
+                                    class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-purple-500 focus:outline-none"
+                                    placeholder="Cau Giay" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-sm font-medium">Detailed Address</label>
+                            <input type="text" id="address"
+                                class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-purple-500 focus:outline-none"
+                                placeholder="House number, street name..." />
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- CHANGE PASSWORD MODAL -->
+    <div id="changePasswordModal"
+        class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl">
+            <div class="p-6 border-b flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-purple-700">Change Password</h2>
+                <button onclick="closeChangePasswordModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+
+            <form id="changePasswordForm" class="p-6 space-y-4">
+                <div class="relative">
+                    <label class="text-sm font-medium">Current Password</label>
+                    <input type="password" id="currentPasswordModal" required
+                        class="w-full mt-1 px-4 py-2 pr-12 rounded-xl border focus:border-purple-500 focus:outline-none">
+                    <button type="button" onclick="togglePasswordField('currentPasswordModal')"
+                        class="absolute right-4 bottom-2 text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+
+                <div class="relative">
+                    <label class="text-sm font-medium">New Password</label>
+                    <input type="password" id="newPasswordModal" required minlength="6"
+                        class="w-full mt-1 px-4 py-2 pr-12 rounded-xl border focus:border-purple-500 focus:outline-none">
+                    <button type="button" onclick="togglePasswordField('newPasswordModal')"
+                        class="absolute right-4 bottom-2 text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+
+                <!-- Password Strength -->
+                <div id="passwordStrength" class="hidden">
+                    <div class="flex gap-1 mb-2">
+                        <div class="h-2 flex-1 rounded-full bg-gray-200" id="strengthBar1"></div>
+                        <div class="h-2 flex-1 rounded-full bg-gray-200" id="strengthBar2"></div>
+                        <div class="h-2 flex-1 rounded-full bg-gray-200" id="strengthBar3"></div>
+                        <div class="h-2 flex-1 rounded-full bg-gray-200" id="strengthBar4"></div>
+                    </div>
+                    <p id="strengthLabel" class="text-sm text-gray-600"></p>
+                </div>
+
+                <div class="relative">
+                    <label class="text-sm font-medium">Confirm New Password</label>
+                    <input type="password" id="confirmPasswordModal" required
+                        class="w-full mt-1 px-4 py-2 pr-12 rounded-xl border focus:border-purple-500 focus:outline-none">
+                    <button type="button" onclick="togglePasswordField('confirmPasswordModal')"
+                        class="absolute right-4 bottom-2 text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+
+                <div class="flex gap-4 pt-4">
+                    <button type="submit"
+                        class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl font-semibold transition">
+                        <i class="fas fa-key mr-2"></i>Change Password
+                    </button>
+                    <button type="button" onclick="closeChangePasswordModal()"
+                        class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 rounded-xl font-semibold transition">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8080/api';
+        let accessToken = localStorage.getItem('accessToken');
+
+        // LOGIN NOT REQUIRED - just warning
+        if (!accessToken) {
+            console.warn('⚠️ Not logged in - Some features may not work');
+        }
+
+        // === STEP 1: AUTO LOAD PROFILE ===
+        async function loadProfile() {
+            if (!accessToken) {
+                showToast('⚠️ Please login to view profile', 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/user/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Cannot load profile');
+                }
+
+                const data = await response.json();
+                console.log('✅ Profile loaded:', data);
+                // Split full name
+                const nameParts = (data.fullName || '').split(' ');
+                const firstName = nameParts.pop() || '';
+                const lastName = nameParts.join(' ') || '';
+
+                // Get initials for avatar
+                const initial = (data.fullName || 'U').charAt(0).toUpperCase();
+
+                // Update sidebar
+                document.getElementById('sidebarName').textContent = data.fullName || 'User';
+                document.getElementById('sidebarAvatar').textContent = initial;
+                document.getElementById('mainAvatar').textContent = initial;
+
+                // Fill form
+                document.getElementById('lastName').value = lastName;
+                document.getElementById('firstName').value = firstName;
+                document.getElementById('email').value = data.email || '';
+                document.getElementById('phone').value = data.phone || '';
+
+                // Load default address
+                loadAddress();
+
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                showToast('❌ ' + error.message, 'error');
+            }
+        }
+
+        // Load địa chỉ mặc định
+        async function loadAddress() {
+            try {
+                const response = await fetch(`${API_URL}/user/addresses`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const addresses = await response.json();
+                    const defaultAddr = addresses.find(a => a.default) || addresses[0];
+
+                    if (defaultAddr) {
+                        document.getElementById('city').value = defaultAddr.city || '';
+                        document.getElementById('district').value = defaultAddr.district || '';
+                        document.getElementById('address').value = defaultAddr.address || '';
+                    }
+                }
+            } catch (error) {
+                console.log('No address found');
+            }
+        }
+
+        // === STEP 2: SAVE PROFILE ===
+        async function saveProfile() {
+            if (!accessToken) {
+                showToast('⚠️ Please login first!', 'warning');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
+                return;
+            }
+
+            const lastName = document.getElementById('lastName').value.trim();
+            const firstName = document.getElementById('firstName').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+
+            // Validate
+            if (!lastName || !firstName) {
+                showToast('❌ Please enter full name!', 'error');
+                return;
+            }
+
+            const fullName = `${lastName} ${firstName}`;
+
+            try {
+                console.log('📤 Sending data:', { fullName, phone });
+
+                const response = await fetch(`${API_URL}/user/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({
+                        fullName: fullName,
+                        phone: phone
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || 'Update failed');
+                }
+
+                const result = await response.text();
+                console.log('✅ Result:', result);
+
+                showToast('✅ Profile updated successfully!', 'success');
+
+                // Reload lại sau 1s
+                setTimeout(() => {
+                    loadProfile();
+                }, 1000);
+
+            } catch (error) {
+                console.error('Save error:', error);
+                showToast('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+
+            // Colors by type
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                warning: 'bg-yellow-500',
+                info: 'bg-blue-500'
+            };
+
+            toast.className = `fixed top-5 right-5 px-6 py-3 rounded-lg shadow-lg text-white font-semibold transition-all z-50 ${colors[type] || colors.success}`;
+            toast.textContent = message;
+            toast.classList.remove('hidden');
+
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Show change password modal
+        function showChangePasswordModal() {
+            if (!accessToken) {
+                showToast('⚠️ Please login!', 'warning');
+                return;
+            }
+            document.getElementById('changePasswordModal').classList.remove('hidden');
+            document.getElementById('changePasswordModal').classList.add('flex');
+        }
+
+        // Close change password modal
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.add('hidden');
+            document.getElementById('changePasswordModal').classList.remove('flex');
+            document.getElementById('changePasswordForm').reset();
+            document.getElementById('passwordStrength').classList.add('hidden');
+        }
+
+        // Toggle password visibility
+        function togglePasswordField(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = field.nextElementSibling.querySelector('i');
+
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Password strength checker
+        document.getElementById('newPasswordModal').addEventListener('input', (e) => {
+            const password = e.target.value;
+            const strengthDiv = document.getElementById('passwordStrength');
+            const bars = [
+                document.getElementById('strengthBar1'),
+                document.getElementById('strengthBar2'),
+                document.getElementById('strengthBar3'),
+                document.getElementById('strengthBar4')
+            ];
+            const label = document.getElementById('strengthLabel');
+
+            if (password.length === 0) {
+                strengthDiv.classList.add('hidden');
+                return;
+            }
+
+            strengthDiv.classList.remove('hidden');
+
+            let strength = 0;
+            if (password.length >= 6) strength++;
+            if (password.length >= 8) strength++;
+            if (/[A-Z]/.test(password) && /[a-z]/.test(password)) strength++;
+            if (/[0-9]/.test(password) && /[^A-Za-z0-9]/.test(password)) strength++;
+
+            // Reset bars
+            bars.forEach(bar => {
+                bar.classList.remove('bg-red-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500');
+                bar.classList.add('bg-gray-200');
+            });
+
+            // Set strength
+            const colors = ['bg-red-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'];
+            const texts = ['Weak', 'Medium', 'Good', 'Strong'];
+
+            for (let i = 0; i < strength; i++) {
+                bars[i].classList.remove('bg-gray-200');
+                bars[i].classList.add(colors[strength - 1]);
+            }
+
+            label.textContent = `Strength: ${texts[strength - 1] || 'Very Weak'}`;
+        });
+
+        // Change password form submit
+        document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const currentPassword = document.getElementById('currentPasswordModal').value;
+            const newPassword = document.getElementById('newPasswordModal').value;
+            const confirmPassword = document.getElementById('confirmPasswordModal').value;
+
+            if (newPassword !== confirmPassword) {
+                showToast('❌ Password confirmation does not match!', 'error');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                showToast('❌ New password must be at least 6 characters!', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/user/change-password`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({
+                        currentPassword,
+                        newPassword,
+                        confirmPassword
+                    })
+                });
+
+                const data = await response.text();
+
+                if (response.ok) {
+                    showToast('✅ ' + data, 'success');
+                    closeChangePasswordModal();
+                } else {
+                    throw new Error(data);
+                }
+            } catch (error) {
+                showToast('❌ ' + error.message, 'error');
+            }
+        });
+
+        // Logout
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.clear();
+                showToast('👋 Logged out!', 'info');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1000);
+            }
+        }
+
+        // === AUTO RUN ON LOAD ===
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Profile page loaded');
+            loadProfile();
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify OTP | ShoppeClone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        @keyframes blob {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            33% {
+                transform: translate(30px, -40px) scale(1.1);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) scale(0.9);
+            }
+
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+        }
+
+        @keyframes pulseInput {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.7);
+            }
+
+            50% {
+                box-shadow: 0 0 0 10px rgba(168, 85, 247, 0);
+            }
+        }
+
+        .otp-input {
+            animation: pulseInput 2s infinite;
+        }
+    </style>
+</head>
+
+<body
+    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-400 via-purple-300 to-purple-500 overflow-hidden">
+
+    <!-- Animated blobs -->
+    <div
+        class="absolute w-96 h-96 bg-purple-600/30 rounded-full blur-3xl top-[-100px] left-[-100px] animate-[blob_20s_infinite]">
+    </div>
+    <div
+        class="absolute w-96 h-96 bg-pink-400/30 rounded-full blur-3xl bottom-[-100px] right-[-100px] animate-[blob_25s_infinite]">
+    </div>
+
+    <div class="relative z-10 w-full max-w-md bg-white/30 backdrop-blur-xl rounded-3xl shadow-2xl p-12">
+
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-extrabold text-purple-700 mb-2">ShoppeClone</h2>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">Verify your email</h3>
+            <p class="text-gray-600">Enter the 6-digit code sent to your email</p>
+        </div>
+
+        <!-- Countdown timer -->
+        <div class="text-center mb-8 p-4 bg-white/50 rounded-2xl">
+            <div id="countdown" class="text-lg font-semibold text-purple-700 mb-1">02:00</div>
+            <p class="text-sm text-gray-600">Didn't receive code? <a href="#" onclick="resendOTP()"
+                    class="text-purple-600 hover:underline font-medium">Resend</a></p>
+        </div>
+
+        <!-- OTP Input Fields -->
+        <div class="flex gap-3 justify-center mb-8">
+            <input id="otp1" maxlength="1"
+                class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-purple-200 focus:border-purple-600 focus:outline-none shadow-lg"
+                type="text">
+            <input id="otp2" maxlength="1"
+                class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-purple-200 focus:border-purple-600 focus:outline-none shadow-lg"
+                type="text">
+            <input id="otp3" maxlength="1"
+                class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-purple-200 focus:border-purple-600 focus:outline-none shadow-lg"
+                type="text">
+            <input id="otp4" maxlength="1"
+                class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-purple-200 focus:border-purple-600 focus:outline-none shadow-lg"
+                type="text">
+            <input id="otp5" maxlength="1"
+                class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-purple-200 focus:border-purple-600 focus:outline-none shadow-lg"
+                type="text">
+            <input id="otp6" maxlength="1"
+                class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-purple-200 focus:border-purple-600 focus:outline-none shadow-lg"
+                type="text">
+        </div>
+
+        <!-- Verify Button -->
+        <button onclick="verifyOTP()"
+            class="w-full py-4 rounded-full bg-gradient-to-r from-purple-600 to-purple-500 text-white font-semibold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-200 mb-6">
+            Verify Code
+        </button>
+
+        <!-- Back to login -->
+        <p class="text-center text-sm text-gray-700">
+            Wrong email? <a href="/login.html" class="text-purple-700 font-semibold hover:underline">Sign in instead</a>
+        </p>
+    </div>
+
+    <script>
+        async function verifyOTP() {
+            const otpInputs = ['otp1', 'otp2', 'otp3', 'otp4', 'otp5', 'otp6'];
+            const otp = otpInputs.map(id => document.getElementById(id).value).join('');
+
+            if (!/^\d{6}$/.test(otp)) {
+                alert('⚠️ Please enter 6 digits');
+                return;
+            }
+
+            const email = localStorage.getItem('pendingEmail');
+            const password = localStorage.getItem('pendingPassword'); // 👈 SAVED FROM REGISTER
+
+            if (!email || !password) {
+                alert('❌ Missing login info');
+                return;
+            }
+
+            try {
+                // 1️⃣ VERIFY OTP
+                const verifyRes = await fetch('http://localhost:8080/api/auth/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, code: otp })
+                });
+
+                if (!verifyRes.ok) {
+                    const err = await verifyRes.json();
+                    alert('❌ ' + (err.message || 'Invalid OTP'));
+                    return;
+                }
+
+                // 2️⃣ AUTO LOGIN
+                const loginRes = await fetch('http://localhost:8080/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const loginData = await loginRes.json();
+
+                if (loginRes.ok) {
+                    localStorage.setItem('accessToken', loginData.accessToken);
+                    localStorage.setItem(
+                        'userName',
+                        loginData.user.fullName || email.split('@')[0]
+                    );
+
+                    // 🧹 cleanup
+                    localStorage.removeItem('pendingEmail');
+                    localStorage.removeItem('pendingPassword');
+
+                    // 🎉 DONE
+                    window.location.href = '/index.html';
+                } else {
+                    alert('❌ Auto login failed');
+                }
+
+            } catch (err) {
+                console.error(err);
+                alert('❌ Server connection error');
+            }
+        }
+    </script>
+
+
+
+</body>
+
+</html>

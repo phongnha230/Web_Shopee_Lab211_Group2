@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShoppeClone - Best Online Shopping Experience</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @keyframes bounceShopee {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-10px);
+            }
+
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .bounce-shopee {
+            animation: bounceShopee 2s infinite;
+        }
+
+        .flash-sale {
+            background: linear-gradient(45deg, #ff5722, #ff8a50, #ff5722);
+            background-size: 200% 200%;
+            animation: gradient 1.5s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-purple-100 via-white to-purple-200">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-shopping-bag text-3xl text-purple-600 bounce-shopee"></i>
+                    <h1
+                        class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-sky-500 bg-clip-text text-transparent">
+                        ShoppeClone
+                    </h1>
+                </div>
+
+                <!-- Search -->
+                <div class="flex-1 max-w-2xl mx-8">
+                    <div class="relative">
+                        <input type="text" placeholder="Search for millions of products..."
+                            class="w-full p-4 pl-12 pr-16 rounded-full border-2 border-gray-200 focus:border-purple-400 focus:outline-none text-lg shadow-lg">
+                        <i
+                            class="fas fa-search absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl"></i>
+                        <button
+                            class="absolute right-3 top-1/2 transform -translate-y-1/2 bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-full font-semibold">
+                            Search
+                        </button>
+                    </div>
+                </div>
+
+                <!-- User Actions -->
+                <div class="flex items-center space-x-4">
+
+                    <!-- 🔓 CHƯA LOGIN -->
+                    <div id="guestNav" class="flex items-center space-x-3">
+                        <a href="/login.html" class="text-gray-700 font-semibold hover:text-purple-500 transition">
+                            Sign in
+                        </a>
+                        <a href="/register.html"
+                            class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-full font-semibold transition">
+                            Sign up
+                        </a>
+                    </div>
+
+                    <!-- 🔐 ĐÃ LOGIN -->
+                    <div id="userNav" class="hidden flex items-center space-x-3">
+                        <div class="flex items-center space-x-2 cursor-pointer">
+                            <a href="profile.html" class="flex items-center space-x-2 cursor-pointer">
+                                <i class="fas fa-user-circle text-2xl text-gray-700"></i>
+                            </a>
+
+                            <span id="userName" class="font-semibold text-gray-800"></span>
+                        </div>
+
+                        <button onclick="logout()"
+                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full font-semibold text-sm transition">
+                            Logout
+                        </button>
+                    </div>
+
+                    <button onclick="showCart()" class="relative p-2 hover:bg-purple-50 rounded-full">
+                        <i class="fas fa-shopping-cart text-xl text-gray-700"></i>
+                    </button>
+                </div>
+
+
+                <!-- Logout button riêng -->
+                <button onclick="logout()" id="logoutBtn"
+                    class="hidden bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full font-semibold text-sm ml-2 transition-all">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                </button>
+
+            </div>
+        </div>
+        </div>
+    </header>
+
+    <!-- Flash Sale Banner -->
+    <section class="bg-gradient-to-r from-purple-500 to-purple-600 text-white py-6 mb-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="flex items-center justify-center space-x-4 mb-4">
+                <i class="fas fa-bolt text-2xl"></i>
+                <h2 class="text-2xl md:text-3xl font-bold">FLASH SALE 50% - TODAY ONLY!</h2>
+                <i class="fas fa-clock text-2xl"></i>
+            </div>
+            <div class="flex items-center justify-center space-x-6 text-lg">
+                <span>00<i class="fas fa-colon"></i>45<i class="fas fa-colon"></i>23</span>
+                <a href="#products"
+                    class="bg-white text-purple-500 px-8 py-3 rounded-full font-bold hover:shadow-xl transform hover:-translate-y-1 transition-all">BUY
+                    NOW</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 pb-12">
+        <!-- Categories -->
+        <section class="mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8">Featured Categories</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <div
+                    class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all text-center">
+                    <i class="fas fa-mobile-alt text-4xl text-purple-500 mb-4"></i>
+                    <h3 class="font-semibold text-gray-800">Phones</h3>
+                </div>
+                <div
+                    class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all text-center">
+                    <i class="fas fa-laptop text-4xl text-purple-500 mb-4"></i>
+                    <h3 class="font-semibold text-gray-800">Laptop</h3>
+                </div>
+                <div
+                    class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all text-center">
+                    <i class="fas fa-headphones text-4xl text-purple-500 mb-4"></i>
+                    <h3 class="font-semibold text-gray-800">Headphones</h3>
+                </div>
+                <div
+                    class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all text-center">
+                    <i class="fas fa-tshirt text-4xl text-purple-500 mb-4"></i>
+                    <h3 class="font-semibold text-gray-800">Fashion</h3>
+                </div>
+                <div
+                    class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all text-center">
+                    <i class="fas fa-home text-4xl text-purple-500 mb-4"></i>
+                    <h3 class="font-semibold text-gray-800">Home & Living</h3>
+                </div>
+                <div
+                    class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all text-center">
+                    <i class="fas fa-gamepad text-4xl text-purple-500 mb-4"></i>
+                    <h3 class="font-semibold text-gray-800">Gaming</h3>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Products -->
+        <section id="products">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">Featured Products</h2>
+                <a href="#" class="text-purple-500 font-semibold hover:text-purple-600">View All →</a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Product Card 1 -->
+                <div
+                    class="bg-white rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden transform hover:-translate-y-2 transition-all group">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop"
+                            alt="iPhone" class="w-full h-64 object-cover group-hover:scale-105 transition-transform">
+                        <div
+                            class="absolute top-4 left-4 bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                            −30%</div>
+                        <div
+                            class="absolute top-4 right-4 bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                            Hot</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-semibold text-lg text-gray-800 mb-2 line-clamp-2">iPhone 15 Pro Max 256GB
+                            Natural Titanium</h3>
+                        <div class="flex items-center mb-4">
+                            <span class="text-2xl font-bold text-purple-500">24.990.000đ</span>
+                            <span class="ml-4 text-gray-400 line-through text-lg">35.990.000đ</span>
+                        </div>
+                        <div class="flex items-center space-x-1 text-yellow-400 mb-4">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i><i class="fas fa-star"></i>
+                            <span class="text-gray-600 ml-2">(1.234)</span>
+                        </div>
+                        <button onclick="addToCart('iPhone 15 Pro')"
+                            class="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white py-3 px-6 rounded-xl font-bold shadow-lg transform hover:-translate-y-1 transition-all">
+                            <i class="fas fa-shopping-cart mr-2"></i>Add to Cart
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Product Card 2 -->
+                <div
+                    class="bg-white rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden transform hover:-translate-y-2 transition-all group">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=400&fit=crop"
+                            alt="MacBook" class="w-full h-64 object-cover group-hover:scale-105 transition-transform">
+                        <div
+                            class="absolute top-4 left-4 bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                            Mới</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-semibold text-lg text-gray-800 mb-2 line-clamp-2">MacBook Air M2 13.6" 16GB
+                            512GB</h3>
+                        <div class="flex items-center mb-4">
+                            <span class="text-2xl font-bold text-purple-500">32.990.000đ</span>
+                        </div>
+                        <div class="flex items-center space-x-1 text-yellow-400 mb-4">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i><i class="far fa-star"></i>
+                            <span class="text-gray-600 ml-2">(856)</span>
+                        </div>
+                        <button onclick="addToCart('MacBook Air M2')"
+                            class="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white py-3 px-6 rounded-xl font-bold shadow-lg transform hover:-translate-y-1 transition-all">
+                            <i class="fas fa-shopping-cart mr-2"></i>Add to Cart
+                        </button>
+                    </div>
+                </div>
+
+                <!-- More product cards... (copy similar structure) -->
+                <div
+                    class="bg-white rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden transform hover:-translate-y-2 transition-all group">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=400&h=400&fit=crop"
+                            alt="Watch" class="w-full h-64 object-cover group-hover:scale-105 transition-transform">
+                        <div
+                            class="absolute top-4 right-4 bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                            Bán chạy</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-semibold text-lg text-gray-800 mb-2 line-clamp-2">Apple Watch Series 9 45mm</h3>
+                        <div class="flex items-center mb-4">
+                            <span class="text-2xl font-bold text-purple-500">12.990.000đ</span>
+                        </div>
+                        <div class="flex items-center space-x-1 text-yellow-400 mb-4">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i><i class="fas fa-star"></i>
+                            <span class="text-gray-600 ml-2">(2.345)</span>
+                        </div>
+                        <button onclick="addToCart('Apple Watch')"
+                            class="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white py-3 px-6 rounded-xl font-bold shadow-lg transform hover:-translate-y-1 transition-all">
+                            <i class="fas fa-shopping-cart mr-2"></i>Add to Cart
+                        </button>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden transform hover:-translate-y-2 transition-all group">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?w=400&h=400&fit=crop"
+                            alt="AirPods" class="w-full h-64 object-cover group-hover:scale-105 transition-transform">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-semibold text-lg text-gray-800 mb-2 line-clamp-2">AirPods Pro 2 USB-C</h3>
+                        <div class="flex items-center mb-4">
+                            <span class="text-2xl font-bold text-purple-500">6.990.000đ</span>
+                        </div>
+                        <div class="flex items-center space-x-1 text-yellow-400 mb-4">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                            <span class="text-gray-600 ml-2">(1.789)</span>
+                        </div>
+                        <button onclick="addToCart('AirPods Pro')"
+                            class="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white py-3 px-6 rounded-xl font-bold shadow-lg transform hover:-translate-y-1 transition-all">
+                            <i class="fas fa-shopping-cart mr-2"></i>Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white mt-16">
+        <div class="max-w-7xl mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-2xl font-bold mb-6 flex items-center">
+                        <i class="fas fa-shopping-bag text-purple-500 mr-3"></i>ShoppeClone
+                    </h3>
+                    <p class="text-gray-400 mb-4">Best online shopping experience with thousands of genuine products!
+                    </p>
+                    <div class="flex space-x-4">
+                        <i class="fab fa-facebook text-2xl hover:text-purple-500 cursor-pointer"></i>
+                        <i class="fab fa-instagram text-2xl hover:text-purple-500 cursor-pointer"></i>
+                        <i class="fab fa-youtube text-2xl hover:text-purple-500 cursor-pointer"></i>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">Customers</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">Account</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Order History</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Return Policy</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">Support</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">Shopping Guide</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">Contact</h4>
+                    <p class="text-gray-400 mb-4">Hotline: 1900 1234</p>
+                    <p class="text-gray-400 mb-4">Email: support@shoppeclone.com</p>
+                    <div class="flex space-x-2">
+                        <div class="w-3 h-12 bg-purple-500"></div>
+                        <div class="w-3 h-12 bg-purple-500"></div>
+                        <div class="w-3 h-12 bg-purple-500"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+                <p>&copy; 2026 ShoppeClone. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cart Modal -->
+    <div id="cartModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full max-h-[80vh] overflow-y-auto shadow-2xl">
+            <div class="p-6 border-b">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-shopping-cart mr-3 text-purple-500"></i>Your Cart
+                </h2>
+            </div>
+            <div id="cartItems" class="p-6">
+                <p class="text-gray-500 text-center py-8">Cart is empty</p>
+            </div>
+            <div class="p-6 border-t bg-gray-50 rounded-b-3xl">
+                <div class="flex justify-between text-xl font-bold mb-4">
+                    <span>Total:</span>
+                    <span id="cartTotal" class="text-purple-500">0đ</span>
+                </div>
+                <button onclick="checkout()"
+                    class="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white py-4 rounded-2xl font-bold text-lg shadow-xl transform hover:-translate-y-1 transition-all">
+                    Checkout Now
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ===============================
+           1️⃣ GOOGLE CALLBACK (NẾU CÓ)
+        ================================ */
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get('token');
+            const userName = params.get('userName');
+            const error = params.get('error');
+
+            if (error) {
+                console.error('❌ Google login error:', error);
+                return;
+            }
+
+            if (token && userName) {
+                localStorage.setItem('accessToken', token);
+                localStorage.setItem('userName', decodeURIComponent(userName));
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            updateNavbar();
+        });
+
+        /* ===============================
+           2️⃣ UPDATE NAVBAR (CỐT LÕI)
+        ================================ */
+        function updateNavbar() {
+            const token = localStorage.getItem('accessToken');
+            const userName = localStorage.getItem('userName') || 'User';
+
+            const guestNav = document.getElementById('guestNav');
+            const userNav = document.getElementById('userNav');
+            const userNameEl = document.getElementById('userName');
+
+            if (token) {
+                guestNav.classList.add('hidden');
+                userNav.classList.remove('hidden');
+                userNameEl.textContent = `Hello, ${userName}`;
+            } else {
+                guestNav.classList.remove('hidden');
+                userNav.classList.add('hidden');
+            }
+        }
+
+        /* ===============================
+           3️⃣ LOGOUT
+        ================================ */
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('userName');
+                location.reload();
+            }
+        }
+
+        /* ===============================
+           4️⃣ CART (GIỮ NGUYÊN)
+        ================================ */
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        function addToCart(productName) {
+            const existing = cart.find(item => item.name === productName);
+            if (existing) existing.quantity += 1;
+            else cart.push({ name: productName, quantity: 1, price: 1000000 });
+
+            localStorage.setItem('cart', JSON.stringify(cart));
+            alert('✅ Added to cart!');
+        }
+
+        function showCart() {
+            document.getElementById('cartModal').classList.remove('hidden');
+        }
+
+        function checkout() {
+            alert('✅ Order placed successfully!');
+            cart = [];
+            localStorage.setItem('cart', JSON.stringify(cart));
+            document.getElementById('cartModal').classList.add('hidden');
+        }
+    </script>
+
+
+
+</body>
+
+</html>

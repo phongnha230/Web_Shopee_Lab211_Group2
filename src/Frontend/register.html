@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Animated Sign Up | ShoppeClone</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @keyframes blob {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            33% {
+                transform: translate(30px, -40px) scale(1.1);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) scale(0.9);
+            }
+
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body
+    class="h-screen flex items-center justify-center bg-gradient-to-br from-purple-400 via-purple-300 to-purple-500 overflow-hidden">
+
+
+    <!-- Animated blobs -->
+    <div
+        class="absolute w-96 h-96 bg-purple-600/30 rounded-full blur-3xl top-[-100px] left-[-100px] animate-[blob_20s_infinite]">
+    </div>
+    <div
+        class="absolute w-96 h-96 bg-pink-400/30 rounded-full blur-3xl bottom-[-100px] right-[-100px] animate-[blob_25s_infinite]">
+    </div>
+
+    <div
+        class="relative z-10 w-full max-w-5xl bg-white/30 backdrop-blur-xl rounded-3xl shadow-2xl flex overflow-hidden">
+
+        <!-- LEFT FORM -->
+        <div class="w-1/2 p-12">
+            <h2 class="text-3xl font-extrabold text-purple-700">ShoppeClone</h2>
+            <h3 class="text-xl font-semibold text-gray-800 mt-6">Create your account</h3>
+            <p class="text-gray-600 mb-8">Sign up to start shopping with us</p>
+
+            <!-- FORM INPUTS -->
+            <input id="fullName" placeholder="Full Name"
+                class="w-full mb-5 bg-transparent border-b-2 border-gray-400 focus:border-purple-600 outline-none py-2">
+            <input id="email" placeholder="Email" type="email"
+                class="w-full mb-5 bg-transparent border-b-2 border-gray-400 focus:border-purple-600 outline-none py-2">
+            <input id="phone" placeholder="Phone"
+                class="w-full mb-5 bg-transparent border-b-2 border-gray-400 focus:border-purple-600 outline-none py-2">
+            <input id="password" placeholder="Password" type="password"
+                class="w-full mb-6 bg-transparent border-b-2 border-gray-400 focus:border-purple-600 outline-none py-2">
+
+            <!-- SIGN UP BUTTON -->
+            <button onclick="goToOTP()"
+                class="w-full py-3 rounded-full bg-gradient-to-r from-purple-600 to-purple-500 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
+                Sign Up & Verify OTP
+            </button>
+
+
+            <div class="flex items-center my-6">
+                <div class="flex-1 h-px bg-gray-400"></div>
+                <span class="mx-4 text-sm text-gray-600">or</span>
+                <div class="flex-1 h-px bg-gray-400"></div>
+            </div>
+
+            <!-- CORRECT GOOGLE BUTTON - DO NOT MODIFY -->
+            <a id="googleBtn" href="#" onclick="googleLogin(event)">
+                <button
+                    class="w-full flex items-center justify-center gap-3 py-3 rounded-full bg-white shadow hover:bg-gray-100 transition">
+                    <svg class="w-5 h-5" viewBox="0 0 48 48">
+                        <path fill="#EA4335"
+                            d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.73 17.74 9.5 24 9.5z" />
+                        <path fill="#4285F4"
+                            d="M46.14 24.56c0-1.64-.15-3.21-.43-4.72H24v9.02h12.45c-.54 2.91-2.18 5.38-4.64 7.04l7.49 5.82c4.38-4.04 6.84-9.99 6.84-17.16z" />
+                        <path fill="#FBBC05"
+                            d="M10.53 28.77A14.5 14.5 0 0 1 9.76 24c0-1.66.29-3.27.77-4.77l-7.99-6.19A23.99 23.99 0 0 0 0 24c0 3.88.93 7.56 2.54 10.96l7.99-6.19z" />
+                        <path fill="#34A853"
+                            d="M24 48c6.48 0 11.93-2.13 15.9-5.81l-7.49-5.82c-2.08 1.4-4.73 2.23-8.41 2.23-6.26 0-11.57-4.23-13.46-9.94l-7.99 6.19C6.51 42.62 14.62 48 24 48z" />
+                    </svg>
+                    <span class="text-gray-700 font-medium">Continue with Google</span>
+                </button>
+            </a>
+
+
+            <p class="text-center text-sm text-gray-700 mt-6">
+                Already have an account?
+                <a href="/login.html" class="text-purple-700 font-semibold hover:underline">Sign in</a>
+            </p>
+        </div>
+
+        <!-- RIGHT IMAGE SLIDER (KEEP AS IS) -->
+        <div class="w-1/2 relative overflow-hidden rounded-r-3xl">
+            <div id="slider" class="w-full h-full relative">
+                <!-- 12 images keep as is -->
+                <img src="https://i.pinimg.com/1200x/ae/43/cc/ae43cc9f03e4c2993b6dabab06afadb2.jpg"
+                    class="slide absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-100">
+                <img src="https://i.pinimg.com/1200x/31/1d/ce/311dcecc2944049d12f3086e1ab985ab.jpg"
+                    class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
+                <img src="https://i.pinimg.com/736x/b7/9f/1c/b79f1cbca6649e3ea6388dc3a19610ca.jpg"
+                    class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
+                <img src="https://i.pinimg.com/1200x/47/76/14/4776142a7e8565819c9dd7d32b3719f6.jpg"
+                    class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
+                <img src="https://i.pinimg.com/736x/10/81/75/1081754c47b9a668deedb509fe137066.jpg"
+                    class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
+                <img src="https://i.pinimg.com/736x/f0/ab/ce/f0abcee0ad6ad1caf957d255be94067d.jpg"
+                    class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
+                <img src="https://i.pinimg.com/736x/f4/e6/0d/f4e60d2eef4fd10245ed1290a6cf6802.jpg"
+                    class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
+                <img src="https://i.pinimg.com/736x/65/a2/00/65a200d40d831444c3f82241344b53fb.jpg"
+                    class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
+                <img src="https://i.pinimg.com/1200x/6b/04/9d/6b049dccf1c6c9d60acf323a8d157b92.jpg"
+                    class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
+                <img src="https://i.pinimg.com/736x/20/14/4c/20144c31ba7a91235a03aca091549c4b.jpg"
+                    class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
+
+            </div>
+
+            <script>
+                async function googleLogin(event) {
+                    event.preventDefault();
+
+                    try {
+                        const res = await fetch(
+                            'http://localhost:8080/api/auth/oauth/google/url?redirect_uri=http://localhost:3000/auth/callback/google.html'
+                        );
+
+                        const data = await res.json();
+
+                        if (data.authUrl) {
+                            // 🔥 SWITCH TO GOOGLE
+                            window.location.href = data.authUrl;
+                        } else {
+                            alert('❌ Could not get Google URL');
+                        }
+                    } catch (err) {
+                        alert('❌ Google Login Error');
+                        console.error(err);
+                    }
+                }
+            </script>
+
+</body>
+
+</html>

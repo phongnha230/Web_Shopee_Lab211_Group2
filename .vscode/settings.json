@@ -1,10 +1,3 @@
 {
-    "java.compile.nullAnalysis.mode": "automatic",
-    "java.configuration.updateBuildConfiguration": "automatic",
-    "java.project.sourcePaths": [
-        "src/Backend/src/main/java"
-    ],
-    "java.project.outputPath": "src/Backend/target/classes",
-    "java.import.maven.enabled": true,
-    "maven.pomfile.globPattern": "**/pom.xml"
+    "java.compile.nullAnalysis.mode": "automatic"
 }
