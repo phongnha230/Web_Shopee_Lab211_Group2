@@ -2161,20 +2161,945 @@ Model
 
 
 
+hãy code cho tao giống giao diện nhât: 
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopee Clone - Best Online Shopping Experience</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @keyframes bounceShopee {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-10px);
+            }
+
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .bounce-shopee {
+            animation: bounceShopee 2s infinite;
+        }
+
+        .flash-sale {
+            background: linear-gradient(45deg, #ff5722, #ff8a50, #ff5722);
+            background-size: 200% 200%;
+            animation: gradient 1.5s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-orange-500 to-orange-600 shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-shopping-bag text-3xl text-white bounce-shopee"></i>
+                    <h1 class="text-2xl font-bold text-white">
+                        Shopee Clone
+                    </h1>
+                </div>
+
+                <!-- Search -->
+                <div class="flex-1 max-w-2xl mx-8">
+                    <div class="relative">
+                        <input type="text" placeholder="Search for millions of products..."
+                            class="w-full p-3 pl-12 pr-16 rounded-sm border-2 border-white focus:border-orange-300 focus:outline-none">
+                        <i
+                            class="fas fa-search absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl"></i>
+                        <button
+                            class="absolute right-3 top-1/2 transform -translate-y-1/2 bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-sm font-semibold">
+                            Search
+                        </button>
+                    </div>
+                </div>
+
+                <!-- User Actions -->
+                <div class="flex items-center space-x-4">
+
+                    <!-- 🔓 CHƯA LOGIN -->
+                    <div id="guestNav" class="flex items-center space-x-3">
+                        <a href="/login.html" class="text-gray-700 font-semibold hover:text-orange-500 transition">
+                            Sign in
+                        </a>
+                        <a href="/register.html"
+                            class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full font-semibold transition">
+                            Sign up
+                        </a>
+                    </div>
+
+                    <!-- 🔐 ĐÃ LOGIN -->
+                    <div id="userNav" class="hidden flex items-center space-x-3">
+                        <div class="flex items-center space-x-2 cursor-pointer">
+                            <a href="profile.html" class="flex items-center space-x-2 cursor-pointer">
+                                <i class="fas fa-user-circle text-2xl text-gray-700"></i>
+                            </a>
+
+                            <span id="userName" class="font-semibold text-gray-800"></span>
+                        </div>
+
+                        <button onclick="logout()"
+                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full font-semibold text-sm transition">
+                            Logout
+                        </button>
+                    </div>
+
+                    <button onclick="showCart()" class="relative p-2 hover:bg-purple-50 rounded-full">
+                        <i class="fas fa-shopping-cart text-xl text-gray-700"></i>
+                    </button>
+                </div>
+
+
+                <!-- Logout button riêng -->
+                <button onclick="logout()" id="logoutBtn"
+                    class="hidden bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full font-semibold text-sm ml-2 transition-all">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                </button>
+
+            </div>
+        </div>
+        </div>
+    </header>
+
+    <!-- Banner Section -->
+    <section class="bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 py-8 mb-4">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Super Brand Day Banner -->
+                <div
+                    class="md:col-span-2 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-6 text-white flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-semibold mb-2">MINIMAL SALE</p>
+                        <h2 class="text-3xl md:text-4xl font-bold mb-2">Super Brand Day</h2>
+                        <p class="text-sm mb-4">Up to 50% Off For Fashion</p>
+                        <div class="flex space-x-2">
+                            <div class="w-3 h-3 bg-white rounded-full"></div>
+                            <div class="w-3 h-3 bg-white bg-opacity-50 rounded-full"></div>
+                            <div class="w-3 h-3 bg-white bg-opacity-50 rounded-full"></div>
+                        </div>
+                    </div>
+                    <div class="hidden md:block">
+                        <i class="fas fa-shopping-bag text-6xl opacity-20"></i>
+                    </div>
+                </div>
+                <!-- Side Banners -->
+                <div class="space-y-4">
+                    <div class="bg-gray-200 rounded-lg h-32 flex items-center justify-center">
+                        <i class="fas fa-image text-4xl text-gray-400"></i>
+                    </div>
+                    <div class="bg-blue-100 rounded-lg h-32 flex items-center justify-center">
+                        <div class="text-center">
+                            <i class="fas fa-tag text-2xl text-blue-600"></i>
+                            <p class="text-xs mt-2">Best Deals</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Service Icons -->
+    <section class="bg-white py-4 mb-4">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
+                <div class="flex flex-col items-center">
+                    <i class="fas fa-shipping-fast text-3xl text-orange-500 mb-2"></i>
+                    <p class="text-sm font-semibold">Free Shipping</p>
+                </div>
+                <div class="flex flex-col items-center">
+                    <i class="fas fa-gift text-3xl text-orange-500 mb-2"></i>
+                    <p class="text-sm font-semibold">Vouchers</p>
+                </div>
+                <div class="flex flex-col items-center">
+                    <i class="fas fa-wallet text-3xl text-orange-500 mb-2"></i>
+                    <p class="text-sm font-semibold">All Payment</p>
+                </div>
+                <div class="flex flex-col items-center">
+                    <i class="fas fa-percent text-3xl text-orange-500 mb-2"></i>
+                    <p class="text-sm font-semibold">Great Deals</p>
+                </div>
+                <div class="flex flex-col items-center">
+                    <i class="fas fa-tags text-3xl text-orange-500 mb-2"></i>
+                    <p class="text-sm font-semibold">Official Brands</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Flash Sale -->
+    <section class="bg-white py-6 mb-4">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center space-x-4">
+                    <h2 class="text-2xl font-bold text-orange-600">FLASH SALE</h2>
+                    <div class="flex items-center space-x-2">
+                        <div class="bg-black text-white px-2 py-1 rounded text-sm font-bold">00</div>
+                        <div class="bg-black text-white px-2 py-1 rounded text-sm font-bold">45</div>
+                        <div class="bg-black text-white px-2 py-1 rounded text-sm font-bold">23</div>
+                    </div>
+                </div>
+                <a href="#products" class="text-orange-500 font-semibold hover:text-orange-600">See All →</a>
+            </div>
+
+            <!-- Categories & Flash Sale Products Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
+                <!-- Product Card 1 -->
+                <div
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop"
+                            alt="Headphones" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold">
+                            50%</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-orange-600 text-lg font-bold">₫99</p>
+                        <div class="w-full bg-orange-200 h-2 rounded-full mt-2">
+                            <div class="bg-orange-600 h-2 rounded-full" style="width: 40%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 2 -->
+                <div
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400&h=400&fit=crop"
+                            alt="Sneakers" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold">
+                            50%</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-orange-600 text-lg font-bold">₫102</p>
+                        <div class="w-full bg-orange-200 h-2 rounded-full mt-2">
+                            <div class="bg-orange-600 h-2 rounded-full" style="width: 73%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 3 -->
+                <div
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&h=400&fit=crop"
+                            alt="Watch" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold">
+                            50%</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-orange-600 text-lg font-bold">₫15</p>
+                        <div class="w-full bg-orange-200 h-2 rounded-full mt-2">
+                            <div class="bg-orange-600 h-2 rounded-full" style="width: 88%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 4 -->
+                <div
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop"
+                            alt="Shoes" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold">
+                            50%</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-orange-600 text-lg font-bold">₫120</p>
+                        <div class="w-full bg-orange-200 h-2 rounded-full mt-2">
+                            <div class="bg-orange-600 h-2 rounded-full" style="width: 56%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 5 -->
+                <div
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop"
+                            alt="Phone" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold">
+                            50%</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-orange-600 text-lg font-bold">₫199</p>
+                        <div class="w-full bg-orange-200 h-2 rounded-full mt-2">
+                            <div class="bg-orange-600 h-2 rounded-full" style="width: 90%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 6 -->
+                <div
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop"
+                            alt="Headphones" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold">
+                            50%</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-orange-600 text-lg font-bold">₫45</p>
+                        <div class="w-full bg-orange-200 h-2 rounded-full mt-2">
+                            <div class="bg-orange-600 h-2 rounded-full" style="width: 60%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="bg-white py-6 mb-4">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">CATEGORIES</h2>
+            <div class="grid grid-cols-3 md:grid-cols-10 gap-4 text-center">
+                <div class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-tshirt text-2xl text-orange-500"></i>
+                    </div>
+                    <p class="text-xs">Fashion</p>
+                </div>
+                <div class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-laptop text-2xl text-orange-500"></i>
+                    </div>
+                    <p class="text-xs">Electronics</p>
+                </div>
+                <div class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-mobile-alt text-2xl text-orange-500"></i>
+                    </div>
+                    <p class="text-xs">Mobile & Gadgets</p>
+                </div>
+                <div class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-home text-2xl text-orange-500"></i>
+                    </div>
+                    <p class="text-xs">Home</p>
+                </div>
+                <div class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-heart text-2xl text-orange-500"></i>
+                    </div>
+                    <p class="text-xs">Beauty</p>
+                </div>
+                <div class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-baby text-2xl text-orange-500"></i>
+                    </div>
+                    <p class="text-xs">Baby & Toys</p>
+                </div>
+                <div class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-dumbbell text-2xl text-orange-500"></i>
+                    </div>
+                    <p class="text-xs">Sports</p>
+                </div>
+                <div class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-utensils text-2xl text-orange-500"></i>
+                    </div>
+                    <p class="text-xs">Food</p>
+                </div>
+                <div class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-book text-2xl text-orange-500"></i>
+                    </div>
+                    <p class="text-xs">Books</p>
+                </div>
+                <div class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-ellipsis-h text-2xl text-orange-500"></i>
+                    </div>
+                    <p class="text-xs">More</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 pb-12">
+        <!-- Daily Discover -->
+        <section id="products" class="mb-12">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">DAILY DISCOVER</h2>
+                <a href="#" class="text-orange-500 font-semibold hover:text-orange-600">See More</a>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <!-- Product 1 -->
+                <div class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop"
+                            alt="Camera" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-orange-600 text-white px-2 py-1 rounded text-xs font-bold">
+                            25% OFF</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2">Nikon D3500 DSLR Camera with 18-55mm VR
+                            Lens</p>
+                        <p class="text-orange-600 text-lg font-bold">₫36.00</p>
+                        <div class="flex items-center text-xs text-gray-500 mt-1">
+                            <i class="fas fa-star text-yellow-400"></i>
+                            <span class="ml-1">4.9</span>
+                            <span class="ml-2">Sold 120</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 2 -->
+                <div class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop"
+                            alt="Nike Shoes" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-orange-600 text-white px-2 py-1 rounded text-xs font-bold">
+                            50% OFF</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2">Nike Air Max Classic Red Shoes Original
+                        </p>
+                        <p class="text-orange-600 text-lg font-bold">₫210.00</p>
+                        <div class="flex items-center text-xs text-gray-500 mt-1">
+                            <i class="fas fa-star text-yellow-400"></i>
+                            <span class="ml-1">4.7</span>
+                            <span class="ml-2">Sold 540</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 3 -->
+                <div class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop"
+                            alt="Bottle" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold">
+                            NEW</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2">Botol Minum Olahraga Stainless Steel 1L
+                        </p>
+                        <p class="text-orange-600 text-lg font-bold">₫15.69</p>
+                        <div class="flex items-center text-xs text-gray-500 mt-1">
+                            <i class="fas fa-star text-yellow-400"></i>
+                            <span class="ml-1">5.0</span>
+                            <span class="ml-2">Sold 980</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 4 -->
+                <div class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&h=400&fit=crop"
+                            alt="Water Bottle" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-blue-600 text-white px-2 py-1 rounded text-xs font-bold">
+                            BEST</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2">Stainless Steel Water Bottle Blue
+                            Premium</p>
+                        <p class="text-orange-600 text-lg font-bold">₫14.50</p>
+                        <div class="flex items-center text-xs text-gray-500 mt-1">
+                            <i class="fas fa-star text-yellow-400"></i>
+                            <span class="ml-1">4.8</span>
+                            <span class="ml-2">Sold 760</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 5 -->
+                <div class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?w=400&h=400&fit=crop"
+                            alt="Chair" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-orange-600 text-white px-2 py-1 rounded text-xs font-bold">
+                            SALE</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2">Modern Blue Velvet Dining Chair Luxury
+                        </p>
+                        <p class="text-orange-600 text-lg font-bold">₫495.00</p>
+                        <div class="flex items-center text-xs text-gray-500 mt-1">
+                            <i class="fas fa-star text-yellow-400"></i>
+                            <span class="ml-1">4.9</span>
+                            <span class="ml-2">Sold 230</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 6 -->
+                <div class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400&h=400&fit=crop"
+                            alt="Sneakers" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold">
+                            HOT</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2">Converse Classic White Sneakers Unisex
+                        </p>
+                        <p class="text-orange-600 text-lg font-bold">₫65.89</p>
+                        <div class="flex items-center text-xs text-gray-500 mt-1">
+                            <i class="fas fa-star text-yellow-400"></i>
+                            <span class="ml-1">4.6</span>
+                            <span class="ml-2">Sold 1540</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="max-w-7xl mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-lg font-bold mb-4">CUSTOMER SERVICE</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors">Help Center</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">How To Buy</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Shipping</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Returns</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">ABOUT SHOPEE</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors">About Us</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Careers</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Terms</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">PAYMENT</h3>
+                    <div class="grid grid-cols-4 gap-2">
+                        <div class="bg-white rounded p-2">
+                            <i class="fab fa-cc-visa text-2xl text-blue-600"></i>
+                        </div>
+                        <div class="bg-white rounded p-2">
+                            <i class="fab fa-cc-mastercard text-2xl text-red-600"></i>
+                        </div>
+                        <div class="bg-white rounded p-2">
+                            <i class="fab fa-cc-paypal text-2xl text-blue-400"></i>
+                        </div>
+                        <div class="bg-white rounded p-2">
+                            <i class="fas fa-credit-card text-2xl text-gray-600"></i>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">FOLLOW US</h3>
+                    <div class="flex space-x-4 mb-4">
+                        <a href="#" class="text-2xl hover:text-orange-500 transition"><i
+                                class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-2xl hover:text-orange-500 transition"><i
+                                class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-2xl hover:text-orange-500 transition"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="text-2xl hover:text-orange-500 transition"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400 text-sm">
+                <p>&copy; 2026 Shopee Clone. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cart Modal -->
+    <div id="cartModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full max-h-[80vh] overflow-y-auto shadow-2xl">
+            <div class="p-6 border-b">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-shopping-cart mr-3 text-orange-500"></i>Your Cart
+                </h2>
+            </div>
+            <div id="cartItems" class="p-6">
+                <p class="text-gray-500 text-center py-8">Cart is empty</p>
+            </div>
+            <div class="p-6 border-t bg-gray-50 rounded-b-3xl">
+                <div class="flex justify-between text-xl font-bold mb-4">
+                    <span>Total:</span>
+                    <span id="cartTotal" class="text-orange-500">0đ</span>
+                </div>
+                <button onclick="checkout()"
+                    class="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-4 rounded-2xl font-bold text-lg shadow-xl transform hover:-translate-y-1 transition-all">
+                    Checkout Now
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ===============================
+           1️⃣ GOOGLE CALLBACK (NẾU CÓ)
+        ================================ */
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get('token');
+            const userName = params.get('userName');
+            const error = params.get('error');
+
+            if (error) {
+                console.error('❌ Google login error:', error);
+                return;
+            }
+
+            if (token && userName) {
+                localStorage.setItem('accessToken', token);
+                localStorage.setItem('userName', decodeURIComponent(userName));
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            updateNavbar();
+        });
+
+        /* ===============================
+           2️⃣ UPDATE NAVBAR (CỐT LÕI)
+        ================================ */
+        function updateNavbar() {
+            const token = localStorage.getItem('accessToken');
+            const userName = localStorage.getItem('userName') || 'User';
+
+            const guestNav = document.getElementById('guestNav');
+            const userNav = document.getElementById('userNav');
+            const userNameEl = document.getElementById('userName');
+
+            if (token) {
+                guestNav.classList.add('hidden');
+                userNav.classList.remove('hidden');
+                userNameEl.textContent = `Hello, ${userName}`;
+            } else {
+                guestNav.classList.remove('hidden');
+                userNav.classList.add('hidden');
+            }
+        }
+
+        /* ===============================
+           3️⃣ LOGOUT
+        ================================ */
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('userName');
+                location.reload();
+            }
+        }
+
+        /* ===============================
+           4️⃣ CART (GIỮ NGUYÊN)
+        ================================ */
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        function addToCart(productName) {
+            const existing = cart.find(item => item.name === productName);
+            if (existing) existing.quantity += 1;
+            else cart.push({ name: productName, quantity: 1, price: 1000000 });
+
+            localStorage.setItem('cart', JSON.stringify(cart));
+            alert('✅ Added to cart!');
+        }
+
+        function showCart() {
+            document.getElementById('cartModal').classList.remove('hidden');
+        }
+
+        function checkout() {
+            alert('✅ Order placed successfully!');
+            cart = [];
+            localStorage.setItem('cart', JSON.stringify(cart));
+            document.getElementById('cartModal').classList.add('hidden');
+        }
+    </script>
 
 
 
+</body>
+
+</html>
 
 
 
+promt: tại sao port 8080 lại bị chặn
+
+# Tìm process đang dùng port 8080
+netstat -ano | findstr :8080
+
+# Tắt process (thay 18228 bằng PID thật)
+taskkill /PID 18228 /F
+
+# Chạy lại server
+./mvnw spring-boot:run
+chạy lại cái này thì nó oke
 
 
 
+promt: hãy setup cái port env.example cho team để ko bị chặn port
+
+# ========================================
+# DATABASE CONFIGURATION
+# ========================================
+# MongoDB Atlas connection string
+MONGODB_URI=mongodb+srv://web_shoppe:Csd201_group2@cluster0.ol8uuso.mongodb.net/web_shoppe?retryWrites=true&w=majority
+
+# ========================================
+# JWT AUTHENTICATION
+# ========================================
+# Khóa bí mật JWT (ít nhất 32 ký tự)
+JWT_SECRET=ShoppeClone2024SecretKeyForJWTTokenGenerationAndValidation123456
+# Thời gian hết hạn Access Token (ms) - 15 phút
+JWT_EXPIRATION=900000
+# Thời gian hết hạn Refresh Token (ms) - 7 ngày
+JWT_REFRESH_EXPIRATION=604800000
+
+# ========================================
+# GOOGLE OAUTH2
+# ========================================
+# Lấy từ Google Cloud Console (để dummy nếu chưa có)
+GOOGLE_CLIENT_ID=dummy-client-id
+GOOGLE_CLIENT_SECRET=dummy-client-secret
+
+# ========================================
+# EMAIL CONFIGURATION (SMTP)
+# ========================================
+# Email dùng để gửi OTP (để dummy nếu chưa có)
+MAIL_USERNAME=dummy@gmail.com
+# Mật khẩu ứng dụng (App Password)
+MAIL_PASSWORD=dummy-password
+
+# ========================================
+# OTHER CONFIGURATION
+# ========================================
+# Thời gian hết hạn OTP (ms) - 5 phút
+OTP_EXPIRATION=300000
+
+
+pom.xml
+
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.5.9</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.shoppeclone</groupId>
+	<artifactId>backend</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>backend</name>
+	<description>Web shop project for Spring Boot</description>
+	
+	<properties>
+		<java.version>21</java.version>
+	</properties>
+	
+	<dependencies>
+		<!-- Spring Boot Web -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<!-- Spring Security -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+		<!-- MongoDB -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-mongodb</artifactId>
+		</dependency>
+
+		<!-- Validation -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+
+		<!-- JWT Dependencies -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.12.3</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.12.3</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.12.3</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- Lombok -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<!-- DevTools -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+
+		<!-- Test -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Thêm vào phần <dependencies> -->
+
+		<!-- Spring OAuth2 Client -->
+		<dependency>
+    		<groupId>org.springframework.boot</groupId>
+    		<artifactId>spring-boot-starter-oauth2-client</artifactId>
+		</dependency>
+
+		<!-- HTTP Client (để call Google API) -->
+		<dependency>
+    		<groupId>org.springframework.boot</groupId>
+    		<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
+
+		<!-- Spring Boot Starter Mail -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+
+		<!-- Spring Dotenv - Load .env file automatically -->
+		<dependency>
+			<groupId>me.paulschwarz</groupId>
+			<artifactId>spring-dotenv</artifactId>
+			<version>4.0.0</version>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.11.0</version>
+				<configuration>
+					<source>21</source>
+					<target>21</target>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>1.18.30</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+
+				<!-- Thêm dòng này -->
+                <mainClass>com.shoppeclone.backend.BackendApplication</mainClass>
+
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
+
+1
+Viewing .env.example file and adding spring-dotenv library
+
+2
+Adding spring-dotenv dependency to pom.xml and creating .env file
+
+3
+Updating .env file with team's shared credentials and verifying .gitignore
+
+4
+Updating .env with existing credentials from application.properties
+
+5
+Writing real credentials to .env file
+
+6
+Testing server startup with new .env configuration
+
+7
+Restarting server with spring-dotenv and .env file
+
+8
+Notifying user of successful setup
 
 
 
-
-
-
-
+pom.xml	Thêm thư viện spring-dotenv để đọc file .env
+.env	Tạo từ .env.example, điền MongoDB URI + JWT config từ project
+.gitignore	Đã có sẵn .env (file này sẽ không push lên git)
+Trạng thái credentials:
+Config	Trạng thái
+MongoDB	✅ Đang dùng MongoDB Atlas thật
+JWT	✅ Đang dùng secret key thật
+Google OAuth	⚠️ Dummy (cần điền thật khi muốn dùng Google Login)
+Email	⚠️ Dummy (cần điền thật khi muốn gửi OTP)
 
