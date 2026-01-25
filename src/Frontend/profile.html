@@ -329,7 +329,7 @@
                     },
                     body: JSON.stringify({
                         fullName: fullName,
-                        phone: phone
+                        phone: phone || null // Gửi null nếu rỗng để tránh lỗi regex Backend
                     })
                 });
 

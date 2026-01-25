@@ -18,7 +18,7 @@ public class EmailService {
         message.setText(
                 "Hello,\n\n" +
                         "Your OTP code is: " + otpCode + "\n\n" +
-                        "This code is valid for 5 minutes.\n\n" +
+                        "This code is valid for 2 minutes.\n\n" +
                         "If you did not request this code, please ignore this email.\n\n" +
                         "Best regards,\n" +
                         "ShoppeClone Team");

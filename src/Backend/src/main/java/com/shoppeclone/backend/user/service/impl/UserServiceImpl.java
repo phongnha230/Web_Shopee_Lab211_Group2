@@ -126,7 +126,7 @@ public class UserServiceImpl implements UserService {
         User user = getUserByEmail(email);
 
         Address address = addressRepository.findByIdAndUserId(addressId, user.getId())
-                .orElseThrow(() -> new RuntimeException("Địa chỉ không tồn tại"));
+                .orElseThrow(() -> new RuntimeException("Address not found"));
 
         addressRepository.delete(address);
     }

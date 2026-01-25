@@ -24,8 +24,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class OAuthServiceImpl implements OAuthService {
 
-    // 🔥 FIX CỨNG redirect URI – KHÔNG TRUYỀN TỪ FE
-    private static final String GOOGLE_REDIRECT_URI = "http://localhost:3000/auth/callback/google.html";
+    // 🔥 SỬA: Dùng URL không có .html để tránh bị Server redirect làm mất params
+    private static final String GOOGLE_REDIRECT_URI = "http://localhost:3000/auth/callback/google";
 
     private final UserRepository userRepository;
     private final OAuthAccountRepository oauthAccountRepository;
@@ -49,7 +49,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     @Override
     public String getGoogleAuthUrl() {
-        return UriComponentsBuilder
+        String url = UriComponentsBuilder
                 .fromUriString("https://accounts.google.com/o/oauth2/v2/auth")
                 .queryParam("client_id", clientId)
                 .queryParam("redirect_uri", GOOGLE_REDIRECT_URI)
@@ -58,6 +58,11 @@ public class OAuthServiceImpl implements OAuthService {
                 .queryParam("prompt", "consent")
                 .build()
                 .toUriString();
+
+        System.out.println("🔍 DEBUG: Using Redirect URI: '" + GOOGLE_REDIRECT_URI + "'");
+        System.out.println("🔍 DEBUG: Full Auth URL: " + url);
+
+        return url;
     }
 
     @Override
@@ -120,17 +125,22 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     private User findOrCreateUser(GoogleUserInfo googleUser) {
+        System.out.println("DEBUG: findOrCreateUser called for email: " + googleUser.getEmail());
 
         OAuthAccount oauthAccount = oauthAccountRepository
                 .findByProviderAndProviderId("google", googleUser.getId())
                 .orElse(null);
 
+        System.out.println("DEBUG: Found existing OAuthAccount? " + (oauthAccount != null));
+
         User user;
 
         if (oauthAccount != null) {
             user = oauthAccount.getUser();
+            System.out.println("DEBUG: User retrieved from OAuthAccount.");
         } else {
             user = userRepository.findByEmail(googleUser.getEmail()).orElse(null);
+            System.out.println("DEBUG: Found existing User by email? " + (user != null));
 
             if (user == null) {
                 user = new User();
@@ -140,10 +150,18 @@ public class OAuthServiceImpl implements OAuthService {
                 user.setCreatedAt(LocalDateTime.now());
 
                 Role role = roleRepository.findByName("ROLE_USER")
-                        .orElseThrow();
+                        .orElseGet(() -> {
+                            System.out.println("⚠️ Role ROLE_USER not found. Creating it now...");
+                            Role newRole = new Role();
+                            newRole.setName("ROLE_USER");
+                            newRole.setDescription("Regular User");
+                            return roleRepository.save(newRole);
+                        });
                 user.setRoles(Set.of(role));
 
-                userRepository.save(user);
+                System.out.println("DEBUG: Saving new User: " + user.getEmail());
+                user = userRepository.save(user); // Re-assign to capture ID if needed
+                System.out.println("DEBUG: User saved with ID: " + user.getId());
             }
 
             OAuthAccount oa = new OAuthAccount();
@@ -153,7 +171,9 @@ public class OAuthServiceImpl implements OAuthService {
             oa.setEmail(googleUser.getEmail());
             oa.setCreatedAt(LocalDateTime.now());
 
+            System.out.println("DEBUG: Saving new OAuthAccount for: " + googleUser.getEmail());
             oauthAccountRepository.save(oa);
+            System.out.println("DEBUG: OAuthAccount saved successfully!");
         }
 
         return user;

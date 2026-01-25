@@ -98,24 +98,24 @@ public class AuthServiceImpl implements AuthService {
 
         // Tìm user
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Email không tồn tại"));
+                .orElseThrow(() -> new RuntimeException("Email does not exist"));
 
         // Kiểm tra password
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             System.out.println("ERROR: Wrong password!");
-            throw new RuntimeException("Sai mật khẩu");
+            throw new RuntimeException("Incorrect password");
         }
 
         // 🚨 BLOCK NẾU CHƯA VERIFY OTP (dùng emailVerified)
         if (!user.isEmailVerified()) {
             System.out.println("ERROR: Email not verified!");
-            throw new RuntimeException("Vui lòng xác thực OTP trước khi đăng nhập");
+            throw new RuntimeException("Please verify OTP before logging in");
         }
 
         // Kiểm tra account active
         if (!user.isActive()) {
             System.out.println("ERROR: Account is inactive!");
-            throw new RuntimeException("Tài khoản đã bị khóa");
+            throw new RuntimeException("Account is locked");
         }
 
         // Generate tokens
@@ -135,18 +135,18 @@ public class AuthServiceImpl implements AuthService {
 
         // Validate token
         if (!jwtUtil.validateToken(refreshToken)) {
-            throw new RuntimeException("Refresh token không hợp lệ");
+            throw new RuntimeException("Invalid refresh token");
         }
 
         // Tìm session
         UserSession session = sessionRepository.findByRefreshToken(refreshToken)
-                .orElseThrow(() -> new RuntimeException("Session không tồn tại"));
+                .orElseThrow(() -> new RuntimeException("Session does not exist"));
 
         User user = session.getUser();
 
         // CHECK USER ĐÃ VERIFY
         if (!user.isEmailVerified()) {
-            throw new RuntimeException("Tài khoản chưa được xác thực OTP");
+            throw new RuntimeException("Account not verified via OTP");
         }
 
         // Generate new tokens
@@ -200,7 +200,7 @@ public class AuthServiceImpl implements AuthService {
 
         // Tìm user
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Email không tồn tại"));
+                .orElseThrow(() -> new RuntimeException("Email does not exist"));
 
         // Xóa OTP cũ (PASSWORD_RESET type)
         otpCodeRepository.deleteByUser(user);
@@ -246,16 +246,16 @@ public class AuthServiceImpl implements AuthService {
 
         // Tìm user
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Email không tồn tại"));
+                .orElseThrow(() -> new RuntimeException("Email does not exist"));
 
         // Tìm OTP với type PASSWORD_RESET
         OtpCode otpCode = otpCodeRepository.findByUserAndCodeAndTypeAndUsed(
                 user, otp, "PASSWORD_RESET", false)
-                .orElseThrow(() -> new RuntimeException("Mã OTP không hợp lệ hoặc đã được sử dụng"));
+                .orElseThrow(() -> new RuntimeException("Invalid or used OTP code"));
 
         // Kiểm tra hết hạn
         if (otpCode.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Mã OTP đã hết hạn");
+            throw new RuntimeException("OTP code has expired");
         }
 
         // Cập nhật mật khẩu

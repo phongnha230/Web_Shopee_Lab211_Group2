@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <script>
+        // 1. Lấy code từ URL
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get("code");
+
+        console.log("Current URL:", window.location.href);
+        console.log("Extracted code:", code);
+
+        if (!code) {
+            alert("❌ ERROR: 'code' not found in URL!\nCurrent Link: " + window.location.href);
+            window.location.href = "/login.html"; // Quay lại login
+        } else {
+            // 2. Gửi code về Backend
+            fetch("http://localhost:8080/api/auth/oauth/google/exchange", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ code: code })
+            })
+                .then(async (res) => {
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        throw new Error(data.message || JSON.stringify(data));
+                    }
+
+                    // 3. Đăng nhập thành công
+                    console.log("Login Success:", data);
+                    localStorage.setItem("accessToken", data.accessToken);
+                    // Lưu user info nếu có
+                    if (data.user) {
+                        localStorage.setItem("user", JSON.stringify(data.user));
+                    }
+
+                    alert("✅ Google Login Successful!");
+                    window.location.href = "/index.html";
+                })
+                .catch(err => {
+                    console.error("Login Error:", err);
+                    alert("❌ Login Failed: " + err.message);
+                    window.location.href = "/login.html";
+                });
+        }
+    </script>
+</body>
+
+</html>

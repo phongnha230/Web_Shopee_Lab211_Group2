@@ -23,5 +23,5 @@ function showForgot() {
 }
 
 function forgotPassword() {
-    alert("Flow quên mật khẩu – backend sẽ làm sau 😅");
+    window.location.href = "forgot-password.html";
 }
