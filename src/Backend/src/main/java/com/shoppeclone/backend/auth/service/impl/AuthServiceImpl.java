@@ -47,7 +47,7 @@ public class AuthServiceImpl implements AuthService {
         // Kiểm tra email đã tồn tại
         if (userRepository.existsByEmail(request.getEmail())) {
             System.out.println("ERROR: Email already exists!");
-            throw new RuntimeException("Email đã tồn tại");
+            throw new RuntimeException("Email already exists");
         }
 
         // Tạo user mới - PENDING STATE
@@ -76,10 +76,10 @@ public class AuthServiceImpl implements AuthService {
         String otpMessage = "";
         try {
             otpService.sendOtpEmail(user.getEmail());
-            otpMessage = "Đăng ký thành công! Mã OTP đã được gửi đến email của bạn.";
+            otpMessage = "Registration successful! OTP code has been sent to your email.";
             System.out.println("✅ OTP sent to: " + user.getEmail());
         } catch (Exception e) {
-            otpMessage = "Đăng ký thành công nhưng không thể gửi OTP. Vui lòng yêu cầu gửi lại!";
+            otpMessage = "Registration successful but failed to send OTP. Please request again!";
             System.err.println("⚠️ OTP sending error: " + e.getMessage());
         }
 

@@ -29,7 +29,7 @@ public class OtpServiceImpl implements OtpService {
 
         // Tìm user
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy user với email: " + email));
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
 
         // Xóa OTP cũ nếu có
         otpCodeRepository.deleteByUser(user);
@@ -60,7 +60,7 @@ public class OtpServiceImpl implements OtpService {
 
         // Tìm user
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         System.out.println("✅ User found: " + user.getEmail());
 
@@ -73,7 +73,7 @@ public class OtpServiceImpl implements OtpService {
                     System.out.println("  Code: " + code);
                     System.out.println("  Type: EMAIL_VERIFICATION");
                     System.out.println("  Used: false");
-                    return new RuntimeException("Mã OTP không hợp lệ");
+                    return new RuntimeException("Invalid OTP code");
                 });
 
         System.out.println("✅ OTP FOUND - Expires: " + otp.getExpiresAt());
@@ -81,7 +81,7 @@ public class OtpServiceImpl implements OtpService {
         // Kiểm tra hết hạn
         if (otp.getExpiresAt().isBefore(LocalDateTime.now())) {
             System.out.println("❌ OTP EXPIRED");
-            throw new RuntimeException("Mã OTP đã hết hạn");
+            throw new RuntimeException("OTP code expired");
         }
 
         System.out.println("✅ OTP VALID - Marking as used");
