@@ -83,37 +83,49 @@
                 </div>
 
                 <!-- User Actions -->
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-6">
+                    <!-- Notification & Help (Addons) -->
+                    <div class="flex items-center gap-4 text-white">
+                        <button class="relative hover:opacity-80 transition">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span
+                                class="absolute -top-1 -right-0.5 w-2 h-2 bg-red-600 rounded-full border border-white"></span>
+                        </button>
+                        <button class="hover:opacity-80 transition">
+                            <i class="fas fa-question-circle text-xl"></i>
+                        </button>
+                    </div>
 
                     <!-- 🔓 CHƯA LOGIN -->
                     <div id="guestNav" class="flex items-center space-x-3">
-                        <a href="/login.html" class="text-gray-700 font-semibold hover:text-orange-500 transition">
+                        <a href="login.html" class="text-white font-semibold hover:text-orange-100 transition">
                             Sign in
                         </a>
-                        <a href="/register.html"
-                            class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full font-semibold transition">
+                        <a href="register.html"
+                            class="bg-white text-orange-600 hover:bg-gray-100 px-4 py-2 rounded-sm font-semibold transition">
                             Sign up
                         </a>
                     </div>
 
                     <!-- 🔐 ĐÃ LOGIN -->
-                    <div id="userNav" class="hidden flex items-center space-x-3">
-                        <div class="flex items-center space-x-2 cursor-pointer">
-                            <a href="profile.html" class="flex items-center space-x-2 cursor-pointer">
-                                <i class="fas fa-user-circle text-2xl text-gray-700"></i>
-                            </a>
-
-                            <span id="userName" class="font-semibold text-gray-800"></span>
+                    <div id="userNav" class="hidden flex items-center space-x-3 text-white">
+                        <div class="flex items-center space-x-2 cursor-pointer hover:opacity-90">
+                            <img src="https://ui-avatars.com/api/?name=User&background=fff&color=f97316"
+                                class="w-6 h-6 rounded-full border border-white" id="userAvatar">
+                            <span id="userName" class="font-semibold">User</span>
                         </div>
 
-                        <button onclick="logout()"
-                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full font-semibold text-sm transition">
-                            Logout
+                        <button onclick="logout()" title="Logout" class="text-white hover:text-red-200 transition ml-2">
+                            <i class="fas fa-sign-out-alt"></i>
                         </button>
                     </div>
 
-                    <button onclick="showCart()" class="relative p-2 hover:bg-purple-50 rounded-full">
-                        <i class="fas fa-shopping-cart text-xl text-gray-700"></i>
+                    <button onclick="window.location.href='cart.html'"
+                        class="relative p-2 hover:bg-orange-400 rounded-full transition">
+                        <i class="fas fa-shopping-cart text-xl text-white"></i>
+                        <span id="cartBadge"
+                            class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
+                            style="display: none;">0</span>
                     </button>
                 </div>
 
@@ -130,38 +142,78 @@
     </header>
 
     <!-- Banner Section -->
-    <section class="bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 py-8 mb-4">
+    <section class="bg-gray-100 py-6 mb-4">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <!-- Super Brand Day Banner -->
-                <div
-                    class="md:col-span-2 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-6 text-white flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-semibold mb-2">MINIMAL SALE</p>
-                        <h2 class="text-3xl md:text-4xl font-bold mb-2">Super Brand Day</h2>
-                        <p class="text-sm mb-4">Up to 50% Off For Fashion</p>
-                        <div class="flex space-x-2">
-                            <div class="w-3 h-3 bg-white rounded-full"></div>
-                            <div class="w-3 h-3 bg-white bg-opacity-50 rounded-full"></div>
-                            <div class="w-3 h-3 bg-white bg-opacity-50 rounded-full"></div>
+            <div class="grid grid-cols-12 gap-2">
+
+                <!-- Main Carousel (Left - 8 Cols) -->
+                <div class="col-span-12 lg:col-span-8 relative group overflow-hidden rounded-lg shadow-sm h-[235px]">
+                    <!-- Slides Wrapper -->
+                    <div id="bannerCarousel" class="h-full w-full flex transition-transform duration-500 ease-out">
+                        <!-- Slide 1 -->
+                        <div class="w-full h-full flex-shrink-0 relative">
+                            <img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=80"
+                                class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-black/10"></div>
+                        </div>
+                        <!-- Slide 2 -->
+                        <div class="w-full h-full flex-shrink-0 relative">
+                            <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80"
+                                class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-black/10"></div>
+                        </div>
+                        <!-- Slide 3 -->
+                        <div class="w-full h-full flex-shrink-0 relative">
+                            <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80"
+                                class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-black/10"></div>
                         </div>
                     </div>
-                    <div class="hidden md:block">
-                        <i class="fas fa-shopping-bag text-6xl opacity-20"></i>
+
+                    <!-- Arrows -->
+                    <button onclick="moveSlide(-1)"
+                        class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button onclick="moveSlide(1)"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+
+                    <!-- Dots -->
+                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+                        <button onclick="goToSlide(0)"
+                            class="w-3 h-3 rounded-full bg-white opacity-100 transition banner-dot"></button>
+                        <button onclick="goToSlide(1)"
+                            class="w-3 h-3 rounded-full bg-white/50 hover:bg-white transition banner-dot"></button>
+                        <button onclick="goToSlide(2)"
+                            class="w-3 h-3 rounded-full bg-white/50 hover:bg-white transition banner-dot"></button>
                     </div>
                 </div>
-                <!-- Side Banners -->
-                <div class="space-y-4">
-                    <div class="bg-gray-200 rounded-lg h-32 flex items-center justify-center">
-                        <i class="fas fa-image text-4xl text-gray-400"></i>
+
+                <!-- Side Banners (Right - 4 Cols) -->
+                <div class="col-span-12 lg:col-span-4 grid grid-rows-2 gap-2 h-[235px]">
+                    <div class="rounded-lg overflow-hidden relative cursor-pointer group">
+                        <img src="https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=400&q=80"
+                            class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute top-2 left-2 text-white font-bold drop-shadow-md">
+                            <span class="bg-orange-500 px-2 py-0.5 text-xs rounded">MALL</span>
+                            <p class="mt-1">Tech Zone</p>
+                        </div>
                     </div>
-                    <div class="bg-blue-100 rounded-lg h-32 flex items-center justify-center">
-                        <div class="text-center">
-                            <i class="fas fa-tag text-2xl text-blue-600"></i>
-                            <p class="text-xs mt-2">Best Deals</p>
+                    <div class="rounded-lg overflow-hidden relative cursor-pointer group">
+                        <img src="https://images.unsplash.com/photo-1596462502278-27bfdd403348?w=400&q=80"
+                            class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute top-2 left-2 text-white font-bold drop-shadow-md">
+                            <div class="flex items-center gap-1">
+                                <i class="fas fa-bolt text-yellow-400"></i>
+                                <span>Flash Sale</span>
+                            </div>
+                            <p class="mt-1 text-xs font-normal">Săn deal chớp nhoáng</p>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </section>
@@ -170,11 +222,13 @@
     <section class="bg-white py-4 mb-4">
         <div class="max-w-7xl mx-auto px-4">
             <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
-                <div class="flex flex-col items-center">
+                <div onclick="window.location.href='freeship.html'"
+                    class="flex flex-col items-center cursor-pointer hover:scale-110 transition-transform">
                     <i class="fas fa-shipping-fast text-3xl text-orange-500 mb-2"></i>
                     <p class="text-sm font-semibold">Free Shipping</p>
                 </div>
-                <div class="flex flex-col items-center">
+                <div onclick="window.location.href='vouchers.html'"
+                    class="flex flex-col items-center cursor-pointer hover:scale-110 transition-transform">
                     <i class="fas fa-gift text-3xl text-orange-500 mb-2"></i>
                     <p class="text-sm font-semibold">Vouchers</p>
                 </div>
@@ -212,7 +266,7 @@
             <!-- Categories & Flash Sale Products Grid -->
             <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
                 <!-- Product Card 1 -->
-                <div
+                <div onclick="goToProduct('1')"
                     class="bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer">
                     <div class="relative">
                         <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop"
@@ -229,7 +283,7 @@
                 </div>
 
                 <!-- Product Card 2 -->
-                <div
+                <div onclick="goToProduct('2')"
                     class="bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer">
                     <div class="relative">
                         <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400&h=400&fit=crop"
@@ -246,7 +300,7 @@
                 </div>
 
                 <!-- Product Card 3 -->
-                <div
+                <div onclick="goToProduct('3')"
                     class="bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer">
                     <div class="relative">
                         <img src="https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&h=400&fit=crop"
@@ -263,7 +317,7 @@
                 </div>
 
                 <!-- Product Card 4 -->
-                <div
+                <div onclick="goToProduct('4')"
                     class="bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer">
                     <div class="relative">
                         <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop"
@@ -280,7 +334,7 @@
                 </div>
 
                 <!-- Product Card 5 -->
-                <div
+                <div onclick="goToProduct('5')"
                     class="bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer">
                     <div class="relative">
                         <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop"
@@ -297,7 +351,7 @@
                 </div>
 
                 <!-- Product Card 6 -->
-                <div
+                <div onclick="goToProduct('6')"
                     class="bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer">
                     <div class="relative">
                         <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop"
@@ -321,25 +375,29 @@
         <div class="max-w-7xl mx-auto px-4">
             <h2 class="text-xl font-bold text-gray-800 mb-4">CATEGORIES</h2>
             <div class="grid grid-cols-3 md:grid-cols-10 gap-4 text-center">
-                <div class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                <div onclick="window.location.href='category.html?category=Fashion'"
+                    class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
                     <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
                         <i class="fas fa-tshirt text-2xl text-orange-500"></i>
                     </div>
                     <p class="text-xs">Fashion</p>
                 </div>
-                <div class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                <div onclick="window.location.href='category.html?category=Electronics'"
+                    class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
                     <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
                         <i class="fas fa-laptop text-2xl text-orange-500"></i>
                     </div>
                     <p class="text-xs">Electronics</p>
                 </div>
-                <div class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                <div onclick="window.location.href='category.html?category=Mobile'"
+                    class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
                     <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
                         <i class="fas fa-mobile-alt text-2xl text-orange-500"></i>
                     </div>
                     <p class="text-xs">Mobile & Gadgets</p>
                 </div>
-                <div class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                <div onclick="window.location.href='category.html?category=Home'"
+                    class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
                     <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
                         <i class="fas fa-home text-2xl text-orange-500"></i>
                     </div>
@@ -357,7 +415,8 @@
                     </div>
                     <p class="text-xs">Baby & Toys</p>
                 </div>
-                <div class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                <div onclick="window.location.href='category.html?category=Sports'"
+                    class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
                     <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
                         <i class="fas fa-dumbbell text-2xl text-orange-500"></i>
                     </div>
@@ -395,7 +454,8 @@
             </div>
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 <!-- Product 1 -->
-                <div class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
+                <div onclick="goToProduct('101')"
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
                     <div class="relative">
                         <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop"
                             alt="Camera" class="w-full h-48 object-cover">
@@ -415,7 +475,8 @@
                 </div>
 
                 <!-- Product 2 -->
-                <div class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
+                <div onclick="goToProduct('102')"
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
                     <div class="relative">
                         <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop"
                             alt="Nike Shoes" class="w-full h-48 object-cover">
@@ -435,7 +496,8 @@
                 </div>
 
                 <!-- Product 3 -->
-                <div class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
+                <div onclick="goToProduct('103')"
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
                     <div class="relative">
                         <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop"
                             alt="Bottle" class="w-full h-48 object-cover">
@@ -455,7 +517,8 @@
                 </div>
 
                 <!-- Product 4 -->
-                <div class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
+                <div onclick="goToProduct('104')"
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
                     <div class="relative">
                         <img src="https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&h=400&fit=crop"
                             alt="Water Bottle" class="w-full h-48 object-cover">
@@ -475,7 +538,8 @@
                 </div>
 
                 <!-- Product 5 -->
-                <div class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
+                <div onclick="goToProduct('105')"
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
                     <div class="relative">
                         <img src="https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?w=400&h=400&fit=crop"
                             alt="Chair" class="w-full h-48 object-cover">
@@ -495,7 +559,8 @@
                 </div>
 
                 <!-- Product 6 -->
-                <div class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
+                <div onclick="goToProduct('106')"
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
                     <div class="relative">
                         <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400&h=400&fit=crop"
                             alt="Sneakers" class="w-full h-48 object-cover">
@@ -620,7 +685,18 @@
             }
 
             updateNavbar();
+            updateCartBadge();
         });
+
+        function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cartBadge');
+            if (badge) {
+                badge.textContent = totalItems;
+                badge.style.display = totalItems > 0 ? 'flex' : 'none';
+            }
+        }
 
         /* ===============================
            2️⃣ UPDATE NAVBAR (CỐT LÕI)
@@ -632,11 +708,15 @@
             const guestNav = document.getElementById('guestNav');
             const userNav = document.getElementById('userNav');
             const userNameEl = document.getElementById('userName');
+            const userAvatar = document.getElementById('userAvatar');
 
             if (token) {
                 guestNav.classList.add('hidden');
                 userNav.classList.remove('hidden');
-                userNameEl.textContent = `Hello, ${userName}`;
+                userNameEl.textContent = userName;
+                if (userAvatar) {
+                    userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=fff&color=f97316`;
+                }
             } else {
                 guestNav.classList.remove('hidden');
                 userNav.classList.add('hidden');
@@ -650,10 +730,61 @@
             if (confirm('Are you sure you want to logout?')) {
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('userName');
-                location.reload();
+                localStorage.removeItem('refreshToken');
+                showToast('👋 Logged out successfully!');
+                setTimeout(() => window.location.reload(), 1000);
             }
         }
 
+        /* ===============================
+           4️⃣ BANNER SLIDER
+        ================================ */
+        let currentSlide = 0;
+        const totalSlides = 3;
+        let slideInterval;
+
+        function updateSlider() {
+            const carousel = document.getElementById('bannerCarousel');
+            if (carousel) {
+                carousel.style.transform = `translateX(-${currentSlide * 100}%)`;
+
+                // Update dots
+                document.querySelectorAll('.banner-dot').forEach((dot, index) => {
+                    if (index === currentSlide) {
+                        dot.classList.remove('bg-white/50');
+                        dot.classList.add('bg-white');
+                    } else {
+                        dot.classList.add('bg-white/50');
+                        dot.classList.remove('bg-white');
+                    }
+                });
+            }
+        }
+
+        function moveSlide(dir) {
+            currentSlide = (currentSlide + dir + totalSlides) % totalSlides;
+            updateSlider();
+            resetTimer();
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlider();
+            resetTimer();
+        }
+
+        function startTimer() {
+            slideInterval = setInterval(() => {
+                moveSlide(1);
+            }, 3000);
+        }
+
+        function resetTimer() {
+            clearInterval(slideInterval);
+            startTimer();
+        }
+
+        document.addEventListener('DOMContentLoaded', startTimer);
         /* ===============================
            4️⃣ CART (GIỮ NGUYÊN)
         ================================ */
@@ -670,6 +801,12 @@
 
         function showCart() {
             document.getElementById('cartModal').classList.remove('hidden');
+        }
+
+        function goToProduct(id) {
+            console.log('Navigating to product:', id);
+            localStorage.setItem('lastClickedProductId', id);
+            window.location.href = `product-detail.html?id=${id}`;
         }
 
         function checkout() {

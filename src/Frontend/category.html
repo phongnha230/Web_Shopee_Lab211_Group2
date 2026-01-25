@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category - Shopee Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100">
+    <!-- Header (Same as index.html) -->
+    <header class="bg-gradient-to-r from-orange-500 to-orange-600 shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-shopping-bag text-3xl text-white"></i>
+                    <a href="index.html" class="text-2xl font-bold text-white">Shopee Clone</a>
+                </div>
+                <div class="flex-1 max-w-2xl mx-8">
+                    <div class="relative">
+                        <input type="text" placeholder="Search for millions of products..."
+                            class="w-full p-3 pl-12 pr-16 rounded-sm">
+                        <i
+                            class="fas fa-search absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl"></i>
+                        <button
+                            class="absolute right-3 top-1/2 transform -translate-y-1/2 bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-sm font-semibold">Search</button>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- Notification & Help (Addons) -->
+                    <div class="flex items-center gap-4 text-white mr-2 hidden md:flex">
+                        <button class="relative hover:opacity-80 transition">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span
+                                class="absolute -top-1 -right-0.5 w-2 h-2 bg-red-600 rounded-full border border-orange-500"></span>
+                        </button>
+                        <button class="hover:opacity-80 transition">
+                            <i class="fas fa-question-circle text-xl"></i>
+                        </button>
+                    </div>
+
+                    <!-- Cart Button -->
+                    <button onclick="window.location.href='cart.html'"
+                        class="relative p-2 hover:bg-orange-700 rounded-full transition mr-2">
+                        <i class="fas fa-shopping-cart text-xl text-white"></i>
+                        <span id="cartBadge"
+                            class="absolute -top-1 -right-1 bg-white text-orange-600 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
+                            style="display: none;">0</span>
+                    </button>
+
+                    <!-- User Nav -->
+                    <div id="guestNav" class="flex items-center space-x-4">
+                        <a href="login.html" class="text-white font-semibold hover:text-orange-200">Sign in</a>
+                        <a href="register.html"
+                            class="bg-white text-orange-600 px-4 py-2 rounded rounded hover:bg-gray-100 font-semibold">Sign
+                            up</a>
+                    </div>
+
+                    <div id="userNav" class="hidden flex items-center space-x-3">
+                        <span id="userName" class="text-white font-semibold truncate max-w-[150px]">User</span>
+                        <button onclick="logout()" class="text-white hover:text-red-200" title="Logout">
+                            <i class="fas fa-sign-out-alt text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <div class="bg-white py-3 mb-4">
+        <div class="max-w-7xl mx-auto px-4">
+            <nav class="flex text-sm text-gray-600">
+                <a href="index.html" class="hover:text-orange-500">Home</a>
+                <span class="mx-2">/</span>
+                <span class="text-gray-800 font-semibold" id="categoryName">All Products</span>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 pb-12">
+        <div class="flex gap-6">
+            <!-- Sidebar Filters (Optional) -->
+            <aside class="w-64 bg-white p-4 rounded-lg h-fit hidden lg:block">
+                <h3 class="font-bold text-lg mb-4">Filter</h3>
+                <div class="mb-6">
+                    <h4 class="font-semibold mb-2">Price Range</h4>
+                    <div class="space-y-2 text-sm">
+                        <label class="flex items-center"><input type="checkbox" class="mr-2"> Under ₫50</label>
+                        <label class="flex items-center"><input type="checkbox" class="mr-2"> ₫50 - ₫100</label>
+                        <label class="flex items-center"><input type="checkbox" class="mr-2"> ₫100 - ₫200</label>
+                        <label class="flex items-center"><input type="checkbox" class="mr-2"> Over ₫200</label>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Products Grid -->
+            <div class="flex-1">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800"><span id="categoryTitle">All Products</span> (<span
+                            id="productCount">0</span>)</h2>
+                    <select class="border border-gray-300 rounded px-4 py-2">
+                        <option>Sort by: Popular</option>
+                        <option>Price: Low to High</option>
+                        <option>Price: High to Low</option>
+                        <option>Newest</option>
+                    </select>
+                </div>
+
+                <div id="productsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                    <!-- Products will be loaded here -->
+                </div>
+
+                <div id="noProducts" class="hidden text-center py-20">
+                    <i class="fas fa-box-open text-6xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500 text-lg">No products found in this category</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Extended Mock Data with Categories
+        const ALL_PRODUCTS = [
+            // Fashion
+            { id: '201', name: "Nike Air Max Classic Red", category: "Fashion", price: 210, oldPrice: 420, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400", badge: "50% OFF", rating: 4.7, sold: 540 },
+            { id: '202', name: "Converse Classic White Sneakers", category: "Fashion", price: 65, oldPrice: 130, image: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400", badge: "50% OFF", rating: 4.9, sold: 1540 },
+            { id: '203', name: "Adidas Running Shoes Black", category: "Fashion", price: 120, oldPrice: 240, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400", badge: "HOT", rating: 4.5, sold: 230 },
+            { id: '204', name: "Canvas Casual Sneakers", category: "Fashion", price: 18, oldPrice: 25, image: "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?w=400", badge: "NEW", rating: 4.2, sold: 89 },
+
+            // Mobile & Gadgets
+            { id: '301', name: "iPhone 14 Pro Max 256GB", category: "Mobile", price: 899, oldPrice: 1199, image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400", badge: "BEST", rating: 4.9, sold: 2340 },
+            { id: '302', name: "Samsung Galaxy S23 Ultra", category: "Mobile", price: 799, oldPrice: 1099, image: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=400", badge: "HOT", rating: 4.8, sold: 1890 },
+            { id: '303', name: "Xiaomi Redmi Note 12 Pro", category: "Mobile", price: 299, oldPrice: 399, image: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400", badge: "25% OFF", rating: 4.6, sold: 987 },
+
+            // Electronics
+            { id: '401', name: "Sony WH-1000XM5 Headphones", category: "Electronics", price: 99, oldPrice: 198, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400", badge: "50% OFF", rating: 4.8, sold: 560 },
+            { id: '402', name: "Canon EOS 90D DSLR Camera", category: "Electronics", price: 450, oldPrice: 599, image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400", badge: "SALE", rating: 4.7, sold: 123 },
+            { id: '403', name: "Nikon D3500 DSLR Camera", category: "Electronics", price: 36, oldPrice: 48, image: "https://images.unsplash.com/photo-1606980227901-1fd7976558c7?w=400", badge: "25% OFF", rating: 4.6, sold: 98 },
+
+            // Home
+            { id: '501', name: "Modern Chair Brown Leather", category: "Home", price: 25, oldPrice: 50, image: "https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?w=400", badge: "50% OFF", rating: 4.3, sold: 340 },
+            { id: '502', name: "Luxury Sofa Set 3 Seater", category: "Home", price: 599, oldPrice: 899, image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400", badge: "NEW", rating: 4.8, sold: 45 },
+
+            // Sports
+            { id: '601', name: "Yoga Mat Premium Quality", category: "Sports", price: 19, oldPrice: 29, image: "https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=400", badge: "35% OFF", rating: 4.5, sold: 789 },
+            { id: '602', name: "Dumbbell Set 20kg Adjustable", category: "Sports", price: 45, oldPrice: 70, image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400", badge: "SALE", rating: 4.7, sold: 234 },
+        ];
+
+        function loadProducts() {
+            const params = new URLSearchParams(window.location.search);
+            const category = params.get('category') || 'All';
+
+            document.getElementById('categoryName').textContent = category;
+            document.getElementById('categoryTitle').textContent = category;
+
+            let filtered = category === 'All' ? ALL_PRODUCTS : ALL_PRODUCTS.filter(p => p.category === category);
+
+            document.getElementById('productCount').textContent = filtered.length;
+            const grid = document.getElementById('productsGrid');
+            const noProducts = document.getElementById('noProducts');
+
+            if (filtered.length === 0) {
+                grid.classList.add('hidden');
+                noProducts.classList.remove('hidden');
+                return;
+            }
+
+            grid.innerHTML = filtered.map(p => `
+                <div onclick="goToProduct('${p.id}')" class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer overflow-hidden">
+                    <div class="relative">
+                        <img src="${p.image}" alt="${p.name}" class="w-full h-48 object-cover">
+                        ${p.badge ? `<div class="absolute top-2 left-2 bg-orange-600 text-white px-2 py-1 rounded text-xs font-bold">${p.badge}</div>` : ''}
+                    </div>
+                    <div class="p-3">
+                        <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2">${p.name}</p>
+                        <p class="text-orange-600 text-lg font-bold">₫${p.price}</p>
+                        <div class="flex items-center text-xs text-gray-500 mt-1">
+                            <i class="fas fa-star text-yellow-400"></i>
+                            <span class="ml-1">${p.rating}</span>
+                            <span class="ml-2">Sold ${p.sold}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function goToProduct(id) {
+            localStorage.setItem('lastClickedProductId', id);
+            window.location.href = `product-detail.html?id=${id}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProducts();
+            updateNavbar();
+            updateCartBadge();
+        });
+
+        function updateNavbar() {
+            const token = localStorage.getItem('accessToken');
+            const userName = localStorage.getItem('userName') || 'User';
+
+            if (token) {
+                document.getElementById('guestNav').classList.add('hidden');
+                document.getElementById('userNav').classList.remove('hidden');
+                document.getElementById('userName').textContent = userName;
+            } else {
+                document.getElementById('guestNav').classList.remove('hidden');
+                document.getElementById('userNav').classList.add('hidden');
+            }
+        }
+
+        function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cartBadge');
+            if (badge) {
+                badge.textContent = totalItems;
+                badge.style.display = totalItems > 0 ? 'flex' : 'none';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('userName');
+            window.location.reload();
+        }
+    </script>
+</body>
+
+</html>
