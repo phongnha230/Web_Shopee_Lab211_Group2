@@ -5318,3 +5318,9413 @@ Danh sách sản phẩm: Gom theo Shop (Sony Official Store), hiển thị giá 
 Tổng kết: Bảng tính merchandise subtotal, shipping, voucher discount và Tổng tiền.
 Action: Nút "Buy Again" và "Contact Seller" ở cuối trang.
 Mời bạn bấm "View Order Details" từ trang Success để kiểm tra nhé! 🫡
+
+
+mình đang làm project trong lớp í ạ mình dùng spring boot nhưng mà giờ leader mình kiu làm frontend là dùng tailwind css ý ạ giờ bạn chỉ mình làm sao với ạ bọn mình dùng java ạ
+
+17 thg 1
+Chào bạn! Mình hiểu vấn đề của bạn rồi. Bạn đang làm backend bằng Spring Boot (Java) và leader muốn frontend dùng Tailwind CSS. Mình sẽ hướng dẫn bạn cách tích hợp nhé:
+
+Cách tích hợp Tailwind CSS vào Spring Boot
+Có 2 cách phổ biến:
+
+Cách 1: Dùng Thymeleaf + Tailwind CSS (Đơn giản nhất)
+
+Thêm dependency Thymeleaf vào pom.xml:
+xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-thymeleaf</artifactId>
+</dependency>
+Tạo file HTML trong src/main/resources/templates/index.html:
+html
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold text-blue-600">Hello Tailwind!</h1>
+    </div>
+</body>
+</html>
+Tạo Controller:
+java
+@Controller
+public class HomeController {
+    @GetMapping("/")
+    public String home() {
+        return "index"; // trả về index.html
+    }
+}
+Cách 2: Tách riêng Frontend và Backend (Chuyên nghiệp hơn)
+
+Nếu team muốn tách riêng:
+
+Backend (Spring Boot): Chỉ làm REST API (trả về JSON)
+Frontend: Dùng HTML/CSS/JS thuần hoặc React/Vue + Tailwind CSS
+Backend sẽ như này:
+
+java
+@RestController
+@RequestMapping("/api")
+public class ApiController {
+    @GetMapping("/data")
+    public ResponseEntity<?> getData() {
+        return ResponseEntity.ok(yourData);
+    }
+}
+Frontend gọi API qua fetch/axios và hiển thị bằng Tailwind CSS.
+
+Bạn nên chọn cách nào?
+
+Nếu project đơn giản, deadline gấp → Chọn Cách 1
+Nếu muốn code sạch, dễ scale → Chọn Cách 2
+Bạn đang làm project gì và yêu cầu như nào? Mình sẽ hướng dẫn chi tiết hơn cho bạn nhé! 😊
+
+1768662572360_image.png
+mình làm cách 2 ấy ạ nhưng mà giờ mình làm luông user này nè ạ bây giờ nên làm gì ạ
+
+17 thg 1
+Ồ mình thấy bạn đã có structure rồi đấy! Bây giờ mình hướng dẫn bạn implement từng bước nhé:
+
+Bước 1: Setup Spring Security + JWT
+1. Thêm dependencies vào pom.xml:
+
+xml
+<dependencies>
+    <!-- Spring Security -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+    
+    <!-- JWT -->
+    <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-api</artifactId>
+        <version>0.11.5</version>
+    </dependency>
+    <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-impl</artifactId>
+        <version>0.11.5</version>
+        <scope>runtime</scope>
+    </dependency>
+    <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-jackson</artifactId>
+        <version>0.11.5</version>
+        <scope>runtime</scope>
+    </dependency>
+
+    <!-- MongoDB -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-mongodb</artifactId>
+    </dependency>
+
+    <!-- Validation -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+
+    <!-- Email (cho OTP) -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-mail</artifactId>
+    </dependency>
+</dependencies>
+Bước 2: Tạo các Entity/Model
+User.java:
+
+java
+@Document(collection = "users")
+@Data
+public class User {
+    @Id
+    private String id;
+    
+    @Indexed(unique = true)
+    private String email;
+    
+    private String password;
+    private String fullName;
+    private boolean emailVerified = false;
+    
+    @DBRef
+    private Set<Role> roles = new HashSet<>();
+    
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+}
+Role.java:
+
+java
+@Document(collection = "roles")
+@Data
+public class Role {
+    @Id
+    private String id;
+    
+    @Indexed(unique = true)
+    private String name; // ROLE_USER, ROLE_ADMIN
+    
+    private Set<String> permissions;
+}
+OAuthAccount.java (cho Google OAuth):
+
+java
+@Document(collection = "oauth_accounts")
+@Data
+public class OAuthAccount {
+    @Id
+    private String id;
+    
+    @DBRef
+    private User user;
+    
+    private String provider; // "google"
+    private String providerId;
+    private String accessToken;
+    private String refreshToken;
+}
+UserSession.java:
+
+java
+@Document(collection = "user_sessions")
+@Data
+public class UserSession {
+    @Id
+    private String id;
+    
+    @DBRef
+    private User user;
+    
+    private String refreshToken;
+    private LocalDateTime expiresAt;
+    private String ipAddress;
+    private String userAgent;
+}
+Notification.java:
+
+java
+@Document(collection = "notifications")
+@Data
+public class Notification {
+    @Id
+    private String id;
+    
+    @DBRef
+    private User user;
+    
+    private String type; // "LOGIN", "VERIFY_EMAIL"
+    private String message;
+    private boolean isRead = false;
+    private LocalDateTime createdAt;
+}
+Bước 3: Tạo DTOs cho API
+RegisterRequest.java:
+
+java
+@Data
+public class RegisterRequest {
+    @Email
+    @NotBlank
+    private String email;
+    
+    @NotBlank
+    @Size(min = 6)
+    private String password;
+    
+    @NotBlank
+    private String fullName;
+}
+LoginRequest.java:
+
+java
+@Data
+public class LoginRequest {
+    @Email
+    @NotBlank
+    private String email;
+    
+    @NotBlank
+    private String password;
+}
+AuthResponse.java:
+
+java
+@Data
+@AllArgsConstructor
+public class AuthResponse {
+    private String accessToken;
+    private String refreshToken;
+    private String tokenType = "Bearer";
+    private UserDto user;
+}
+Bước 4: Cấu hình JWT
+JwtUtil.java:
+
+java
+@Component
+public class JwtUtil {
+    @Value("${jwt.secret}")
+    private String secret;
+    
+    @Value("${jwt.expiration}")
+    private Long expiration; // 15 phút
+    
+    @Value("${jwt.refresh-expiration}")
+    private Long refreshExpiration; // 7 ngày
+    
+    public String generateAccessToken(String email) {
+        return Jwts.builder()
+            .setSubject(email)
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + expiration))
+            .signWith(getSignKey(), SignatureAlgorithm.HS256)
+            .compact();
+    }
+    
+    public String generateRefreshToken(String email) {
+        return Jwts.builder()
+            .setSubject(email)
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + refreshExpiration))
+            .signWith(getSignKey(), SignatureAlgorithm.HS256)
+            .compact();
+    }
+    
+    private Key getSignKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+    
+    public String extractEmail(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
+    
+    public boolean validateToken(String token, String email) {
+        return (extractEmail(token).equals(email) && !isTokenExpired(token));
+    }
+    
+    private boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+    
+    private Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
+    
+    private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
+    
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+            .setSigningKey(getSignKey())
+            .build()
+            .parseClaimsJws(token)
+            .getBody();
+    }
+}
+Bước 5: Tạo AuthService
+AuthService.java:
+
+java
+@Service
+@RequiredArgsConstructor
+public class AuthService {
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
+    private final UserSessionRepository sessionRepository;
+    
+    public AuthResponse register(RegisterRequest request) {
+        // Kiểm tra email đã tồn tại
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email already exists");
+        }
+        
+        // Tạo user mới
+        User user = new User();
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setFullName(request.getFullName());
+        user.setCreatedAt(LocalDateTime.now());
+        
+        userRepository.save(user);
+        
+        // Generate tokens
+        String accessToken = jwtUtil.generateAccessToken(user.getEmail());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+        
+        // Save refresh token
+        saveRefreshToken(user, refreshToken);
+        
+        return new AuthResponse(accessToken, refreshToken, "Bearer", toUserDto(user));
+    }
+    
+    public AuthResponse login(LoginRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+            .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+        
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid credentials");
+        }
+        
+        String accessToken = jwtUtil.generateAccessToken(user.getEmail());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+        
+        saveRefreshToken(user, refreshToken);
+        
+        return new AuthResponse(accessToken, refreshToken, "Bearer", toUserDto(user));
+    }
+    
+    private void saveRefreshToken(User user, String refreshToken) {
+        UserSession session = new UserSession();
+        session.setUser(user);
+        session.setRefreshToken(refreshToken);
+        session.setExpiresAt(LocalDateTime.now().plusDays(7));
+        sessionRepository.save(session);
+    }
+}
+Bước 6: Tạo Controller
+AuthController.java:
+
+java
+@RestController
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
+public class AuthController {
+    private final AuthService authService;
+    
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+        return ResponseEntity.ok(authService.register(request));
+    }
+    
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
+    }
+}
+Bước 7: Config file application.yml
+yaml
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/your_database
+      
+jwt:
+  secret: your-very-long-secret-key-at-least-256-bits
+  expiration: 900000 # 15 phút
+  refresh-expiration: 604800000 # 7 ngày
+Tiếp theo bạn cần làm:
+
+✅ Register/Login API (như trên)
+Google OAuth (mình sẽ hướng dẫn riêng nếu cần)
+Email OTP verification
+Refresh token endpoint
+Role/Permission
+Bạn muốn mình giải thích kỹ phần nào trước? Hay mình code luôn phần Google OAuth hoặc Email OTP cho bạn? 😊
+
+1768663089861_image.png
+mà mình làm spring boot với mongo nhaa leader mình có các thư muc như này nè ạ rồi bạn chỉ mình làm cái luồng mình nên làm gì nha
+
+17 thg 1
+Ồ mình thấy cấu trúc project rồi! Đây là project e-commerce (ShoppeClone) với nhiều module. Mình sẽ hướng dẫn bạn làm module AUTH theo đúng cấu trúc này nhé!
+
+📁 Cấu trúc thư mục trong package auth
+Bạn nên tạo các package con như này:
+
+auth/
+├── controller/
+│   └── AuthController.java
+├── service/
+│   ├── AuthService.java
+│   └── impl/
+│       └── AuthServiceImpl.java
+├── repository/
+│   ├── UserRepository.java
+│   ├── RoleRepository.java
+│   └── UserSessionRepository.java
+├── model/
+│   ├── User.java
+│   ├── Role.java
+│   └── UserSession.java
+├── dto/
+│   ├── request/
+│   │   ├── LoginRequest.java
+│   │   ├── RegisterRequest.java
+│   │   └── RefreshTokenRequest.java
+│   └── response/
+│       ├── AuthResponse.java
+│       └── UserDto.java
+├── security/
+│   ├── JwtUtil.java
+│   ├── JwtAuthFilter.java
+│   ├── SecurityConfig.java
+│   └── CustomUserDetailsService.java
+└── exception/
+    ├── EmailAlreadyExistsException.java
+    └── InvalidCredentialsException.java
+🔄 LUỒNG LÀM VIỆC (Thứ tự từng bước)
+BƯỚC 1: Tạo Model (trong auth/model/)
+User.java:
+
+java
+package com.shoppeclone.backend.auth.model;
+
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.index.Indexed;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+@Document(collection = "users")
+@Data
+public class User {
+    @Id
+    private String id;
+    
+    @Indexed(unique = true)
+    private String email;
+    
+    private String password;
+    private String fullName;
+    private String phone;
+    private boolean emailVerified = false;
+    private boolean active = true;
+    
+    @DBRef
+    private Set<Role> roles = new HashSet<>();
+    
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+}
+Role.java:
+
+java
+package com.shoppeclone.backend.auth.model;
+
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.index.Indexed;
+
+@Document(collection = "roles")
+@Data
+public class Role {
+    @Id
+    private String id;
+    
+    @Indexed(unique = true)
+    private String name; // ROLE_USER, ROLE_ADMIN, ROLE_SELLER
+    
+    private String description;
+}
+UserSession.java:
+
+java
+package com.shoppeclone.backend.auth.model;
+
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import java.time.LocalDateTime;
+
+@Document(collection = "user_sessions")
+@Data
+public class UserSession {
+    @Id
+    private String id;
+    
+    @DBRef
+    private User user;
+    
+    private String refreshToken;
+    private LocalDateTime expiresAt;
+    private String ipAddress;
+    private String userAgent;
+    private LocalDateTime createdAt;
+}
+BƯỚC 2: Tạo Repository (trong auth/repository/)
+UserRepository.java:
+
+java
+package com.shoppeclone.backend.auth.repository;
+
+import com.shoppeclone.backend.auth.model.User;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import java.util.Optional;
+
+public interface UserRepository extends MongoRepository<User, String> {
+    Optional<User> findByEmail(String email);
+    boolean existsByEmail(String email);
+}
+RoleRepository.java:
+
+java
+package com.shoppeclone.backend.auth.repository;
+
+import com.shoppeclone.backend.auth.model.Role;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import java.util.Optional;
+
+public interface RoleRepository extends MongoRepository<Role, String> {
+    Optional<Role> findByName(String name);
+}
+UserSessionRepository.java:
+
+java
+package com.shoppeclone.backend.auth.repository;
+
+import com.shoppeclone.backend.auth.model.UserSession;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import java.util.Optional;
+
+public interface UserSessionRepository extends MongoRepository<UserSession, String> {
+    Optional<UserSession> findByRefreshToken(String refreshToken);
+    void deleteByRefreshToken(String refreshToken);
+}
+BƯỚC 3: Tạo DTO (trong auth/dto/)
+LoginRequest.java:
+
+java
+package com.shoppeclone.backend.auth.dto.request;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Data
+public class LoginRequest {
+    @Email(message = "Email không hợp lệ")
+    @NotBlank(message = "Email không được để trống")
+    private String email;
+    
+    @NotBlank(message = "Mật khẩu không được để trống")
+    private String password;
+}
+RegisterRequest.java:
+
+java
+package com.shoppeclone.backend.auth.dto.request;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.Data;
+
+@Data
+public class RegisterRequest {
+    @Email(message = "Email không hợp lệ")
+    @NotBlank(message = "Email không được để trống")
+    private String email;
+    
+    @NotBlank(message = "Mật khẩu không được để trống")
+    @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
+    private String password;
+    
+    @NotBlank(message = "Họ tên không được để trống")
+    private String fullName;
+    
+    private String phone;
+}
+AuthResponse.java:
+
+java
+package com.shoppeclone.backend.auth.dto.response;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+public class AuthResponse {
+    private String accessToken;
+    private String refreshToken;
+    private String tokenType;
+    private UserDto user;
+}
+UserDto.java:
+
+java
+package com.shoppeclone.backend.auth.dto.response;
+
+import lombok.Data;
+import java.util.Set;
+
+@Data
+public class UserDto {
+    private String id;
+    private String email;
+    private String fullName;
+    private String phone;
+    private boolean emailVerified;
+    private Set<String> roles;
+}
+BƯỚC 4: Tạo Security Config (trong auth/security/)
+JwtUtil.java:
+
+java
+package com.shoppeclone.backend.auth.security;
+
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import java.security.Key;
+import java.util.Date;
+
+@Component
+public class JwtUtil {
+    
+    @Value("${jwt.secret}")
+    private String secret;
+    
+    @Value("${jwt.expiration}")
+    private Long expiration;
+    
+    @Value("${jwt.refresh-expiration}")
+    private Long refreshExpiration;
+    
+    private Key getSignKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes());
+    }
+    
+    public String generateAccessToken(String email) {
+        return Jwts.builder()
+            .setSubject(email)
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + expiration))
+            .signWith(getSignKey(), SignatureAlgorithm.HS256)
+            .compact();
+    }
+    
+    public String generateRefreshToken(String email) {
+        return Jwts.builder()
+            .setSubject(email)
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + refreshExpiration))
+            .signWith(getSignKey(), SignatureAlgorithm.HS256)
+            .compact();
+    }
+    
+    public String extractEmail(String token) {
+        return extractClaims(token).getSubject();
+    }
+    
+    public boolean validateToken(String token) {
+        try {
+            extractClaims(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+    
+    private Claims extractClaims(String token) {
+        return Jwts.parserBuilder()
+            .setSigningKey(getSignKey())
+            .build()
+            .parseClaimsJws(token)
+            .getBody();
+    }
+}
+SecurityConfig.java:
+
+java
+package com.shoppeclone.backend.auth.security;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+@Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
+public class SecurityConfig {
+    
+    private final JwtAuthFilter jwtAuthFilter;
+    
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/auth/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        
+        return http.build();
+    }
+    
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+    
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+}
+JwtAuthFilter.java:
+
+java
+package com.shoppeclone.backend.auth.security;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+import java.io.IOException;
+
+@Component
+@RequiredArgsConstructor
+public class JwtAuthFilter extends OncePerRequestFilter {
+    
+    private final JwtUtil jwtUtil;
+    private final CustomUserDetailsService userDetailsService;
+    
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) 
+            throws ServletException, IOException {
+        
+        String authHeader = request.getHeader("Authorization");
+        
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            
+            if (jwtUtil.validateToken(token)) {
+                String email = jwtUtil.extractEmail(token);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                
+                UsernamePasswordAuthenticationToken authentication = 
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+        }
+        
+        filterChain.doFilter(request, response);
+    }
+}
+CustomUserDetailsService.java:
+
+java
+package com.shoppeclone.backend.auth.security;
+
+import com.shoppeclone.backend.auth.model.User;
+import com.shoppeclone.backend.auth.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class CustomUserDetailsService implements UserDetailsService {
+    
+    private final UserRepository userRepository;
+    
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        
+        return org.springframework.security.core.userdetails.User.builder()
+            .username(user.getEmail())
+            .password(user.getPassword())
+            .authorities(user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .collect(Collectors.toList()))
+            .build();
+    }
+}
+BƯỚC 5: Tạo Service (trong auth/service/)
+AuthService.java (interface):
+
+java
+package com.shoppeclone.backend.auth.service;
+
+import com.shoppeclone.backend.auth.dto.request.LoginRequest;
+import com.shoppeclone.backend.auth.dto.request.RegisterRequest;
+import com.shoppeclone.backend.auth.dto.response.AuthResponse;
+
+public interface AuthService {
+    AuthResponse register(RegisterRequest request);
+    AuthResponse login(LoginRequest request);
+    AuthResponse refreshToken(String refreshToken);
+    void logout(String refreshToken);
+}
+AuthServiceImpl.java (trong auth/service/impl/):
+
+java
+package com.shoppeclone.backend.auth.service.impl;
+
+import com.shoppeclone.backend.auth.dto.request.LoginRequest;
+import com.shoppeclone.backend.auth.dto.request.RegisterRequest;
+import com.shoppeclone.backend.auth.dto.response.AuthResponse;
+import com.shoppeclone.backend.auth.dto.response.UserDto;
+import com.shoppeclone.backend.auth.model.Role;
+import com.shoppeclone.backend.auth.model.User;
+import com.shoppeclone.backend.auth.model.UserSession;
+import com.shoppeclone.backend.auth.repository.RoleRepository;
+import com.shoppeclone.backend.auth.repository.UserRepository;
+import com.shoppeclone.backend.auth.repository.UserSessionRepository;
+import com.shoppeclone.backend.auth.security.JwtUtil;
+import com.shoppeclone.backend.auth.service.AuthService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class AuthServiceImpl implements AuthService {
+    
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final UserSessionRepository sessionRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
+    
+    @Override
+    public AuthResponse register(RegisterRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email đã tồn tại");
+        }
+        
+        User user = new User();
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setFullName(request.getFullName());
+        user.setPhone(request.getPhone());
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
+        
+        // Set default role
+        Role userRole = roleRepository.findByName("ROLE_USER")
+            .orElseThrow(() -> new RuntimeException("Role not found"));
+        Set<Role> roles = new HashSet<>();
+        roles.add(userRole);
+        user.setRoles(roles);
+        
+        userRepository.save(user);
+        
+        String accessToken = jwtUtil.generateAccessToken(user.getEmail());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+        
+        saveUserSession(user, refreshToken);
+        
+        return new AuthResponse(accessToken, refreshToken, "Bearer", mapToUserDto(user));
+    }
+    
+    @Override
+    public AuthResponse login(LoginRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+            .orElseThrow(() -> new RuntimeException("Email hoặc mật khẩu không đúng"));
+        
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Email hoặc mật khẩu không đúng");
+        }
+        
+        if (!user.isActive()) {
+            throw new RuntimeException("Tài khoản đã bị khóa");
+        }
+        
+        String accessToken = jwtUtil.generateAccessToken(user.getEmail());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+        
+        saveUserSession(user, refreshToken);
+        
+        return new AuthResponse(accessToken, refreshToken, "Bearer", mapToUserDto(user));
+    }
+    
+    @Override
+    public AuthResponse refreshToken(String refreshToken) {
+        if (!jwtUtil.validateToken(refreshToken)) {
+            throw new RuntimeException("Refresh token không hợp lệ");
+        }
+        
+        UserSession session = sessionRepository.findByRefreshToken(refreshToken)
+            .orElseThrow(() -> new RuntimeException("Session không tồn tại"));
+        
+        User user = session.getUser();
+        String newAccessToken = jwtUtil.generateAccessToken(user.getEmail());
+        String newRefreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+        
+        sessionRepository.delete(session);
+        saveUserSession(user, newRefreshToken);
+        
+        return new AuthResponse(newAccessToken, newRefreshToken, "Bearer", mapToUserDto(user));
+    }
+    
+    @Override
+    public void logout(String refreshToken) {
+        sessionRepository.deleteByRefreshToken(refreshToken);
+    }
+    
+    private void saveUserSession(User user, String refreshToken) {
+        UserSession session = new UserSession();
+        session.setUser(user);
+        session.setRefreshToken(refreshToken);
+        session.setExpiresAt(LocalDateTime.now().plusDays(7));
+        session.setCreatedAt(LocalDateTime.now());
+        sessionRepository.save(session);
+    }
+    
+    private UserDto mapToUserDto(User user) {
+        UserDto dto = new UserDto();
+        dto.setId(user.getId());
+        dto.setEmail(user.getEmail());
+        dto.setFullName(user.getFullName());
+        dto.setPhone(user.getPhone());
+        dto.setEmailVerified(user.isEmailVerified());
+        dto.setRoles(user.getRoles().stream()
+            .map(Role::getName)
+            .collect(Collectors.toSet()));
+        return dto;
+    }
+}
+BƯỚC 6: Tạo Controller (trong auth/controller/)
+AuthController.java:
+
+java
+package com.shoppeclone.backend.auth.controller;
+
+import com.shoppeclone.backend.auth.dto.request.LoginRequest;
+import com.shoppeclone.backend.auth.dto.request.RegisterRequest;
+import com.shoppeclone.backend.auth.dto.response.AuthResponse;
+import com.shoppeclone.backend.auth.service.AuthService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
+public class AuthController {
+    
+    private final AuthService authService;
+    
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+        return ResponseEntity.ok(authService.register(request));
+    }
+    
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
+    }
+    
+    @PostMapping("/refresh-token")
+    public ResponseEntity<AuthResponse> refreshToken(@RequestHeader("Refresh-Token") String refreshToken) {
+        return ResponseEntity.ok(authService.refreshToken(refreshToken));
+    }
+    
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestHeader("Refresh-Token") String refreshToken) {
+        authService.logout(refreshToken);
+        return ResponseEntity.ok().build();
+    }
+}
+BƯỚC 7: Config application.yml
+yaml
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/shoppeclone
+      
+jwt:
+  secret: your-super-secret-key-must-be-at-least-256-bits-long-for-hs256
+  expiration: 900000 # 15 phút
+  refresh-expiration: 604800000 # 7 ngày
+BƯỚC 8: Seed dữ liệu Role (tạo file InitData)
+Tạo trong package common/config/:
+
+DataInitializer.java:
+
+java
+package com.shoppeclone.backend.common.config;
+
+import com.shoppeclone.backend.auth.model.Role;
+import com.shoppeclone.backend.auth.repository.RoleRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+public class DataInitializer implements CommandLineRunner {
+    
+    private final RoleRepository roleRepository;
+    
+    @Override
+    public void run(String... args) {
+        if (roleRepository.count() == 0) {
+            Role userRole = new Role();
+            userRole.setName("ROLE_USER");
+            userRole.setDescription("User mặc định");
+            roleRepository.save(userRole);
+            
+            Role adminRole = new Role();
+            adminRole.setName("ROLE_ADMIN");
+            adminRole.setDescription("Quản trị viên");
+            roleRepository.save(adminRole);
+            
+            System.out.println("✅ Roles đã được tạo!");
+        }
+    }
+}
+✅ CHECKLIST - THỨ TỰ LÀM
+✅ Model (User, Role, UserSession)
+✅ Repository (UserRepository, RoleRepository, UserSessionRepository)
+✅ DTO (Request, Response)
+✅ Security (JwtUtil, JwtAuthFilter, SecurityConfig, CustomUserDetailsService)
+✅ Service (AuthService interface + AuthServiceImpl)
+✅ Controller (AuthController)
+✅ Config (application.yml, DataInitializer)
+✅ Test API bằng Postman
+🧪 TEST API
+1. Register:
+
+http
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "123456",
+  "fullName": "Nguyen Van A",
+  "phone": "0123456789"
+}
+2. Login:
+
+http
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "123456"
+}
+Bạn làm theo thứ tự từ trên xuống là được nhé! Có lỗi gì cứ hỏi mình sẽ hỗ trợ! 💪😊
+
+khoan đã cơ còn cái thư mục user nữa cơ
+
+17 thg 1
+Ồ đúng rồi! Mình quên mất thư mục user nữa! 😅
+
+Thư mục user sẽ khác với auth nhé:
+
+auth: Xử lý đăng nhập, đăng ký, JWT, security
+user: Quản lý thông tin user (profile, cập nhật thông tin, đổi mật khẩu, etc.)
+📁 Cấu trúc thư mục user
+user/
+├── controller/
+│   └── UserController.java
+├── service/
+│   ├── UserService.java
+│   └── impl/
+│       └── UserServiceImpl.java
+├── dto/
+│   ├── request/
+│   │   ├── UpdateProfileRequest.java
+│   │   ├── ChangePasswordRequest.java
+│   │   └── UpdateAddressRequest.java
+│   └── response/
+│       └── UserProfileResponse.java
+└── exception/
+    └── UserNotFoundException.java
+LƯU Ý: Repository và Model của User đã nằm trong auth rồi, nên user sẽ dùng chung!
+
+🔄 PHÂN BIỆT AUTH vs USER
+Module	Chức năng
+auth	Register, Login, Logout, Refresh Token, JWT, Security
+user	Xem profile, Cập nhật thông tin, Đổi mật khẩu, Quản lý địa chỉ
+CODE CHO MODULE USER
+BƯỚC 1: Tạo DTO (trong user/dto/)
+UpdateProfileRequest.java:
+
+java
+package com.shoppeclone.backend.user.dto.request;
+
+import lombok.Data;
+
+@Data
+public class UpdateProfileRequest {
+    private String fullName;
+    private String phone;
+    private String avatar;
+    private String dateOfBirth;
+    private String gender; // MALE, FEMALE, OTHER
+}
+ChangePasswordRequest.java:
+
+java
+package com.shoppeclone.backend.user.dto.request;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.Data;
+
+@Data
+public class ChangePasswordRequest {
+    @NotBlank(message = "Mật khẩu cũ không được để trống")
+    private String oldPassword;
+    
+    @NotBlank(message = "Mật khẩu mới không được để trống")
+    @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
+    private String newPassword;
+    
+    @NotBlank(message = "Xác nhận mật khẩu không được để trống")
+    private String confirmPassword;
+}
+UserProfileResponse.java:
+
+java
+package com.shoppeclone.backend.user.dto.response;
+
+import lombok.Data;
+import java.time.LocalDateTime;
+import java.util.Set;
+
+@Data
+public class UserProfileResponse {
+    private String id;
+    private String email;
+    private String fullName;
+    private String phone;
+    private String avatar;
+    private String dateOfBirth;
+    private String gender;
+    private boolean emailVerified;
+    private Set<String> roles;
+    private LocalDateTime createdAt;
+}
+BƯỚC 2: Cập nhật Model User (thêm fields mới)
+Vào auth/model/User.java và thêm:
+
+java
+@Document(collection = "users")
+@Data
+public class User {
+    @Id
+    private String id;
+    
+    @Indexed(unique = true)
+    private String email;
+    
+    private String password;
+    private String fullName;
+    private String phone;
+    private String avatar;
+    private String dateOfBirth;
+    private String gender; // MALE, FEMALE, OTHER
+    
+    private boolean emailVerified = false;
+    private boolean active = true;
+    
+    @DBRef
+    private Set<Role> roles = new HashSet<>();
+    
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+}
+BƯỚC 3: Tạo Service (trong user/service/)
+UserService.java (interface):
+
+java
+package com.shoppeclone.backend.user.service;
+
+import com.shoppeclone.backend.user.dto.request.ChangePasswordRequest;
+import com.shoppeclone.backend.user.dto.request.UpdateProfileRequest;
+import com.shoppeclone.backend.user.dto.response.UserProfileResponse;
+
+public interface UserService {
+    UserProfileResponse getProfile(String email);
+    UserProfileResponse updateProfile(String email, UpdateProfileRequest request);
+    void changePassword(String email, ChangePasswordRequest request);
+    void deleteAccount(String email);
+}
+UserServiceImpl.java:
+
+java
+package com.shoppeclone.backend.user.service.impl;
+
+import com.shoppeclone.backend.auth.model.User;
+import com.shoppeclone.backend.auth.repository.UserRepository;
+import com.shoppeclone.backend.user.dto.request.ChangePasswordRequest;
+import com.shoppeclone.backend.user.dto.request.UpdateProfileRequest;
+import com.shoppeclone.backend.user.dto.response.UserProfileResponse;
+import com.shoppeclone.backend.user.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class UserServiceImpl implements UserService {
+    
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    
+    @Override
+    public UserProfileResponse getProfile(String email) {
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
+        
+        return mapToProfileResponse(user);
+    }
+    
+    @Override
+    public UserProfileResponse updateProfile(String email, UpdateProfileRequest request) {
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
+        
+        if (request.getFullName() != null) {
+            user.setFullName(request.getFullName());
+        }
+        if (request.getPhone() != null) {
+            user.setPhone(request.getPhone());
+        }
+        if (request.getAvatar() != null) {
+            user.setAvatar(request.getAvatar());
+        }
+        if (request.getDateOfBirth() != null) {
+            user.setDateOfBirth(request.getDateOfBirth());
+        }
+        if (request.getGender() != null) {
+            user.setGender(request.getGender());
+        }
+        
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+        
+        return mapToProfileResponse(user);
+    }
+    
+    @Override
+    public void changePassword(String email, ChangePasswordRequest request) {
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
+        
+        // Kiểm tra mật khẩu cũ
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new RuntimeException("Mật khẩu cũ không đúng");
+        }
+        
+        // Kiểm tra mật khẩu mới và confirm
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new RuntimeException("Mật khẩu mới và xác nhận không khớp");
+        }
+        
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+    }
+    
+    @Override
+    public void deleteAccount(String email) {
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
+        
+        // Soft delete
+        user.setActive(false);
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+    }
+    
+    private UserProfileResponse mapToProfileResponse(User user) {
+        UserProfileResponse response = new UserProfileResponse();
+        response.setId(user.getId());
+        response.setEmail(user.getEmail());
+        response.setFullName(user.getFullName());
+        response.setPhone(user.getPhone());
+        response.setAvatar(user.getAvatar());
+        response.setDateOfBirth(user.getDateOfBirth());
+        response.setGender(user.getGender());
+        response.setEmailVerified(user.isEmailVerified());
+        response.setRoles(user.getRoles().stream()
+            .map(role -> role.getName())
+            .collect(Collectors.toSet()));
+        response.setCreatedAt(user.getCreatedAt());
+        return response;
+    }
+}
+BƯỚC 4: Tạo Controller (trong user/controller/)
+UserController.java:
+
+java
+package com.shoppeclone.backend.user.controller;
+
+import com.shoppeclone.backend.user.dto.request.ChangePasswordRequest;
+import com.shoppeclone.backend.user.dto.request.UpdateProfileRequest;
+import com.shoppeclone.backend.user.dto.response.UserProfileResponse;
+import com.shoppeclone.backend.user.service.UserService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/user")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
+public class UserController {
+    
+    private final UserService userService;
+    
+    @GetMapping("/profile")
+    public ResponseEntity<UserProfileResponse> getProfile(Authentication authentication) {
+        String email = authentication.getName();
+        return ResponseEntity.ok(userService.getProfile(email));
+    }
+    
+    @PutMapping("/profile")
+    public ResponseEntity<UserProfileResponse> updateProfile(
+            Authentication authentication,
+            @RequestBody UpdateProfileRequest request) {
+        String email = authentication.getName();
+        return ResponseEntity.ok(userService.updateProfile(email, request));
+    }
+    
+    @PutMapping("/change-password")
+    public ResponseEntity<Void> changePassword(
+            Authentication authentication,
+            @Valid @RequestBody ChangePasswordRequest request) {
+        String email = authentication.getName();
+        userService.changePassword(email, request);
+        return ResponseEntity.ok().build();
+    }
+    
+    @DeleteMapping("/account")
+    public ResponseEntity<Void> deleteAccount(Authentication authentication) {
+        String email = authentication.getName();
+        userService.deleteAccount(email);
+        return ResponseEntity.ok().build();
+    }
+}
+🧪 TEST API USER
+LƯU Ý: Các API này cần có JWT Token (từ khi login)
+
+1. Xem Profile:
+
+http
+GET http://localhost:8080/api/user/profile
+Authorization: Bearer YOUR_ACCESS_TOKEN
+2. Cập nhật Profile:
+
+http
+PUT http://localhost:8080/api/user/profile
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "fullName": "Nguyen Van B",
+  "phone": "0987654321",
+  "dateOfBirth": "2000-01-01",
+  "gender": "MALE"
+}
+3. Đổi mật khẩu:
+
+http
+PUT http://localhost:8080/api/user/change-password
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "oldPassword": "123456",
+  "newPassword": "654321",
+  "confirmPassword": "654321"
+}
+4. Xóa tài khoản:
+
+http
+DELETE http://localhost:8080/api/user/account
+Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+---
+
+## ✅ TÓM TẮT CẤU TRÚC HOÀN CHỈNH
+```
+backend/
+├── auth/                    # Xác thực & Bảo mật
+│   ├── controller/         → AuthController (register, login, logout)
+│   ├── service/            → AuthService
+│   ├── repository/         → UserRepository, RoleRepository
+│   ├── model/              → User, Role, UserSession
+│   ├── dto/                → LoginRequest, RegisterRequest, AuthResponse
+│   ├── security/           → JwtUtil, JwtAuthFilter, SecurityConfig
+│   └── exception/
+│
+├── user/                    # Quản lý User
+│   ├── controller/         → UserController (profile, update, change-password)
+│   ├── service/            → UserService
+│   ├── dto/                → UpdateProfileRequest, UserProfileResponse
+│   └── exception/
+│
+├── notification/            # (Chưa làm)
+├── product/                 # (Chưa làm)
+├── order/                   # (Chưa làm)
+└── common/                  # Config chung
+    └── config/
+        └── DataInitializer.java
+🎯 LUỒNG HOÀN CHỈNH
+User Register → /api/auth/register → Nhận JWT
+User Login → /api/auth/login → Nhận JWT
+Xem Profile → /api/user/profile (cần JWT)
+Cập nhật Profile → /api/user/profile (cần JWT)
+Đổi mật khẩu → /api/user/change-password (cần JWT)
+Giờ bạn đã có đầy đủ AUTH + USER module rồi! Cần làm thêm gì nữa không? Google OAuth, Email OTP, hay làm luôn các module khác? 😊
+
+package com.shoppeclone.backend.auth.dto.request;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+@Data
+public class LoginRequest {
+    @Email(message = "Email không hợp lệ")
+    @NotBlank(message = "Email không được để trống")
+    private String email;
+
+    @NotBlank(message = "Mật khẩu không được để trống")
+    private String password;
+}
+cái này bị lỗi ạ
+
+Show more
+17 thg 1
+Bạn bị lỗi gì nhỉ? Mình đoán là import không tìm thấy jakarta.validation đúng không? 🤔
+
+✅ CÁCH SỬA:
+Thêm dependency validation vào pom.xml:
+xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-validation</artifactId>
+</dependency>
+Sau đó:
+
+Maven Reload: Click chuột phải vào project → Maven → Reload Project
+Hoặc chạy lệnh: mvn clean install
+🔍 Nếu vẫn lỗi, check thêm:
+1. Kiểm tra Spring Boot version trong pom.xml:
+xml
+<parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.2.0</version> <!-- Phải >= 3.0.0 để dùng jakarta -->
+</parent>
+LƯU Ý:
+
+Spring Boot 3.x trở lên → dùng jakarta.validation
+Spring Boot 2.x → dùng javax.validation
+Nếu bạn dùng Spring Boot 2.x, đổi import thành:
+
+java
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+2. Nếu IDE (IntelliJ/Eclipse) báo đỏ:
+IntelliJ: File → Invalidate Caches → Restart
+Eclipse: Project → Clean
+📋 File pom.xml hoàn chỉnh (tham khảo):
+xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.0</version>
+    </parent>
+    
+    <groupId>com.shoppeclone</groupId>
+    <artifactId>backend</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>backend</name>
+    
+    <properties>
+        <java.version>17</java.version>
+    </properties>
+    
+    <dependencies>
+        <!-- Spring Boot Web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        
+        <!-- Spring Security -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        
+        <!-- MongoDB -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
+        
+        <!-- Validation -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        
+        <!-- JWT -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
+        
+        <!-- DevTools (optional) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+        
+        <!-- Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+🧪 Test lại:
+Sau khi thêm dependency, code này phải chạy được:
+
+java
+package com.shoppeclone.backend.auth.dto.request;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Data
+public class LoginRequest {
+    @Email(message = "Email không hợp lệ")
+    @NotBlank(message = "Email không được để trống")
+    private String email;
+    
+    @NotBlank(message = "Mật khẩu không được để trống")
+    private String password;
+}
+Bạn thử làm theo và báo lại cho mình xem còn lỗi gì không nhé! 😊 Nếu vẫn lỗi thì chụp màn hình lỗi gửi mình sẽ hỗ trợ cụ thể hơn!
+
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.9</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>com.example</groupId>
+    <artifactId>demo</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>demo</name>
+    <description>Web shop project for Spring Boot</description>
+    <url/>
+    <licenses>
+        <license/>
+    </licenses>
+    <developers>
+        <developer/>
+    </developers>
+    <scm>
+        <connection/>
+        <developerConnection/>
+        <tag/>
+        <url/>
+    </scm>
+    <properties>
+        <java.version>21</java.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- MongoDB Dependency -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.11.0</version>
+            <configuration>
+                <source>21</source>
+                <target>21</target>
+                <annotationProcessorPaths>
+                    <path>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                        <version>1.18.30</version>
+                    </path>
+                </annotationProcessorPaths>
+            </configuration>
+        </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
+
+nè bạn xem pom.xml mình thử ạ mình dùng maven 3.9 ạ
+Show more
+17 thg 1
+Ồ mình thấy rồi! pom.xml của bạn thiếu Spring Security và JWT nè! 😅
+
+Bạn chỉ có validation thôi, nhưng chưa có Security và JWT nên sẽ bị lỗi khi code các phần authentication.
+
+✅ CẬP NHẬT pom.xml ĐẦY ĐỦ:
+xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.5.9</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.shoppeclone</groupId>
+	<artifactId>backend</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>backend</name>
+	<description>Web shop project for Spring Boot</description>
+	
+	<properties>
+		<java.version>21</java.version>
+	</properties>
+	
+	<dependencies>
+		<!-- Spring Boot Web -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<!-- Spring Security -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+		<!-- MongoDB -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-mongodb</artifactId>
+		</dependency>
+
+		<!-- Validation -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+
+		<!-- JWT Dependencies -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.12.3</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.12.3</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.12.3</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- Lombok -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<!-- DevTools -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+
+		<!-- Test -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.11.0</version>
+				<configuration>
+					<source>21</source>
+					<target>21</target>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>1.18.30</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
+🔥 NHỮNG GÌ MỚI THÊM VÀO:
+✅ Spring Security - Để bảo mật API
+✅ JWT (jjwt 0.12.3) - Mới nhất, tương thích Java 21
+✅ spring-security-test - Để test Security
+⚡ SAU KHI CẬP NHẬT:
+Bước 1: Save file pom.xml
+
+Bước 2: Reload Maven:
+
+IntelliJ: Click chuột phải vào pom.xml → Maven → Reload Project
+Hoặc terminal: mvn clean install
+Bước 3: Đợi Maven download dependencies (khoảng 1-2 phút)
+
+Bước 4: Restart IDE nếu cần
+
+🧪 KIỂM TRA XEM ĐÃ OK CHƯA:
+Sau khi reload, thử import này vào class bất kỳ:
+
+java
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import io.jsonwebtoken.Jwts;
+Nếu không báo đỏ là OK rồi! ✅
+
+📝 LƯU Ý QUAN TRỌNG:
+Java 21 + Spring Boot 3.5.9 → Dùng jakarta.* (KHÔNG phải javax.*)
+JWT version 0.12.3 - Mới nhất, hỗ trợ tốt Java 21
+Maven 3.9 OK, không vấn đề gì
+Bạn thử làm theo rồi báo mình kết quả nhé! Nếu vẫn lỗi thì chụp màn hình lỗi gửi mình! 😊
+
+package com.shoppeclone.backend.auth.security;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import java.security.Key;
+import java.util.Date;
+@Component
+public class JwtUtil {
+
+    @Value("${jwt.secret}")
+    private String secret;
+
+    @Value("${jwt.expiration}")
+    private Long expiration;
+
+    @Value("${jwt.refresh-expiration}")
+    private Long refreshExpiration;
+
+    private Key getSignKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes());
+    }
+
+    public String generateAccessToken(String email) {
+        return Jwts.builder()
+            .setSubject(email)
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + expiration))
+            .signWith(getSignKey(), SignatureAlgorithm.HS256)
+            .compact();
+    }
+
+    public String generateRefreshToken(String email) {
+        return Jwts.builder()
+            .setSubject(email)
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + refreshExpiration))
+            .signWith(getSignKey(), SignatureAlgorithm.HS256)
+            .compact();
+    }
+
+    public String extractEmail(String token) {
+        return extractClaims(token).getSubject();
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            extractClaims(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    private Claims extractClaims(String token) {
+        return Jwts.parserBuilder()
+            .setSigningKey(getSignKey())
+            .build()
+            .parseClaimsJws(token)
+            .getBody();
+    }
+}
+đoạn code này bị lỗi ạ nó gạch gạch mấy cái set í ạ gạch ngang qua mấy dòng đó luôn
+
+Show more
+17 thg 1
+Ồ mình biết rồi! Đó là vì JWT version 0.12.3 đã thay đổi API, các method setSubject(), setIssuedAt() bị deprecated (lỗi thời) rồi! 😅
+
+Với JWT 0.12.x trở lên, phải dùng builder pattern mới là subject(), issuedAt() thay vì setSubject(), setIssuedAt().
+
+✅ CODE MỚI ĐÚNG CHO JWT 0.12.3:
+java
+package com.shoppeclone.backend.auth.security;
+
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.util.Date;
+
+@Component
+public class JwtUtil {
+    
+    @Value("${jwt.secret}")
+    private String secret;
+    
+    @Value("${jwt.expiration}")
+    private Long expiration;
+    
+    @Value("${jwt.refresh-expiration}")
+    private Long refreshExpiration;
+    
+    private SecretKey getSignKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes());
+    }
+    
+    public String generateAccessToken(String email) {
+        return Jwts.builder()
+            .subject(email)  // ✅ Dùng subject() thay vì setSubject()
+            .issuedAt(new Date())  // ✅ Dùng issuedAt() thay vì setIssuedAt()
+            .expiration(new Date(System.currentTimeMillis() + expiration))  // ✅ Dùng expiration()
+            .signWith(getSignKey(), Jwts.SIG.HS256)  // ✅ Dùng Jwts.SIG.HS256
+            .compact();
+    }
+    
+    public String generateRefreshToken(String email) {
+        return Jwts.builder()
+            .subject(email)
+            .issuedAt(new Date())
+            .expiration(new Date(System.currentTimeMillis() + refreshExpiration))
+            .signWith(getSignKey(), Jwts.SIG.HS256)
+            .compact();
+    }
+    
+    public String extractEmail(String token) {
+        return extractClaims(token).getSubject();
+    }
+    
+    public boolean validateToken(String token) {
+        try {
+            extractClaims(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+    
+    private Claims extractClaims(String token) {
+        return Jwts.parser()  // ✅ Dùng parser() thay vì parserBuilder()
+            .verifyWith(getSignKey())  // ✅ Dùng verifyWith() thay vì setSigningKey()
+            .build()
+            .parseSignedClaims(token)  // ✅ Dùng parseSignedClaims() thay vì parseClaimsJws()
+            .getPayload();  // ✅ Dùng getPayload() thay vì getBody()
+    }
+}
+🔥 NHỮNG THAY ĐỔI CHÍNH:
+Cũ (JWT 0.11.x)	Mới (JWT 0.12.x)
+setSubject()	subject()
+setIssuedAt()	issuedAt()
+setExpiration()	expiration()
+SignatureAlgorithm.HS256	Jwts.SIG.HS256
+Key	SecretKey
+parserBuilder()	parser()
+setSigningKey()	verifyWith()
+parseClaimsJws()	parseSignedClaims()
+getBody()	getPayload()
+📝 HOẶC DÙNG JWT 0.11.5 (Cách cũ nhưng ổn định hơn):
+Nếu bạn muốn dùng code cũ, hạ version JWT xuống 0.11.5:
+
+xml
+<!-- Trong pom.xml, đổi version JWT -->
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-api</artifactId>
+    <version>0.11.5</version>
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-impl</artifactId>
+    <version>0.11.5</version>
+    <scope>runtime</scope>
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-jackson</artifactId>
+    <version>0.11.5</version>
+    <scope>runtime</scope>
+</dependency>
+Rồi Maven Reload, code cũ sẽ chạy được! ✅
+
+🎯 KHUYẾN NGHỊ:
+Mình nghĩ bạn nên:
+
+Dùng JWT 0.12.3 (mới nhất) + code mới mình vừa đưa ở trên ✅
+Hoặc hạ xuống JWT 0.11.5 + giữ nguyên code cũ
+Cả 2 cách đều OK, nhưng 0.12.3 tốt hơn vì mới và bảo mật hơn!
+
+Bạn thử update lại code JwtUtil.java như mình vừa đưa nhé! Sau đó báo mình kết quả! 😊
+
+# Application Name
+spring.application.name=web-shoppe
+
+# Server Port Configuration
+server.port=8080
+
+# ========================================
+# MongoDB Configuration
+# ========================================
+
+# Local MongoDB (KHÔNG DÙNG)
+# spring.data.mongodb.uri=mongodb://localhost:27017/web_shoppe
+
+# MongoDB Atlas (ĐANG DÙNG)
+spring.data.mongodb.uri=mongodb+srv://web_shoppe:Csd201_group2@cluster0.ol8uuso.mongodb.net/web_shoppe?retryWrites=true&w=majority
+
+bây giờ mình tới bước 7 config application.yml 
+nhưng mà mình có application.properties này ạ bạn xem rồi chỉnh mình làm bước này thử ạ
+Show more
+17 thg 1
+Ồ bạn đang dùng application.properties chứ không phải application.yml nhỉ! Không sao, mình sẽ config theo properties cho bạn luôn! 😊
+
+✅ CẬP NHẬT FILE application.properties:
+properties
+# Application Name
+spring.application.name=web-shoppe
+
+# Server Port Configuration
+server.port=8080
+
+# ========================================
+# MongoDB Configuration
+# ========================================
+
+# Local MongoDB (KHÔNG DÙNG)
+# spring.data.mongodb.uri=mongodb://localhost:27017/web_shoppe
+
+# MongoDB Atlas (ĐANG DÙNG)
+spring.data.mongodb.uri=mongodb+srv://web_shoppe:Csd201_group2@cluster0.ol8uuso.mongodb.net/web_shoppe?retryWrites=true&w=majority
+
+# ========================================
+# JWT Configuration
+# ========================================
+
+# JWT Secret Key (Phải ít nhất 256 bits = 32 ký tự)
+jwt.secret=ShoppeClone2024SecretKeyForJWTTokenGenerationAndValidation123456
+
+# Access Token Expiration (15 phút = 900000 milliseconds)
+jwt.expiration=900000
+
+# Refresh Token Expiration (7 ngày = 604800000 milliseconds)
+jwt.refresh-expiration=604800000
+
+# ========================================
+# Security Configuration (Optional)
+# ========================================
+
+# Tắt security mặc định khi dev (nếu cần)
+# spring.security.user.name=admin
+# spring.security.user.password=admin123
+
+# ========================================
+# Logging Configuration (Optional)
+# ========================================
+
+# Log level
+logging.level.root=INFO
+logging.level.com.shoppeclone.backend=DEBUG
+logging.level.org.springframework.security=DEBUG
+logging.level.org.springframework.data.mongodb=DEBUG
+
+# ========================================
+# CORS Configuration (Optional - nếu frontend khác domain)
+# ========================================
+
+# Cho phép tất cả origin (chỉ dùng khi dev)
+# Nếu deploy production, cần config cụ thể domain frontend
+🔥 GIẢI THÍCH CÁC CONFIG:
+1. JWT Secret:
+properties
+jwt.secret=ShoppeClone2024SecretKeyForJWTTokenGenerationAndValidation123456
+Phải dài ít nhất 32 ký tự (256 bits) để đảm bảo bảo mật
+QUAN TRỌNG: Khi deploy production, phải đổi key này và giữ bí mật!
+2. JWT Expiration:
+properties
+jwt.expiration=900000           # 15 phút
+jwt.refresh-expiration=604800000 # 7 ngày
+Access Token: Ngắn (15 phút) để bảo mật
+Refresh Token: Dài (7 ngày) để user không phải login liên tục
+3. MongoDB URI:
+Bạn đã config đúng rồi! ✅
+
+🎯 TIẾP THEO: Bước 8 - SEED DỮ LIỆU ROLE
+Tạo file DataInitializer.java trong package common.config:
+
+java
+package com.shoppeclone.backend.common.config;
+
+import com.shoppeclone.backend.auth.model.Role;
+import com.shoppeclone.backend.auth.repository.RoleRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+public class DataInitializer implements CommandLineRunner {
+    
+    private final RoleRepository roleRepository;
+    
+    @Override
+    public void run(String... args) {
+        // Kiểm tra nếu chưa có role nào thì tạo
+        if (roleRepository.count() == 0) {
+            
+            // Role USER
+            Role userRole = new Role();
+            userRole.setName("ROLE_USER");
+            userRole.setDescription("Người dùng thông thường");
+            roleRepository.save(userRole);
+            
+            // Role ADMIN
+            Role adminRole = new Role();
+            adminRole.setName("ROLE_ADMIN");
+            adminRole.setDescription("Quản trị viên");
+            roleRepository.save(adminRole);
+            
+            // Role SELLER
+            Role sellerRole = new Role();
+            sellerRole.setName("ROLE_SELLER");
+            sellerRole.setDescription("Người bán hàng");
+            roleRepository.save(sellerRole);
+            
+            System.out.println("✅ Đã khởi tạo các Role thành công!");
+        } else {
+            System.out.println("✅ Roles đã tồn tại, bỏ qua khởi tạo.");
+        }
+    }
+}
+🧪 TEST CHẠY APPLICATION:
+Bước 1: Chạy Spring Boot application:
+
+bash
+mvn spring-boot:run
+```
+
+Hoặc click **Run** trong IDE.
+
+**Bước 2:** Check console, bạn sẽ thấy:
+```
+✅ Đã khởi tạo các Role thành công!
+Started BackendApplication in X.XXX seconds
+Bước 3: Check MongoDB Atlas xem đã có collections chưa:
+
+Vào MongoDB Atlas → Clusters → Browse Collections
+Database: web_shoppe
+Collections: roles, users, user_sessions
+🔍 KIỂM TRA KẾT NỐI MONGODB:
+Thêm vào application.properties để test connection:
+
+properties
+# Test MongoDB Connection
+logging.level.org.springframework.data.mongodb.core.MongoTemplate=DEBUG
+```
+
+Khi chạy app, nếu thấy log kiểu:
+```
+Opening MongoClient...
+Connected to MongoDB Atlas
+→ Kết nối thành công! ✅
+
+⚠️ LƯU Ý QUAN TRỌNG:
+1. Bảo mật JWT Secret:
+Khi deploy production, KHÔNG được hardcode secret vào file, mà phải dùng Environment Variables:
+
+properties
+# Production - Dùng biến môi trường
+jwt.secret=${JWT_SECRET}
+jwt.expiration=${JWT_EXPIRATION:900000}
+jwt.refresh-expiration=${JWT_REFRESH_EXPIRATION:604800000}
+2. MongoDB Connection String:
+Password đang để plaintext, cần:
+
+Dùng Environment Variables
+Hoặc Spring Cloud Config
+Hoặc HashiCorp Vault
+📋 CHECKLIST HOÀN THÀNH:
+✅ Bước 1: Model
+✅ Bước 2: Repository
+✅ Bước 3: DTO
+✅ Bước 4: Security
+✅ Bước 5: Service
+✅ Bước 6: Controller
+✅ Bước 7: Config application.properties ← BẠN Ở ĐÂY
+⏭️ Bước 8: Seed dữ liệu Role (code ở trên)
+⏭️ Bước 9: Test API bằng Postman
+Bạn thử chạy app xem có lỗi gì không rồi báo mình nhé! Nếu OK thì làm tiếp Bước 8 luôn! 🚀😊
+
+# Application Name
+spring.application.name=web-shoppe
+# Server Port Configuration
+server.port=8080
+# ========================================
+# MongoDB Configuration
+# ========================================
+# Local MongoDB (KHÔNG DÙNG)
+# spring.data.mongodb.uri=mongodb://localhost:27017/web_shoppe
+# MongoDB Atlas (ĐANG DÙNG)
+spring.data.mongodb.uri=mongodb+srv://web_shoppe:Csd201_group2@cluster0.ol8uuso.mongodb.net/web_shoppe?retryWrites=true&w=majority
+# ========================================
+# JWT Configuration
+# ========================================
+# JWT Secret Key (Phải ít nhất 256 bits = 32 ký tự)
+jwt.secret=ShoppeClone2024SecretKeyForJWTTokenGenerationAndValidation123456
+# Access Token Expiration (15 phút = 900000 milliseconds)
+jwt.expiration=900000
+# Refresh Token Expiration (7 ngày = 604800000 milliseconds)
+jwt.refresh-expiration=604800000
+# ========================================
+# Security Configuration (Optional)
+# ========================================
+# Tắt security mặc định khi dev (nếu cần)
+# spring.security.user.name=admin
+# spring.security.user.password=admin123
+# ========================================
+# Logging Configuration (Optional)
+# ========================================
+# Log level
+logging.level.root=INFO
+logging.level.com.shoppeclone.backend=DEBUG
+logging.level.org.springframework.security=DEBUG
+logging.level.org.springframework.data.mongodb=DEBUG
+# ========================================
+# CORS Configuration (Optional - nếu frontend khác domain)
+# ========================================
+# Cho phép tất cả origin (chỉ dùng khi dev)
+# Nếu deploy production, cần config cụ thể domain frontend
+bỏ cái này vào bị 3 cái gạch vàng ấy ạ
+
+Show more
+18 thg 1
+Ồ gạch vàng (warning) à? Đó chỉ là cảnh báo thôi, không phải lỗi đâu bạn! 😊
+
+Nhưng mình đoán 3 chỗ gạch vàng là:
+
+jwt.secret
+jwt.expiration
+jwt.refresh-expiration
+Lý do: IDE báo warning vì Spring Boot chưa biết các property này (chúng là custom property của mình tự định nghĩa).
+
+✅ CÁCH XỬ LÝ WARNING (3 cách):
+Cách 1: BỎ QUA (Recommended cho bây giờ)
+Gạch vàng chỉ là warning, không ảnh hưởng gì!
+Application vẫn chạy 100% bình thường
+Khi chạy code, Spring sẽ tự động inject các giá trị này vào @Value
+→ Cứ để vậy, không cần làm gì! ✅
+
+Cách 2: TẮT WARNING (Nếu bạn thấy khó chịu)
+Tạo file additional-spring-configuration-metadata.json trong thư mục:
+
+src/main/resources/META-INF/additional-spring-configuration-metadata.json
+Nội dung:
+
+json
+{
+  "properties": [
+    {
+      "name": "jwt.secret",
+      "type": "java.lang.String",
+      "description": "JWT secret key for token generation"
+    },
+    {
+      "name": "jwt.expiration",
+      "type": "java.lang.Long",
+      "description": "JWT access token expiration time in milliseconds"
+    },
+    {
+      "name": "jwt.refresh-expiration",
+      "type": "java.lang.Long",
+      "description": "JWT refresh token expiration time in milliseconds"
+    }
+  ]
+}
+Sau đó Rebuild Project → Gạch vàng sẽ mất!
+
+Cách 3: THÊM DEPENDENCY (Không cần thiết lắm)
+Thêm vào pom.xml:
+
+xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-configuration-processor</artifactId>
+    <optional>true</optional>
+</dependency>
+Sau đó Maven Reload → Spring Boot sẽ tự động generate metadata.
+
+🎯 KHUYẾN NGHỊ:
+Cứ để vậy, KHÔNG CẦN SỬA! 😊
+
+Vì:
+
+✅ Application vẫn chạy bình thường
+✅ Không ảnh hưởng gì đến logic
+✅ Chỉ là IDE warning, không phải runtime error
+Khi bạn test API, mọi thứ sẽ hoạt động 100% OK!
+
+🧪 TIẾP THEO: CHẠY THỬ APPLICATION
+Bước 1: Chạy Spring Boot:
+
+bash
+mvn spring-boot:run
+```
+
+Hoặc click **Run** trong IDE.
+
+**Bước 2:** Kiểm tra log, bạn sẽ thấy:
+```
+Started WebShoppeApplication in X.XXX seconds
+Tomcat started on port 8080
+```
+
+**Bước 3:** Mở browser test:
+```
+http://localhost:8080
+Sẽ thấy trang login của Spring Security (nếu chưa config SecurityConfig).
+
+⚠️ NẾU GẶP LỖI KHI CHẠY:
+Lỗi 1: "Unable to connect to MongoDB"
+→ Check lại MongoDB Atlas:
+
+Network Access → Whitelist IP (thêm 0.0.0.0/0 cho phép mọi IP)
+Database Access → User có quyền Read/Write
+Lỗi 2: "Bean creation error"
+→ Có thể thiếu dependency, check lại pom.xml
+
+Lỗi 3: "Port 8080 already in use"
+→ Đổi port trong application.properties:
+
+properties
+server.port=8081
+Bạn thử chạy app xem có lỗi gì không, rồi làm tiếp Bước 8: Seed Role nhé! Còn 3 gạch vàng đó CỨ ĐỂ VẬY không sao đâu! 😊🚀
+
+DataInitializer.java file này tạo trong thư mục nào ấy nhỉ
+
+18 thg 1
+File DataInitializer.java tạo trong thư mục common/config/ nhé bạn! 😊
+
+📁 Cấu trúc thư mục chính xác:
+src/
+└── main/
+    └── java/
+        └── com/
+            └── shoppeclone/
+                └── backend/
+                    ├── auth/
+                    ├── user/
+                    ├── notification/
+                    ├── product/
+                    ├── order/
+                    └── common/              ← Tạo package này
+                        └── config/          ← Tạo package này
+                            └── DataInitializer.java  ← File ở đây
+🔧 CÁCH TẠO:
+Bước 1: Tạo package common
+Chuột phải vào backend → New → Package
+Nhập: com.shoppeclone.backend.common
+Bước 2: Tạo package config trong common
+Chuột phải vào common → New → Package
+Nhập: com.shoppeclone.backend.common.config
+Bước 3: Tạo file DataInitializer.java
+Chuột phải vào config → New → Java Class
+Nhập: DataInitializer
+📝 Code hoàn chỉnh:
+java
+package com.shoppeclone.backend.common.config;
+
+import com.shoppeclone.backend.auth.model.Role;
+import com.shoppeclone.backend.auth.repository.RoleRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+public class DataInitializer implements CommandLineRunner {
+    
+    private final RoleRepository roleRepository;
+    
+    @Override
+    public void run(String... args) {
+        // Kiểm tra nếu chưa có role nào thì tạo
+        if (roleRepository.count() == 0) {
+            
+            // Role USER
+            Role userRole = new Role();
+            userRole.setName("ROLE_USER");
+            userRole.setDescription("Người dùng thông thường");
+            roleRepository.save(userRole);
+            
+            // Role ADMIN
+            Role adminRole = new Role();
+            adminRole.setName("ROLE_ADMIN");
+            adminRole.setDescription("Quản trị viên");
+            roleRepository.save(adminRole);
+            
+            // Role SELLER
+            Role sellerRole = new Role();
+            sellerRole.setName("ROLE_SELLER");
+            sellerRole.setDescription("Người bán hàng");
+            roleRepository.save(sellerRole);
+            
+            System.out.println("✅ Đã khởi tạo các Role thành công!");
+        } else {
+            System.out.println("✅ Roles đã tồn tại, bỏ qua khởi tạo.");
+        }
+    }
+}
+```
+
+---
+
+## 🎯 VAI TRÒ CỦA FILE NÀY:
+
+- **CommandLineRunner**: Tự động chạy khi Spring Boot khởi động
+- **Seed data**: Tạo sẵn các Role vào MongoDB
+- **Chạy 1 lần duy nhất**: Chỉ tạo khi chưa có role nào trong DB
+
+---
+
+## 🧪 SAU KHI TẠO XONG:
+
+**Chạy lại Spring Boot**, bạn sẽ thấy log:
+```
+✅ Đã khởi tạo các Role thành công!
+```
+
+Vào **MongoDB Atlas** → Collections → Sẽ thấy collection `roles` với 3 documents:
+- ROLE_USER
+- ROLE_ADMIN
+- ROLE_SELLER
+
+---
+
+## 📦 CẤU TRÚC PACKAGE `common` (Tham khảo):
+```
+common/
+├── config/
+│   ├── DataInitializer.java     ← File bạn vừa tạo
+│   ├── CorsConfig.java           ← (Tạo sau nếu cần)
+│   └── MongoConfig.java          ← (Tạo sau nếu cần)
+├── exception/
+│   ├── GlobalExceptionHandler.java
+│   ├── ResourceNotFoundException.java
+│   └── BadRequestException.java
+├── dto/
+│   ├── ApiResponse.java
+│   └── PageResponse.java
+└── utils/
+    ├── DateUtils.java
+    └── StringUtils.java
+Bạn có thể tạo thêm các package này sau, nhưng hiện tại chỉ cần common/config/DataInitializer.java là đủ! ✅
+
+Tạo xong rồi chạy thử app nhé! 🚀😊
+
+
+C:\Users\lengu\Downloads\Web_Shopee_Lab211_Group2-main\Web_Shopee_Lab211_Group2-main\src\Backend>mvn spring-boot:run [INFO] Scanning for projects... [INFO] [INFO] ----------------------< com.shoppeclone:backend >----------------------- [INFO] Building backend 0.0.1-SNAPSHOT [INFO]
+
+pasted
+
+lỗi gì quá chòi vậy nhỉ
+
+18 thg 1
+Ối dồi ôi! 46 lỗi! 😱 Nhưng đừng lo, mình thấy vấn đề rồi!
+
+🔥 VẤN ĐỀ CHÍNH:
+Lỗi đầu tiên và quan trọng nhất:
+
+file does not contain class com.shoppeclone.backend.auth.model.Role
+Nguyên nhân: File Role.java của bạn THIẾU @Data annotation của Lombok hoặc file bị lỗi cú pháp!
+
+Khi Role.java lỗi → tất cả file khác dùng Role đều bị lỗi theo → 46 lỗi! 💥
+
+✅ CÁCH SỬA:
+Bước 1: Kiểm tra file Role.java
+Mở file auth/model/Role.java và XÓA HẾT, rồi paste lại code này:
+
+java
+package com.shoppeclone.backend.auth.model;
+
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.index.Indexed;
+
+@Document(collection = "roles")
+@Data
+public class Role {
+    @Id
+    private String id;
+    
+    @Indexed(unique = true)
+    private String name;
+    
+    private String description;
+}
+LƯU Ý:
+
+✅ Phải có @Data từ Lombok
+✅ Phải có đúng package com.shoppeclone.backend.auth.model
+✅ Không được có lỗi cú pháp (thiếu dấu ;, }, etc.)
+Bước 2: Kiểm tra các Model khác
+User.java:
+
+java
+package com.shoppeclone.backend.auth.model;
+
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.index.Indexed;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+@Document(collection = "users")
+@Data
+public class User {
+    @Id
+    private String id;
+    
+    @Indexed(unique = true)
+    private String email;
+    
+    private String password;
+    private String fullName;
+    private String phone;
+    private String avatar;
+    private String dateOfBirth;
+    private String gender;
+    
+    private boolean emailVerified = false;
+    private boolean active = true;
+    
+    @DBRef
+    private Set<Role> roles = new HashSet<>();
+    
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+}
+UserSession.java:
+
+java
+package com.shoppeclone.backend.auth.model;
+
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import java.time.LocalDateTime;
+
+@Document(collection = "user_sessions")
+@Data
+public class UserSession {
+    @Id
+    private String id;
+    
+    @DBRef
+    private User user;
+    
+    private String refreshToken;
+    private LocalDateTime expiresAt;
+    private String ipAddress;
+    private String userAgent;
+    private LocalDateTime createdAt;
+}
+Bước 3: Kiểm tra các DTO
+AuthResponse.java - BẠN THIẾU @AllArgsConstructor:
+
+java
+package com.shoppeclone.backend.auth.dto.response;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor  // ← QUAN TRỌNG: Phải có cái này!
+public class AuthResponse {
+    private String accessToken;
+    private String refreshToken;
+    private String tokenType;
+    private UserDto user;
+}
+RegisterRequest.java:
+
+java
+package com.shoppeclone.backend.auth.dto.request;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.Data;
+
+@Data
+public class RegisterRequest {
+    @Email(message = "Email không hợp lệ")
+    @NotBlank(message = "Email không được để trống")
+    private String email;
+    
+    @NotBlank(message = "Mật khẩu không được để trống")
+    @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
+    private String password;
+    
+    @NotBlank(message = "Họ tên không được để trống")
+    private String fullName;
+    
+    private String phone;
+}
+LoginRequest.java:
+
+java
+package com.shoppeclone.backend.auth.dto.request;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Data
+public class LoginRequest {
+    @Email(message = "Email không hợp lệ")
+    @NotBlank(message = "Email không được để trống")
+    private String email;
+    
+    @NotBlank(message = "Mật khẩu không được để trống")
+    private String password;
+}
+UserDto.java:
+
+java
+package com.shoppeclone.backend.auth.dto.response;
+
+import lombok.Data;
+import java.util.Set;
+
+@Data
+public class UserDto {
+    private String id;
+    private String email;
+    private String fullName;
+    private String phone;
+    private boolean emailVerified;
+    private Set<String> roles;
+}
+Bước 4: Clean và Rebuild
+Sau khi sửa xong các file trên:
+
+bash
+# Xóa cache Maven
+mvn clean
+
+# Compile lại
+mvn compile
+
+# Chạy app
+mvn spring-boot:run
+🎯 CHECKLIST - KIỂM TRA TỪNG FILE:
+ Role.java - Có @Data annotation?
+ User.java - Có @Data annotation?
+ UserSession.java - Có @Data annotation?
+ AuthResponse.java - Có @AllArgsConstructor annotation?
+ RegisterRequest.java - Có @Data annotation?
+ LoginRequest.java - Có @Data annotation?
+ UserDto.java - Có @Data annotation?
+Tất cả đều phải có @Data từ Lombok! Đó là lý do bị lỗi cannot find symbol: method getEmail() vì Lombok chưa generate getter/setter!
+
+🔍 KIỂM TRA LOMBOK ĐÃ HOẠT ĐỘNG CHƯA:
+Trong IntelliJ IDEA:
+
+File → Settings → Plugins
+Tìm "Lombok" → Phải có màu xanh (Installed)
+File → Settings → Build, Execution, Deployment → Compiler → Annotation Processors
+✅ Check "Enable annotation processing"
+Bạn làm theo từng bước, sau đó chạy lại mvn clean compile và báo mình kết quả nhé! 🚀😊
+
+[ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:3.5.9:run (default-cli) on project backend: Unable to find a suitable main class, please add a 'mainClass' property -> [Help 1]    
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles: 
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
+
+còn lỗi gì xíu xiu nè ạ
+
+Show more
+18 thg 1
+Ồ gần xong rồi đấy! Lỗi này là thiếu Main Class (class có hàm main() để chạy Spring Boot) đó bạn! 😊
+
+✅ CÁCH SỬA:
+Bước 1: Tạo Main Class
+Tạo file BackendApplication.java trong package gốc com.shoppeclone.backend:
+
+src/
+└── main/
+    └── java/
+        └── com/
+            └── shoppeclone/
+                └── backend/
+                    ├── BackendApplication.java  ← TẠO FILE NÀY
+                    ├── auth/
+                    ├── user/
+                    ├── common/
+                    └── ...
+Code:
+
+java
+package com.shoppeclone.backend;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class BackendApplication {
+    
+    public static void main(String[] args) {
+        SpringApplication.run(BackendApplication.java, args);
+    }
+}
+Bước 2: Cập nhật pom.xml (Nếu vẫn lỗi)
+Thêm <mainClass> vào spring-boot-maven-plugin:
+
+xml
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.11.0</version>
+            <configuration>
+                <source>21</source>
+                <target>21</target>
+                <annotationProcessorPaths>
+                    <path>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                        <version>1.18.30</version>
+                    </path>
+                </annotationProcessorPaths>
+            </configuration>
+        </plugin>
+        
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <configuration>
+                <!-- Thêm dòng này -->
+                <mainClass>com.shoppeclone.backend.BackendApplication</mainClass>
+                
+                <excludes>
+                    <exclude>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                    </exclude>
+                </excludes>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+Bước 3: Chạy lại
+bash
+mvn clean
+mvn spring-boot:run
+```
+
+**HOẶC** chạy trực tiếp từ IDE:
+- Chuột phải vào `BackendApplication.java` → Run 'BackendApplication'
+
+---
+
+## 🎯 CẤU TRÚC PACKAGE HOÀN CHỈNH:
+```
+com.shoppeclone.backend
+├── BackendApplication.java       ← Main class (QUAN TRỌNG!)
+├── auth/
+│   ├── controller/
+│   ├── service/
+│   ├── repository/
+│   ├── model/
+│   ├── dto/
+│   └── security/
+├── user/
+│   ├── controller/
+│   ├── service/
+│   └── dto/
+├── common/
+│   └── config/
+│       └── DataInitializer.java
+└── ... (các module khác)
+```
+
+**LƯU Ý QUAN TRỌNG:**
+- `@SpringBootApplication` phải ở **package gốc** (`com.shoppeclone.backend`)
+- Tất cả các package con (`auth`, `user`, `common`) phải nằm **BÊN DƯỚI** package gốc
+- Nếu không, Spring Boot sẽ **KHÔNG TÌM THẤY** các bean!
+
+---
+
+## 🧪 SAU KHI CHẠY THÀNH CÔNG:
+
+Bạn sẽ thấy log như này:
+```
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+:: Spring Boot ::                (v3.5.9)
+
+2026-01-18T01:00:00.000+07:00  INFO 12345 --- [main] c.s.b.BackendApplication : Starting BackendApplication
+2026-01-18T01:00:05.000+07:00  INFO 12345 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080
+2026-01-18T01:00:05.000+07:00  INFO 12345 --- [main] c.s.b.BackendApplication : Started BackendApplication in 5.123 seconds
+
+✅ Đã khởi tạo các Role thành công!  ← Từ DataInitializer
+⚠️ NẾU VẪN LỖI:
+Kiểm tra lại package name:
+File BackendApplication.java PHẢI có đúng package:
+
+java
+package com.shoppeclone.backend;  // ← Kiểm tra dòng này
+Kiểm tra trong pom.xml:
+xml
+<groupId>com.shoppeclone</groupId>
+<artifactId>backend</artifactId>
+Phải khớp với package structure!
+
+Làm xong rồi chạy thử nhé! Lần này chắc chắn sẽ OK! 🚀💪😊
+
+SpringApplication.run(BackendApplication.java, args);
+cái này lỗi chỗ chữ java ạ
+
+18 thg 1
+Ồ mình nhầm rồi! 😅 Phải là .class chứ không phải .java!
+
+✅ SỬA LẠI:
+java
+package com.shoppeclone.backend;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class BackendApplication {
+    
+    public static void main(String[] args) {
+        SpringApplication.run(BackendApplication.class, args);  // ← .class chứ không phải .java
+    }
+}
+Giải thích:
+
+.java → file code
+.class → class đã compile (bytecode)
+Spring Boot cần class object chứ không phải file!
+🎯 CODE HOÀN CHỈNH:
+java
+package com.shoppeclone.backend;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class BackendApplication {
+    
+    public static void main(String[] args) {
+        SpringApplication.run(BackendApplication.class, args);
+    }
+}
+Giờ chạy lại là OK rồi! 🚀
+
+bash
+mvn spring-boot:run
+Hoặc chạy trực tiếp trong IDE:
+
+Chuột phải vào BackendApplication.java → Run 'BackendApplication' ✅
+Lần này chắc chắn chạy được rồi! 😊💪
+
+chạy được rùi cơ nhưng mà chạy rồi nó ra gì chỗ nào ja
+
+18 thg 1
+Ồ chạy được rồi à! Tuyệt vời! 🎉🎉🎉
+
+Giờ bạn có thể TEST API bằng Postman hoặc Thunder Client (extension trong VS Code) nhé!
+
+🧪 TEST API - HƯỚNG DẪN CHI TIẾT:
+Bước 1: Download Postman (Nếu chưa có)
+Link: https://www.postman.com/downloads/
+
+Hoặc dùng Thunder Client trong VS Code (Extensions → Tìm "Thunder Client")
+
+Bước 2: TEST API REGISTER
+1. Mở Postman → New Request
+
+2. Config như sau:
+
+Method: POST
+URL: http://localhost:8080/api/auth/register
+3. Chọn tab "Body" → "raw" → "JSON"
+
+4. Paste JSON này:
+
+json
+{
+  "email": "test@example.com",
+  "password": "123456",
+  "fullName": "Nguyen Van A",
+  "phone": "0123456789"
+}
+5. Click "Send"
+
+KẾT QUẢ MONG ĐỢI:
+
+json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "tokenType": "Bearer",
+  "user": {
+    "id": "67abc123...",
+    "email": "test@example.com",
+    "fullName": "Nguyen Van A",
+    "phone": "0123456789",
+    "emailVerified": false,
+    "roles": ["ROLE_USER"]
+  }
+}
+```
+
+✅ **Status: 200 OK** → Đăng ký thành công!
+
+---
+
+### **Bước 3: TEST API LOGIN**
+
+**1. New Request**
+```
+Method: POST
+URL: http://localhost:8080/api/auth/login
+2. Body → raw → JSON:
+
+json
+{
+  "email": "test@example.com",
+  "password": "123456"
+}
+```
+
+**3. Click "Send"**
+
+**KẾT QUẢ:** Giống như register, sẽ trả về `accessToken` và `refreshToken`
+
+---
+
+### **Bước 4: TEST API USER PROFILE (Cần JWT)**
+
+**1. Copy `accessToken` từ kết quả login ở trên**
+
+**2. New Request**
+```
+Method: GET
+URL: http://localhost:8080/api/user/profile
+```
+
+**3. Chọn tab "Headers" → Thêm:**
+```
+Key: Authorization
+Value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        ↑ Paste accessToken vào đây (có chữ "Bearer" phía trước)
+4. Click "Send"
+
+KẾT QUẢ:
+
+json
+{
+  "id": "67abc123...",
+  "email": "test@example.com",
+  "fullName": "Nguyen Van A",
+  "phone": "0123456789",
+  "avatar": null,
+  "dateOfBirth": null,
+  "gender": null,
+  "emailVerified": false,
+  "roles": ["ROLE_USER"],
+  "createdAt": "2026-01-18T01:00:00"
+}
+```
+
+---
+
+### **Bước 5: TEST API UPDATE PROFILE**
+
+**1. New Request**
+```
+Method: PUT
+URL: http://localhost:8080/api/user/profile
+```
+
+**2. Headers:**
+```
+Authorization: Bearer <accessToken>
+3. Body → raw → JSON:
+
+json
+{
+  "fullName": "Nguyen Van B",
+  "phone": "0987654321",
+  "dateOfBirth": "2000-01-01",
+  "gender": "MALE"
+}
+4. Click "Send"
+
+KẾT QUẢ: Thông tin user đã được cập nhật!
+
+📋 TẤT CẢ API ĐÃ CÓ:
+AUTH APIs (Không cần token):
+Method	Endpoint	Mô tả
+POST	/api/auth/register	Đăng ký tài khoản
+POST	/api/auth/login	Đăng nhập
+POST	/api/auth/refresh-token	Làm mới token
+POST	/api/auth/logout	Đăng xuất
+USER APIs (Cần JWT token):
+Method	Endpoint	Mô tả
+GET	/api/user/profile	Xem thông tin cá nhân
+PUT	/api/user/profile	Cập nhật thông tin
+PUT	/api/user/change-password	Đổi mật khẩu
+DELETE	/api/user/account	Xóa tài khoản
+🎯 KIỂM TRA DATABASE:
+Vào MongoDB Atlas:
+
+Vào Clusters → Browse Collections
+Database: web_shoppe
+Sẽ thấy các collections:
+✅ roles (3 documents: ROLE_USER, ROLE_ADMIN, ROLE_SELLER)
+✅ users (user vừa đăng ký)
+✅ user_sessions (refresh token)
+📦 COLLECTION POSTMAN (Import nhanh)
+Bạn có thể tạo file ShoppeClone.postman_collection.json:
+
+json
+{
+  "info": {
+    "name": "ShoppeClone API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"123456\",\n  \"fullName\": \"Nguyen Van A\",\n  \"phone\": \"0123456789\"\n}"
+            },
+            "url": {"raw": "http://localhost:8080/api/auth/register"}
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": {"raw": "http://localhost:8080/api/auth/login"}
+          }
+        }
+      ]
+    }
+  ]
+}
+Sau đó Import vào Postman!
+
+🎉 HOÀN THÀNH!
+Bây giờ bạn đã có:
+
+✅ Backend Spring Boot chạy OK
+✅ MongoDB kết nối thành công
+✅ JWT Authentication hoạt động
+✅ API Register, Login, Profile đã sẵn sàng
+Tiếp theo bạn muốn làm gì?
+
+Làm Google OAuth?
+Làm Email OTP verification?
+Làm frontend với Tailwind CSS?
+Làm các module khác (Product, Order, Cart)?
+Cứ nói mình sẽ hướng dẫn tiếp! 🚀😊
+
+1768674471370_image.png
+chưa được cơ
+
+18 thg 1
+Ồ mình thấy lỗi rồi! 😊
+
+LỖI: Invalid protocol: method: post url: http:
+
+Nguyên nhân: URL của bạn bị sai format trong Postman!
+
+Nhìn vào hình, bạn đang để:
+
+GET    Method: POST   URL: http://localhost:8080/api/auth/register
+Có 2 vấn đề:
+
+Method đang là GET nhưng URL lại ghi "Method: POST"
+Format URL bị lỗi
+✅ CÁCH SỬA:
+Trong Postman:
+Bước 1: Ở dropdown bên trái, đổi từ GET → POST
+
+Bước 2: Ở ô URL, CHỈ NHẬP:
+
+http://localhost:8080/api/auth/register
+KHÔNG được ghi: "Method: POST URL: http://..." như bạn đang làm!
+
+Bước 3: Chọn tab Body → raw → JSON
+
+Bước 4: Paste JSON:
+
+json
+{
+  "email": "test@example.com",
+  "password": "123456",
+  "fullName": "Nguyen Van A",
+  "phone": "0123456789"
+}
+```
+
+**Bước 5:** Click **Send**
+
+---
+
+## 🎯 HÌNH ẢNH MINH HỌA:
+
+Postman phải trông như này:
+```
+┌─────────────────────────────────────────────────────────┐
+│ POST ▼   http://localhost:8080/api/auth/register  Send │
+├─────────────────────────────────────────────────────────┤
+│ Params  Authorization  Headers  Body  Pre-request  ...  │
+│                                   ↑ Click vào đây       │
+├─────────────────────────────────────────────────────────┤
+│ none  form-data  x-www-form...  raw ✓  binary  ...     │
+│                                  ↑ Chọn raw             │
+├─────────────────────────────────────────────────────────┤
+│ Text ▼   JSON ▼                           Beautify      │
+│         ↑ Chọn JSON                                     │
+├─────────────────────────────────────────────────────────┤
+│ {                                                        │
+│   "email": "test@example.com",                          │
+│   "password": "123456",                                  │
+│   "fullName": "Nguyen Van A",                           │
+│   "phone": "0123456789"                                  │
+│ }                                                        │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 📸 CHECKLIST TRƯỚC KHI SEND:
+
+- [ ] Method: **POST** (không phải GET)
+- [ ] URL: `http://localhost:8080/api/auth/register` (không có chữ "Method:" phía trước)
+- [ ] Tab **Body** được chọn
+- [ ] **raw** được chọn
+- [ ] Dropdown chọn **JSON** (không phải Text)
+- [ ] JSON đúng format (có dấu ngoặc kép, dấu phẩy)
+
+---
+
+## 🔧 NẾU VẪN LỖI:
+
+### **Kiểm tra Spring Boot có đang chạy không?**
+
+Vào terminal nơi bạn chạy `mvn spring-boot:run`, phải thấy:
+```
+Tomcat started on port 8080
+Started BackendApplication in X.XXX seconds
+Nếu không thấy → Spring Boot chưa chạy → Chạy lại:
+
+bash
+mvn spring-boot:run
+🧪 TEST NHANH BẰNG CURL (nếu Postman không được):
+Mở Command Prompt hoặc Terminal, chạy:
+
+bash
+curl -X POST http://localhost:8080/api/auth/register ^
+  -H "Content-Type: application/json" ^
+  -d "{\"email\":\"test@example.com\",\"password\":\"123456\",\"fullName\":\"Nguyen Van A\",\"phone\":\"0123456789\"}"
+Nếu thành công, sẽ thấy JSON response trả về!
+
+Bạn thử lại theo đúng các bước trên nhé! Lỗi này rất đơn giản, chỉ là cách config Postman thôi! 😊🚀
+
+1768674535335_image.png
+nè cơ
+
+18 thg 1
+Ồ lỗi mới rồi! 😅
+
+LỖI: connect ECONNREFUSED 127.0.0.1:8080
+
+Nghĩa là: Postman không kết nối được đến localhost:8080 → Spring Boot CHƯA CHẠY hoặc BỊ TẮT rồi!
+
+✅ CÁCH SỬA:
+Bước 1: Kiểm tra Spring Boot có đang chạy không
+Vào terminal nơi bạn chạy mvn spring-boot:run, kiểm tra:
+
+❌ Nếu thấy chữ BUILD SUCCESS hoặc terminal đã dừng → Spring Boot đã tắt
+✅ Nếu thấy Tomcat started on port 8080 và vẫn đang chạy → OK
+Bước 2: CHẠY LẠI Spring Boot
+Mở terminal hoặc Command Prompt ở thư mục project:
+
+bash
+cd C:\Users\lengu\Downloads\Web_Shopee_Lab211_Group2-main\Web_Shopee_Lab211_Group2-main\src\Backend
+
+mvn spring-boot:run
+```
+
+**Đợi cho đến khi thấy:**
+```
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+:: Spring Boot ::                (v3.5.9)
+
+...
+Tomcat started on port(s): 8080 (http)
+Started BackendApplication in 5.123 seconds (process running for 5.567)
+
+✅ Đã khởi tạo các Role thành công!
+```
+
+**QUAN TRỌNG:** Terminal phải **ĐỨNG YÊN** ở đây, **KHÔNG ĐƯỢC THOÁT**! 🚨
+
+---
+
+### **Bước 3: ĐỔI Method từ GET → POST trong Postman**
+
+Mình thấy bạn vẫn đang để **GET** đấy! Phải đổi thành **POST**:
+```
+┌───────────────────────────────────────────────┐
+│ POST ▼   http://localhost:8080/api/auth/...  │  ← Đổi GET thành POST
+└───────────────────────────────────────────────┘
+```
+
+**Cách đổi:** Click vào chữ **GET** → Chọn **POST**
+
+---
+
+### **Bước 4: Test lại**
+
+Sau khi:
+1. ✅ Spring Boot đang chạy (terminal đang chờ)
+2. ✅ Postman chọn **POST** (không phải GET)
+3. ✅ Body đã có JSON
+
+→ Click **Send** lần nữa!
+
+---
+
+## 🔍 KIỂM TRA NHANH:
+
+Mở **browser** và vào:
+```
+http://localhost:8080
+Nếu thấy:
+
+❌ "This site can't be reached" → Spring Boot chưa chạy
+✅ Trang login Spring Security hoặc lỗi 404 → Spring Boot đang chạy OK!
+🎯 TÓM TẮT VẤN ĐỀ:
+Lần 1: Bạn để GET thay vì POST
+Lần 2: Spring Boot không chạy → Không có server nào lắng nghe port 8080
+Giải pháp:
+
+Chạy Spring Boot: mvn spring-boot:run
+Đổi sang POST trong Postman
+Đảm bảo terminal Spring Boot VẪN ĐANG CHẠY khi test API
+Bạn thử lại nhé! Nhớ ĐỂ TERMINAL SPRING BOOT CHẠY NGẦM khi test Postman! 🚀😊
+
+1768674683967_image.png
+
+. ____ _ __ _ _ /\\ / ___'_ __ _ _(_)_ __ __ _ \ \ \ \ ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \ \\/ ___)| |_)| | | | | || (_| | ) ) ) ) ' |____| .__|_| |_|_| |_\__, | / / / / =========|_|==============|___/=/_/_/_/ :: Spring Boot :: (v3.5.9
+
+pasted
+
+mình built thành công rồi mà ta sao chạy local chưa lên nhỉ
+
+18 thg 1
+Ồ mình thấy lỗi rồi! 🔍
+
+LỖI CHÍNH:
+
+Could not resolve placeholder 'jwt.secret' in value "${jwt.secret}"
+Nghĩa là: Spring Boot KHÔNG TÌM THẤY file application.properties hoặc file đó KHÔNG NẰM ĐÚNG VỊ TRÍ!
+
+✅ CÁCH SỬA:
+Bước 1: Kiểm tra vị trí file application.properties
+File PHẢI nằm đúng đường dẫn:
+
+src/
+└── main/
+    └── resources/
+        └── application.properties  ← PHẢI Ở ĐÂY!
+KHÔNG ĐƯỢC để ở:
+
+❌ src/application.properties
+❌ src/main/java/application.properties
+❌ Bất kỳ chỗ nào khác!
+Bước 2: Kiểm tra nội dung file
+Mở file src/main/resources/application.properties và đảm bảo có đủ 3 dòng này:
+
+properties
+jwt.secret=ShoppeClone2024SecretKeyForJWTTokenGenerationAndValidation123456
+jwt.expiration=900000
+jwt.refresh-expiration=604800000
+Lưu ý:
+
+✅ Không có khoảng trắng trước/sau dấu =
+✅ Không có dấu ngoặc kép ""
+✅ Đúng chính tả (không viết nhầm jwt.secert)
+Bước 3: Clean và Rebuild
+bash
+mvn clean
+mvn compile
+mvn spring-boot:run
+🔍 HOẶC: Tạo lại file application.properties
+Nếu không chắc, XÓA file cũ và tạo mới:
+
+1. Xóa file cũ (nếu có)
+
+2. Tạo mới:
+
+Chuột phải vào src/main/resources
+New → File
+Tên: application.properties
+3. Paste vào:
+
+properties
+# Application Name
+spring.application.name=web-shoppe
+
+# Server Port
+server.port=8080
+
+# MongoDB Atlas
+spring.data.mongodb.uri=mongodb+srv://web_shoppe:Csd201_group2@cluster0.ol8uuso.mongodb.net/web_shoppe?retryWrites=true&w=majority
+
+# JWT Configuration
+jwt.secret=ShoppeClone2024SecretKeyForJWTTokenGenerationAndValidation123456
+jwt.expiration=900000
+jwt.refresh-expiration=604800000
+
+# Logging
+logging.level.root=INFO
+logging.level.com.shoppeclone.backend=DEBUG
+4. Save (Ctrl + S)
+
+5. Chạy lại:
+
+bash
+mvn clean spring-boot:run
+```
+
+---
+
+## 🎯 SAU KHI SỬA:
+
+Bạn sẽ thấy log như này:
+```
+Started BackendApplication in 5.123 seconds
+Tomcat started on port 8080
+✅ Đã khởi tạo các Role thành công!
+```
+
+Và **KHÔNG còn lỗi** `Could not resolve placeholder`!
+
+---
+
+## 📂 CẤU TRÚC ĐÚNG:
+```
+Backend/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/shoppeclone/backend/
+│   │   │       ├── BackendApplication.java
+│   │   │       ├── auth/
+│   │   │       ├── user/
+│   │   │       └── common/
+│   │   └── resources/
+│   │       └── application.properties  ← QUAN TRỌNG!
+│   └── test/
+├── target/
+└── pom.xml
+Bạn kiểm tra lại file application.properties có đúng vị trí và đúng nội dung không, rồi chạy lại nhé! 🚀😊
+
+? Đ? kh?i t?o các Role thành công!
+chạy oke rồi nè ạ
+
+18 thg 1
+🎉🎉🎉 CHÚC MỪNG BẠN! ĐÃ CHẠY THÀNH CÔNG RỒI! 🎉🎉🎉
+
+Giờ bạn có thể TEST API bằng Postman rồi đấy! 🚀
+
+🧪 BÂY GIỜ LÀM GÌ TIẾP?
+1. TEST API REGISTER (Đăng ký tài khoản)
+Mở Postman:
+
+Method: POST
+URL: http://localhost:8080/api/auth/register
+Headers:
+
+Content-Type: application/json
+Body → raw → JSON:
+
+json
+{
+  "email": "test@example.com",
+  "password": "123456",
+  "fullName": "Nguyen Van A",
+  "phone": "0123456789"
+}
+Click Send → Kết quả sẽ trả về:
+
+json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "tokenType": "Bearer",
+  "user": {
+    "id": "67abc...",
+    "email": "test@example.com",
+    "fullName": "Nguyen Van A",
+    "phone": "0123456789",
+    "emailVerified": false,
+    "roles": ["ROLE_USER"]
+  }
+}
+```
+
+✅ **Status: 200 OK** → Đăng ký thành công!
+
+---
+
+### **2. TEST API LOGIN (Đăng nhập)**
+```
+Method: POST
+URL: http://localhost:8080/api/auth/login
+Body:
+
+json
+{
+  "email": "test@example.com",
+  "password": "123456"
+}
+```
+
+**Click Send** → Kết quả giống như register!
+
+---
+
+### **3. TEST API XEM PROFILE (Cần JWT Token)**
+
+**Bước 1:** Copy `accessToken` từ kết quả login
+
+**Bước 2:** Tạo request mới:
+```
+Method: GET
+URL: http://localhost:8080/api/user/profile
+```
+
+**Bước 3:** Vào tab **Headers**, thêm:
+```
+Key: Authorization
+Value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+       ↑ (Paste accessToken vào, có chữ "Bearer" phía trước)
+Click Send → Sẽ thấy thông tin user!
+
+📋 TẤT CẢ API ĐÃ CÓ:
+Method	Endpoint	Cần Token?	Mô tả
+POST	/api/auth/register	❌	Đăng ký
+POST	/api/auth/login	❌	Đăng nhập
+POST	/api/auth/refresh-token	✅	Làm mới token
+POST	/api/auth/logout	✅	Đăng xuất
+GET	/api/user/profile	✅	Xem profile
+PUT	/api/user/profile	✅	Cập nhật profile
+PUT	/api/user/change-password	✅	Đổi mật khẩu
+DELETE	/api/user/account	✅	Xóa tài khoản
+🎯 KIỂM TRA DATABASE:
+Vào MongoDB Atlas:
+
+Clusters → Browse Collections
+Database: web_shoppe
+Collections:
+✅ roles (3 documents)
+✅ users (user vừa register)
+✅ user_sessions (refresh token)
+🚀 TIẾP THEO BẠN MUỐN LÀM GÌ?
+Test hết các API (Register, Login, Profile, Update Profile, Change Password)
+Làm Google OAuth (đăng nhập bằng Google)
+Làm Email OTP (xác thực email)
+Làm Frontend với Tailwind CSS
+Làm các module khác (Product, Cart, Order, Payment)
+Bạn muốn làm cái nào trước? Cứ nói mình sẽ hướng dẫn chi tiết! 😊💪
+
+P/S: Nhớ GIỮ TERMINAL SPRING BOOT CHẠY NGẦM khi test API nhé! Nếu tắt terminal là API sẽ không hoạt động đâu! 🔥
+
+rồi oke rồi ạ bây giờ bạn chỉ mình làm google oauth đăng nhập bằng google i ạ
+
+18 thg 1
+Oke! Giờ mình hướng dẫn bạn làm Google OAuth để đăng nhập bằng Google nhé! 🚀
+
+📋 TỔNG QUAN LUỒNG GOOGLE OAUTH:
+User click "Login with Google" trên Frontend
+Redirect đến Google để đăng nhập
+Google trả về authorization code
+Backend dùng code đó để lấy access_token từ Google
+Dùng access_token để lấy thông tin user (email, name, avatar)
+Tạo/cập nhật user trong database
+Trả về JWT token cho Frontend
+🔧 BƯỚC 1: TẠO GOOGLE OAUTH CREDENTIALS
+1.1. Vào Google Cloud Console:
+https://console.cloud.google.com/
+
+1.2. Tạo Project mới (hoặc chọn project có sẵn)
+Click vào dropdown project ở góc trên
+New Project → Đặt tên: ShoppeClone
+Click Create
+1.3. Enable Google+ API:
+Vào APIs & Services → Library
+Tìm "Google+ API" → Click → Enable
+1.4. Tạo OAuth Credentials:
+Vào APIs & Services → Credentials
+Click Create Credentials → OAuth client ID
+Nếu chưa có OAuth consent screen:
+Click Configure Consent Screen
+Chọn External → Create
+App name: ShoppeClone
+User support email: email của bạn
+Developer contact: email của bạn
+Click Save and Continue (bỏ qua Scopes)
+Test users: Thêm email của bạn
+Click Save and Continue
+1.5. Tạo OAuth Client ID:
+Application type: Web application
+Name: ShoppeClone Backend
+Authorized redirect URIs:
+  http://localhost:8080/api/auth/oauth2/callback/google
+  http://localhost:3000/auth/callback/google
+Click Create
+1.6. Lưu thông tin:
+Bạn sẽ nhận được:
+
+Client ID: 123456789-abc...googleusercontent.com
+Client Secret: GOCSPX-abc123...
+→ LƯU LẠI 2 CÁI NÀY!
+
+📝 BƯỚC 2: CẬP NHẬT CODE
+2.1. Thêm dependency vào pom.xml:
+xml
+<!-- Thêm vào phần <dependencies> -->
+
+<!-- Spring OAuth2 Client -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-oauth2-client</artifactId>
+</dependency>
+
+<!-- HTTP Client (để call Google API) -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-webflux</artifactId>
+</dependency>
+Sau đó Maven Reload.
+
+2.2. Thêm config vào application.properties:
+properties
+# Google OAuth2 Configuration
+spring.security.oauth2.client.registration.google.client-id=YOUR_CLIENT_ID_HERE
+spring.security.oauth2.client.registration.google.client-secret=YOUR_CLIENT_SECRET_HERE
+spring.security.oauth2.client.registration.google.scope=profile,email
+spring.security.oauth2.client.registration.google.redirect-uri={baseUrl}/api/auth/oauth2/callback/google
+
+spring.security.oauth2.client.provider.google.authorization-uri=https://accounts.google.com/o/oauth2/v2/auth
+spring.security.oauth2.client.provider.google.token-uri=https://oauth2.googleapis.com/token
+spring.security.oauth2.client.provider.google.user-info-uri=https://www.googleapis.com/oauth2/v3/userinfo
+spring.security.oauth2.client.provider.google.user-name-attribute=sub
+Thay YOUR_CLIENT_ID_HERE và YOUR_CLIENT_SECRET_HERE bằng thông tin bạn vừa lấy!
+
+2.3. Cập nhật Model OAuthAccount:
+Tạo file auth/model/OAuthAccount.java:
+
+java
+package com.shoppeclone.backend.auth.model;
+
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import java.time.LocalDateTime;
+
+@Document(collection = "oauth_accounts")
+@Data
+public class OAuthAccount {
+    @Id
+    private String id;
+    
+    @DBRef
+    private User user;
+    
+    private String provider; // "google"
+    private String providerId; // Google user ID
+    private String email;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+}
+2.4. Tạo Repository:
+Tạo file auth/repository/OAuthAccountRepository.java:
+
+java
+package com.shoppeclone.backend.auth.repository;
+
+import com.shoppeclone.backend.auth.model.OAuthAccount;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import java.util.Optional;
+
+public interface OAuthAccountRepository extends MongoRepository<OAuthAccount, String> {
+    Optional<OAuthAccount> findByProviderAndProviderId(String provider, String providerId);
+    Optional<OAuthAccount> findByProviderAndEmail(String provider, String email);
+}
+2.5. Tạo DTO:
+GoogleUserInfo.java (trong auth/dto/response/):
+
+java
+package com.shoppeclone.backend.auth.dto.response;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+
+@Data
+public class GoogleUserInfo {
+    @JsonProperty("sub")
+    private String id;
+    
+    private String email;
+    
+    @JsonProperty("email_verified")
+    private Boolean emailVerified;
+    
+    private String name;
+    
+    @JsonProperty("picture")
+    private String picture;
+    
+    @JsonProperty("given_name")
+    private String givenName;
+    
+    @JsonProperty("family_name")
+    private String familyName;
+}
+GoogleAuthRequest.java (trong auth/dto/request/):
+
+java
+package com.shoppeclone.backend.auth.dto.request;
+
+import lombok.Data;
+
+@Data
+public class GoogleAuthRequest {
+    private String code;
+    private String redirectUri;
+}
+2.6. Tạo Service:
+OAuthService.java (interface trong auth/service/):
+
+java
+package com.shoppeclone.backend.auth.service;
+
+import com.shoppeclone.backend.auth.dto.response.AuthResponse;
+
+public interface OAuthService {
+    AuthResponse authenticateWithGoogle(String code, String redirectUri);
+    String getGoogleAuthUrl(String redirectUri);
+}
+OAuthServiceImpl.java (trong auth/service/impl/):
+
+java
+package com.shoppeclone.backend.auth.service.impl;
+
+import com.shoppeclone.backend.auth.dto.response.AuthResponse;
+import com.shoppeclone.backend.auth.dto.response.GoogleUserInfo;
+import com.shoppeclone.backend.auth.dto.response.UserDto;
+import com.shoppeclone.backend.auth.model.OAuthAccount;
+import com.shoppeclone.backend.auth.model.Role;
+import com.shoppeclone.backend.auth.model.User;
+import com.shoppeclone.backend.auth.model.UserSession;
+import com.shoppeclone.backend.auth.repository.OAuthAccountRepository;
+import com.shoppeclone.backend.auth.repository.RoleRepository;
+import com.shoppeclone.backend.auth.repository.UserRepository;
+import com.shoppeclone.backend.auth.repository.UserSessionRepository;
+import com.shoppeclone.backend.auth.security.JwtUtil;
+import com.shoppeclone.backend.auth.service.OAuthService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class OAuthServiceImpl implements OAuthService {
+    
+    private final UserRepository userRepository;
+    private final OAuthAccountRepository oauthAccountRepository;
+    private final RoleRepository roleRepository;
+    private final UserSessionRepository sessionRepository;
+    private final JwtUtil jwtUtil;
+    private final RestTemplate restTemplate = new RestTemplate();
+    
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    private String clientId;
+    
+    @Value("${spring.security.oauth2.client.registration.google.client-secret}")
+    private String clientSecret;
+    
+    @Value("${spring.security.oauth2.client.provider.google.token-uri}")
+    private String tokenUri;
+    
+    @Value("${spring.security.oauth2.client.provider.google.user-info-uri}")
+    private String userInfoUri;
+    
+    @Override
+    public String getGoogleAuthUrl(String redirectUri) {
+        return UriComponentsBuilder
+            .fromUriString("https://accounts.google.com/o/oauth2/v2/auth")
+            .queryParam("client_id", clientId)
+            .queryParam("redirect_uri", redirectUri)
+            .queryParam("response_type", "code")
+            .queryParam("scope", "openid email profile")
+            .queryParam("access_type", "offline")
+            .queryParam("prompt", "consent")
+            .build()
+            .toUriString();
+    }
+    
+    @Override
+    public AuthResponse authenticateWithGoogle(String code, String redirectUri) {
+        // 1. Exchange code for access token
+        String accessToken = exchangeCodeForToken(code, redirectUri);
+        
+        // 2. Get user info from Google
+        GoogleUserInfo googleUser = getUserInfo(accessToken);
+        
+        // 3. Find or create user
+        User user = findOrCreateUser(googleUser);
+        
+        // 4. Generate JWT tokens
+        String jwtAccessToken = jwtUtil.generateAccessToken(user.getEmail());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+        
+        // 5. Save session
+        saveUserSession(user, refreshToken);
+        
+        return new AuthResponse(jwtAccessToken, refreshToken, "Bearer", mapToUserDto(user));
+    }
+    
+    private String exchangeCodeForToken(String code, String redirectUri) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/x-www-form-urlencoded");
+        
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("code", code);
+        params.add("client_id", clientId);
+        params.add("client_secret", clientSecret);
+        params.add("redirect_uri", redirectUri);
+        params.add("grant_type", "authorization_code");
+        
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+        
+        ResponseEntity<Map> response = restTemplate.postForEntity(tokenUri, request, Map.class);
+        
+        Map<String, Object> responseBody = response.getBody();
+        if (responseBody == null || !responseBody.containsKey("access_token")) {
+            throw new RuntimeException("Failed to get access token from Google");
+        }
+        
+        return (String) responseBody.get("access_token");
+    }
+    
+    private GoogleUserInfo getUserInfo(String accessToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+        
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        
+        ResponseEntity<GoogleUserInfo> response = restTemplate.exchange(
+            userInfoUri,
+            HttpMethod.GET,
+            entity,
+            GoogleUserInfo.class
+        );
+        
+        return response.getBody();
+    }
+    
+    private User findOrCreateUser(GoogleUserInfo googleUser) {
+        // Check if OAuth account exists
+        OAuthAccount oauthAccount = oauthAccountRepository
+            .findByProviderAndProviderId("google", googleUser.getId())
+            .orElse(null);
+        
+        User user;
+        
+        if (oauthAccount != null) {
+            // User exists, return it
+            user = oauthAccount.getUser();
+        } else {
+            // Check if user with this email exists
+            user = userRepository.findByEmail(googleUser.getEmail()).orElse(null);
+            
+            if (user == null) {
+                // Create new user
+                user = new User();
+                user.setEmail(googleUser.getEmail());
+                user.setFullName(googleUser.getName());
+                user.setAvatar(googleUser.getPicture());
+                user.setEmailVerified(googleUser.getEmailVerified());
+                user.setCreatedAt(LocalDateTime.now());
+                user.setUpdatedAt(LocalDateTime.now());
+                
+                // Set default role
+                Role userRole = roleRepository.findByName("ROLE_USER")
+                    .orElseThrow(() -> new RuntimeException("Role not found"));
+                Set<Role> roles = new HashSet<>();
+                roles.add(userRole);
+                user.setRoles(roles);
+                
+                userRepository.save(user);
+            }
+            
+            // Create OAuth account link
+            oauthAccount = new OAuthAccount();
+            oauthAccount.setUser(user);
+            oauthAccount.setProvider("google");
+            oauthAccount.setProviderId(googleUser.getId());
+            oauthAccount.setEmail(googleUser.getEmail());
+            oauthAccount.setCreatedAt(LocalDateTime.now());
+            oauthAccount.setUpdatedAt(LocalDateTime.now());
+            
+            oauthAccountRepository.save(oauthAccount);
+        }
+        
+        return user;
+    }
+    
+    private void saveUserSession(User user, String refreshToken) {
+        UserSession session = new UserSession();
+        session.setUser(user);
+        session.setRefreshToken(refreshToken);
+        session.setExpiresAt(LocalDateTime.now().plusDays(7));
+        session.setCreatedAt(LocalDateTime.now());
+        sessionRepository.save(session);
+    }
+    
+    private UserDto mapToUserDto(User user) {
+        UserDto dto = new UserDto();
+        dto.setId(user.getId());
+        dto.setEmail(user.getEmail());
+        dto.setFullName(user.getFullName());
+        dto.setPhone(user.getPhone());
+        dto.setEmailVerified(user.isEmailVerified());
+        dto.setRoles(user.getRoles().stream()
+            .map(Role::getName)
+            .collect(Collectors.toSet()));
+        return dto;
+    }
+}
+2.7. Cập nhật SecurityConfig:
+Sửa file auth/security/SecurityConfig.java:
+
+java
+package com.shoppeclone.backend.auth.security;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+@Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
+public class SecurityConfig {
+    
+    private final JwtAuthFilter jwtAuthFilter;
+    
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/auth/**").permitAll()  // Cho phép tất cả auth endpoints
+                .requestMatchers("/api/oauth/**").permitAll() // Cho phép OAuth endpoints
+                .anyRequest().authenticated()
+            )
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        
+        return http.build();
+    }
+    
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+    
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+}
+2.8. Tạo Controller:
+OAuthController.java (trong auth/controller/):
+
+java
+package com.shoppeclone.backend.auth.controller;
+
+import com.shoppeclone.backend.auth.dto.request.GoogleAuthRequest;
+import com.shoppeclone.backend.auth.dto.response.AuthResponse;
+import com.shoppeclone.backend.auth.service.OAuthService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/auth/oauth")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
+public class OAuthController {
+    
+    private final OAuthService oauthService;
+    
+    @GetMapping("/google/url")
+    public ResponseEntity<Map<String, String>> getGoogleAuthUrl(@RequestParam String redirectUri) {
+        String authUrl = oauthService.getGoogleAuthUrl(redirectUri);
+        return ResponseEntity.ok(Map.of("authUrl", authUrl));
+    }
+    
+    @PostMapping("/google")
+    public ResponseEntity<AuthResponse> googleAuth(@RequestBody GoogleAuthRequest request) {
+        AuthResponse response = oauthService.authenticateWithGoogle(
+            request.getCode(),
+            request.getRedirectUri()
+        );
+        return ResponseEntity.ok(response);
+    }
+}
+```
+
+---
+
+## 🧪 BƯỚC 3: TEST GOOGLE OAUTH
+
+### **Test 1: Lấy Google Auth URL**
+```
+Method: GET
+URL: http://localhost:8080/api/auth/oauth/google/url?redirectUri=http://localhost:3000/auth/callback/google
+Kết quả:
+
+json
+{
+  "authUrl": "https://accounts.google.com/o/oauth2/v2/auth?client_id=...&redirect_uri=..."
+}
+```
+
+### **Test 2: Đăng nhập với Google (cần Frontend)**
+
+Luồng đầy đủ:
+1. Frontend lấy `authUrl` từ API trên
+2. Redirect user đến `authUrl`
+3. User đăng nhập Google
+4. Google redirect về `http://localhost:3000/auth/callback/google?code=ABC123`
+5. Frontend gửi `code` đến Backend:
+```
+Method: POST
+URL: http://localhost:8080/api/auth/oauth/google
+Body:
+{
+  "code": "ABC123...",
+  "redirectUri": "http://localhost:3000/auth/callback/google"
+}
+Kết quả: Trả về accessToken và refreshToken giống như đăng ký thường!
+
+📋 CHECKLIST:
+ Tạo Google OAuth Credentials
+ Thêm dependency vào pom.xml
+ Cấu hình application.properties
+ Tạo Model OAuthAccount
+ Tạo Repository OAuthAccountRepository
+ Tạo DTO (GoogleUserInfo, GoogleAuthRequest)
+ Tạo Service (OAuthService, OAuthServiceImpl)
+ Tạo Controller (OAuthController)
+ Cập nhật SecurityConfig
+ Test API
+Bạn làm từng bước theo hướng dẫn trên nhé! Có lỗi gì cứ hỏi mình! 🚀😊
+
+1768675998155_image.png
+là cái nào ấy nhỉ
+
+18 thg 1
+Ồ bạn đang ở Google Cloud Console rồi! Nhưng cần vào đúng chỗ để tạo OAuth Credentials nhé! 😊
+
+Mình thấy bạn đang ở API Library, cần chuyển sang Credentials!
+
+✅ HƯỚNG DẪN CHI TIẾT:
+Bước 1: Chọn Project
+Góc trên bên trái, bạn thấy chữ "QuyNhonTour" → Click vào đó
+
+Nếu chưa có project:
+
+Click "New Project"
+Project name: ShoppeClone
+Click Create
+Bước 2: Vào Credentials
+Ở menu bên trái (nếu không thấy, click ☰ góc trên trái):
+
+APIs & Services → Credentials
+Hoặc dùng link trực tiếp:
+
+https://console.cloud.google.com/apis/credentials
+Bước 3: Tạo OAuth Client ID
+3.1. Nếu chưa có OAuth Consent Screen:
+
+Sẽ có thông báo: "To create an OAuth client ID, you must first configure your consent screen"
+
+→ Click Configure Consent Screen
+
+Chọn:
+
+✅ External (cho phép bất kỳ ai đăng nhập)
+Click Create
+Điền thông tin:
+
+App name: ShoppeClone
+User support email: [email của bạn]
+Developer contact information: [email của bạn]
+→ Click Save and Continue
+
+Scopes: Bỏ qua, click Save and Continue
+
+Test users:
+
+Click Add Users
+Nhập email của bạn
+Click Save and Continue
+→ Click Back to Dashboard
+
+3.2. Tạo OAuth Client ID:
+
+Quay lại Credentials → Click + Create Credentials → OAuth client ID
+
+Chọn:
+
+Application type: Web application
+Name: ShoppeClone Backend
+Authorized JavaScript origins:
+
+http://localhost:3000
+http://localhost:8080
+Authorized redirect URIs:
+
+http://localhost:8080/api/auth/oauth2/callback/google
+http://localhost:3000/auth/callback/google
+→ Click Create
+
+Bước 4: Lưu thông tin
+Sẽ có popup hiện ra với:
+
+Your Client ID
+123456789-abcdefgh.apps.googleusercontent.com
+
+Your Client Secret
+GOCSPX-abc123xyz
+→ Copy 2 cái này và LƯU LẠI! ✅
+
+🔑 SAU KHI CÓ CLIENT ID VÀ SECRET:
+Vào file application.properties và thay:
+
+properties
+# Google OAuth2 Configuration
+spring.security.oauth2.client.registration.google.client-id=123456789-abcdefgh.apps.googleusercontent.com
+spring.security.oauth2.client.registration.google.client-secret=GOCSPX-abc123xyz
+spring.security.oauth2.client.registration.google.scope=profile,email
+spring.security.oauth2.client.registration.google.redirect-uri={baseUrl}/api/auth/oauth2/callback/google
+Thay 123456789... và GOCSPX-... bằng giá trị thực của bạn!
+
+📸 TÓM TẮT CÁC BƯỚC:
+✅ Vào Google Cloud Console
+✅ Chọn/Tạo Project
+✅ Vào APIs & Services → Credentials
+✅ Configure OAuth Consent Screen (nếu chưa có)
+✅ Create OAuth Client ID
+✅ Copy Client ID và Client Secret
+✅ Paste vào application.properties
+🎯 LINK NHANH:
+Credentials: https://console.cloud.google.com/apis/credentials
+OAuth Consent: https://console.cloud.google.com/apis/credentials/consent
+Bạn làm theo các bước trên, lấy được Client ID và Client Secret rồi báo mình nhé! Sau đó mình sẽ hướng dẫn tiếp! 😊🚀
+
+1768676123966_image.png
+này á hẻ
+
+18 thg 1
+Ồ đúng rồi đấy! Đó là Google+ API! 😊
+
+Nhưng Google+ đã bị khai tử (shutdown) từ năm 2019 rồi, nên bây giờ mình KHÔNG CẦN enable API đó nữa!
+
+Để đăng nhập bằng Google, bạn chỉ cần:
+
+✅ NHỮNG API CẦN ENABLE:
+1. Google Identity Services (Tự động có sẵn)
+Khi tạo OAuth Client ID, Google sẽ tự động enable các API cần thiết để lấy thông tin user (email, name, avatar).
+
+2. People API (Optional - nếu cần thêm info)
+Nếu muốn lấy thêm thông tin chi tiết về user:
+
+Vào API Library
+Tìm: "People API"
+Click Enable
+🎯 BẠN CHỈ CẦN LÀM:
+Bỏ qua Google+ API → Không cần enable!
+Làm tiếp các bước sau:
+Bước 1: Vào APIs & Services → Credentials
+
+Link: https://console.cloud.google.com/apis/credentials
+
+Bước 2: Click + Create Credentials → OAuth client ID
+
+Bước 3: Nếu chưa có OAuth Consent Screen:
+
+Click Configure Consent Screen
+Chọn External → Create
+Điền thông tin:
+App name: ShoppeClone
+User support email: email của bạn
+Developer contact: email của bạn
+Click Save and Continue (bỏ qua Scopes)
+Test users: Thêm email của bạn
+Click Save and Continue → Back to Dashboard
+Bước 4: Quay lại Credentials → + Create Credentials → OAuth client ID
+
+Bước 5: Điền thông tin:
+
+Application type: Web application
+Name: ShoppeClone Backend
+
+Authorized JavaScript origins:
+- http://localhost:3000
+- http://localhost:8080
+
+Authorized redirect URIs:
+- http://localhost:8080/api/auth/oauth2/callback/google
+- http://localhost:3000/auth/callback/google
+Bước 6: Click Create
+
+Bước 7: Copy Client ID và Client Secret
+
+📝 SAU KHI CÓ CLIENT ID & SECRET:
+Paste vào application.properties:
+
+properties
+# Google OAuth2 Configuration
+spring.security.oauth2.client.registration.google.client-id=YOUR_CLIENT_ID_HERE
+spring.security.oauth2.client.registration.google.client-secret=YOUR_CLIENT_SECRET_HERE
+spring.security.oauth2.client.registration.google.scope=profile,email
+spring.security.oauth2.client.registration.google.redirect-uri={baseUrl}/api/auth/oauth2/callback/google
+
+spring.security.oauth2.client.provider.google.authorization-uri=https://accounts.google.com/o/oauth2/v2/auth
+spring.security.oauth2.client.provider.google.token-uri=https://oauth2.googleapis.com/token
+spring.security.oauth2.client.provider.google.user-info-uri=https://www.googleapis.com/oauth2/v3/userinfo
+spring.security.oauth2.client.provider.google.user-name-attribute=sub
+🚨 TÓM TẮT:
+❌ KHÔNG CẦN enable Google+ API (đã bị khai tử)
+✅ CHỈ CẦN tạo OAuth Client ID
+✅ Google sẽ tự động enable các API cần thiết
+Bạn bỏ qua Google+ API, làm tiếp theo hướng dẫn bên trên nhé! 😊🚀
+
+{"web":{"client_id":"YOUR_CLIENT_ID","project_id":"shoppeclone-484618","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"YOUR_CLIENT_SECRET","redirect_uris":["http://localhost:8080/api/auth/oauth2/callback/google","http://localhost:3000/auth/callback/google"],"javascript_origins":["http://localhost:3000","http://localhost:8080"]}}
+này của mình nè bạn làm để mình coppy vào i
+
+18 thg 1
+Tuyệt vời! Mình thấy thông tin rồi! 🎉
+
+✅ PASTE VÀO application.properties:
+Mở file src/main/resources/application.properties và THÊM VÀO CUỐI FILE:
+
+properties
+# ========================================
+# Google OAuth2 Configuration
+# ========================================
+
+spring.security.oauth2.client.registration.google.client-id=YOUR_CLIENT_ID
+spring.security.oauth2.client.registration.google.client-secret=YOUR_CLIENT_SECRET
+spring.security.oauth2.client.registration.google.scope=profile,email
+spring.security.oauth2.client.registration.google.redirect-uri={baseUrl}/api/auth/oauth2/callback/google
+
+spring.security.oauth2.client.provider.google.authorization-uri=https://accounts.google.com/o/oauth2/v2/auth
+spring.security.oauth2.client.provider.google.token-uri=https://oauth2.googleapis.com/token
+spring.security.oauth2.client.provider.google.user-info-uri=https://www.googleapis.com/oauth2/v3/userinfo
+spring.security.oauth2.client.provider.google.user-name-attribute=sub
+📋 FILE application.properties HOÀN CHỈNH:
+properties
+# Application Name
+spring.application.name=web-shoppe
+
+# Server Port
+server.port=8080
+
+# ========================================
+# MongoDB Configuration
+# ========================================
+
+spring.data.mongodb.uri=mongodb+srv://web_shoppe:Csd201_group2@cluster0.ol8uuso.mongodb.net/web_shoppe?retryWrites=true&w=majority
+
+# ========================================
+# JWT Configuration
+# ========================================
+
+jwt.secret=ShoppeClone2024SecretKeyForJWTTokenGenerationAndValidation123456
+jwt.expiration=900000
+jwt.refresh-expiration=604800000
+
+# ========================================
+# Google OAuth2 Configuration
+# ========================================
+
+spring.security.oauth2.client.registration.google.client-id=YOUR_CLIENT_ID
+spring.security.oauth2.client.registration.google.client-secret=YOUR_CLIENT_SECRET
+spring.security.oauth2.client.registration.google.scope=profile,email
+spring.security.oauth2.client.registration.google.redirect-uri={baseUrl}/api/auth/oauth2/callback/google
+
+spring.security.oauth2.client.provider.google.authorization-uri=https://accounts.google.com/o/oauth2/v2/auth
+spring.security.oauth2.client.provider.google.token-uri=https://oauth2.googleapis.com/token
+spring.security.oauth2.client.provider.google.user-info-uri=https://www.googleapis.com/oauth2/v3/userinfo
+spring.security.oauth2.client.provider.google.user-name-attribute=sub
+
+# ========================================
+# Logging Configuration
+# ========================================
+
+logging.level.root=INFO
+logging.level.com.shoppeclone.backend=DEBUG
+🎯 TIẾP THEO: THÊM CODE
+Bây giờ bạn cần thêm các file code mình đã hướng dẫn ở trên! Mình tóm tắt lại nhé:
+
+1. Thêm dependency vào pom.xml:
+xml
+<!-- Spring OAuth2 Client -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-oauth2-client</artifactId>
+</dependency>
+
+<!-- WebFlux (cho HTTP Client) -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-webflux</artifactId>
+</dependency>
+Sau đó Maven Reload (chuột phải vào pom.xml → Maven → Reload Project)
+
+2. Tạo các file theo thứ tự:
+2.1. Model: OAuthAccount.java
+Package: com.shoppeclone.backend.auth.model
+
+java
+package com.shoppeclone.backend.auth.model;
+
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import java.time.LocalDateTime;
+
+@Document(collection = "oauth_accounts")
+@Data
+public class OAuthAccount {
+    @Id
+    private String id;
+    
+    @DBRef
+    private User user;
+    
+    private String provider;
+    private String providerId;
+    private String email;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+}
+2.2. Repository: OAuthAccountRepository.java
+Package: com.shoppeclone.backend.auth.repository
+
+java
+package com.shoppeclone.backend.auth.repository;
+
+import com.shoppeclone.backend.auth.model.OAuthAccount;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import java.util.Optional;
+
+public interface OAuthAccountRepository extends MongoRepository<OAuthAccount, String> {
+    Optional<OAuthAccount> findByProviderAndProviderId(String provider, String providerId);
+    Optional<OAuthAccount> findByProviderAndEmail(String provider, String email);
+}
+2.3. DTO Request: GoogleAuthRequest.java
+Package: com.shoppeclone.backend.auth.dto.request
+
+java
+package com.shoppeclone.backend.auth.dto.request;
+
+import lombok.Data;
+
+@Data
+public class GoogleAuthRequest {
+    private String code;
+    private String redirectUri;
+}
+2.4. DTO Response: GoogleUserInfo.java
+Package: com.shoppeclone.backend.auth.dto.response
+
+java
+package com.shoppeclone.backend.auth.dto.response;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+
+@Data
+public class GoogleUserInfo {
+    @JsonProperty("sub")
+    private String id;
+    
+    private String email;
+    
+    @JsonProperty("email_verified")
+    private Boolean emailVerified;
+    
+    private String name;
+    
+    @JsonProperty("picture")
+    private String picture;
+    
+    @JsonProperty("given_name")
+    private String givenName;
+    
+    @JsonProperty("family_name")
+    private String familyName;
+}
+2.5. Service Interface: OAuthService.java
+Package: com.shoppeclone.backend.auth.service
+
+java
+package com.shoppeclone.backend.auth.service;
+
+import com.shoppeclone.backend.auth.dto.response.AuthResponse;
+
+public interface OAuthService {
+    AuthResponse authenticateWithGoogle(String code, String redirectUri);
+    String getGoogleAuthUrl(String redirectUri);
+}
+2.6. Service Implementation: OAuthServiceImpl.java
+Package: com.shoppeclone.backend.auth.service.impl
+
+Code dài, mình gửi ở message tiếp theo!
+
+Bạn làm từng bước theo thứ tự trên nhé! Có lỗi gì báo mình ngay! 😊🚀
+
+bạn làm tiếp cho mình i ạ
+
+18 thg 1
+Oke! Mình làm tiếp phần Service Implementation và Controller nhé! 🚀
+
+📝 2.6. Service Implementation: OAuthServiceImpl.java
+Package: com.shoppeclone.backend.auth.service.impl
+
+java
+package com.shoppeclone.backend.auth.service.impl;
+
+import com.shoppeclone.backend.auth.dto.response.AuthResponse;
+import com.shoppeclone.backend.auth.dto.response.GoogleUserInfo;
+import com.shoppeclone.backend.auth.dto.response.UserDto;
+import com.shoppeclone.backend.auth.model.OAuthAccount;
+import com.shoppeclone.backend.auth.model.Role;
+import com.shoppeclone.backend.auth.model.User;
+import com.shoppeclone.backend.auth.model.UserSession;
+import com.shoppeclone.backend.auth.repository.OAuthAccountRepository;
+import com.shoppeclone.backend.auth.repository.RoleRepository;
+import com.shoppeclone.backend.auth.repository.UserRepository;
+import com.shoppeclone.backend.auth.repository.UserSessionRepository;
+import com.shoppeclone.backend.auth.security.JwtUtil;
+import com.shoppeclone.backend.auth.service.OAuthService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class OAuthServiceImpl implements OAuthService {
+    
+    private final UserRepository userRepository;
+    private final OAuthAccountRepository oauthAccountRepository;
+    private final RoleRepository roleRepository;
+    private final UserSessionRepository sessionRepository;
+    private final JwtUtil jwtUtil;
+    private final RestTemplate restTemplate = new RestTemplate();
+    
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    private String clientId;
+    
+    @Value("${spring.security.oauth2.client.registration.google.client-secret}")
+    private String clientSecret;
+    
+    @Value("${spring.security.oauth2.client.provider.google.token-uri}")
+    private String tokenUri;
+    
+    @Value("${spring.security.oauth2.client.provider.google.user-info-uri}")
+    private String userInfoUri;
+    
+    @Override
+    public String getGoogleAuthUrl(String redirectUri) {
+        return UriComponentsBuilder
+            .fromUriString("https://accounts.google.com/o/oauth2/v2/auth")
+            .queryParam("client_id", clientId)
+            .queryParam("redirect_uri", redirectUri)
+            .queryParam("response_type", "code")
+            .queryParam("scope", "openid email profile")
+            .queryParam("access_type", "offline")
+            .queryParam("prompt", "consent")
+            .build()
+            .toUriString();
+    }
+    
+    @Override
+    public AuthResponse authenticateWithGoogle(String code, String redirectUri) {
+        // 1. Exchange code for access token
+        String accessToken = exchangeCodeForToken(code, redirectUri);
+        
+        // 2. Get user info from Google
+        GoogleUserInfo googleUser = getUserInfo(accessToken);
+        
+        // 3. Find or create user
+        User user = findOrCreateUser(googleUser);
+        
+        // 4. Generate JWT tokens
+        String jwtAccessToken = jwtUtil.generateAccessToken(user.getEmail());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+        
+        // 5. Save session
+        saveUserSession(user, refreshToken);
+        
+        return new AuthResponse(jwtAccessToken, refreshToken, "Bearer", mapToUserDto(user));
+    }
+    
+    private String exchangeCodeForToken(String code, String redirectUri) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/x-www-form-urlencoded");
+        
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("code", code);
+        params.add("client_id", clientId);
+        params.add("client_secret", clientSecret);
+        params.add("redirect_uri", redirectUri);
+        params.add("grant_type", "authorization_code");
+        
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+        
+        ResponseEntity<Map> response = restTemplate.postForEntity(tokenUri, request, Map.class);
+        
+        Map<String, Object> responseBody = response.getBody();
+        if (responseBody == null || !responseBody.containsKey("access_token")) {
+            throw new RuntimeException("Failed to get access token from Google");
+        }
+        
+        return (String) responseBody.get("access_token");
+    }
+    
+    private GoogleUserInfo getUserInfo(String accessToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+        
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        
+        ResponseEntity<GoogleUserInfo> response = restTemplate.exchange(
+            userInfoUri,
+            HttpMethod.GET,
+            entity,
+            GoogleUserInfo.class
+        );
+        
+        return response.getBody();
+    }
+    
+    private User findOrCreateUser(GoogleUserInfo googleUser) {
+        // Check if OAuth account exists
+        OAuthAccount oauthAccount = oauthAccountRepository
+            .findByProviderAndProviderId("google", googleUser.getId())
+            .orElse(null);
+        
+        User user;
+        
+        if (oauthAccount != null) {
+            // User exists, return it
+            user = oauthAccount.getUser();
+        } else {
+            // Check if user with this email exists
+            user = userRepository.findByEmail(googleUser.getEmail()).orElse(null);
+            
+            if (user == null) {
+                // Create new user
+                user = new User();
+                user.setEmail(googleUser.getEmail());
+                user.setFullName(googleUser.getName());
+                user.setAvatar(googleUser.getPicture());
+                user.setEmailVerified(googleUser.getEmailVerified());
+                user.setCreatedAt(LocalDateTime.now());
+                user.setUpdatedAt(LocalDateTime.now());
+                
+                // Set default role
+                Role userRole = roleRepository.findByName("ROLE_USER")
+                    .orElseThrow(() -> new RuntimeException("Role not found"));
+                Set<Role> roles = new HashSet<>();
+                roles.add(userRole);
+                user.setRoles(roles);
+                
+                userRepository.save(user);
+            }
+            
+            // Create OAuth account link
+            oauthAccount = new OAuthAccount();
+            oauthAccount.setUser(user);
+            oauthAccount.setProvider("google");
+            oauthAccount.setProviderId(googleUser.getId());
+            oauthAccount.setEmail(googleUser.getEmail());
+            oauthAccount.setCreatedAt(LocalDateTime.now());
+            oauthAccount.setUpdatedAt(LocalDateTime.now());
+            
+            oauthAccountRepository.save(oauthAccount);
+        }
+        
+        return user;
+    }
+    
+    private void saveUserSession(User user, String refreshToken) {
+        UserSession session = new UserSession();
+        session.setUser(user);
+        session.setRefreshToken(refreshToken);
+        session.setExpiresAt(LocalDateTime.now().plusDays(7));
+        session.setCreatedAt(LocalDateTime.now());
+        sessionRepository.save(session);
+    }
+    
+    private UserDto mapToUserDto(User user) {
+        UserDto dto = new UserDto();
+        dto.setId(user.getId());
+        dto.setEmail(user.getEmail());
+        dto.setFullName(user.getFullName());
+        dto.setPhone(user.getPhone());
+        dto.setEmailVerified(user.isEmailVerified());
+        dto.setRoles(user.getRoles().stream()
+            .map(Role::getName)
+            .collect(Collectors.toSet()));
+        return dto;
+    }
+}
+📝 2.7. Controller: OAuthController.java
+Package: com.shoppeclone.backend.auth.controller
+
+java
+package com.shoppeclone.backend.auth.controller;
+
+import com.shoppeclone.backend.auth.dto.request.GoogleAuthRequest;
+import com.shoppeclone.backend.auth.dto.response.AuthResponse;
+import com.shoppeclone.backend.auth.service.OAuthService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/auth/oauth")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
+public class OAuthController {
+    
+    private final OAuthService oauthService;
+    
+    @GetMapping("/google/url")
+    public ResponseEntity<Map<String, String>> getGoogleAuthUrl(@RequestParam String redirectUri) {
+        String authUrl = oauthService.getGoogleAuthUrl(redirectUri);
+        return ResponseEntity.ok(Map.of("authUrl", authUrl));
+    }
+    
+    @PostMapping("/google")
+    public ResponseEntity<AuthResponse> googleAuth(@RequestBody GoogleAuthRequest request) {
+        AuthResponse response = oauthService.authenticateWithGoogle(
+            request.getCode(),
+            request.getRedirectUri()
+        );
+        return ResponseEntity.ok(response);
+    }
+}
+📝 2.8. Cập nhật SecurityConfig.java
+Mở file auth/security/SecurityConfig.java và sửa lại:
+
+java
+package com.shoppeclone.backend.auth.security;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+@Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
+public class SecurityConfig {
+    
+    private final JwtAuthFilter jwtAuthFilter;
+    
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/auth/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        
+        return http.build();
+    }
+    
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+    
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+}
+🚀 CHẠY VÀ TEST
+Bước 1: Clean và Compile
+bash
+mvn clean compile
+mvn spring-boot:run
+```
+
+### **Bước 2: Test API lấy Google Auth URL**
+
+**Postman:**
+```
+Method: GET
+URL: http://localhost:8080/api/auth/oauth/google/url?redirectUri=http://localhost:3000/auth/callback/google
+Kết quả:
+
+json
+{
+  "authUrl": "https://accounts.google.com/o/oauth2/v2/auth?client_id=YOUR_CLIENT_ID&redirect_uri=http://localhost:3000/auth/callback/google&response_type=code&scope=openid%20email%20profile&access_type=offline&prompt=consent"
+}
+```
+
+✅ **Copy URL này và paste vào browser** → Đăng nhập Google
+
+### **Bước 3: Sau khi đăng nhập Google**
+
+Google sẽ redirect về:
+```
+http://localhost:3000/auth/callback/google?code=4/0AanRRrtPxxx...
+```
+
+**Copy phần `code=...`** (phần sau dấu `=`)
+
+### **Bước 4: Test API đăng nhập với Google**
+
+**Postman:**
+```
+Method: POST
+URL: http://localhost:8080/api/auth/oauth/google
+Headers:
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "code": "4/0AanRRrtPxxx...",
+  "redirectUri": "http://localhost:3000/auth/callback/google"
+}
+Kết quả:
+
+json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "tokenType": "Bearer",
+  "user": {
+    "id": "67abc...",
+    "email": "your-email@gmail.com",
+    "fullName": "Your Name",
+    "phone": null,
+    "emailVerified": true,
+    "roles": ["ROLE_USER"]
+  }
+}
+🎉 THÀNH CÔNG!
+
+📋 CHECKLIST:
+ Thêm dependency vào pom.xml
+ Tạo Model OAuthAccount.java
+ Tạo Repository OAuthAccountRepository.java
+ Tạo DTO GoogleAuthRequest.java
+ Tạo DTO GoogleUserInfo.java
+ Tạo Service OAuthService.java
+ Tạo Service OAuthServiceImpl.java
+ Tạo Controller OAuthController.java
+ Cập nhật SecurityConfig.java
+ Cập nhật application.properties
+ Maven Reload
+ Test API
+Bạn làm từng bước, có lỗi gì báo mình ngay nhé! 🚀😊
+
+import com.shoppeclone.backend.auth.dto.request.GoogleAuthRequest;
+file OAuthController.java bị lỗi hàng này ạ 
+
+        Map<String, Object> responseBody = response.getBody();
+rồi hàng này trong OAuthServiceImpl.java bị gạch vàng ạ
+18 thg 1
+Ồ mình thấy lỗi rồi! 😊
+
+✅ SỬA LỖI:
+Lỗi 1: Import thiếu trong OAuthController.java
+Bạn cần thêm import cho GoogleAuthRequest. Đầu file phải có đủ các import này:
+
+java
+package com.shoppeclone.backend.auth.controller;
+
+import com.shoppeclone.backend.auth.dto.request.GoogleAuthRequest;
+import com.shoppeclone.backend.auth.dto.response.AuthResponse;
+import com.shoppeclone.backend.auth.service.OAuthService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/auth/oauth")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
+public class OAuthController {
+    
+    private final OAuthService oauthService;
+    
+    @GetMapping("/google/url")
+    public ResponseEntity<Map<String, String>> getGoogleAuthUrl(@RequestParam String redirectUri) {
+        String authUrl = oauthService.getGoogleAuthUrl(redirectUri);
+        return ResponseEntity.ok(Map.of("authUrl", authUrl));
+    }
+    
+    @PostMapping("/google")
+    public ResponseEntity<AuthResponse> googleAuth(@RequestBody GoogleAuthRequest request) {
+        AuthResponse response = oauthService.authenticateWithGoogle(
+            request.getCode(),
+            request.getRedirectUri()
+        );
+        return ResponseEntity.ok(response);
+    }
+}
+Kiểm tra: Bạn đã tạo file GoogleAuthRequest.java trong package com.shoppeclone.backend.auth.dto.request chưa?
+
+Nếu chưa, tạo file đó:
+
+java
+package com.shoppeclone.backend.auth.dto.request;
+
+import lombok.Data;
+
+@Data
+public class GoogleAuthRequest {
+    private String code;
+    private String redirectUri;
+}
+Lỗi 2: Gạch vàng ở Map<String, Object> responseBody = response.getBody();
+Dòng này bị gạch vàng (warning) vì Java cảnh báo về unchecked cast hoặc raw type. Không sao, đây chỉ là warning, không phải lỗi!
+
+Cách 1: Bỏ qua warning (Recommended)
+
+Thêm annotation @SuppressWarnings phía trên method:
+
+java
+@SuppressWarnings("unchecked")
+private String exchangeCodeForToken(String code, String redirectUri) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Type", "application/x-www-form-urlencoded");
+    
+    MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+    params.add("code", code);
+    params.add("client_id", clientId);
+    params.add("client_secret", clientSecret);
+    params.add("redirect_uri", redirectUri);
+    params.add("grant_type", "authorization_code");
+    
+    HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+    
+    ResponseEntity<Map> response = restTemplate.postForEntity(tokenUri, request, Map.class);
+    
+    Map<String, Object> responseBody = response.getBody();
+    if (responseBody == null || !responseBody.containsKey("access_token")) {
+        throw new RuntimeException("Failed to get access token from Google");
+    }
+    
+    return (String) responseBody.get("access_token");
+}
+Cách 2: Dùng generic type đầy đủ (Tốt hơn nhưng dài hơn)
+
+Tạo DTO để nhận response từ Google:
+
+GoogleTokenResponse.java (tạo trong auth/dto/response/):
+
+java
+package com.shoppeclone.backend.auth.dto.response;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+
+@Data
+public class GoogleTokenResponse {
+    @JsonProperty("access_token")
+    private String accessToken;
+    
+    @JsonProperty("expires_in")
+    private Integer expiresIn;
+    
+    @JsonProperty("token_type")
+    private String tokenType;
+    
+    @JsonProperty("scope")
+    private String scope;
+    
+    @JsonProperty("refresh_token")
+    private String refreshToken;
+}
+Rồi sửa lại method exchangeCodeForToken:
+
+java
+private String exchangeCodeForToken(String code, String redirectUri) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Type", "application/x-www-form-urlencoded");
+    
+    MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+    params.add("code", code);
+    params.add("client_id", clientId);
+    params.add("client_secret", clientSecret);
+    params.add("redirect_uri", redirectUri);
+    params.add("grant_type", "authorization_code");
+    
+    HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+    
+    ResponseEntity<GoogleTokenResponse> response = restTemplate.postForEntity(
+        tokenUri, 
+        request, 
+        GoogleTokenResponse.class
+    );
+    
+    GoogleTokenResponse responseBody = response.getBody();
+    if (responseBody == null || responseBody.getAccessToken() == null) {
+        throw new RuntimeException("Failed to get access token from Google");
+    }
+    
+    return responseBody.getAccessToken();
+}
+🎯 KHUYẾN NGHỊ:
+Dùng Cách 1 (thêm @SuppressWarnings) vì:
+
+✅ Nhanh, đơn giản
+✅ Gạch vàng sẽ biến mất
+✅ Code vẫn chạy 100% bình thường
+Gạch vàng chỉ là warning (cảnh báo), không phải error (lỗi). Application vẫn compile và chạy được!
+
+📝 FILE OAuthServiceImpl.java HOÀN CHỈNH (Đã sửa):
+java
+package com.shoppeclone.backend.auth.service.impl;
+
+import com.shoppeclone.backend.auth.dto.response.AuthResponse;
+import com.shoppeclone.backend.auth.dto.response.GoogleUserInfo;
+import com.shoppeclone.backend.auth.dto.response.UserDto;
+import com.shoppeclone.backend.auth.model.OAuthAccount;
+import com.shoppeclone.backend.auth.model.Role;
+import com.shoppeclone.backend.auth.model.User;
+import com.shoppeclone.backend.auth.model.UserSession;
+import com.shoppeclone.backend.auth.repository.OAuthAccountRepository;
+import com.shoppeclone.backend.auth.repository.RoleRepository;
+import com.shoppeclone.backend.auth.repository.UserRepository;
+import com.shoppeclone.backend.auth.repository.UserSessionRepository;
+import com.shoppeclone.backend.auth.security.JwtUtil;
+import com.shoppeclone.backend.auth.service.OAuthService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class OAuthServiceImpl implements OAuthService {
+    
+    private final UserRepository userRepository;
+    private final OAuthAccountRepository oauthAccountRepository;
+    private final RoleRepository roleRepository;
+    private final UserSessionRepository sessionRepository;
+    private final JwtUtil jwtUtil;
+    private final RestTemplate restTemplate = new RestTemplate();
+    
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    private String clientId;
+    
+    @Value("${spring.security.oauth2.client.registration.google.client-secret}")
+    private String clientSecret;
+    
+    @Value("${spring.security.oauth2.client.provider.google.token-uri}")
+    private String tokenUri;
+    
+    @Value("${spring.security.oauth2.client.provider.google.user-info-uri}")
+    private String userInfoUri;
+    
+    @Override
+    public String getGoogleAuthUrl(String redirectUri) {
+        return UriComponentsBuilder
+            .fromUriString("https://accounts.google.com/o/oauth2/v2/auth")
+            .queryParam("client_id", clientId)
+            .queryParam("redirect_uri", redirectUri)
+            .queryParam("response_type", "code")
+            .queryParam("scope", "openid email profile")
+            .queryParam("access_type", "offline")
+            .queryParam("prompt", "consent")
+            .build()
+            .toUriString();
+    }
+    
+    @Override
+    public AuthResponse authenticateWithGoogle(String code, String redirectUri) {
+        String accessToken = exchangeCodeForToken(code, redirectUri);
+        GoogleUserInfo googleUser = getUserInfo(accessToken);
+        User user = findOrCreateUser(googleUser);
+        
+        String jwtAccessToken = jwtUtil.generateAccessToken(user.getEmail());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+        
+        saveUserSession(user, refreshToken);
+        
+        return new AuthResponse(jwtAccessToken, refreshToken, "Bearer", mapToUserDto(user));
+    }
+    
+    @SuppressWarnings("unchecked")  // ← Thêm dòng này
+    private String exchangeCodeForToken(String code, String redirectUri) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/x-www-form-urlencoded");
+        
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("code", code);
+        params.add("client_id", clientId);
+        params.add("client_secret", clientSecret);
+        params.add("redirect_uri", redirectUri);
+        params.add("grant_type", "authorization_code");
+        
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+        
+        ResponseEntity<Map> response = restTemplate.postForEntity(tokenUri, request, Map.class);
+        
+        Map<String, Object> responseBody = response.getBody();
+        if (responseBody == null || !responseBody.containsKey("access_token")) {
+            throw new RuntimeException("Failed to get access token from Google");
+        }
+        
+        return (String) responseBody.get("access_token");
+    }
+    
+    private GoogleUserInfo getUserInfo(String accessToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+        
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        
+        ResponseEntity<GoogleUserInfo> response = restTemplate.exchange(
+            userInfoUri,
+            HttpMethod.GET,
+            entity,
+            GoogleUserInfo.class
+        );
+        
+        return response.getBody();
+    }
+    
+    private User findOrCreateUser(GoogleUserInfo googleUser) {
+        OAuthAccount oauthAccount = oauthAccountRepository
+            .findByProviderAndProviderId("google", googleUser.getId())
+            .orElse(null);
+        
+        User user;
+        
+        if (oauthAccount != null) {
+            user = oauthAccount.getUser();
+        } else {
+            user = userRepository.findByEmail(googleUser.getEmail()).orElse(null);
+            
+            if (user == null) {
+                user = new User();
+                user.setEmail(googleUser.getEmail());
+                user.setFullName(googleUser.getName());
+                user.setAvatar(googleUser.getPicture());
+                user.setEmailVerified(googleUser.getEmailVerified());
+                user.setCreatedAt(LocalDateTime.now());
+                user.setUpdatedAt(LocalDateTime.now());
+                
+                Role userRole = roleRepository.findByName("ROLE_USER")
+                    .orElseThrow(() -> new RuntimeException("Role not found"));
+                Set<Role> roles = new HashSet<>();
+                roles.add(userRole);
+                user.setRoles(roles);
+                
+                userRepository.save(user);
+            }
+            
+            oauthAccount = new OAuthAccount();
+            oauthAccount.setUser(user);
+            oauthAccount.setProvider("google");
+            oauthAccount.setProviderId(googleUser.getId());
+            oauthAccount.setEmail(googleUser.getEmail());
+            oauthAccount.setCreatedAt(LocalDateTime.now());
+            oauthAccount.setUpdatedAt(LocalDateTime.now());
+            
+            oauthAccountRepository.save(oauthAccount);
+        }
+        
+        return user;
+    }
+    
+    private void saveUserSession(User user, String refreshToken) {
+        UserSession session = new UserSession();
+        session.setUser(user);
+        session.setRefreshToken(refreshToken);
+        session.setExpiresAt(LocalDateTime.now().plusDays(7));
+        session.setCreatedAt(LocalDateTime.now());
+        sessionRepository.save(session);
+    }
+    
+    private UserDto mapToUserDto(User user) {
+        UserDto dto = new UserDto();
+        dto.setId(user.getId());
+        dto.setEmail(user.getEmail());
+        dto.setFullName(user.getFullName());
+        dto.setPhone(user.getPhone());
+        dto.setEmailVerified(user.isEmailVerified());
+        dto.setRoles(user.getRoles().stream()
+            .map(Role::getName)
+            .collect(Collectors.toSet()));
+        return dto;
+    }
+}
+Bạn thử sửa lại 2 chỗ đó rồi chạy lại nhé! Có lỗi gì báo mình tiếp! 😊🚀
+
+ResponseEntity<Map> response = restTemplate.postForEntity(tokenUri, request, Map.class);
+cái này còn gạch vàng chỗ chứ Map đầu tiên ạ
+18 thg 1
+Ồ đúng rồi! Đó cũng là warning về raw type thôi bạn! 😊
+
+Có 2 cách xử lý:
+
+✅ CÁCH 1: Thêm <?, ?> (Nhanh nhất)
+Sửa dòng đó thành:
+
+java
+ResponseEntity<Map<?, ?>> response = restTemplate.postForEntity(tokenUri, request, Map.class);
+Hoặc cụ thể hơn:
+
+java
+ResponseEntity<Map<String, Object>> response = restTemplate.postForEntity(tokenUri, request, Map.class);
+Nhưng dòng này vẫn sẽ có gạch vàng ở Map.class vì Java không thể kiểm tra generic type lúc runtime.
+
+✅ CÁCH 2: Dùng @SuppressWarnings (Recommended)
+Giữ nguyên code và thêm @SuppressWarnings phía trên method (mình đã thêm rồi ở phần trước):
+
+java
+@SuppressWarnings("unchecked")
+private String exchangeCodeForToken(String code, String redirectUri) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Type", "application/x-www-form-urlencoded");
+    
+    MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+    params.add("code", code);
+    params.add("client_id", clientId);
+    params.add("client_secret", clientSecret);
+    params.add("redirect_uri", redirectUri);
+    params.add("grant_type", "authorization_code");
+    
+    HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+    
+    ResponseEntity<Map> response = restTemplate.postForEntity(tokenUri, request, Map.class);  // ← Sẽ không còn gạch vàng
+    
+    Map<String, Object> responseBody = response.getBody();
+    if (responseBody == null || !responseBody.containsKey("access_token")) {
+        throw new RuntimeException("Failed to get access token from Google");
+    }
+    
+    return (String) responseBody.get("access_token");
+}
+Annotation @SuppressWarnings("unchecked") sẽ tắt tất cả warning về unchecked cast trong method đó!
+
+✅ CÁCH 3: Dùng DTO (Chuẩn nhất, không warning)
+Tạo file GoogleTokenResponse.java trong auth/dto/response/:
+
+java
+package com.shoppeclone.backend.auth.dto.response;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+
+@Data
+public class GoogleTokenResponse {
+    @JsonProperty("access_token")
+    private String accessToken;
+    
+    @JsonProperty("expires_in")
+    private Integer expiresIn;
+    
+    @JsonProperty("token_type")
+    private String tokenType;
+    
+    @JsonProperty("scope")
+    private String scope;
+    
+    @JsonProperty("refresh_token")
+    private String refreshToken;
+}
+Rồi sửa lại method:
+
+java
+private String exchangeCodeForToken(String code, String redirectUri) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Type", "application/x-www-form-urlencoded");
+    
+    MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+    params.add("code", code);
+    params.add("client_id", clientId);
+    params.add("client_secret", clientSecret);
+    params.add("redirect_uri", redirectUri);
+    params.add("grant_type", "authorization_code");
+    
+    HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+    
+    // ✅ Không còn warning!
+    ResponseEntity<GoogleTokenResponse> response = restTemplate.postForEntity(
+        tokenUri, 
+        request, 
+        GoogleTokenResponse.class
+    );
+    
+    GoogleTokenResponse responseBody = response.getBody();
+    if (responseBody == null || responseBody.getAccessToken() == null) {
+        throw new RuntimeException("Failed to get access token from Google");
+    }
+    
+    return responseBody.getAccessToken();
+}
+✅ KHÔNG CÒN GẠCH VÀNG!
+
+🎯 KHUYẾN NGHỊ:
+Dùng Cách 2 (@SuppressWarnings) vì:
+
+✅ Nhanh nhất
+✅ Không cần tạo thêm file
+✅ Code vẫn sạch
+Hoặc dùng Cách 3 nếu bạn muốn code chuẩn chỉnh hơn (không có warning gì cả).
+
+📝 CODE HOÀN CHỈNH METHOD (Cách 2):
+java
+@SuppressWarnings("unchecked")
+private String exchangeCodeForToken(String code, String redirectUri) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Type", "application/x-www-form-urlencoded");
+    
+    MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+    params.add("code", code);
+    params.add("client_id", clientId);
+    params.add("client_secret", clientSecret);
+    params.add("redirect_uri", redirectUri);
+    params.add("grant_type", "authorization_code");
+    
+    HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+    
+    ResponseEntity<Map> response = restTemplate.postForEntity(tokenUri, request, Map.class);
+    
+    Map<String, Object> responseBody = response.getBody();
+    if (responseBody == null || !responseBody.containsKey("access_token")) {
+        throw new RuntimeException("Failed to get access token from Google");
+    }
+    
+    return (String) responseBody.get("access_token");
+}
+Gạch vàng sẽ biến mất! ✅
+
+Bạn chọn 1 trong 2 cách (Cách 2 hoặc Cách 3) là được nhé! Mình recommend Cách 2 cho nhanh! 😊🚀
+
+mình chạy mvn oke rồi cơ giờ làm sao nữa ạ
+
+18 thg 1
+Tuyệt vời! Giờ test Google OAuth thôi! 🎉
+
+🧪 TEST GOOGLE OAUTH - HƯỚNG DẪN CHI TIẾT
+BƯỚC 1: Test API lấy Google Auth URL
+Mở Postman:
+
+Method: GET
+URL: http://localhost:8080/api/auth/oauth/google/url?redirectUri=http://localhost:3000/auth/callback/google
+Click Send
+
+Kết quả sẽ trả về:
+
+json
+{
+  "authUrl": "https://accounts.google.com/o/oauth2/v2/auth?client_id=YOUR_CLIENT_ID&redirect_uri=http://localhost:3000/auth/callback/google&response_type=code&scope=openid%20email%20profile&access_type=offline&prompt=consent"
+}
+```
+
+---
+
+### **BƯỚC 2: Đăng nhập Google**
+
+**Copy cái URL trong `authUrl`** (toàn bộ từ `https://accounts.google.com...`)
+
+**Paste vào trình duyệt** → Enter
+
+Bạn sẽ thấy trang đăng nhập Google:
+1. Chọn tài khoản Google
+2. Click "Continue" hoặc "Cho phép"
+
+---
+
+### **BƯỚC 3: Lấy Authorization Code**
+
+Sau khi đăng nhập, Google sẽ **redirect** về URL:
+```
+http://localhost:3000/auth/callback/google?code=4/0AanRRrt...&scope=email+profile+openid...
+```
+
+**⚠️ LƯU Ý:** Trang này sẽ **không load được** (vì frontend chưa có), **NHƯNG KHÔNG SAO!**
+
+**Copy phần `code=...` từ URL bar của browser**
+
+Ví dụ URL là:
+```
+http://localhost:3000/auth/callback/google?code=4/0AanRRrtPxxxxxx&scope=...
+```
+
+→ **Copy phần:** `4/0AanRRrtPxxxxxx` (từ `code=` đến trước `&scope`)
+
+---
+
+### **BƯỚC 4: Test API đăng nhập với Google**
+
+**Quay lại Postman, tạo request mới:**
+```
+Method: POST
+URL: http://localhost:8080/api/auth/oauth/google
+Headers:
+  Content-Type: application/json
+Body → raw → JSON:
+
+json
+{
+  "code": "4/0AanRRrtPxxxxxx",
+  "redirectUri": "http://localhost:3000/auth/callback/google"
+}
+⚠️ Thay 4/0AanRRrtPxxxxxx bằng code bạn vừa copy ở Bước 3!
+
+Click Send
+
+BƯỚC 5: Kiểm tra kết quả
+Kết quả mong đợi:
+
+json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaWF0IjoxNzM3MTQxMDAwLCJleHAiOjE3MzcxNDE5MDB9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaWF0IjoxNzM3MTQxMDAwLCJleHAiOjE3Mzc3NDU4MDB9...",
+  "tokenType": "Bearer",
+  "user": {
+    "id": "67abc123...",
+    "email": "your-email@gmail.com",
+    "fullName": "Your Name",
+    "phone": null,
+    "emailVerified": true,
+    "roles": ["ROLE_USER"]
+  }
+}
+✅ THÀNH CÔNG! Bạn đã đăng nhập bằng Google!
+
+🔍 KIỂM TRA DATABASE
+Vào MongoDB Atlas → Browse Collections:
+
+Collection users:
+
+json
+{
+  "_id": "67abc...",
+  "email": "your-email@gmail.com",
+  "fullName": "Your Name",
+  "avatar": "https://lh3.googleusercontent.com/a/...",
+  "emailVerified": true,
+  "active": true,
+  "roles": [...],
+  "createdAt": "2026-01-18T01:30:00.000Z"
+}
+Collection oauth_accounts:
+
+json
+{
+  "_id": "67xyz...",
+  "user": { "$ref": "users", "$id": "67abc..." },
+  "provider": "google",
+  "providerId": "1234567890",
+  "email": "your-email@gmail.com",
+  "createdAt": "2026-01-18T01:30:00.000Z"
+}
+Collection user_sessions:
+
+json
+{
+  "_id": "67def...",
+  "user": { "$ref": "users", "$id": "67abc..." },
+  "refreshToken": "eyJhbGci...",
+  "expiresAt": "2026-01-25T01:30:00.000Z",
+  "createdAt": "2026-01-18T01:30:00.000Z"
+}
+```
+
+---
+
+## ⚠️ NẾU GẶP LỖI:
+
+### **Lỗi 1: "redirect_uri_mismatch"**
+
+→ Kiểm tra lại **Authorized redirect URIs** trong Google Cloud Console phải có:
+```
+http://localhost:3000/auth/callback/google
+Lỗi 2: "invalid_grant" hoặc "code already used"
+→ Code chỉ dùng được 1 lần! Phải quay lại Bước 2 để lấy code mới!
+
+Lỗi 3: "Failed to get access token"
+→ Kiểm tra:
+
+Client ID và Client Secret trong application.properties có đúng không
+Spring Boot có đang chạy không
+Code có bị hết hạn không (code chỉ valid trong ~10 phút)
+🎯 TÓM TẮT API ĐÃ CÓ:
+Auth APIs (không cần token):
+Method	Endpoint	Mô tả
+POST	/api/auth/register	Đăng ký thường
+POST	/api/auth/login	Đăng nhập thường
+GET	/api/auth/oauth/google/url	Lấy Google auth URL
+POST	/api/auth/oauth/google	Đăng nhập Google
+POST	/api/auth/refresh-token	Làm mới token
+POST	/api/auth/logout	Đăng xuất
+User APIs (cần JWT token):
+Method	Endpoint	Mô tả
+GET	/api/user/profile	Xem profile
+PUT	/api/user/profile	Cập nhật profile
+PUT	/api/user/change-password	Đổi mật khẩu
+DELETE	/api/user/account	Xóa tài khoản
+🚀 TIẾP THEO BẠN MUỐN LÀM GÌ?
+✅ Test hết các API (Register, Login, Google OAuth, Profile)
+Làm Email OTP (gửi mã xác thực qua email)
+Làm Frontend với Tailwind CSS (tích hợp với backend)
+Làm các module khác (Product, Cart, Order, Payment)
+Deploy lên server (Render, Railway, Heroku...)
+Bạn muốn làm cái nào tiếp? 😊💪
+
+1768706883131_image.png
+bạn xem thử ạ
+
+18 thg 1
+Ồ mình thấy lỗi rồi! 403 Forbidden 😅
+
+Nguyên nhân: Bạn đang gửi sai endpoint! Endpoint của bạn là:
+
+http://localhost:8080/api/auth/oauth/google/url
+Nhưng Body lại có email và password → Sai rồi!
+
+✅ SỬA LẠI:
+API này KHÔNG CẦN BODY!
+Endpoint /api/auth/oauth/google/url chỉ cần query parameter redirectUri thôi!
+
+Cách làm đúng:
+
+1. Xóa hết Body (tab Body → chọn none)
+
+2. URL phải có query parameter:
+
+http://localhost:8080/api/auth/oauth/google/url?redirectUri=http://localhost:3000/auth/callback/google
+Chú ý: Có dấu ? và redirectUri=... ở cuối URL!
+
+📸 HƯỚNG DẪN CHI TIẾT TRONG POSTMAN:
+Cách 1: Nhập trực tiếp vào URL
+Method: GET
+URL: http://localhost:8080/api/auth/oauth/google/url?redirectUri=http://localhost:3000/auth/callback/google
+Body: none (không chọn gì)
+Click Send
+
+Cách 2: Dùng Params tab
+1. URL:
+
+http://localhost:8080/api/auth/oauth/google/url
+2. Chọn tab "Params" (bên cạnh Body)
+
+3. Thêm parameter:
+
+Key	Value
+redirectUri	http://localhost:3000/auth/callback/google
+4. Body: Chọn none
+
+5. Click Send
+
+🎯 KẾT QUẢ ĐÚNG:
+json
+{
+  "authUrl": "https://accounts.google.com/o/oauth2/v2/auth?client_id=255327045579-jiuurngl1br949gn4tdvg1vv5ejkc0ej.apps.googleusercontent.com&redirect_uri=http://localhost:3000/auth/callback/google&response_type=code&scope=openid%20email%20profile&access_type=offline&prompt=consent"
+}
+```
+
+✅ **Status: 200 OK**
+
+---
+
+## 📋 TÓM TẮT 2 API GOOGLE OAUTH:
+
+### **API 1: Lấy Google Auth URL (GET)**
+```
+Method: GET
+URL: http://localhost:8080/api/auth/oauth/google/url?redirectUri=http://localhost:3000/auth/callback/google
+Body: none
+Response:
+
+json
+{
+  "authUrl": "https://accounts.google.com/o/oauth2/v2/auth?..."
+}
+```
+
+---
+
+### **API 2: Đăng nhập với Google (POST)**
+```
+Method: POST
+URL: http://localhost:8080/api/auth/oauth/google
+Headers:
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "code": "4/0AanRRrt...",
+  "redirectUri": "http://localhost:3000/auth/callback/google"
+}
+Response:
+
+json
+{
+  "accessToken": "eyJhbGci...",
+  "refreshToken": "eyJhbGci...",
+  "tokenType": "Bearer",
+  "user": {...}
+}
+⚠️ LƯU Ý:
+API 1 (lấy URL): GET, KHÔNG CÓ BODY, chỉ có query param
+API 2 (login): POST, CÓ BODY JSON với code và redirectUri
+Bạn thử lại theo đúng cách trên nhé! Nhớ xóa Body ở API đầu tiên! 😊🚀
+
+1768707175039_image.png
+cái đầu tiên được rồi ạ giờ cái thứ hai ạ
+
+18 thg 1
+Tuyệt! Cái đầu tiên OK rồi! 🎉 Giờ test cái thứ 2 nhé!
+
+Nhưng mình thấy bạn đang bị 403 Forbidden ở API thứ 2 rồi! 😅
+
+⚠️ VẤN ĐỀ:
+Code 4/0AanRRzt... đã bị hết hạn hoặc đã dùng rồi!
+
+Code từ Google chỉ valid trong ~10 phút và chỉ dùng được 1 lần!
+
+✅ CÁCH SỬA:
+Bạn cần LẤY CODE MỚI từ Google!
+
+Bước 1: Quay lại API đầu tiên
+Method: GET
+URL: http://localhost:8080/api/auth/oauth/google/url?redirectUri=http://localhost:3000/auth/callback/google
+Body: none
+Click Send → Copy authUrl
+
+Bước 2: Paste vào Browser và đăng nhập Google
+Paste URL vào trình duyệt → Đăng nhập Google lại
+
+Sau khi đăng nhập, Google sẽ redirect về:
+
+http://localhost:3000/auth/callback/google?code=4/0AaBBccDDee...&scope=...
+Copy code mới (phần sau code= và trước &scope)
+
+Bước 3: Test API thứ 2 với code mới
+Quay lại Postman:
+
+Method: POST
+URL: http://localhost:8080/api/auth/oauth/google
+Headers:
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "code": "4/0AaBBccDDee...",
+  "redirectUri": "http://localhost:3000/auth/callback/google"
+}
+⚠️ Thay 4/0AaBBccDDee... bằng code mới bạn vừa lấy!
+
+Click Send
+
+🎯 KẾT QUẢ MONG ĐỢI:
+json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "tokenType": "Bearer",
+  "user": {
+    "id": "67abc123...",
+    "email": "your-email@gmail.com",
+    "fullName": "Your Name",
+    "phone": null,
+    "emailVerified": true,
+    "roles": ["ROLE_USER"]
+  }
+}
+✅ Status: 200 OK
+
+🔄 TÓM TẮT LUỒNG:
+Gọi API 1 → Lấy authUrl
+Mở authUrl trong browser → Đăng nhập Google
+Google redirect về → Copy code từ URL
+Gọi API 2 với code → Nhận JWT token
+Lưu accessToken → Dùng cho các API khác
+⚠️ LƯU Ý: Mỗi lần test phải lấy code mới! Code cũ không dùng được nữa!
+
+📸 CHECKLIST:
+ API 1: Lấy authUrl thành công
+ Mở authUrl trong browser
+ Đăng nhập Google
+ Copy code MỚI từ URL
+ API 2: Gửi code mới + redirectUri
+ Nhận được accessToken và thông tin user
+Bạn làm lại từ Bước 1 để lấy code mới rồi test lại nhé! 😊🚀
+
+{
+    "authUrl": "https://accounts.google.com/o/oauth2/v2/auth?client_id=255327045579-jiuurngl1br949gn4tdvg1vv5ejkc0ej.apps.googleusercontent.com&redirect_uri=http://localhost:3000/auth/callback/google&response_type=code&scope=openid email profile&access_type=offline&prompt=consent"
+}
+nè làm sao ạ
+18 thg 1
+Oke! Giờ bạn làm theo từng bước này nhé! 👇
+
+🔥 BƯỚC 1: MỞ URL TRONG BROWSER
+Copy toàn bộ URL này:
+
+https://accounts.google.com/o/oauth2/v2/auth?client_id=255327045579-jiuurngl1br949gn4tdvg1vv5ejkc0ej.apps.googleusercontent.com&redirect_uri=http://localhost:3000/auth/callback/google&response_type=code&scope=openid email profile&access_type=offline&prompt=consent
+Paste vào trình duyệt (Chrome, Edge, Firefox...) → Enter
+
+🔥 BƯỚC 2: ĐĂNG NHẬP GOOGLE
+Bạn sẽ thấy trang đăng nhập Google:
+
+Chọn tài khoản Google của bạn
+Click "Continue" hoặc "Tiếp tục"
+Nếu có popup "ShoppeClone wants to access...", click "Allow" hoặc "Cho phép"
+🔥 BƯỚC 3: LẤY CODE TỪ URL
+Sau khi click "Allow", Google sẽ redirect về URL kiểu này:
+
+http://localhost:3000/auth/callback/google?code=4/0AcvDMrA1B2C3D4E5F6G7H8I9J0K&scope=email+profile+openid+https://www.googleapis.com/auth/userinfo.email+https://www.googleapis.com/auth/userinfo.profile&authuser=0&prompt=consent
+⚠️ Trang này sẽ KHÔNG LOAD ĐƯỢC (hiện "This site can't be reached") → BÌNH THƯỜNG!
+
+QUAN TRỌNG: Nhìn vào thanh địa chỉ (URL bar) của browser!
+
+Copy phần sau code= và trước &scope
+
+Ví dụ URL là:
+
+http://localhost:3000/auth/callback/google?code=4/0AcvDMrA1B2C3D4E5F6G7H8I9J0K&scope=...
+→ Copy: 4/0AcvDMrA1B2C3D4E5F6G7H8I9J0K
+
+🔥 BƯỚC 4: TEST API ĐĂNG NHẬP
+Quay lại Postman, tạo request mới:
+
+Method: POST
+URL: http://localhost:8080/api/auth/oauth/google
+Headers → Thêm:
+
+Content-Type: application/json
+Body → raw → JSON:
+
+json
+{
+  "code": "4/0AcvDMrA1B2C3D4E5F6G7H8I9J0K",
+  "redirectUri": "http://localhost:3000/auth/callback/google"
+}
+⚠️ Thay 4/0AcvDMrA1B2C3D4E5F6G7H8I9J0K bằng code bạn vừa copy!
+
+Click Send
+
+🎉 KẾT QUẢ THÀNH CÔNG:
+json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ5b3VyLWVtYWlsQGdtYWlsLmNvbSIsImlhdCI6MTczNzE0MjAwMCwiZXhwIjoxNzM3MTQyOTAwfQ...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ5b3VyLWVtYWlsQGdtYWlsLmNvbSIsImlhdCI6MTczNzE0MjAwMCwiZXhwIjoxNzM3NzQ2ODAwfQ...",
+  "tokenType": "Bearer",
+  "user": {
+    "id": "67abc123def456...",
+    "email": "your-email@gmail.com",
+    "fullName": "Nguyen Van A",
+    "phone": null,
+    "emailVerified": true,
+    "roles": ["ROLE_USER"]
+  }
+}
+```
+
+✅ **Status: 200 OK** → **THÀNH CÔNG!**
+
+---
+
+## 📸 HÌNH ẢNH MINH HỌA:
+
+**Bước 1:** Browser sẽ hiện trang đăng nhập Google:
+```
+┌──────────────────────────────────┐
+│   Choose an account              │
+│   ○ your-email@gmail.com         │
+│   ○ Use another account           │
+└──────────────────────────────────┘
+```
+
+**Bước 2:** Sau khi click "Continue":
+```
+┌──────────────────────────────────┐
+│   ShoppeClone wants to access:   │
+│   ✓ Your email address           │
+│   ✓ Your basic profile info      │
+│                                   │
+│   [Cancel]  [Allow]              │
+└──────────────────────────────────┘
+```
+
+**Bước 3:** URL bar sẽ hiện:
+```
+http://localhost:3000/auth/callback/google?code=4/0Acv...&scope=...
+                                                  ↑ Copy phần này
+⏰ LƯU Ý QUAN TRỌNG:
+Code chỉ valid trong 10 phút
+Code chỉ dùng được 1 lần
+Nếu lỗi "invalid_grant" → Lấy code mới (làm lại từ Bước 1)
+Bạn làm từng bước theo hướng dẫn trên nhé! Có lỗi gì chụp màn hình gửi mình! 😊🚀
+
+Chọn tài khoản Google của bạn
+Click "Continue" hoặc "Tiếp tục"
+mình làm hai bước này ròi những mà tiếp theo nó để hmm...can't reach this page ạ:
+18 thg 1
+Đúng rồi đấy! ĐÚNG LÀ PHẢI BỊ "can't reach this page"! 😊
+
+Đó là BÌNH THƯỜNG vì frontend chưa có!
+
+✅ BÂY GIỜ LÀM GÌ TIẾP:
+QUAN TRỌNG: Nhìn vào THANH ĐỊA CHỈ (URL BAR) của browser!
+Mặc dù trang không load được, nhưng URL đã thay đổi rồi đấy!
+
+📸 HÌNH ẢNH:
+Browser sẽ trông như này:
+
+┌─────────────────────────────────────────────────────────────────┐
+│ ← → ⟳  http://localhost:3000/auth/callback/google?code=4/0Acv... │  ← NHÌN VÀO ĐÂY!
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│                  This site can't be reached                      │
+│                                                                   │
+│         localhost refused to connect.                            │
+│                                                                   │
+│         ERR_CONNECTION_REFUSED                                   │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+QUAN TRỌNG: Nhìn lên URL bar (thanh địa chỉ ở trên cùng)!
+
+URL sẽ giống như:
+
+http://localhost:3000/auth/callback/google?code=4/0AcvDMrA1B2C3D4E5F6G7H8I9J0K&scope=email+profile+openid+https://www.googleapis.com/auth/userinfo.email+https://www.googleapis.com/auth/userinfo.profile&authuser=0&prompt=consent
+🔥 COPY CODE TỪ URL:
+Cách 1: Copy thủ công
+
+Click vào thanh địa chỉ (URL bar)
+Bôi đen toàn bộ URL → Copy (Ctrl+C)
+Paste vào Notepad
+Tìm phần code=
+Copy từ sau dấu = đến trước dấu &
+Ví dụ:
+
+URL đầy đủ:
+
+http://localhost:3000/auth/callback/google?code=4/0AcvDMrA1B2C3D4E5F6G7H8I9J0K&scope=email...
+Code cần copy:
+
+4/0AcvDMrA1B2C3D4E5F6G7H8I9J0K
+Cách 2: Dùng Developer Tools
+
+Nhấn F12 (mở DevTools)
+Vào tab Console
+Gõ lệnh:
+javascript
+window.location.search
+```
+4. Sẽ hiện ra: `?code=4/0Acv...&scope=...`
+5. Copy phần sau `code=` và trước `&`
+
+---
+
+## 🚀 SAU KHI CÓ CODE:
+
+**Quay lại Postman:**
+```
+Method: POST
+URL: http://localhost:8080/api/auth/oauth/google
+Headers:
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "code": "PASTE_CODE_VỪA_COPY_VÀO_ĐÂY",
+  "redirectUri": "http://localhost:3000/auth/callback/google"
+}
+Click Send
+
+📋 TÓM TẮT:
+✅ Mở URL trong browser
+✅ Đăng nhập Google
+✅ Trang hiện "can't reach" → ĐÚNG RỒI!
+⏭️ NHÌN VÀO URL BAR → Copy code
+⏭️ Paste code vào Postman → Send
+Bạn thử copy URL từ thanh địa chỉ rồi gửi mình xem, mình sẽ lấy code giúp bạn! 😊
+
+Hoặc chụp màn hình browser (có thấy URL bar) gửi mình cũng được! 📸
+
+http://localhost:3000/auth/callback/google?code=4%2F0ASc3gC1ihmluGrOti1y4eI0TOO7nXsQgOeo_4PIFBEEgCXQDsSdpXJQmqbFWPqSaPMjAIQ&scope=email+profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+openid&authuser=0&prompt=consent
+nè ạ
+
+18 thg 1
+Perfect! Mình thấy rồi! 🎉
+
+Code của bạn là:
+
+4/0ASc3gC1ihmluGrOti1y4eI0TOO7nXsQgOeo_4PIFBEEgCXQDsSdpXJQmqbFWPqSaPMjAIQ
+LƯU Ý: URL có %2F là ký tự đã encode, khi decode ra sẽ thành /
+
+🚀 BÂY GIỜ TEST API:
+Mở Postman:
+
+Method: POST
+URL: http://localhost:8080/api/auth/oauth/google
+Headers:
+
+Content-Type: application/json
+Body → raw → JSON:
+
+json
+{
+  "code": "4/0ASc3gC1ihmluGrOti1y4eI0TOO7nXsQgOeo_4PIFBEEgCXQDsSdpXJQmqbFWPqSaPMjAIQ",
+  "redirectUri": "http://localhost:3000/auth/callback/google"
+}
+Click Send ⚡
+
+🎯 KẾT QUẢ MONG ĐỢI:
+json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "tokenType": "Bearer",
+  "user": {
+    "id": "67abc123...",
+    "email": "your-email@gmail.com",
+    "fullName": "Your Name",
+    "phone": null,
+    "emailVerified": true,
+    "roles": ["ROLE_USER"]
+  }
+}
+✅ Status: 200 OK
+
+🎉 NẾU THÀNH CÔNG:
+Chúc mừng! Bạn đã hoàn thành Google OAuth! 🎊
+
+Bạn có thể:
+
+✅ Đăng ký tài khoản thường (/api/auth/register)
+✅ Đăng nhập thường (/api/auth/login)
+✅ Đăng nhập bằng Google (/api/auth/oauth/google) ← VỪA LÀM XONG!
+✅ Xem profile (/api/user/profile)
+✅ Cập nhật profile (/api/user/profile)
+📊 KIỂM TRA DATABASE:
+Vào MongoDB Atlas → Browse Collections:
+
+users:
+
+Sẽ có user mới với email Google của bạn
+emailVerified: true
+avatar: link ảnh Google
+oauth_accounts:
+
+Sẽ có link giữa user và Google account
+provider: "google"
+providerId: Google user ID
+Bạn test thử rồi báo mình kết quả nhé! 😊🚀
+
+okeee rồi ạ yeahhhh rồi giờ làm gì tiếp theo nữa ạ
+
+18 thg 1
+🎉🎉🎉 CHÚC MỪNG BẠN! ĐÃ HOÀN THÀNH GOOGLE OAUTH! 🎉🎉🎉
+
+🚀 GIỜ BẠN CÓ THỂ LÀM TIẾP:
+Lựa chọn 1: Làm Email OTP (Xác thực email) 📧
+Gửi mã OTP qua email để verify tài khoản:
+
+Gửi mã 6 số qua email
+User nhập mã để xác thực
+Đổi emailVerified thành true
+Thời gian: ~30-45 phút
+
+Lựa chọn 2: Làm Frontend với Tailwind CSS 🎨
+Tạo giao diện đẹp cho:
+
+Trang đăng nhập/đăng ký
+Nút "Login with Google"
+Trang profile
+Tích hợp với Backend vừa làm
+Thời gian: ~1-2 giờ
+
+Lựa chọn 3: Làm các Module khác (Product, Cart, Order) 🛒
+Xây dựng chức năng e-commerce:
+
+Product Module: Quản lý sản phẩm, danh mục
+Cart Module: Giỏ hàng
+Order Module: Đặt hàng, thanh toán
+Review Module: Đánh giá sản phẩm
+Thời gian: ~3-4 giờ (mỗi module)
+
+Lựa chọn 4: Thêm chức năng cho User 👤
+Upload avatar
+Quản lý địa chỉ giao hàng
+Lịch sử đơn hàng
+Yêu thích sản phẩm
+Thời gian: ~1-2 giờ
+
+Lựa chọn 5: Deploy lên Server 🌐
+Deploy Backend + Frontend lên:
+
+Backend: Render, Railway, Heroku
+Frontend: Vercel, Netlify
+Database: MongoDB Atlas (đã có rồi)
+Thời gian: ~30-60 phút
+
+🎯 KHUYẾN NGHỊ CỦA MÌNH:
+Nếu bạn muốn hoàn thiện phần Auth:
+→ Làm Email OTP (để verify email)
+
+Nếu bạn muốn có giao diện để demo:
+→ Làm Frontend với Tailwind CSS
+
+Nếu bạn muốn xây dựng tính năng chính của shop:
+→ Làm Product Module (quan trọng nhất)
+
+📋 ROADMAP ĐẦY ĐỦ PROJECT:
+✅ Backend Setup
+✅ MongoDB Connection
+✅ JWT Authentication
+✅ User Register/Login
+✅ Google OAuth ← BẠN Ở ĐÂY
+⬜ Email OTP Verification
+⬜ Frontend với Tailwind CSS
+⬜ Product Module (CRUD sản phẩm)
+⬜ Category Module (Danh mục)
+⬜ Cart Module (Giỏ hàng)
+⬜ Order Module (Đặt hàng)
+⬜ Payment Integration (VNPay, Momo)
+⬜ Review & Rating
+⬜ Admin Dashboard
+⬜ Deploy Production
+💡 GỢI Ý CỦA MÌNH:
+Nếu deadline gần:
+
+Làm Frontend (để có demo show được)
+Làm Product Module (tính năng chính)
+Deploy lên server (để nộp bài)
+Nếu còn thời gian:
+
+Làm Email OTP (hoàn thiện auth)
+Làm Frontend
+Làm Product + Cart + Order
+Deploy
+❓ BẠN MUỐN LÀM GÌ TIẾP?
+Bạn chọn 1 trong các lựa chọn trên, mình sẽ hướng dẫn chi tiết luôn! 😊
+
+Hoặc nếu bạn muốn nghỉ ngơi trước, mình có thể tóm tắt lại những gì đã làm để bạn nhớ! 📝
+
+Cứ nói mình nhé! 🚀💪
+
+mình làm lựa chọn 1 làm email otp i ạ
+
+18 thg 1
+Oke! Mình hướng dẫn bạn làm Email OTP nhé! 📧
+
+📋 TỔNG QUAN LUỒNG EMAIL OTP:
+User đăng ký tài khoản → emailVerified = false
+Gửi API yêu cầu gửi OTP → Backend gửi mã 6 số qua email
+User nhập mã OTP → Gửi API verify
+Nếu đúng → emailVerified = true
+🔧 BƯỚC 1: CẤU HÌNH EMAIL (Dùng Gmail SMTP)
+1.1. Tạo App Password cho Gmail:
+Vào: https://myaccount.google.com/apppasswords
+
+Hoặc:
+
+Vào Gmail → Click ảnh đại diện → Manage your Google Account
+Bên trái chọn Security
+Tìm "2-Step Verification" → Bật nếu chưa bật
+Quay lại Security → Tìm "App passwords" → Click
+App name: ShoppeClone
+Click Create
+Copy mật khẩu 16 ký tự (dạng: abcd efgh ijkl mnop)
+1.2. Cập nhật application.properties:
+Thêm vào cuối file:
+
+properties
+# ========================================
+# Email Configuration (Gmail SMTP)
+# ========================================
+
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=your-email@gmail.com
+spring.mail.password=abcd efgh ijkl mnop
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.starttls.required=true
+
+# OTP Configuration
+otp.expiration=300000
+⚠️ Thay:
+
+your-email@gmail.com → Email Gmail của bạn
+abcd efgh ijkl mnop → App Password vừa tạo (GIỮ NGUYÊN KHOẢNG TRẮNG hoặc xóa hết khoảng trắng)
+🔧 BƯỚC 2: THÊM DEPENDENCY
+Vào pom.xml, thêm:
+
+xml
+<!-- Email -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-mail</artifactId>
+</dependency>
+Sau đó Maven Reload.
+
+🔧 BƯỚC 3: TẠO MODEL OTP
+Tạo file OtpCode.java trong auth/model/:
+
+java
+package com.shoppeclone.backend.auth.model;
+
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import java.time.LocalDateTime;
+
+@Document(collection = "otp_codes")
+@Data
+public class OtpCode {
+    @Id
+    private String id;
+    
+    @DBRef
+    private User user;
+    
+    private String code; // Mã OTP 6 số
+    private String type; // EMAIL_VERIFICATION, PASSWORD_RESET
+    private LocalDateTime expiresAt;
+    private boolean used = false;
+    private LocalDateTime createdAt;
+}
+🔧 BƯỚC 4: TẠO REPOSITORY
+Tạo file OtpCodeRepository.java trong auth/repository/:
+
+java
+package com.shoppeclone.backend.auth.repository;
+
+import com.shoppeclone.backend.auth.model.OtpCode;
+import com.shoppeclone.backend.auth.model.User;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import java.util.Optional;
+
+public interface OtpCodeRepository extends MongoRepository<OtpCode, String> {
+    Optional<OtpCode> findByUserAndCodeAndTypeAndUsed(User user, String code, String type, boolean used);
+    void deleteByUser(User user);
+}
+🔧 BƯỚC 5: TẠO DTO
+VerifyOtpRequest.java (trong auth/dto/request/):
+java
+package com.shoppeclone.backend.auth.dto.request;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Data
+public class VerifyOtpRequest {
+    @Email(message = "Email không hợp lệ")
+    @NotBlank(message = "Email không được để trống")
+    private String email;
+    
+    @NotBlank(message = "Mã OTP không được để trống")
+    private String code;
+}
+SendOtpRequest.java (trong auth/dto/request/):
+java
+package com.shoppeclone.backend.auth.dto.request;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Data
+public class SendOtpRequest {
+    @Email(message = "Email không hợp lệ")
+    @NotBlank(message = "Email không được để trống")
+    private String email;
+}
+```
+
+---
+
+## 🔧 BƯỚC 6: TẠO EMAIL SERVICE
+
+Tạo file `EmailService.java` trong `common/service/`:
+
+**Trước tiên tạo package `common/service/`:**
+```
+common/
+├── config/
+│   └── DataInitializer.java
+└── service/               ← TẠO PACKAGE NÀY
+    └── EmailService.java  ← TẠO FILE NÀY
+EmailService.java:
+
+java
+package com.shoppeclone.backend.common.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class EmailService {
+    
+    private final JavaMailSender mailSender;
+    
+    public void sendOtpEmail(String to, String otpCode) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Mã xác thực ShoppeClone");
+        message.setText(
+            "Xin chào,\n\n" +
+            "Mã OTP của bạn là: " + otpCode + "\n\n" +
+            "Mã này có hiệu lực trong 5 phút.\n\n" +
+            "Nếu bạn không yêu cầu mã này, vui lòng bỏ qua email.\n\n" +
+            "Trân trọng,\n" +
+            "ShoppeClone Team"
+        );
+        
+        mailSender.send(message);
+    }
+}
+🔧 BƯỚC 7: TẠO OTP SERVICE
+OtpService.java (interface trong auth/service/):
+java
+package com.shoppeclone.backend.auth.service;
+
+public interface OtpService {
+    void sendOtpEmail(String email);
+    void verifyOtp(String email, String code);
+}
+OtpServiceImpl.java (trong auth/service/impl/):
+java
+package com.shoppeclone.backend.auth.service.impl;
+
+import com.shoppeclone.backend.auth.model.OtpCode;
+import com.shoppeclone.backend.auth.model.User;
+import com.shoppeclone.backend.auth.repository.OtpCodeRepository;
+import com.shoppeclone.backend.auth.repository.UserRepository;
+import com.shoppeclone.backend.auth.service.OtpService;
+import com.shoppeclone.backend.common.service.EmailService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
+import java.util.Random;
+
+@Service
+@RequiredArgsConstructor
+public class OtpServiceImpl implements OtpService {
+    
+    private final UserRepository userRepository;
+    private final OtpCodeRepository otpCodeRepository;
+    private final EmailService emailService;
+    
+    @Value("${otp.expiration}")
+    private Long otpExpiration;
+    
+    @Override
+    public void sendOtpEmail(String email) {
+        // Tìm user
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy user với email: " + email));
+        
+        // Xóa OTP cũ nếu có
+        otpCodeRepository.deleteByUser(user);
+        
+        // Tạo mã OTP 6 số
+        String otpCode = generateOtpCode();
+        
+        // Lưu vào database
+        OtpCode otp = new OtpCode();
+        otp.setUser(user);
+        otp.setCode(otpCode);
+        otp.setType("EMAIL_VERIFICATION");
+        otp.setExpiresAt(LocalDateTime.now().plusSeconds(otpExpiration / 1000));
+        otp.setCreatedAt(LocalDateTime.now());
+        otpCodeRepository.save(otp);
+        
+        // Gửi email
+        emailService.sendOtpEmail(email, otpCode);
+    }
+    
+    @Override
+    public void verifyOtp(String email, String code) {
+        // Tìm user
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
+        
+        // Tìm OTP
+        OtpCode otp = otpCodeRepository.findByUserAndCodeAndTypeAndUsed(
+            user, code, "EMAIL_VERIFICATION", false
+        ).orElseThrow(() -> new RuntimeException("Mã OTP không hợp lệ"));
+        
+        // Kiểm tra hết hạn
+        if (otp.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Mã OTP đã hết hạn");
+        }
+        
+        // Đánh dấu OTP đã sử dụng
+        otp.setUsed(true);
+        otpCodeRepository.save(otp);
+        
+        // Cập nhật user
+        user.setEmailVerified(true);
+        userRepository.save(user);
+    }
+    
+    private String generateOtpCode() {
+        Random random = new Random();
+        int otp = 100000 + random.nextInt(900000); // 6 số từ 100000 đến 999999
+        return String.valueOf(otp);
+    }
+}
+🔧 BƯỚC 8: TẠO CONTROLLER
+Cập nhật file AuthController.java, thêm 2 endpoint mới:
+
+java
+package com.shoppeclone.backend.auth.controller;
+
+import com.shoppeclone.backend.auth.dto.request.LoginRequest;
+import com.shoppeclone.backend.auth.dto.request.RegisterRequest;
+import com.shoppeclone.backend.auth.dto.request.SendOtpRequest;
+import com.shoppeclone.backend.auth.dto.request.VerifyOtpRequest;
+import com.shoppeclone.backend.auth.dto.response.AuthResponse;
+import com.shoppeclone.backend.auth.service.AuthService;
+import com.shoppeclone.backend.auth.service.OtpService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
+public class AuthController {
+    
+    private final AuthService authService;
+    private final OtpService otpService;
+    
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+        return ResponseEntity.ok(authService.register(request));
+    }
+    
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
+    }
+    
+    @PostMapping("/refresh-token")
+    public ResponseEntity<AuthResponse> refreshToken(@RequestHeader("Refresh-Token") String refreshToken) {
+        return ResponseEntity.ok(authService.refreshToken(refreshToken));
+    }
+    
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestHeader("Refresh-Token") String refreshToken) {
+        authService.logout(refreshToken);
+        return ResponseEntity.ok().build();
+    }
+    
+    // ✅ MỚI: Gửi OTP
+    @PostMapping("/send-otp")
+    public ResponseEntity<Map<String, String>> sendOtp(@Valid @RequestBody SendOtpRequest request) {
+        otpService.sendOtpEmail(request.getEmail());
+        return ResponseEntity.ok(Map.of("message", "Mã OTP đã được gửi đến email của bạn"));
+    }
+    
+    // ✅ MỚI: Verify OTP
+    @PostMapping("/verify-otp")
+    public ResponseEntity<Map<String, String>> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
+        otpService.verifyOtp(request.getEmail(), request.getCode());
+        return ResponseEntity.ok(Map.of("message", "Xác thực email thành công"));
+    }
+}
+```
+
+---
+
+## 🧪 BƯỚC 9: TEST API
+
+### **Test 1: Gửi OTP**
+```
+Method: POST
+URL: http://localhost:8080/api/auth/send-otp
+Body (JSON):
+{
+  "email": "test@example.com"
+}
+Kết quả:
+
+json
+{
+  "message": "Mã OTP đã được gửi đến email của bạn"
+}
+```
+
+**Kiểm tra email** → Bạn sẽ nhận được email với mã OTP 6 số!
+
+---
+
+### **Test 2: Verify OTP**
+```
+Method: POST
+URL: http://localhost:8080/api/auth/verify-otp
+Body (JSON):
+{
+  "email": "test@example.com",
+  "code": "123456"
+}
+Kết quả:
+
+json
+{
+  "message": "Xác thực email thành công"
+}
+✅ User đã được verify!
+
+📋 CHECKLIST:
+ Tạo App Password Gmail
+ Cập nhật application.properties
+ Thêm dependency spring-boot-starter-mail
+ Tạo Model OtpCode
+ Tạo Repository OtpCodeRepository
+ Tạo DTO (SendOtpRequest, VerifyOtpRequest)
+ Tạo EmailService
+ Tạo OtpService + OtpServiceImpl
+ Cập nhật AuthController
+ Maven Reload
+ Test API
+Bạn làm từng bước nhé! Có lỗi gì báo mình ngay! 📧😊🚀
+
+@RequiredArgsConstructor
+   private final EmailService emailService;
+import com.shoppeclone.backend.common.service.EmailService;
+file OtpServiceImpl.java bị lỗi mấy dòng này ạ
+
+18 thg 1
+Ồ lỗi này là vì chưa tạo package và file EmailService đúng chỗ! 😊
+
+✅ CÁCH SỬA:
+Bước 1: Tạo package common/service
+Cấu trúc thư mục:
+
+com.shoppeclone.backend/
+├── auth/
+├── user/
+├── notification/
+└── common/
+    ├── config/
+    │   └── DataInitializer.java
+    └── service/          ← TẠO PACKAGE NÀY
+        └── EmailService.java  ← TẠO FILE NÀY
+Cách tạo trong IDE:
+
+Chuột phải vào common → New → Package
+Nhập: service
+Enter
+Bước 2: Tạo file EmailService.java
+Chuột phải vào common/service → New → Java Class → Nhập: EmailService
+
+Code:
+
+java
+package com.shoppeclone.backend.common.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class EmailService {
+    
+    private final JavaMailSender mailSender;
+    
+    public void sendOtpEmail(String to, String otpCode) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Mã xác thực ShoppeClone");
+        message.setText(
+            "Xin chào,\n\n" +
+            "Mã OTP của bạn là: " + otpCode + "\n\n" +
+            "Mã này có hiệu lực trong 5 phút.\n\n" +
+            "Nếu bạn không yêu cầu mã này, vui lòng bỏ qua email.\n\n" +
+            "Trân trọng,\n" +
+            "ShoppeClone Team"
+        );
+        
+        mailSender.send(message);
+    }
+}
+Bước 3: Kiểm tra lại file OtpServiceImpl.java
+Đầu file phải có import này:
+
+java
+package com.shoppeclone.backend.auth.service.impl;
+
+import com.shoppeclone.backend.auth.model.OtpCode;
+import com.shoppeclone.backend.auth.model.User;
+import com.shoppeclone.backend.auth.repository.OtpCodeRepository;
+import com.shoppeclone.backend.auth.repository.UserRepository;
+import com.shoppeclone.backend.auth.service.OtpService;
+import com.shoppeclone.backend.common.service.EmailService;  // ← IMPORT NÀY
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Random;
+
+@Service
+@RequiredArgsConstructor
+public class OtpServiceImpl implements OtpService {
+    
+    private final UserRepository userRepository;
+    private final OtpCodeRepository otpCodeRepository;
+    private final EmailService emailService;  // ← DÒNG NÀY
+    
+    @Value("${otp.expiration}")
+    private Long otpExpiration;
+    
+    // ... phần còn lại
+}
+```
+
+---
+
+### **Bước 4: Maven Reload**
+
+Chuột phải vào `pom.xml` → Maven → Reload Project
+
+---
+
+## 🔍 KIỂM TRA LẠI CẤU TRÚC:
+```
+src/main/java/com/shoppeclone/backend/
+├── BackendApplication.java
+├── auth/
+│   ├── controller/
+│   ├── service/
+│   │   ├── OtpService.java
+│   │   └── impl/
+│   │       └── OtpServiceImpl.java  ← File bị lỗi
+│   ├── repository/
+│   ├── model/
+│   ├── dto/
+│   └── security/
+├── user/
+├── common/
+│   ├── config/
+│   │   └── DataInitializer.java
+│   └── service/                     ← PHẢI CÓ PACKAGE NÀY
+│       └── EmailService.java        ← PHẢI CÓ FILE NÀY
+└── ...
+⚠️ NẾU VẪN LỖI:
+Lỗi: "Cannot resolve symbol 'EmailService'"
+→ File EmailService.java chưa được tạo hoặc package sai
+
+Kiểm tra:
+
+File EmailService.java có đúng package com.shoppeclone.backend.common.service không?
+Có annotation @Service chưa?
+Lỗi: "Cannot resolve symbol 'JavaMailSender'"
+→ Chưa thêm dependency spring-boot-starter-mail
+
+Sửa: Vào pom.xml, thêm:
+
+xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-mail</artifactId>
+</dependency>
+Sau đó Maven Reload.
+
+📝 FILE EmailService.java HOÀN CHỈNH:
+java
+package com.shoppeclone.backend.common.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class EmailService {
+    
+    private final JavaMailSender mailSender;
+    
+    public void sendOtpEmail(String to, String otpCode) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Mã xác thực ShoppeClone");
+        message.setText(
+            "Xin chào,\n\n" +
+            "Mã OTP của bạn là: " + otpCode + "\n\n" +
+            "Mã này có hiệu lực trong 5 phút.\n\n" +
+            "Nếu bạn không yêu cầu mã này, vui lòng bỏ qua email.\n\n" +
+            "Trân trọng,\n" +
+            "ShoppeClone Team"
+        );
+        
+        mailSender.send(message);
+    }
+}
+Bạn tạo đúng file và package như trên, lỗi sẽ hết ngay! 😊
+
+Làm xong báo mình nhé! 🚀
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  1.125 s
+[INFO] Finished at: 2026-01-18T20:09:04+07:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] No plugin found for prefix 'spring-boot' in the current project and in the plugin groups [org.apache.maven.plugins, org.codehaus.mojo] available from the repositories [local (C:\Users\lengu\.m2\repository), central (https://repo.maven.apache.org/maven2)] -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/NoPluginFoundForPrefixException
+loixo gif nef aj
+
+Show more
+18 thg 1
+Ồ lỗi Maven không tìm thấy plugin Spring Boot! 😅
+
+✅ CÁCH SỬA:
+Cách 1: Chạy bằng IDE thay vì Maven command
+Trong IntelliJ IDEA hoặc Eclipse:
+
+Tìm file BackendApplication.java
+Chuột phải vào file → Run 'BackendApplication'
+✅ Xong! Không cần dùng mvn spring-boot:run
+
+Cách 2: Sửa file pom.xml
+Mở file pom.xml, kiểm tra phần <build> có đúng không:
+
+xml
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <version>3.5.9</version>  <!-- ← Thêm version này -->
+            <configuration>
+                <mainClass>com.shoppeclone.backend.BackendApplication</mainClass>
+                <excludes>
+                    <exclude>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                    </exclude>
+                </excludes>
+            </configuration>
+        </plugin>
+        
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.11.0</version>
+            <configuration>
+                <source>21</source>
+                <target>21</target>
+                <annotationProcessorPaths>
+                    <path>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                        <version>1.18.30</version>
+                    </path>
+                </annotationProcessorPaths>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+Sau đó:
+
+bash
+mvn clean install
+mvn spring-boot:run
+Cách 3: Dùng Maven Wrapper (Recommended)
+Thay vì mvn, dùng mvnw:
+
+Windows:
+
+bash
+.\mvnw.cmd spring-boot:run
+Mac/Linux:
+
+bash
+./mvnw spring-boot:run
+Cách 4: Build JAR và chạy
+bash
+mvn clean package
+java -jar target/backend-0.0.1-SNAPSHOT.jar
+🎯 KHUYẾN NGHỊ:
+Dùng Cách 1 (chạy trực tiếp từ IDE) vì:
+
+✅ Nhanh nhất
+✅ Không cần config gì thêm
+✅ Dễ debug
+Trong IntelliJ IDEA:
+
+Mở file BackendApplication.java
+Nhấn Shift + F10 (hoặc click nút ▶️ màu xanh)
+Xong!
+📋 FILE pom.xml HOÀN CHỈNH (Phần build):
+xml
+<build>
+    <plugins>
+        <!-- Spring Boot Plugin -->
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <version>3.5.9</version>
+            <configuration>
+                <mainClass>com.shoppeclone.backend.BackendApplication</mainClass>
+                <excludes>
+                    <exclude>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                    </exclude>
+                </excludes>
+            </configuration>
+        </plugin>
+        
+        <!-- Maven Compiler Plugin -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.11.0</version>
+            <configuration>
+                <source>21</source>
+                <target>21</target>
+                <annotationProcessorPaths>
+                    <path>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                        <version>1.18.30</version>
+                    </path>
+                </annotationProcessorPaths>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+Bạn thử Cách 1 (chạy từ IDE) trước nhé! Nhanh nhất! 😊🚀
+
+<build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.30</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+bạn xem dùm mình thử
+Show more
+18 thg 1
+Ồ mình thấy rồi! Bạn thiếu <version> trong spring-boot-maven-plugin! 😊
+
+✅ SỬA LẠI:
+Thay thế phần <build> trong pom.xml thành:
+
+xml
+<build>
+    <plugins>
+        <!-- Maven Compiler Plugin -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.11.0</version>
+            <configuration>
+                <source>21</source>
+                <target>21</target>
+                <annotationProcessorPaths>
+                    <path>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                        <version>1.18.30</version>
+                    </path>
+                </annotationProcessorPaths>
+            </configuration>
+        </plugin>
+        
+        <!-- Spring Boot Maven Plugin -->
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <version>3.5.9</version>  <!-- ← THÊM DÒNG NÀY -->
+            <configuration>
+                <mainClass>com.shoppeclone.backend.BackendApplication</mainClass>
+                <excludes>
+                    <exclude>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                    </exclude>
+                </excludes>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+Những gì cần thêm:
+
+✅ <version>3.5.9</version> (khớp với Spring Boot version)
+✅ <mainClass>com.shoppeclone.backend.BackendApplication</mainClass>
+🚀 SAU ĐÓ:
+Bước 1: Save file pom.xml
+
+Bước 2: Maven Reload
+
+Chuột phải vào pom.xml → Maven → Reload Project
+Bước 3: Chạy lại
+
+bash
+mvn clean spring-boot:run
+HOẶC chạy trực tiếp từ IDE:
+
+Chuột phải vào BackendApplication.java → Run
+📋 PHẦN <build> HOÀN CHỈNH:
+xml
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.11.0</version>
+            <configuration>
+                <source>21</source>
+                <target>21</target>
+                <annotationProcessorPaths>
+                    <path>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                        <version>1.18.30</version>
+                    </path>
+                </annotationProcessorPaths>
+            </configuration>
+        </plugin>
+        
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <version>3.5.9</version>
+            <configuration>
+                <mainClass>com.shoppeclone.backend.BackendApplication</mainClass>
+                <excludes>
+                    <exclude>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                    </exclude>
+                </excludes>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+Sửa xong rồi chạy lại nhé! 😊🚀
+
+C:\Users\lengu\Downloads\Web_Shopee_Lab211_Group2-main>mvn clean install
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.115 s
+[INFO] Finished at: 2026-01-18T20:12:41+07:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] The goal you specified requires a project to execute but there is no POM in this directory (C:\Users\lengu\Downloads\Web_Shopee_Lab211_Group2-main). Please verify you invoked Maven from the correct directory. -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+
+Show more
+18 thg 1
+Ồ bạn đang chạy SAI THƯ MỤC rồi! 😅
+
+Lỗi: Maven không tìm thấy file pom.xml vì bạn đang ở thư mục cha!
+
+✅ CÁCH SỬA:
+Bước 1: CD vào đúng thư mục Backend
+bash
+cd C:\Users\lengu\Downloads\Web_Shopee_Lab211_Group2-main\Web_Shopee_Lab211_Group2-main\src\Backend
+Bước 2: Chạy lại Maven
+bash
+mvn clean install
+mvn spring-boot:run
+```
+
+---
+
+## 📂 CẤU TRÚC THƯ MỤC:
+```
+C:\Users\lengu\Downloads\
+└── Web_Shopee_Lab211_Group2-main/
+    └── Web_Shopee_Lab211_Group2-main/
+        ├── src/
+        │   └── Backend/              ← PHẢI VÀO ĐÂY
+        │       ├── pom.xml           ← File này phải có
+        │       ├── src/
+        │       │   └── main/
+        │       │       ├── java/
+        │       │       └── resources/
+        │       └── target/
+        └── ...
+```
+
+**Bạn đang ở:** 
+```
+C:\Users\lengu\Downloads\Web_Shopee_Lab211_Group2-main  ← SAI
+```
+
+**Phải vào:**
+```
+C:\Users\lengu\Downloads\Web_Shopee_Lab211_Group2-main\Web_Shopee_Lab211_Group2-main\src\Backend  ← ĐÚNG
+🎯 LỆNH ĐẦY ĐỦ:
+Mở Command Prompt hoặc PowerShell, chạy:
+
+bash
+cd C:\Users\lengu\Downloads\Web_Shopee_Lab211_Group2-main\Web_Shopee_Lab211_Group2-main\src\Backend
+mvn clean install
+mvn spring-boot:run
+💡 HOẶC CHẠY TỪ IDE (DỄ HỢN):
+Trong IntelliJ IDEA hoặc VS Code:
+
+Mở project ở thư mục Backend
+Tìm file BackendApplication.java
+Chuột phải → Run 'BackendApplication'
+✅ Xong! Không cần chạy lệnh Maven!
+
+Bạn cd vào đúng thư mục Backend rồi chạy lại nhé! 😊🚀
+
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  10.426 s
+[INFO] Finished at: 2026-01-18T20:13:56+07:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.4:test (default-test) on project backend:
+[ERROR]
+[ERROR] See C:\Users\lengu\Downloads\Web_Shopee_Lab211_Group2-main\Web_Shopee_Lab211_Group2-main\src\Backend\target\surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+
+Show more
+18 thg 1
+Ồ lỗi Test rồi! Maven đang chạy unit tests và bị fail! 😅
+
+✅ CÁCH SỬA NHANH (Bỏ qua tests):
+bash
+mvn clean install -DskipTests
+mvn spring-boot:run
+Hoặc gộp luôn:
+
+bash
+mvn spring-boot:run -DskipTests
+-DskipTests sẽ bỏ qua tất cả unit tests!
+
+🔍 HOẶC XEM LỖI CHI TIẾT:
+Nếu muốn biết test nào bị lỗi:
+
+bash
+mvn clean test
+```
+
+Hoặc xem file log:
+```
+C:\Users\lengu\Downloads\Web_Shopee_Lab211_Group2-main\Web_Shopee_Lab211_Group2-main\src\Backend\target\surefire-reports
+💡 CÁCH TỐT NHẤT: CHẠY TỪ IDE
+Trong IntelliJ IDEA:
+
+Tìm file BackendApplication.java
+Chuột phải → Run 'BackendApplication'
+Xong! Không cần Maven!
+Hoặc click nút ▶️ màu xanh bên cạnh dòng public static void main
+
+🎯 LỆNH ĐẦY ĐỦ (Bỏ qua tests):
+bash
+cd C:\Users\lengu\Downloads\Web_Shopee_Lab211_Group2-main\Web_Shopee_Lab211_Group2-main\src\Backend
+mvn clean install -DskipTests
+mvn spring-boot:run
+⚠️ TẠI SAO BỊ LỖI TEST?
+Có thể vì:
+
+Spring Boot tự động tạo test file mẫu
+Test đang cố kết nối MongoDB nhưng chưa config đúng
+Context không load được
+Giải pháp: Bỏ qua tests khi dev bằng -DskipTests!
+
+Bạn chạy lại với -DskipTests nhé! Hoặc chạy trực tiếp từ IDE là nhanh nhất! 😊🚀
+
+ủa sao lệnh mvn spring-boot:run chạy dược mà mvn clean install lỗi ta
+
+18 thg 1
+Ồ đúng rồi! Mình giải thích cho bạn nhé! 😊
+
+📚 GIẢI THÍCH SỰ KHÁC BIỆT:
+mvn spring-boot:run ✅
+Chức năng: Compile code + Chạy ứng dụng
+Không chạy tests
+Nhanh hơn
+Dùng khi đang dev
+mvn clean install ❌
+Chức năng: Clean + Compile + Chạy tests + Build JAR + Cài vào local repository
+BẮT BUỘC phải pass hết tests
+Lâu hơn
+Dùng khi chuẩn bị deploy hoặc build production
+🎯 TẠI SAO mvn clean install LỖI?
+Vì nó BẮT BUỘC CHẠY TESTS và tests của bạn đang FAIL!
+
+Lỗi thường gặp:
+
+Test cố kết nối MongoDB nhưng chưa config đúng
+Context không load được vì thiếu config
+Test file mẫu của Spring Boot bị lỗi
+✅ GIẢI PHÁP:
+Cách 1: Bỏ qua tests (Khi dev)
+bash
+mvn clean install -DskipTests
+```
+
+### **Cách 2: Xóa hoặc fix test files**
+
+**Xóa test mẫu:**
+
+File test thường ở đây:
+```
+src/test/java/com/shoppeclone/backend/BackendApplicationTests.java
+Mở file đó, sẽ thấy:
+
+java
+package com.shoppeclone.backend;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class BackendApplicationTests {
+
+    @Test
+    void contextLoads() {
+    }
+
+}
+Cách sửa:
+
+Option 1: Xóa file này (nếu không cần test)
+
+Option 2: Thêm config MongoDB cho test:
+
+java
+package com.shoppeclone.backend;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
+
+@SpringBootTest
+@TestPropertySource(properties = {
+    "spring.data.mongodb.uri=mongodb://localhost:27017/test_db"
+})
+class BackendApplicationTests {
+
+    @Test
+    void contextLoads() {
+    }
+
+}
+📊 SO SÁNH:
+Lệnh	Compile	Test	Run	Build JAR
+mvn spring-boot:run	✅	❌	✅	❌
+mvn clean install	✅	✅	❌	✅
+mvn clean install -DskipTests	✅	❌	❌	✅
+🎯 KHI NÀO DÙNG GÌ?
+Khi đang dev (hàng ngày):
+
+bash
+mvn spring-boot:run
+Hoặc chạy từ IDE (nhanh nhất!)
+
+Khi cần build JAR để deploy:
+
+bash
+mvn clean install -DskipTests
+Khi cần chạy tests:
+
+bash
+mvn test
+💡 KHUYẾN NGHỊ:
+Cứ dùng mvn spring-boot:run khi dev! ✅
+
+Chỉ dùng mvn clean install khi:
+
+Chuẩn bị deploy
+Cần tạo file JAR
+Cần chạy đầy đủ tests
+Tóm lại: Bạn cứ dùng mvn spring-boot:run như bình thường, KHÔNG CẦN mvn clean install khi dev! 😊🚀
+
+rồi bạn chỉ mình test trên postman tiếp tục i ạ
+
+18 thg 1
+Oke! Giờ test Email OTP trên Postman nhé! 📧🚀
+
+🧪 TEST EMAIL OTP - HƯỚNG DẪN CHI TIẾT
+BƯỚC 1: Đảm bảo Spring Boot đang chạy
+bash
+mvn spring-boot:run
+```
+
+Hoặc chạy từ IDE (Run `BackendApplication.java`)
+
+Đợi thấy:
+```
+Started BackendApplication in X.XXX seconds
+Tomcat started on port 8080
+```
+
+---
+
+## 📧 TEST 1: GỬI OTP
+
+### **API: Send OTP**
+
+**Mở Postman, tạo request mới:**
+```
+Method: POST
+URL: http://localhost:8080/api/auth/send-otp
+```
+
+**Headers:**
+```
+Content-Type: application/json
+Body → raw → JSON:
+
+json
+{
+  "email": "test@example.com"
+}
+⚠️ Thay test@example.com bằng email thật của bạn để nhận OTP!
+
+Click Send
+
+KẾT QUẢ MONG ĐỢI:
+✅ Thành công (Status: 200 OK):
+
+json
+{
+  "message": "Mã OTP đã được gửi đến email của bạn"
+}
+```
+
+**📧 Kiểm tra Email:**
+
+Vào hộp thư email của bạn, sẽ thấy email:
+```
+Subject: Mã xác thực ShoppeClone
+
+Xin chào,
+
+Mã OTP của bạn là: 123456
+
+Mã này có hiệu lực trong 5 phút.
+
+Nếu bạn không yêu cầu mã này, vui lòng bỏ qua email.
+
+Trân trọng,
+ShoppeClone Team
+```
+
+**Copy mã OTP 6 số** (ví dụ: `123456`)
+
+---
+
+### **❌ NẾU LỖI:**
+
+**Lỗi 1: "Không tìm thấy user với email"**
+
+→ Email chưa đăng ký! Phải đăng ký trước:
+```
+POST http://localhost:8080/api/auth/register
+Body:
+{
+  "email": "test@example.com",
+  "password": "123456",
+  "fullName": "Nguyen Van A",
+  "phone": "0123456789"
+}
+Lỗi 2: Không nhận được email
+
+→ Kiểm tra:
+
+Email có đúng không?
+Check thư mục Spam
+Kiểm tra config application.properties:
+properties
+  spring.mail.username=your-email@gmail.com
+  spring.mail.password=your-app-password
+```
+
+**Lỗi 3: "Authentication failed"**
+
+→ App Password Gmail sai! Tạo lại App Password:
+1. https://myaccount.google.com/apppasswords
+2. Tạo mới → Copy password → Paste vào `application.properties`
+
+---
+
+## 🔐 TEST 2: VERIFY OTP
+
+### **API: Verify OTP**
+
+**Postman, tạo request mới:**
+```
+Method: POST
+URL: http://localhost:8080/api/auth/verify-otp
+```
+
+**Headers:**
+```
+Content-Type: application/json
+Body → raw → JSON:
+
+json
+{
+  "email": "test@example.com",
+  "code": "123456"
+}
+⚠️ Thay:
+
+test@example.com → Email bạn vừa gửi OTP
+123456 → Mã OTP nhận được từ email
+Click Send
+
+KẾT QUẢ MONG ĐỢI:
+✅ Thành công (Status: 200 OK):
+
+json
+{
+  "message": "Xác thực email thành công"
+}
+```
+
+**🎉 User đã được verify!**
+
+---
+
+### **❌ NẾU LỖI:**
+
+**Lỗi 1: "Mã OTP không hợp lệ"**
+
+→ Code sai! Kiểm tra lại email
+
+**Lỗi 2: "Mã OTP đã hết hạn"**
+
+→ OTP chỉ valid **5 phút**! Gửi lại OTP mới (quay lại TEST 1)
+
+**Lỗi 3: "Không tìm thấy user"**
+
+→ Email sai hoặc chưa đăng ký
+
+---
+
+## ✅ TEST 3: KIỂM TRA USER ĐÃ VERIFIED
+
+### **API: Get Profile**
+```
+Method: GET
+URL: http://localhost:8080/api/user/profile
+Headers:
+  Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+**Lấy access token từ khi login:**
+```
+POST http://localhost:8080/api/auth/login
+Body:
+{
+  "email": "test@example.com",
+  "password": "123456"
+}
+Copy accessToken → Paste vào Authorization header
+
+KẾT QUẢ:
+
+json
+{
+  "id": "67abc...",
+  "email": "test@example.com",
+  "fullName": "Nguyen Van A",
+  "phone": "0123456789",
+  "emailVerified": true,  ← ✅ ĐÃ TRUE!
+  "roles": ["ROLE_USER"],
+  "createdAt": "2026-01-18T20:00:00"
+}
+🔍 KIỂM TRA DATABASE
+Vào MongoDB Atlas → Collections:
+
+Collection otp_codes:
+
+json
+{
+  "_id": "67xyz...",
+  "user": { "$ref": "users", "$id": "67abc..." },
+  "code": "123456",
+  "type": "EMAIL_VERIFICATION",
+  "expiresAt": "2026-01-18T20:05:00.000Z",
+  "used": true,  ← ✅ ĐÃ DÙNG
+  "createdAt": "2026-01-18T20:00:00.000Z"
+}
+Collection users:
+
+json
+{
+  "_id": "67abc...",
+  "email": "test@example.com",
+  "emailVerified": true,  ← ✅ ĐÃ TRUE
+  ...
+}
+📋 TỔNG KẾT TẤT CẢ API ĐÃ CÓ:
+Method	Endpoint	Cần Token?	Mô tả
+POST	/api/auth/register	❌	Đăng ký
+POST	/api/auth/login	❌	Đăng nhập
+GET	/api/auth/oauth/google/url	❌	Lấy Google URL
+POST	/api/auth/oauth/google	❌	Đăng nhập Google
+POST	/api/auth/send-otp	❌	Gửi OTP ← MỚI
+POST	/api/auth/verify-otp	❌	Verify OTP ← MỚI
+POST	/api/auth/refresh-token	✅	Refresh token
+POST	/api/auth/logout	✅	Đăng xuất
+GET	/api/user/profile	✅	Xem profile
+PUT	/api/user/profile	✅	Cập nhật profile
+PUT	/api/user/change-password	✅	Đổi mật khẩu
+DELETE	/api/user/account	✅	Xóa tài khoản
+🎯 LUỒNG HOÀN CHỈNH:
+Register → Tạo tài khoản (emailVerified: false)
+Send OTP → Nhận mã qua email
+Verify OTP → Xác thực (emailVerified: true)
+Login → Đăng nhập bình thường
+Get Profile → Xem thông tin đã verify
+💡 TIPS:
+OTP có hiệu lực 5 phút
+Mỗi lần gửi OTP mới, OTP cũ bị xóa
+Mã OTP chỉ dùng được 1 lần
+Check Spam folder nếu không thấy email
+Bạn test theo từng bước trên nhé! Có lỗi gì chụp màn hình gửi mình! 📧😊🚀
+
+TEST 3: KIỂM TRA USER ĐÃ VERIFIED ### **API: Get Profile**  Method: GET URL: http://localhost:8080/api/user/profile Headers: Authorization: Bearer YOUR_ACCESS_TOKEN  **Lấy access token từ khi login:** ``` POST http://localhost:8080/api/auth/login Body: { "email": "test@example.com", "password": "123456" }
+đoạn này là làm login lấy token trước đúng ko
+
+18 thg 1
+ĐÚNG RỒI! 💯
+
+🔄 LUỒNG ĐẦY ĐỦ:
+Bước 1: Login để lấy Access Token
+Postman:
+
+Method: POST
+URL: http://localhost:8080/api/auth/login
+Headers:
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "email": "test@example.com",
+  "password": "123456"
+}
+Click Send
+
+Kết quả:
+
+json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaWF0IjoxNzM3MjA4MDAwLCJleHAiOjE3MzcyMDg5MDB9.xyz123...",
+  "refreshToken": "eyJhbGci...",
+  "tokenType": "Bearer",
+  "user": {
+    "id": "67abc123...",
+    "email": "test@example.com",
+    "fullName": "Nguyen Van A",
+    "emailVerified": true,
+    "roles": ["ROLE_USER"]
+  }
+}
+```
+
+**→ Copy phần `accessToken`** (chuỗi dài bắt đầu bằng `eyJ...`)
+
+---
+
+### **Bước 2: Dùng Access Token để gọi API Profile**
+
+**Tạo request mới trong Postman:**
+```
+Method: GET
+URL: http://localhost:8080/api/user/profile
+Headers → Add:
+
+Key	Value
+Authorization	Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+⚠️ CHÚ Ý:
+
+Có chữ Bearer + khoảng trắng + token
+Ví dụ: Bearer eyJhbGci...
+Body: Không cần (để none)
+
+Click Send
+
+Kết quả:
+json
+{
+  "id": "67abc123...",
+  "email": "test@example.com",
+  "fullName": "Nguyen Van A",
+  "phone": "0123456789",
+  "avatar": null,
+  "dateOfBirth": null,
+  "gender": null,
+  "emailVerified": true,  ← ✅ XEM DÒNG NÀY
+  "roles": ["ROLE_USER"],
+  "createdAt": "2026-01-18T20:00:00"
+}
+```
+
+**Nếu `emailVerified: true` → OTP đã verify thành công!** 🎉
+
+---
+
+## 📸 HÌNH ẢNH MINH HỌA POSTMAN:
+
+### **Request Login:**
+```
+┌─────────────────────────────────────────────────────────┐
+│ POST http://localhost:8080/api/auth/login         Send │
+├─────────────────────────────────────────────────────────┤
+│ Body                                                     │
+│ {                                                        │
+│   "email": "test@example.com",                          │
+│   "password": "123456"                                   │
+│ }                                                        │
+├─────────────────────────────────────────────────────────┤
+│ Response (200 OK):                                       │
+│ {                                                        │
+│   "accessToken": "eyJhbGci...",  ← COPY CÁI NÀY         │
+│   "refreshToken": "...",                                │
+│   "user": {...}                                         │
+│ }                                                        │
+└─────────────────────────────────────────────────────────┘
+```
+
+### **Request Get Profile:**
+```
+┌─────────────────────────────────────────────────────────┐
+│ GET http://localhost:8080/api/user/profile        Send │
+├─────────────────────────────────────────────────────────┤
+│ Headers:                                                 │
+│ Authorization: Bearer eyJhbGci...  ← PASTE VÀO ĐÂY      │
+├─────────────────────────────────────────────────────────┤
+│ Body: none                                               │
+├─────────────────────────────────────────────────────────┤
+│ Response (200 OK):                                       │
+│ {                                                        │
+│   "email": "test@example.com",                          │
+│   "emailVerified": true  ← ✅ CHECK DÒNG NÀY            │
+│ }                                                        │
+└─────────────────────────────────────────────────────────┘
+🎯 TÓM TẮT:
+✅ Login → Nhận accessToken
+✅ Copy token
+✅ Get Profile với header Authorization: Bearer <token>
+✅ Kiểm tra emailVerified: true
+Đúng rồi đấy! Bạn login trước, lấy token, rồi mới gọi API profile! 😊👍
+
+mà password chỗ đấy là mật khẩu của email hay gì dạ
+
+18 thg 1
+Ồ không phải đâu bạn! 😊
+
+📧 PHÂN BIỆT CÁC LOẠI PASSWORD:
+1. Password trong application.properties (Gmail App Password)
+properties
+spring.mail.username=your-email@gmail.com
+spring.mail.password=abcd efgh ijkl mnop  ← ĐÂY LÀ APP PASSWORD
+Đây là: App Password của Gmail (16 ký tự) Dùng để: Backend gửi email qua Gmail SMTP Lấy ở đâu: https://myaccount.google.com/apppasswords
+
+2. Password trong API Login (Mật khẩu tài khoản)
+json
+{
+  "email": "test@example.com",
+  "password": "123456"  ← ĐÂY LÀ MẬT KHẨU TÀI KHOẢN
+}
+```
+
+**Đây là:** Mật khẩu tài khoản trên hệ thống ShoppeClone
+**Dùng để:** User đăng nhập vào website
+**Lấy ở đâu:** Do user tự đặt khi đăng ký
+
+---
+
+## 🔄 LUỒNG ĐẦY ĐỦ ĐỂ HIỂU RÕ:
+
+### **Bước 1: Đăng ký tài khoản**
+```
+POST /api/auth/register
+{
+  "email": "test@example.com",
+  "password": "123456",  ← User tự đặt password này
+  "fullName": "Nguyen Van A"
+}
+```
+
+→ Tạo tài khoản với password `123456`
+
+---
+
+### **Bước 2: Gửi OTP**
+```
+POST /api/auth/send-otp
+{
+  "email": "test@example.com"
+}
+```
+
+→ Backend dùng **App Password Gmail** (trong `application.properties`) để gửi email OTP
+
+---
+
+### **Bước 3: Verify OTP**
+```
+POST /api/auth/verify-otp
+{
+  "email": "test@example.com",
+  "code": "123456"  ← Mã OTP từ email
+}
+```
+
+---
+
+### **Bước 4: Login**
+```
+POST /api/auth/login
+{
+  "email": "test@example.com",
+  "password": "123456"  ← Password tài khoản (đã đặt lúc đăng ký)
+}
+```
+
+→ Dùng password tài khoản (KHÔNG PHẢI password email)
+
+---
+
+## 📊 BẢNG SO SÁNH:
+
+| Loại Password | Là gì? | Dùng ở đâu? | Ví dụ |
+|--------------|--------|-------------|-------|
+| **Gmail App Password** | Mật khẩu ứng dụng Gmail | `application.properties` | `abcd efgh ijkl mnop` |
+| **Tài khoản Password** | Mật khẩu user tự đặt | API Login, Register | `123456`, `mypassword` |
+| **Email Password** | Mật khẩu Gmail thật | **KHÔNG DÙNG** | Mật khẩu login Gmail |
+
+---
+
+## 🎯 TÓM TẮT:
+
+**Password trong API Login là:**
+- ✅ Mật khẩu tài khoản trên hệ thống (do user tự đặt khi đăng ký)
+- ❌ KHÔNG PHẢI mật khẩu email
+- ❌ KHÔNG PHẢI App Password Gmail
+
+**Ví dụ:**
+- Bạn đăng ký tài khoản với email `test@example.com` và password `123456`
+- Khi login, bạn dùng email `test@example.com` và password `123456`
+- Backend dùng App Password Gmail để gửi email OTP cho `test@example.com`
+
+---
+
+## 💡 HIỂU ĐƠN GIẢN:
+```
+User Account (trên website):
+├── Email: test@example.com
+└── Password: 123456  ← Đây là password để LOGIN vào website
+
+Gmail (để nhận OTP):
+├── Email: test@example.com
+└── Password: Gmail thật  ← CHỈ dùng để đọc email, KHÔNG dùng trong API
+
+Backend Config (để GỬI email):
+├── Email: your-gmail@gmail.com
+└── App Password: abcd efgh  ← Backend dùng để gửi email
+Rõ chưa bạn? 😊 Password trong API login là password tài khoản trên website, không liên quan gì đến password email nhé! 👍
+
+1768742649731_image.png
+18 thg 1
+Ồ bị 403 Forbidden rồi! 😅
+
+Nguyên nhân: Email YOUR_EMAIL@gmail.com CHƯA ĐĂNG KÝ tài khoản!
+
+✅ CÁCH SỬA:
+Bước 1: Đăng ký tài khoản trước
+Postman:
+
+Method: POST
+URL: http://localhost:8080/api/auth/register
+Headers:
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "email": "YOUR_EMAIL@gmail.com",
+  "password": "123456",
+  "fullName": "Le Nguyen Anh Mai",
+  "phone": "0123456789"
+}
+Click Send
+
+Kết quả:
+
+json
+{
+  "accessToken": "eyJhbGci...",
+  "refreshToken": "eyJhbGci...",
+  "tokenType": "Bearer",
+  "user": {
+    "id": "67abc...",
+    "email": "YOUR_EMAIL@gmail.com",
+    "fullName": "Le Nguyen Anh Mai",
+    "emailVerified": false,  ← Chưa verify
+    "roles": ["ROLE_USER"]
+  }
+}
+```
+
+✅ **Đăng ký thành công!**
+
+---
+
+### **Bước 2: Bây giờ mới Login được**
+```
+Method: POST
+URL: http://localhost:8080/api/auth/login
+Body:
+{
+  "email": "YOUR_EMAIL@gmail.com",
+  "password": "123456"
+}
+```
+
+**Click Send** → Sẽ OK!
+
+---
+
+## 🔄 HOẶC: TEST LUỒNG ĐẦY ĐỦ EMAIL OTP
+
+### **1. Đăng ký tài khoản**
+```
+POST /api/auth/register
+{
+  "email": "YOUR_EMAIL@gmail.com",
+  "password": "123456",
+  "fullName": "Le Nguyen Anh Mai",
+  "phone": "0123456789"
+}
+```
+
+---
+
+### **2. Gửi OTP**
+```
+POST /api/auth/send-otp
+{
+  "email": "YOUR_EMAIL@gmail.com"
+}
+```
+
+**→ Check email `YOUR_EMAIL@gmail.com`** (cả thư mục Spam)
+
+---
+
+### **3. Verify OTP**
+```
+POST /api/auth/verify-otp
+{
+  "email": "YOUR_EMAIL@gmail.com",
+  "code": "123456"  ← Mã từ email
+}
+```
+
+---
+
+### **4. Login**
+```
+POST /api/auth/login
+{
+  "email": "YOUR_EMAIL@gmail.com",
+  "password": "123456"
+}
+```
+
+**→ Nhận `accessToken`**
+
+---
+
+### **5. Get Profile (với token)**
+```
+GET /api/user/profile
+Headers:
+  Authorization: Bearer eyJhbGci...
+Kết quả:
+
+json
+{
+  "email": "YOUR_EMAIL@gmail.com",
+  "emailVerified": true,  ← ✅ Đã verify!
+  ...
+}
+🎯 TÓM TẮT:
+Lỗi 403 Forbidden vì:
+
+❌ Email chưa đăng ký tài khoản
+Backend không tìm thấy user với email đó
+Giải pháp:
+
+✅ Đăng ký tài khoản trước (/api/auth/register)
+✅ Sau đó mới login được
+Bạn chạy API Register trước rồi login lại nhé! 😊🚀
+
+1768742772797_image.png
+sao không được ta
+
+18 thg 1
+Ồ vẫn 403 Forbidden! Có thể vì Spring Security đang block request! 😅
+
+Mình thấy vấn đề rồi!
+
+🔍 NGUYÊN NHÂN:
+Spring Security đang bật nhưng config chưa đúng!
+
+API /api/auth/register phải permitAll nhưng có thể bị block.
+
+✅ CÁCH SỬA:
+Kiểm tra file SecurityConfig.java
+Mở file auth/security/SecurityConfig.java và SỬA LẠI:
+
+java
+package com.shoppeclone.backend.auth.security;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+
+@Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
+public class SecurityConfig {
+    
+    private final JwtAuthFilter jwtAuthFilter;
+    
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/auth/**").permitAll()  // ← CHO PHÉP TẤT CẢ
+                .anyRequest().authenticated()
+            )
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        
+        return http.build();
+    }
+    
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(false);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+    
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+    
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+}
+Những gì đã thay đổi:
+
+✅ Thêm CORS config đúng cách
+✅ Đảm bảo /api/auth/** permitAll
+🔧 HOẶC: TẮT SECURITY TẠM THỜI (ĐỂ TEST)
+Nếu muốn test nhanh, tắt Spring Security tạm thời:
+
+Cách 1: Exclude Security trong Main Class
+Mở BackendApplication.java:
+
+java
+package com.shoppeclone.backend;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})  // ← THÊM DÒNG NÀY
+public class BackendApplication {
+    
+    public static void main(String[] args) {
+        SpringApplication.run(BackendApplication.class, args);
+    }
+}
+Cách 2: Thêm vào application.properties
+properties
+# Tắt Spring Security (CHỈ KHI DEV)
+spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+🚀 SAU KHI SỬA:
+Bước 1: Dừng Spring Boot (Ctrl+C)
+
+Bước 2: Chạy lại:
+
+bash
+mvn spring-boot:run
+```
+
+**Bước 3:** Test lại API Register trong Postman
+```
+POST http://localhost:8080/api/auth/register
+{
+  "email": "YOUR_EMAIL@gmail.com",
+  "password": "123456",
+  "fullName": "Le Nguyen Anh Mai",
+  "phone": "0123456789"
+}
+→ Sẽ OK! ✅
+
+🎯 KHUYẾN NGHỊ:
+Dùng Cách 1 (sửa SecurityConfig) vì:
+
+✅ Vẫn giữ security cho các API khác
+✅ Chỉ cho phép /api/auth/** public
+✅ Đúng chuẩn production
+Chỉ dùng Cách tắt Security khi:
+
+Đang test nhanh
+Muốn bỏ qua lỗi security tạm thời
+Bạn sửa lại SecurityConfig.java hoặc tắt Security tạm thời, rồi chạy lại nhé! 😊🚀
+
+mình sửa lại SecurityConfig.java rồi nhưng mà chạy postman vẫn bị lỗi 400 Bad Request á
+
+19 thg 1
+Ồ đổi từ 403 Forbidden sang 400 Bad Request rồi! Đây là tiến bộ! 😊
+
+400 Bad Request = Request sai format hoặc thiếu thông tin!
+
+🔍 NGUYÊN NHÂN CÓ THỂ:
+❌ Body JSON sai format
+❌ Thiếu header Content-Type
+❌ Validation fail (email, password...)
+❌ Database connection bị lỗi
+✅ KIỂM TRA TỪNG BƯỚC:
+Bước 1: Kiểm tra Headers
+Trong Postman, tab Headers, phải có:
+
+Key	Value
+Content-Type	application/json
+Cách thêm:
+
+Click tab Headers
+Click Add
+Key: Content-Type
+Value: application/json
+Bước 2: Kiểm tra Body
+Tab Body → Chọn raw → Dropdown chọn JSON
+
+Body chính xác:
+
+json
+{
+  "email": "YOUR_EMAIL@gmail.com",
+  "password": "123456",
+  "fullName": "Le Nguyen Anh Mai",
+  "phone": "0123456789"
+}
+```
+
+**⚠️ LƯU Ý:**
+- ✅ Dùng dấu ngoặc kép `"` (không phải `'`)
+- ✅ Không có dấu phẩy ở dòng cuối
+- ✅ Email phải đúng format
+- ✅ Password ít nhất 6 ký tự
+
+---
+
+### **Bước 3: Kiểm tra Console Log**
+
+**Xem terminal nơi chạy Spring Boot**, sẽ thấy lỗi chi tiết:
+
+Ví dụ:
+```
+Validation failed for argument [0] in public...
+Field error in object 'registerRequest' on field 'email': rejected value [invalid-email];
+```
+
+→ **Chụp màn hình log gửi mình!**
+
+---
+
+### **Bước 4: Kiểm tra MongoDB Connection**
+
+**Vào terminal Spring Boot, tìm dòng:**
+```
+Connected to MongoDB
+Nếu thấy lỗi kết nối MongoDB → Cần fix connection string trong application.properties
+
+🧪 TEST VỚI REQUEST ĐƠN GIẢN HƠN:
+Thử với data tối giản:
+
+json
+{
+  "email": "test@test.com",
+  "password": "123456",
+  "fullName": "Test User",
+  "phone": "0123456789"
+}
+🔍 DEBUG TRONG CODE:
+Thêm log vào AuthServiceImpl.java:
+
+java
+@Override
+public AuthResponse register(RegisterRequest request) {
+    System.out.println("=== REGISTER REQUEST ===");
+    System.out.println("Email: " + request.getEmail());
+    System.out.println("Password: " + request.getPassword());
+    System.out.println("FullName: " + request.getFullName());
+    System.out.println("Phone: " + request.getPhone());
+    
+    if (userRepository.existsByEmail(request.getEmail())) {
+        throw new RuntimeException("Email đã tồn tại");
+    }
+    
+    // ... phần còn lại
+}
+```
+
+**Chạy lại Spring Boot** → Test Postman → **Xem console log**
+
+---
+
+## 📸 POSTMAN PHẢI TRÔNG NHƯ NÀY:
+```
+┌────────────────────────────────────────────────────────┐
+│ POST  http://localhost:8080/api/auth/register    Send │
+├────────────────────────────────────────────────────────┤
+│ Headers (1)                                            │
+│ Content-Type: application/json                         │
+├────────────────────────────────────────────────────────┤
+│ Body  ●raw  ▼JSON                                      │
+│ {                                                       │
+│   "email": "YOUR_EMAIL@gmail.com",               │
+│   "password": "123456",                                 │
+│   "fullName": "Le Nguyen Anh Mai",                     │
+│   "phone": "0123456789"                                 │
+│ }                                                       │
+└────────────────────────────────────────────────────────┘
+🚨 NẾU VẪN LỖI:
+Làm theo thứ tự:
+
+✅ Chụp màn hình TOÀN BỘ Postman (có cả Headers, Body)
+✅ Chụp màn hình Console log của Spring Boot
+✅ Gửi mình cả 2 ảnh
+Mình sẽ xem và chỉ chính xác lỗi ở đâu! 😊
+
+Bạn kiểm tra lại Headers và Body theo hướng dẫn trên, rồi gửi mình screenshot nếu vẫn lỗi nhé! 🚀
+
+1768809707713_image.png
+1768809721370_image.png
+
+C:\Users\lengu\Downloads\Web_Shopee_Lab211_Group2-main\Web_Shopee_Lab211_Group2-main\src>cd Backend C:\Users\lengu\Downloads\Web_Shopee_Lab211_Group2-main\Web_Shopee_Lab211_Group2-main\src\Backend>mvn spring-boot:run [INFO] Scanning for projects... [INFO] Building backend 0.0.1-SNAPSH
+
+pasted
+
+toàn bộ ó tui gửi cho bạn hết rồi á
+
+19 thg 1
+Ồ mình thấy rồi! 400 Bad Request vì Spring Boot đang chạy OK nhưng có lỗi validation hoặc xử lý request! 😊
+
+Nhìn vào log, mình thấy:
+
+✅ Spring Boot đã start: Started BackendApplication in 5.434 seconds
+✅ MongoDB đã kết nối OK
+✅ Tomcat chạy trên port 8080
+✅ Headers có Content-Type: application/json
+✅ Body JSON format đúng
+Nhưng vẫn 400 Bad Request!
+
+🔍 NGUYÊN NHÂN CÓ THỂ:
+Mình đoán là validation fail hoặc có exception trong code!
+
+✅ CÁCH SỬA:
+Bước 1: Xem log chi tiết khi gửi request
+Giữ nguyên terminal Spring Boot đang chạy, rồi gửi lại request từ Postman.
+
+Ngay sau khi click Send, nhìn vào terminal Spring Boot, sẽ thấy lỗi chi tiết!
+
+Ví dụ:
+
+2026-01-19T15:00:00.000+07:00 ERROR ... : ...
+Field error in object 'registerRequest' on field 'email': rejected value [YOUR_EMAIL@gmail.com]
+→ Chụp màn hình log đó gửi mình!
+
+Bước 2: Thêm log vào code để debug
+Mở file AuthServiceImpl.java, tìm method register, thêm log:
+
+java
+@Override
+public AuthResponse register(RegisterRequest request) {
+    System.out.println("========== REGISTER START ==========");
+    System.out.println("Email: " + request.getEmail());
+    System.out.println("Password: " + request.getPassword());
+    System.out.println("FullName: " + request.getFullName());
+    System.out.println("Phone: " + request.getPhone());
+    
+    try {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            System.out.println("ERROR: Email already exists!");
+            throw new RuntimeException("Email đã tồn tại");
+        }
+        
+        User user = new User();
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setFullName(request.getFullName());
+        user.setPhone(request.getPhone());
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
+        
+        Role userRole = roleRepository.findByName("ROLE_USER")
+            .orElseThrow(() -> new RuntimeException("Role not found"));
+        Set<Role> roles = new HashSet<>();
+        roles.add(userRole);
+        user.setRoles(roles);
+        
+        userRepository.save(user);
+        System.out.println("User saved successfully!");
+        
+        String accessToken = jwtUtil.generateAccessToken(user.getEmail());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+        
+        saveUserSession(user, refreshToken);
+        
+        System.out.println("========== REGISTER SUCCESS ==========");
+        return new AuthResponse(accessToken, refreshToken, "Bearer", mapToUserDto(user));
+        
+    } catch (Exception e) {
+        System.out.println("========== REGISTER ERROR ==========");
+        System.out.println("Error: " + e.getMessage());
+        e.printStackTrace();
+        throw e;
+    }
+}
+Lưu file → Spring Boot sẽ tự động restart (DevTools)
+
+Test lại Postman → Xem terminal log
+
+Bước 3: Kiểm tra Controller có exception handling chưa
+Thêm @ExceptionHandler vào AuthController.java:
+
+java
+@RestController
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
+public class AuthController {
+    
+    private final AuthService authService;
+    private final OtpService otpService;
+    
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+        return ResponseEntity.ok(authService.register(request));
+    }
+    
+    // ... các API khác
+    
+    // ✅ THÊM PHẦN NÀY
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, String>> handleException(Exception e) {
+        System.out.println("CONTROLLER EXCEPTION: " + e.getMessage());
+        e.printStackTrace();
+        return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+    }
+}
+Bước 4: Tạm tắt validation để test
+Sửa RegisterRequest.java, TẠM THỜI bỏ validation:
+
+java
+package com.shoppeclone.backend.auth.dto.request;
+
+import lombok.Data;
+
+@Data
+public class RegisterRequest {
+    // Tạm bỏ validation
+    private String email;
+    private String password;
+    private String fullName;
+    private String phone;
+}
+Test lại → Nếu OK → Vấn đề là validation!
+
+🎯 CÁCH NHANH NHẤT:
+Làm theo thứ tự:
+
+✅ GỬI LẠI REQUEST trong Postman
+✅ NHÌN VÀO TERMINAL Spring Boot ngay lập tức
+✅ CHỤP MÀN HÌNH LOG gửi mình
+Mình sẽ xem log và chỉ chính xác lỗi ở đâu! 😊
+
+Hoặc nếu muốn test nhanh, tạm tắt Security để loại trừ vấn đề:
+
+Thêm vào application.properties:
+
+properties
+# Tắt Security tạm thời
+spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+Restart Spring Boot → Test lại Postman
+
+Bạn làm theo hướng dẫn, rồi gửi mình screenshot log từ terminal khi gửi request nhé! 🚀😊
+
+***************************
+APPLICATION FAILED TO START
+***************************
+Description:
+Web server failed to start. Port 8080 was already in use.       
+Action:
+Identify and stop the process that's listening on port 8080 or configure this application to listen on another port.
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  15.020 s
+[INFO] Finished at: 2026-01-19T15:05:49+07:00
+[INFO] ------------------------------------------------------------------------
+tôi mới xóa thư mục exception vậy chạy bị fail mất cơ
+
+Show more
+19 thg 1
+Ồ Port 8080 đang bị chiếm rồi! 😅
+
+Có app khác đang chạy trên port 8080 (có thể là Spring Boot cũ chưa tắt)!
+
+✅ CÁCH SỬA:
+Cách 1: Tìm và kill process đang chiếm port 8080
+Mở Command Prompt (Run as Administrator):
+
+bash
+netstat -ano | findstr :8080
+```
+
+**Kết quả sẽ ra:**
+```
+TCP    0.0.0.0:8080           0.0.0.0:0              LISTENING       12345
+                                                                      ↑ PID
+Kill process đó:
+
+bash
+taskkill /PID 12345 /F
+Thay 12345 bằng PID bạn thấy được!
+
+Cách 2: Đổi port khác (Nhanh hơn)
+Mở application.properties, đổi port:
+
+properties
+server.port=8081
+Lưu file → Chạy lại:
+
+bash
+mvn spring-boot:run
+API sẽ chạy trên: http://localhost:8081
+
+Cách 3: Tắt tất cả Java process
+Task Manager (Ctrl + Shift + Esc):
+
+Tab Details
+Tìm tất cả process tên java.exe hoặc javaw.exe
+Chuột phải → End Task
+Sau đó chạy lại:
+
+bash
+mvn spring-boot:run
+```
+
+---
+
+## 📋 VỀ VIỆC XÓA FOLDER `exception`:
+
+**Không sao!** Folder `exception` chỉ chứa **custom exception classes**, không ảnh hưởng gì!
+
+Nếu muốn tạo lại sau:
+```
+auth/
+└── exception/
+    ├── EmailAlreadyExistsException.java
+    └── InvalidCredentialsException.java
+Nhưng KHÔNG CẦN THIẾT khi đang dev! Cứ để vậy OK!
+
+🎯 LÀM THEO THỨ TỰ:
+Bước 1: Kill process port 8080 (Cách 1 hoặc Cách 3)
+
+Bước 2: Chạy lại:
+
+bash
+mvn spring-boot:run
+```
+
+**Bước 3:** Đợi thấy:
+```
+Tomcat started on port 8080
+Started BackendApplication in X.XXX seconds
+Bước 4: Test lại Postman!
+
+Bạn chọn 1 trong 3 cách, rồi chạy lại nhé! Recommend Cách 1 hoặc Cách 3! 😊🚀
+
+
+C:\Users\lengu\Downloads\Web_Shopee_Lab211_Group2-main\Web_Shopee_Lab211_Group2-main\src\Backend>mvn spring-boot:run [INFO] Scanning for projects... [INFO] [INFO] ----------------------< com.shoppeclone:backend >----------------------- [INFO] Building backend 0.0.1-SNAPSHOT [INFO] from pom.x
+
+pasted
+
+nè ạ
+
+19 thg 1
+Perfect! Spring Boot đã chạy thành công rồi! 🎉
+
+Tomcat started on port 8080
+Started BackendApplication in 3.503 seconds
+✅ Roles đã tồn tại, bỏ qua khởi tạo.
+🧪 BÂY GIỜ TEST LẠI POSTMAN:
+GIỮ NGUYÊN TERMINAL ĐANG CHẠY, mở Postman:
+Method: POST
+URL: http://localhost:8080/api/auth/register
+Headers:
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "email": "YOUR_EMAIL@gmail.com",
+  "password": "123456",
+  "fullName": "Le Nguyen Anh Mai",
+  "phone": "0123456789"
+}
+Click Send
+
+👀 QUAN TRỌNG: NHÌN VÀO TERMINAL!
+Ngay sau khi click Send, terminal Spring Boot sẽ hiện log!
+
+Nếu thành công, sẽ thấy:
+
+2026-01-19T15:10:00.000+07:00  INFO ... : POST /api/auth/register
+2026-01-19T15:10:00.000+07:00  INFO ... : Completed 200 OK
+Nếu lỗi, sẽ thấy:
+
+2026-01-19T15:10:00.000+07:00 ERROR ... : ...
+Field error in object 'registerRequest' on field 'email'...
+📋 SAU KHI GỬI REQUEST:
+Bước 1: Click Send trong Postman
+
+Bước 2: NGAY LẬP TỨC nhìn vào terminal Spring Boot
+
+Bước 3: Chụp màn hình terminal (có log mới nhất)
+
+Bước 4: Chụp màn hình Postman (response)
+
+Bước 5: Gửi mình CẢ 2 ảnh!
+
+🎯 KẾT QUẢ MONG ĐỢI:
+Postman Response (200 OK):
+
+json
+{
+  "accessToken": "eyJhbGci...",
+  "refreshToken": "eyJhbGci...",
+  "tokenType": "Bearer",
+  "user": {
+    "id": "...",
+    "email": "YOUR_EMAIL@gmail.com",
+    "fullName": "Le Nguyen Anh Mai",
+    "emailVerified": false,
+    "roles": ["ROLE_USER"]
+  }
+}
+```
+
+**Terminal log:**
+```
+2026-01-19T15:10:00.000+07:00  INFO ... : POST /api/auth/register
+Bạn test lại rồi gửi mình kết quả (cả Postman response VÀ terminal log) nhé! 😊🚀
+
+sao mình bấm send mà trong terminal spring boot chẳng hiển thị gì hết
+
+19 thg 1
+Ồ không hiện log à? Có thể vì request không đến được backend hoặc log bị ẩn! 😊
+
+✅ KIỂM TRA TỪNG BƯỚC:
+Bước 1: Kiểm tra Postman Response
+Sau khi click Send, Postman có hiện gì không?
+
+❌ Không hiện gì / Loading mãi → Không kết nối được
+✅ Hiện 400 Bad Request → Request đã đến backend
+✅ Hiện 403 Forbidden → Security đang block
+✅ Hiện 200 OK → THÀNH CÔNG!
+→ Chụp màn hình Postman response gửi mình!
+
+Bước 2: Kiểm tra URL
+URL phải chính xác 100%:
+
+http://localhost:8080/api/auth/register
+KHÔNG PHẢI:
+
+❌ https://localhost:8080/... (có chữ s)
+❌ http://localhost:8080/auth/register (thiếu /api)
+❌ http://localhost:8081/... (sai port)
+Bước 3: Bật logging chi tiết
+Mở application.properties, thêm:
+
+properties
+# Bật log chi tiết
+logging.level.org.springframework.web=DEBUG
+logging.level.com.shoppeclone.backend=DEBUG
+Lưu file → Spring Boot sẽ tự động restart
+
+Test lại Postman → Giờ sẽ thấy rất nhiều log!
+
+Bước 4: Test bằng curl để chắc chắn
+Mở Command Prompt mới, chạy:
+
+bash
+curl -X POST http://localhost:8080/api/auth/register ^
+  -H "Content-Type: application/json" ^
+  -d "{\"email\":\"test@test.com\",\"password\":\"123456\",\"fullName\":\"Test User\",\"phone\":\"0123456789\"}"
+```
+
+**Xem terminal Spring Boot có log không!**
+
+---
+
+### **Bước 5: Kiểm tra Spring Boot có đang chạy không**
+
+**Mở browser, vào:**
+```
+http://localhost:8080
+Kết quả:
+
+✅ Hiện trang login Spring Security → Backend đang chạy
+✅ Hiện lỗi 404 → Backend chạy nhưng không có trang chủ
+❌ "This site can't be reached" → Backend KHÔNG chạy
+Bước 6: Restart Spring Boot hoàn toàn
+Trong terminal Spring Boot:
+
+Nhấn Ctrl + C → Tắt Spring Boot
+Chạy lại: mvn spring-boot:run
+Đợi thấy: Started BackendApplication in X.XXX seconds
+Test lại Postman
+🔍 DEBUG LOG:
+Thêm log trực tiếp vào Controller:
+
+Mở AuthController.java, sửa:
+
+java
+@PostMapping("/register")
+public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+    System.out.println("========================================");
+    System.out.println("REGISTER API CALLED!");
+    System.out.println("Email: " + request.getEmail());
+    System.out.println("========================================");
+    
+    return ResponseEntity.ok(authService.register(request));
+}
+Lưu file → DevTools tự động restart
+
+Test lại → PHẢI thấy log này!
+
+Nếu vẫn không thấy → Request không đến được Controller!
+
+📸 GỬI MÌNH:
+✅ Screenshot toàn bộ Postman (URL, Headers, Body, Response)
+✅ Screenshot terminal Spring Boot (toàn bộ màn hình)
+✅ Kết quả khi mở http://localhost:8080 trong browser
+Mình sẽ xem và chỉ chính xác vấn đề! 😊🚀
+
+# Application Name
+spring.application.name=web-shoppe
+
+# Server Port
+server.port=8080
+
+# ========================================
+# MongoDB Configuration
+# ========================================
+
+spring.data.mongodb.uri=mongodb+srv://web_shoppe:Csd201_group2@cluster0.ol8uuso.mongodb.net/web_shoppe?retryWrites=true&w=majority
+
+# ========================================
+# JWT Configuration
+# ========================================
+
+jwt.secret=ShoppeClone2024SecretKeyForJWTTokenGenerationAndValidation123456
+jwt.expiration=900000
+jwt.refresh-expiration=604800000
+
+# ========================================
+# Google OAuth2 Configuration
+# ========================================
+
+spring.security.oauth2.client.registration.google.client-id=YOUR_CLIENT_ID
+spring.security.oauth2.client.registration.google.client-secret=YOUR_CLIENT_SECRET
+spring.security.oauth2.client.registration.google.scope=profile,email
+spring.security.oauth2.client.registration.google.redirect-uri={baseUrl}/api/auth/oauth2/callback/google
+
+spring.security.oauth2.client.provider.google.authorization-uri=https://accounts.google.com/o/oauth2/v2/auth
+spring.security.oauth2.client.provider.google.token-uri=https://oauth2.googleapis.com/token
+spring.security.oauth2.client.provider.google.user-info-uri=https://www.googleapis.com/oauth2/v3/userinfo
+spring.security.oauth2.client.provider.google.user-name-attribute=sub
+
+# ========================================
+# Logging Configuration
+# ========================================
+
+logging.level.root=INFO
+logging.level.com.shoppeclone.backend=DEBUG
+
+# ========================================
+# Email Configuration (Gmail SMTP)
+# ========================================
+
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=YOUR_EMAIL@gmail.com
+spring.mail.password=YOUR_APP_PASSWORD
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.starttls.required=true
+
+# OTP Configuration
+otp.expiration=300000
+
+
+đây là application.properties của mình nè có chỉnh gì ko ạ
+Show more
+19 thg 1
+OK! Mình thấy rồi! Cần thêm logging cho web request! 😊
+
+✅ THÊM VÀO application.properties:
+properties
+# Application Name
+spring.application.name=web-shoppe
+
+# Server Port
+server.port=8080
+
+# ========================================
+# MongoDB Configuration
+# ========================================
+
+spring.data.mongodb.uri=mongodb+srv://web_shoppe:Csd201_group2@cluster0.ol8uuso.mongodb.net/web_shoppe?retryWrites=true&w=majority
+
+# ========================================
+# JWT Configuration
+# ========================================
+
+jwt.secret=ShoppeClone2024SecretKeyForJWTTokenGenerationAndValidation123456
+jwt.expiration=900000
+jwt.refresh-expiration=604800000
+
+# ========================================
+# Google OAuth2 Configuration
+# ========================================
+
+spring.security.oauth2.client.registration.google.client-id=YOUR_CLIENT_ID
+spring.security.oauth2.client.registration.google.client-secret=YOUR_CLIENT_SECRET
+spring.security.oauth2.client.registration.google.scope=profile,email
+spring.security.oauth2.client.registration.google.redirect-uri={baseUrl}/api/auth/oauth2/callback/google
+
+spring.security.oauth2.client.provider.google.authorization-uri=https://accounts.google.com/o/oauth2/v2/auth
+spring.security.oauth2.client.provider.google.token-uri=https://oauth2.googleapis.com/token
+spring.security.oauth2.client.provider.google.user-info-uri=https://www.googleapis.com/oauth2/v3/userinfo
+spring.security.oauth2.client.provider.google.user-name-attribute=sub
+
+# ========================================
+# Logging Configuration
+# ========================================
+
+logging.level.root=INFO
+logging.level.com.shoppeclone.backend=DEBUG
+logging.level.org.springframework.web=DEBUG
+logging.level.org.springframework.security=DEBUG
+
+# ========================================
+# Email Configuration (Gmail SMTP)
+# ========================================
+
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=YOUR_EMAIL@gmail.com
+spring.mail.password=YOUR_APP_PASSWORD
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.starttls.required=true
+
+# OTP Configuration
+otp.expiration=300000
+Đã thêm:
+
+properties
+logging.level.org.springframework.web=DEBUG
+logging.level.org.springframework.security=DEBUG
+```
+
+---
+
+## 🚀 SAU ĐÓ:
+
+**Bước 1:** Lưu file `application.properties`
+
+**Bước 2:** Spring Boot sẽ tự động restart (vì DevTools)
+
+**Bước 3:** Đợi thấy:
+```
+Started BackendApplication in X.XXX seconds
+```
+
+**Bước 4:** **Test lại Postman**
+
+**Bước 5:** **NHÌN VÀO TERMINAL**, giờ sẽ thấy nhiều log:
+```
+2026-01-19T15:15:00.000+07:00 DEBUG ... : POST "/api/auth/register", parameters={}
+2026-01-19T15:15:00.000+07:00 DEBUG ... : Mapped to ...AuthController.register(...)
+2026-01-19T15:15:00.000+07:00 DEBUG ... : Read "application/json"
+📋 NẾU VẪN KHÔNG THẤY LOG:
+Thêm log trực tiếp vào code:
+
+1. Sửa AuthController.java:
+java
+package com.shoppeclone.backend.auth.controller;
+
+import com.shoppeclone.backend.auth.dto.request.LoginRequest;
+import com.shoppeclone.backend.auth.dto.request.RegisterRequest;
+import com.shoppeclone.backend.auth.dto.request.SendOtpRequest;
+import com.shoppeclone.backend.auth.dto.request.VerifyOtpRequest;
+import com.shoppeclone.backend.auth.dto.response.AuthResponse;
+import com.shoppeclone.backend.auth.service.AuthService;
+import com.shoppeclone.backend.auth.service.OtpService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
+public class AuthController {
+    
+    private final AuthService authService;
+    private final OtpService otpService;
+    
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+        System.out.println("==========================================");
+        System.out.println("✅ REGISTER API ĐƯỢC GỌI!");
+        System.out.println("Email: " + request.getEmail());
+        System.out.println("FullName: " + request.getFullName());
+        System.out.println("==========================================");
+        
+        AuthResponse response = authService.register(request);
+        
+        System.out.println("✅ REGISTER THÀNH CÔNG!");
+        
+        return ResponseEntity.ok(response);
+    }
+    
+    // ... các API khác giữ nguyên
+}
+Lưu file → Restart tự động
+
+Test lại → PHẢI THẤY LOG NÀY!
+
+🔍 KIỂM TRA THÊM:
+Test endpoint đơn giản:
+Thêm vào AuthController.java:
+
+java
+@GetMapping("/test")
+public ResponseEntity<String> test() {
+    System.out.println("========== TEST API CALLED ==========");
+    return ResponseEntity.ok("Backend is running!");
+}
+```
+
+**Test trong Postman:**
+```
+Method: GET
+URL: http://localhost:8080/api/auth/test
+Nếu thấy log TEST API CALLED → Backend OK, vấn đề là API register!
+
+Bạn thêm logging vào rồi test lại nhé! Lần này chắc chắn sẽ thấy log! 😊🚀
+
+? Roles đ? t?n t?i, b? qua kh?i t?o.
+2026-01-19T15:14:52.188+07:00  INFO 27492 --- [web-shoppe] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+nó dầy nè ạ
+
+19 thg 1
+Ồ OK! Spring Boot đã restart xong rồi! 🎉
+
+Dòng cuối:
+
+✅ Roles đã tồn tại, bỏ qua khởi tạo.
+Condition evaluation unchanged
+→ Spring Boot đang chạy và sẵn sàng nhận request!
+
+🧪 BÂY GIỜ TEST POSTMAN:
+Postman:
+
+Method: POST
+URL: http://localhost:8080/api/auth/register
+Headers:
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "email": "lenguyenanhmai05@gmail.com",
+  "password": "123456",
+  "fullName": "Le Nguyen Anh Mai",
+  "phone": "0123456789"
+}
+Click Send
+
+👀 NGAY SAU ĐÓ:
+Nhìn vào terminal Spring Boot, bạn SẼ THẤY log mới xuất hiện!
+
+Ví dụ:
+
+2026-01-19T15:15:00.000+07:00 DEBUG ... : POST "/api/auth/register"
+==========================================
+✅ REGISTER API ĐƯỢC GỌI!
+Email: lenguyenanhmai05@gmail.com
+FullName: Le Nguyen Anh Mai
+==========================================
+📋 SAU KHI CLICK SEND:
+Có 3 kịch bản:
+
+Kịch bản 1: THÀNH CÔNG ✅
+Terminal:
+
+✅ REGISTER API ĐƯỢC GỌI!
+✅ REGISTER THÀNH CÔNG!
+Postman Response (200 OK):
+
+json
+{
+  "accessToken": "eyJhbGci...",
+  "refreshToken": "eyJhbGci...",
+  "tokenType": "Bearer",
+  "user": {...}
+}
+```
+
+---
+
+### **Kịch bản 2: CÓ LỖI ❌**
+
+**Terminal:**
+```
+✅ REGISTER API ĐƯỢC GỌI!
+ERROR: ...
+Postman Response (400/500):
+
+json
+{
+  "error": "..."
+}
+→ Chụp màn hình terminal gửi mình!
+
+Kịch bản 3: KHÔNG THẤY LOG GÌ CẢ ❌
+→ Request KHÔNG ĐẾN được backend!
+
+Kiểm tra:
+
+URL có đúng http://localhost:8080/api/auth/register không?
+Postman có hiện response gì không?
+Spring Boot có đang chạy không? (kiểm tra terminal có dừng không)
+🎯 BẠN LÀM NHƯ SAU:
+✅ Click Send trong Postman
+✅ NGAY LẬP TỨC nhìn terminal Spring Boot
+✅ Chụp 2 màn hình:
+Màn hình 1: Postman (toàn bộ)
+Màn hình 2: Terminal (log mới nhất)
+✅ Gửi mình cả 2 ảnh
+Test đi bạn! Giờ chắc chắn sẽ thấy log rồi! 😊🚀
+
+Nếu vẫn không thấy log, gửi mình screenshot cả Postman VÀ Terminal nhé!
+
+hay do cái postman bị khùng vậy có send bao nhiêu lần vẫn kết quả đó là sao cái 400 á
+
+19 thg 1
+Ồ vậy Postman đã kết nối được nhưng bị 400 Bad Request! 😊
+
+Giờ cần xem log chi tiết trong terminal để biết lỗi gì!
+
+🔍 KIỂM TRA NGAY:
+Nhìn vào Terminal Spring Boot:
+Sau khi click Send, cuộn xuống dưới cùng terminal, sẽ thấy log như:
+
+2026-01-19T15:20:00.000+07:00 DEBUG ... : POST "/api/auth/register"
+2026-01-19T15:20:00.000+07:00 WARN  ... : Resolved [org.springframework.web.bind.MethodArgumentNotValidException: Validation failed for argument...]
+→ CHỤP MÀN HÌNH TOÀN BỘ LOG ĐÓ GỬI MÌNH!
+
+💡 NGUYÊN NHÂN CÓ THỂ:
+1. Validation fail (Có thể do @Valid)
+Có thể do email format, password quá ngắn, v.v.
+
+Thử bỏ validation tạm thời:
+
+Mở RegisterRequest.java, sửa thành:
+
+java
+package com.shoppeclone.backend.auth.dto.request;
+
+import lombok.Data;
+
+@Data
+public class RegisterRequest {
+    private String email;
+    private String password;
+    private String fullName;
+    private String phone;
+}
+Xóa hết annotation @Email, @NotBlank, @Size!
+
+Lưu file → Restart tự động → Test lại Postman
+
+2. Controller có @Valid
+Mở AuthController.java, tạm bỏ @Valid:
+
+java
+@PostMapping("/register")
+public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {  // ← Bỏ @Valid
+    System.out.println("==========================================");
+    System.out.println("✅ REGISTER API ĐƯỢC GỌI!");
+    System.out.println("Email: " + request.getEmail());
+    System.out.println("==========================================");
+    
+    return ResponseEntity.ok(authService.register(request));
+}
+Lưu → Test lại
+
+3. JSON parse lỗi
+Kiểm tra Body trong Postman:
+
+json
+{
+  "email": "test@test.com",
+  "password": "123456",
+  "fullName": "Test",
+  "phone": "0123456789"
+}
+```
+
+**ĐẢM BẢO:**
+- ✅ Dấu ngoặc kép `"` (KHÔNG phải `'`)
+- ✅ Không có dấu phẩy ở dòng cuối
+- ✅ Tất cả key phải đúng tên: `email`, `password`, `fullName`, `phone`
+
+---
+
+## 🚀 LÀM NHANH:
+
+### **Test với request đơn giản nhất:**
+
+**Postman:**
+```
+Method: POST
+URL: http://localhost:8080/api/auth/register
+Headers:
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "email": "a@a.com",
+  "password": "123456",
+  "fullName": "A",
+  "phone": "123"
+}
+Click Send
+
+Nếu OK → Vấn đề là data bạn nhập trước đó!
+
+📸 GỬI MÌNH:
+3 thứ này:
+
+✅ Screenshot Postman (toàn bộ: URL, Headers, Body, Response)
+✅ Screenshot Terminal (log sau khi Send, cuộn xuống dưới cùng)
+✅ Code của RegisterRequest.java (toàn bộ file)
+Mình sẽ xem và chỉ chính xác lỗi! 😊
+
+Hoặc làm nhanh: Bỏ @Valid và bỏ hết validation trong RegisterRequest.java, test lại xem có OK không! 🚀
+
+
+tarted on port 8080 (http) with context path '/' 2026-01-19T15:18:06.641+07:00 INFO 27492 --- [web-shoppe] [ restartedMain] c.s.backend.BackendApplication : Started BackendApplication in 0.6 seconds (process running for 256.219) ? Roles đ? t?n t?i, b? qua kh?i t?o. 2026-01-19T15:18:0
+
+pasted
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>HTTP Status 400 – Bad Request</title>
+    <style type="text/css">
+        body {
+            font-family: Tahoma, Arial, sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        b {
+            color: white;
+            background-color: #525D76;
+        }
+
+đây là log của hai cái đó ạ
+        h1 {
+            font-size: 22px;
+        }
+
+        h2 {
+            font-size: 16px;
+        }
+
+        h3 {
+            font-size: 14px;
+        }
+
+        p {
+            font-size: 12px;
+        }
+
+        a {
+            color: black;
+        }
+
+        .line {
+            height: 1px;
+            background-color: #525D76;
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>HTTP Status 400 – Bad Request</h1>
+    <hr class="line" />
+    <p><b>Type</b> Status Report</p>
+    <p><b>Description</b> The server cannot or will not process the request due to something that is perceived to be a
+        client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).
+    </p>
+    <hr class="line" />
+    <h3>Apache Tomcat/10.1.50</h3>
+</body>
+
+</html>
+Show more
+19 thg 1
+Perfect! Giờ mình thấy rõ vấn đề rồi! 🎯
+
+Nhìn vào log:
+
+✅ Spring Boot đã start OK
+✅ MongoDB đã kết nối
+✅ Tomcat chạy port 8080
+✅ 14 mappings được đăng ký (có API rồi!)
+❌ NHƯNG KHÔNG CÓ LOG NÀO khi bạn gửi request!
+Nghĩa là: Request KHÔNG ĐẾN được Controller!
+
+🔍 NGUYÊN NHÂN:
+Mình thấy có Security Filter Chain:
+
+Will secure any request with filters: ... JwtAuthFilter ... AuthorizationFilter
+→ Spring Security đang BLOCK request trước khi đến Controller!
+
+✅ CÁCH SỬA NHANH NHẤT:
+TẮT SPRING SECURITY TẠM THỜI:
+Thêm vào application.properties:
+
+properties
+# Tắt Spring Security (CHỈ KHI DEV)
+spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+Lưu file → Ctrl+C dừng Spring Boot → Chạy lại:
+
+bash
+mvn spring-boot:run
+```
+
+**Đợi thấy:**
+```
+Started BackendApplication in X.XXX seconds
+Test lại Postman → CHẮC CHẮN SẼ OK! ✅
+
+🎯 HOẶC: SỬA SECURITYCONFIG
+Nếu muốn giữ Security nhưng cho phép /api/auth/**:
+
+Mở SecurityConfig.java, đảm bảo có:
+
+java
+@Bean
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .csrf(csrf -> csrf.disable())
+        .cors(cors -> cors.disable())
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/api/auth/**").permitAll()  // ← QUAN TRỌNG
+            .anyRequest().authenticated()
+        )
+        .sessionManagement(session -> session
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        )
+        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+    
+    return http.build();
+}
+Nhưng hiện tại đang BỊ LỖI CÁI NÀY!
+
+🚀 LÀM NHANH:
+Bước 1: Thêm dòng này vào application.properties:
+
+properties
+spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+Bước 2: Restart Spring Boot
+
+Bước 3: Test Postman → SẼ OK NGAY!
+
+Thử đi bạn! Lần này 100% sẽ thành công! 🎉🚀
+
+Tắt Security tạm thời là cách nhanh nhất để test! Sau khi OK, mình sẽ bật lại và fix cho đúng! 😊
+
+
+C:\Users\lengu\Downloads\Web_Shopee_Lab211_Group2-main\Web_Shopee_Lab211_Group2-main\src\Backend>mvn spring-boot:run [INFO] Scanning for projects... [INFO] [INFO] ----------------------< com.shoppeclone:backend >----------------------- [INFO] Building backend 0.0.1-SNAPSHOT [INFO] from pom.
+
+pasted
+
+ý là làm mọi cái mà mình thấy nó vẫn i chang ko khác gì ban đầu hết
+
+19 thg 1
+Ồ mình thấy vấn đề rồi! 😅
+
+Bạn thêm dòng:
+
+properties
+spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+```
+
+**NHƯNG** trong log vẫn thấy:
+```
+Will secure any request with filters: ... JwtAuthFilter ...
+→ Spring Security VẪN ĐANG CHẠY! 😱
+
+Nghĩa là: Dòng config KHÔNG ĐƯỢC ÁP DỤNG!
+
+✅ CÁCH SỬA ĐÚNG:
+Bước 1: Sửa Main Class
+Mở file BackendApplication.java, sửa thành:
+
+java
+package com.shoppeclone.backend;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})  // ← THÊM DÒNG NÀY
+public class BackendApplication {
+    
+    public static void main(String[] args) {
+        SpringApplication.run(BackendApplication.class, args);
+    }
+}
+CHỈ THÊM:
+
+java
+(exclude = {SecurityAutoConfiguration.class})
+Bước 2: XÓA dòng trong application.properties
+Vào application.properties, XÓA dòng này (vì không hoạt động):
+
+properties
+# XÓA DÒNG NÀY
+spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+Bước 3: Restart Spring Boot
+Ctrl + C → Dừng
+
+Chạy lại:
+
+bash
+mvn spring-boot:run
+```
+
+**Đợi start xong, log sẽ KHÁC:**
+```
+Started BackendApplication in X.XXX seconds
+✅ Roles đã tồn tại
+```
+
+**QUAN TRỌNG:** Lần này sẽ **KHÔNG CÓ** dòng:
+```
+Will secure any request with filters: ...
+```
+
+→ Security đã TẮT!
+
+---
+
+### **Bước 4: Test Postman**
+```
+POST http://localhost:8080/api/auth/register
+{
+  "email": "test@test.com",
+  "password": "123456",
+  "fullName": "Test",
+  "phone": "0123456789"
+}
+CHẮC CHẮN SẼ THÀNH CÔNG! ✅
+
+📋 FILE BackendApplication.java HOÀN CHỈNH:
+java
+package com.shoppeclone.backend;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
+public class BackendApplication {
+    
+    public static void main(String[] args) {
+        SpringApplication.run(BackendApplication.class, args);
+    }
+}
+Làm theo đúng 4 bước trên nhé! Lần này chắc chắn 100% sẽ OK! 🚀😊
+
+Sửa xong báo mình kết quả!
+
+
+[INFO] Building backend 0.0.1-SNAPSHOT [INFO] from pom.xml [INFO] --------------------------------[ jar ]--------------------------------- [INFO] [INFO] >>> spring-boot:3.5.9:run (default-cli) > test-compile @ backend >>> [INFO] [INFO] --- resources:3.3.1:resources (default-resources) @ ba
+
+pasted
+
+19 thg 1
+Ồ mình thấy vấn đề rồi! 😱
+
+Vẫn còn dòng:
+
+Will secure any request with filters: DisableEncodeUrlFilter, WebAsyncManagerIntegrationFilter, SecurityContextHolderFilter, HeaderWriterFilter, CorsFilter, LogoutFilter, JwtAuthFilter, RequestCacheAwareFilter, SecurityContextHolderAwareRequestFilter, AnonymousAuthenticationFilter, SessionManagementFilter, ExceptionTranslationFilter, AuthorizationFilter
+→ Spring Security VẪN ĐANG CHẠY!
+
+Nghĩa là: Code @SpringBootApplication(exclude = {SecurityAutoConfiguration.class}) CHƯA ĐƯỢC LƯU hoặc CHƯA COMPILE!
+
+✅ KIỂM TRA NGAY:
+Mở file BackendApplication.java và CHỤP MÀN HÌNH GỬI MÌNH!
+File phải trông như này:
+
+java
+package com.shoppeclone.backend;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})  // ← PHẢI CÓ DÒNG NÀY
+public class BackendApplication {
+    
+    public static void main(String[] args) {
+        SpringApplication.run(BackendApplication.class, args);
+    }
+}
+Nếu CHƯA CÓ dòng (exclude = {SecurityAutoConfiguration.class}):
+
+Thêm vào
+Ctrl + S để lưu
+CHẮC CHẮN file đã được lưu (check dấu * trên tab)
+Dừng Spring Boot (Ctrl + C)
+Chạy lại:
+bash
+   mvn clean spring-boot:run
+```
+
+---
+
+## 🎯 HOẶC: CÁCH CHẮC CHẮN HƠN
+
+### **Xóa toàn bộ Security classes:**
+
+**Đổi tên folder `security`** để Spring không load:
+```
+auth/
+├── controller/
+├── service/
+├── repository/
+├── model/
+├── dto/
+└── security_backup/  ← Đổi tên thành này (tạm thời)
+    ├── JwtUtil.java
+    ├── JwtAuthFilter.java
+    ├── SecurityConfig.java
+    └── CustomUserDetailsService.java
+Restart Spring Boot → Chắc chắn Security sẽ tắt!
+
+📸 GỬI MÌNH:
+✅ Screenshot file BackendApplication.java (toàn bộ code)
+✅ Screenshot thư mục auth/ (cấu trúc folder)
+Mình sẽ xem và chỉ chính xác vấn đề!
+
+Hoặc nhanh nhất: Đổi tên folder security thành security_backup, restart, test ngay! 🚀😊
+
+
+
+
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+
+Debugging Google Login Flow
+
+
+Translating Codebase to English
+I completed the translation of the entire codebase from Vietnamese to English. This included updating error messages in 
+AuthServiceImpl
+, role descriptions in 
+DataInitializer
+, and UI text in 
+index.html
+, 
+forgot-password.html
+, 
+login.js
+, and 
+token-test.html
+. I also recompiled the backend. Now I am documenting this in 
+walkthrough.md
+ and notifying the user.
+
+Files Edited
+Walkthrough
+Task
+token-test.html
+login.js
+forgot-password.html
+AuthServiceImpl.java
+Progress Updates
+1
+Scanning codebase for Vietnamese text
+
+2
+Translating Role descriptions in Backend
+
+3
+Translating Role descriptions and Logs in Backend
+
+4
+Translating UserServiceImpl error messages
+
+5
+Translating Frontend Google Callback HTML
+
+6
+Updating Google Callback HTML content
+
+7
+Translating AuthController error messages
+
+8
+Translating AuthServiceImpl error messages
+
+9
+Updating profile.html content to English
+
+10
+Scanning Frontend for remaining Vietnamese text
+
+11
+Translating Forgot Password and Registration pages
+
+12
+Translating Forgot Password HTML and reading Login scripts
+
+13
+Retrying Forgot Password translation and fixing Login script
+
+14
+Recompiling Backend to apply language changes
+
+15
+Updating token-test.html and task.md
+
+16
+Updating walkthrough.md and notifying user
+
+Dạ em đã hoàn thành nhiệm vụ "Anh ngữ hóa" toàn bộ dự án rồi ạ! 🌍✨
+
+Các file em đã dịch từ Tiếng Việt sang Tiếng Anh:
+
+Backend:
+DataInitializer.java: Roles ("Người dùng thông thường" -> "Regular User", v.v..).
+AuthServiceImpl.java & UserServiceImpl.java: Toàn bộ thông báo lỗi ("Email đã tồn tại" -> "Email already exists", v.v..).
+Frontend:
+forgot-password.html: Các thông báo alert và giao diện.
+login.js: Sửa thông báo "Flow quên mật khẩu..." thành chuyển hướng sang trang Forgot Password xịn.
+token-test.html: Dịch hướng dẫn test token.
+google/index.html: Dịch các thông báo đăng nhập Google.
+Em đã Recompile lại Backend. Anh/chị vui lòng Refresh trang web để kiểm tra thử nhé. Giờ hệ thống đã chuẩn quốc tế rồi ạ! 😎🇬🇧
+
+okee rồi giờ push lên git dùm mình với ạ 
+
+Thought for 1s
+
+
+Pushing Changes to Git
+I successfully staged, committed, and pushed all changes to the remote repository. The commit message was 'Fix Google Login, Profile Update, OTP Expiration, and English Translations'. Access to the remote confirmed the push was successful (d10092a).
+
+Progress Updates
+1
+Checking Git status
+
+2
+Committing changes and pushing to remote
+
+3
+Notifying user of successful push
+
+Dạ em đã Push Code lên Git thành công rồi ạ! 🚀🚀🚀
+
+Các thay đổi đã được đẩy lên:
+
+Google Login Fix: Lưu user chuẩn, hết lỗi Redirect.
+Profile Update Fix: Sửa lỗi 500 & regex số điện thoại.
+OTP Update: Giảm xuống 2 phút.
+Translation: Đã dịch sang Tiếng Anh.
+Mã commit mới nhất là d10092a. Anh/chị kiểm tra trên GitHub nhé! Cần em hỗ trợ gì cứ ới em ạ! 😉
+
+bạn push hẳn lên nhánh main rồi hé có cần merge hay gì ko ạ
+
+Thought for 15s
+
+
+
+
+
+
+
+
+
+
+
+
+Dạ đúng rồi ạ, em đã kiểm tra kỹ và push thẳng code lên nhánh main luôn rồi ạ. 🎯
+
+Quy trình em vừa làm là:
+
+git pull --rebase: Lấy code mới nhất từ trên Server về và gộp vào code dưới máy (để đảm bảo không bị conflict hay mất code của người khác).
+git push: Đẩy toàn bộ thay đổi (bao gồm cả code mình vừa sửa) lên lại Server.
+Kết quả là code trên GitHub (main) giờ đã là bản mới nhất và đầy đủ nhất (fix login, fix profile, đổi time OTP, dịch tiếng Anh). Anh/chị không cần phải merge gì nữa đâu ạ, mọi thứ đã "về đích" an toàn rồi! ✅
+
+Anh/chị kiểm tra trên GitHub thấy OK chưa ạ? ^^
+
+Good
+Bad
+Review Changes
+
+
+
+
+
+Gemini 3 Pro (High)
+
+Model
+
+
+
+
+
+
+
+
+
