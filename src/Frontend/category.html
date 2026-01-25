@@ -58,9 +58,12 @@
                             up</a>
                     </div>
 
-                    <div id="userNav" class="hidden flex items-center space-x-3">
-                        <span id="userName" class="text-white font-semibold truncate max-w-[150px]">User</span>
-                        <button onclick="logout()" class="text-white hover:text-red-200" title="Logout">
+                    <div id="userNav" class="hidden flex items-center space-x-3 text-white">
+                        <div class="flex items-center space-x-2 cursor-pointer">
+                            <img id="userAvatar" src="" alt="User" class="w-6 h-6 rounded-full border border-white">
+                            <span id="userName" class="font-semibold truncate max-w-[150px]">User</span>
+                        </div>
+                        <button onclick="logout()" class="text-white hover:text-red-200 ml-2" title="Logout">
                             <i class="fas fa-sign-out-alt text-xl"></i>
                         </button>
                     </div>
@@ -207,6 +210,7 @@
                 document.getElementById('guestNav').classList.add('hidden');
                 document.getElementById('userNav').classList.remove('hidden');
                 document.getElementById('userName').textContent = userName;
+                document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=fff&color=f97316`;
             } else {
                 document.getElementById('guestNav').classList.remove('hidden');
                 document.getElementById('userNav').classList.add('hidden');
@@ -214,6 +218,13 @@
         }
 
         function updateCartBadge() {
+            // HIDE IF NOT LOGGED IN
+            if (!localStorage.getItem('accessToken')) {
+                const badge = document.getElementById('cartBadge');
+                if (badge) badge.style.display = 'none';
+                return;
+            }
+
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
             const badge = document.getElementById('cartBadge');

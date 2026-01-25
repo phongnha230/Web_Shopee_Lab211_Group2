@@ -8,6 +8,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
+<script>
+    // AUTH GUARD: Chuyển hướng nếu chưa đăng nhập
+    if (!localStorage.getItem('accessToken')) {
+        alert('⚠️ You must login to view your cart!');
+        window.location.href = 'login.html';
+    }
+</script>
+</head>
 
 <body class="bg-gray-50">
     <!-- Header -->
@@ -47,10 +55,12 @@
                     <button class="hover:text-orange-500 transition">
                         <i class="fas fa-question-circle text-xl"></i>
                     </button>
-                    <div class="flex items-center gap-2 cursor-pointer hover:text-orange-500 transition">
-                        <img src="https://ui-avatars.com/api/?name=Alex+Johnson&background=ffedd5&color=f97316"
-                            alt="User" class="w-8 h-8 rounded-full border border-gray-200">
-                        <span class="font-medium text-sm hidden lg:block">Alex Johnson</span>
+
+                    <!-- Dynamic User -->
+                    <div id="userNav" class="flex items-center gap-2 cursor-pointer hover:text-orange-500 transition">
+                        <img id="userAvatar" src="" alt="User" class="w-8 h-8 rounded-full border border-gray-200">
+                        <span id="userName" class="font-medium text-sm hidden lg:block">Loading...</span>
+                        <button onclick="logout()" class="ml-2 text-sm text-red-500 hover:text-red-700">Logout</button>
                     </div>
                 </div>
             </div>
@@ -404,7 +414,24 @@
             window.location.href = 'checkout.html';
         }
 
-        document.addEventListener('DOMContentLoaded', renderCart);
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCart();
+            updateNavbar();
+        });
+
+        function updateNavbar() {
+            const userName = localStorage.getItem('userName') || 'User';
+            document.getElementById('userName').textContent = userName;
+            document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=ffedd5&color=f97316`;
+        }
+
+        function logout() {
+            if (confirm('Logout?')) {
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('userName');
+                window.location.href = 'login.html';
+            }
+        }
     </script>
 </body>
 

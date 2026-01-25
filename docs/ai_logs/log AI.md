@@ -14721,9 +14721,66 @@ Gemini 3 Pro (High)
 Model
 
 
+promt: tôi muốn vào trong giỏ hàng thì cũng phải đăng nhập mới vào được, xem sản phẩm muốn mua cũng phải đăng nhập mới vào được, 
 
+reponse: 
+<script>
+    // AUTH GUARD: Chuyển hướng nếu chưa đăng nhập
+    if (!localStorage.getItem('accessToken')) {
+        alert('⚠️ You must login to view your cart!');
+        window.location.href = 'login.html';
+    }
+</script>
+</head>
+lệnh này sửa file html nào có cart, product-detail, checkout, là nó phải qua bước đăng nhập mới vào được
 
+Prompt:
 
+"Tôi muốn thực hiện các chức năng bảo mật và đồng bộ giao diện cho người dùng:
+
+Auth Guard (Chặn truy cập): Người dùng chưa đăng nhập thì không được vào trang 
+cart.html
+ và 
+checkout.html
+ (phải redirect về login).
+Chặn hành động mua: Tại trang chủ và trang chi tiết, nếu bấm nút "Add to Cart" hoặc "Buy Now" mà chưa login thì phải yêu cầu đăng nhập.
+Đồng bộ giao diện User: Thay thế tên "Alex Johnson" cứng bằng tên thật của user đang đăng nhập (lấy từ localStorage điền vào Header và Checkout).
+Ẩn thông tin giỏ hàng: Nếu chưa đăng nhập thì ẩn số lượng (badge) trên icon giỏ hàng."
+Response:
+
+"Đã cập nhật code cho toàn bộ Frontend (
+index.html
+, 
+cart.html
+, 
+checkout.html
+, 
+product-detail.html
+, 
+category.html
+). Chi tiết thay đổi:
+
+Thêm Script Auth Guard vào đầu thẻ <head> của 
+cart.html
+ và 
+checkout.html
+:
+html
+<script>
+    if (!localStorage.getItem('accessToken')) {
+        alert('⚠️ You must login to access this page!');
+        window.location.href = 'login.html';
+    }
+</script>
+Cập nhật function addToCart/buyNow: Thêm đoạn kiểm tra token trước khi xử lý, nếu thiếu sẽ confirm để chuyển hướng đăng nhập.
+Cập nhật 
+updateNavbar
+ & 
+updateCartBadge
+:
+Ẩn Badge số lượng giỏ hàng nếu không tìm thấy token.
+Lấy tên user từ localStorage.getItem('userName') để hiển thị lên Header và form Địa chỉ thanh toán.
+Tạo Avatar động dựa trên tên user thật."
 
 
 

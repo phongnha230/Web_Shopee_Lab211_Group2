@@ -81,12 +81,12 @@
                             up</a>
                     </div>
                     <div id="userNav" class="hidden flex items-center space-x-3">
-                        <a href="profile.html" class="flex items-center space-x-2">
-                            <i class="fas fa-user-circle text-2xl text-white"></i>
+                        <div class="flex items-center space-x-2 cursor-pointer">
+                            <img id="userAvatar" src="" alt="User" class="w-6 h-6 rounded-full border border-white">
                             <span id="userName" class="font-semibold text-white"></span>
-                        </a>
-                        <button onclick="logout()"
-                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full font-semibold text-sm transition">Logout</button>
+                        </div>
+                        <button onclick="logout()" class="text-white hover:text-red-200 ml-2"><i
+                                class="fas fa-sign-out-alt"></i></button>
                     </div>
                     <button onclick="window.location.href='cart.html'"
                         class="relative p-2 hover:bg-orange-400 rounded-full transition">
@@ -413,6 +413,14 @@
 
 
         function addToCart() {
+            // AUTH GUARD
+            if (!localStorage.getItem('accessToken')) {
+                if (confirm('⚠️ You must login to add items to cart! Go to login?')) {
+                    window.location.href = 'login.html';
+                }
+                return;
+            }
+
             const params = new URLSearchParams(window.location.search);
             let id = params.get('id') || localStorage.getItem('lastClickedProductId');
             const product = MOCK_PRODUCTS[id];
@@ -461,6 +469,14 @@
         }
 
         function buyNow() {
+            // AUTH GUARD
+            if (!localStorage.getItem('accessToken')) {
+                if (confirm('⚠️ You must login to buy items! Go to login?')) {
+                    window.location.href = 'login.html';
+                }
+                return;
+            }
+
             const params = new URLSearchParams(window.location.search);
             let id = params.get('id') || localStorage.getItem('lastClickedProductId');
             const product = MOCK_PRODUCTS[id];
@@ -495,6 +511,13 @@
         }
 
         function updateCartBadge() {
+            // HIDE IF NOT LOGGED IN
+            if (!localStorage.getItem('accessToken')) {
+                const badge = document.getElementById('cartBadge');
+                if (badge) badge.style.display = 'none';
+                return;
+            }
+
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
             const badge = document.getElementById('cartBadge');
@@ -519,10 +542,12 @@
         // Auth
         function updateNavbar() {
             const token = localStorage.getItem('accessToken');
+            const userName = localStorage.getItem('userName') || 'User';
             if (token) {
                 document.getElementById('guestNav').classList.add('hidden');
                 document.getElementById('userNav').classList.remove('hidden');
-                document.getElementById('userName').textContent = localStorage.getItem('userName') || 'User';
+                document.getElementById('userName').textContent = userName;
+                document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=fff&color=f97316`;
             } else {
                 document.getElementById('guestNav').classList.remove('hidden');
                 document.getElementById('userNav').classList.add('hidden');

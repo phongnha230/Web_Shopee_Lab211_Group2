@@ -8,6 +8,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
+<script>
+    // AUTH GUARD: Chuyển hướng nếu chưa đăng nhập
+    if (!localStorage.getItem('accessToken')) {
+        alert('⚠️ You must login to checkout!');
+        window.location.href = 'login.html';
+    }
+</script>
+</head>
 
 <body class="bg-gray-50">
     <!-- Header -->
@@ -290,7 +298,15 @@
             alert('Address updated successfully!');
         }
 
-        document.addEventListener('DOMContentLoaded', renderCheckoutItems);
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCheckoutItems();
+
+            // Sync User Name to Address
+            const userName = localStorage.getItem('userName');
+            if (userName) {
+                document.getElementById('addrName').textContent = userName;
+            }
+        });
     </script>
 </body>
 
