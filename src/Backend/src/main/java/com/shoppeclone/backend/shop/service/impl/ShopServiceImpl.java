@@ -1,95 +1,115 @@
 package com.shoppeclone.backend.shop.service.impl;
 
-import com.shoppeclone.backend.shop.dto.request.CreateShopRequest;
-import com.shoppeclone.backend.shop.dto.request.UpdateShopRequest;
-import com.shoppeclone.backend.shop.dto.response.ShopResponse;
+import com.shoppeclone.backend.auth.model.Role;
+import com.shoppeclone.backend.auth.model.User;
+import com.shoppeclone.backend.auth.repository.RoleRepository;
+import com.shoppeclone.backend.auth.repository.UserRepository;
+import com.shoppeclone.backend.shop.dto.ShopRegisterRequest;
 import com.shoppeclone.backend.shop.entity.Shop;
+import com.shoppeclone.backend.shop.entity.ShopStatus;
 import com.shoppeclone.backend.shop.repository.ShopRepository;
 import com.shoppeclone.backend.shop.service.ShopService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ShopServiceImpl implements ShopService {
 
     private final ShopRepository shopRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
     @Override
-    public ShopResponse createShop(CreateShopRequest request) {
-        // Check if seller already has a shop
-        if (shopRepository.existsBySellerId(request.getSellerId())) {
-            throw new RuntimeException("Seller already has a shop");
+    @Transactional
+    public Shop registerShop(String userEmail, ShopRegisterRequest request) {
+        User user = getUserByEmail(userEmail);
+
+        // Check if user already has a shop
+        if (shopRepository.existsByOwnerId(user.getId())) {
+            throw new RuntimeException("You already have a shop registered!");
         }
 
         Shop shop = new Shop();
-        shop.setSellerId(request.getSellerId());
+        shop.setOwnerId(user.getId());
         shop.setName(request.getName());
+        shop.setAddress(request.getAddress());
+        shop.setPhone(request.getPhone());
+        shop.setEmail(request.getEmail());
+        shop.setDescription(request.getDescription());
+
+        // Map Step 2 Info
+        shop.setIdentityFullName(request.getIdentityFullName());
+        shop.setBankName(request.getBankName());
+        shop.setBankBranch(request.getBankBranch());
+        shop.setBankAccountNumber(request.getBankAccountNumber());
+        shop.setBankAccountHolder(request.getBankAccountHolder());
+
+        shop.setStatus(ShopStatus.PENDING);
         shop.setCreatedAt(LocalDateTime.now());
         shop.setUpdatedAt(LocalDateTime.now());
 
-        Shop savedShop = shopRepository.save(shop);
-        return mapToResponse(savedShop);
+        return shopRepository.save(shop);
     }
 
     @Override
-    public ShopResponse getShopById(String id) {
-        Shop shop = shopRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Shop not found"));
-        return mapToResponse(shop);
+    public Shop getMyShop(String userEmail) {
+        User user = getUserByEmail(userEmail);
+        return shopRepository.findByOwnerId(user.getId()).orElse(null);
     }
 
     @Override
-    public ShopResponse getShopBySellerId(String sellerId) {
-        Shop shop = shopRepository.findBySellerId(sellerId)
-                .orElseThrow(() -> new RuntimeException("Shop not found for this seller"));
-        return mapToResponse(shop);
+    public List<Shop> getPendingShops() {
+        return shopRepository.findByStatus(ShopStatus.PENDING);
     }
 
     @Override
-    public List<ShopResponse> getAllShops() {
-        return shopRepository.findAll().stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public ShopResponse updateShop(String id, UpdateShopRequest request) {
-        Shop shop = shopRepository.findById(id)
+    @Transactional
+    public void approveShop(String shopId) {
+        Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new RuntimeException("Shop not found"));
 
-        if (request.getName() != null) {
-            shop.setName(request.getName());
+        if (shop.getStatus() == ShopStatus.ACTIVE) {
+            return; // Already approved
         }
-        if (request.getStatus() != null) {
-            shop.setStatus(request.getStatus());
-        }
+
+        // 1. Update Shop Status
+        shop.setStatus(ShopStatus.ACTIVE);
         shop.setUpdatedAt(LocalDateTime.now());
+        shopRepository.save(shop);
 
-        Shop updatedShop = shopRepository.save(shop);
-        return mapToResponse(updatedShop);
+        // 2. Promote User to SELLER
+        User user = userRepository.findById(shop.getOwnerId())
+                .orElseThrow(() -> new RuntimeException("Shop owner not found"));
+
+        Role sellerRole = roleRepository.findByName("ROLE_SELLER")
+                .orElseThrow(() -> new RuntimeException("Role ROLE_SELLER not found"));
+
+        boolean hasRole = user.getRoles().stream().anyMatch(r -> r.getName().equals("ROLE_SELLER"));
+        if (!hasRole) {
+            user.getRoles().add(sellerRole);
+            userRepository.save(user);
+        }
     }
 
     @Override
-    public void deleteShop(String id) {
-        if (!shopRepository.existsById(id)) {
-            throw new RuntimeException("Shop not found");
-        }
-        shopRepository.deleteById(id);
+    @Transactional
+    public void rejectShop(String shopId, String reason) {
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new RuntimeException("Shop not found"));
+
+        shop.setStatus(ShopStatus.REJECTED);
+        shop.setRejectionReason(reason);
+        shop.setUpdatedAt(LocalDateTime.now());
+        shopRepository.save(shop);
     }
 
-    private ShopResponse mapToResponse(Shop shop) {
-        ShopResponse response = new ShopResponse();
-        response.setId(shop.getId());
-        response.setSellerId(shop.getSellerId());
-        response.setName(shop.getName());
-        response.setRating(shop.getRating());
-        response.setStatus(shop.getStatus());
-        response.setCreatedAt(shop.getCreatedAt());
-        response.setUpdatedAt(shop.getUpdatedAt());
-        return response;
+    private User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }

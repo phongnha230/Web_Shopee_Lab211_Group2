@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - ShoppeClone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+</head>
+
+<body class="bg-gray-50 flex h-screen">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gray-800 text-white flex flex-col">
+        <div class="p-6 text-2xl font-bold text-center border-b border-gray-700">
+            ADMIN PANEL
+        </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="#" class="block px-4 py-2 bg-gray-700 rounded-lg text-white font-semibold flex items-center gap-3">
+                <i class="fas fa-store"></i> Shop Approvals
+                <span id="pendingCount"
+                    class="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full hidden">0</span>
+            </a>
+            <a href="admin-setup.html"
+                class="block px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg transition flex items-center gap-3">
+                <i class="fas fa-tools"></i> Developer Tools
+            </a>
+            <a href="index.html"
+                class="block px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg transition flex items-center gap-3 mt-8">
+                <i class="fas fa-home"></i> Back to Store
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">Pending Shop Approvals</h1>
+
+        <div id="shopList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Shop Cards Will Be Loaded Here -->
+            <div class="text-center w-full col-span-3 py-10 text-gray-500">
+                <i class="fas fa-spinner fa-spin text-2xl"></i> Loading requests...
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const token = localStorage.getItem('accessToken');
+        if (!token) window.location.href = 'login.html';
+
+        async function loadPendingShops() {
+            try {
+                const response = await fetch('http://localhost:8080/api/shop/admin/pending', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const shops = await response.json();
+                    renderShops(shops);
+                } else {
+                    document.getElementById('shopList').innerHTML = `<div class="text-red-500 w-full col-span-3 text-center">Failed to load: ${response.status}</div>`;
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('shopList').innerHTML = `<div class="text-red-500 w-full col-span-3 text-center">Connection failed</div>`;
+            }
+        }
+
+        function renderShops(shops) {
+            const container = document.getElementById('shopList');
+            const badge = document.getElementById('pendingCount');
+
+            if (shops.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-3 text-center py-20 bg-white rounded-lg shadow-sm">
+                        <i class="fas fa-clipboard-check text-6xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500 text-lg">No pending applications</p>
+                    </div>`;
+                badge.classList.add('hidden');
+                return;
+            }
+
+            badge.textContent = shops.length;
+            badge.classList.remove('hidden');
+
+            container.innerHTML = shops.map(shop => `
+                <div class="bg-white rounded-lg shadow-md border hover:shadow-lg transition overflow-hidden">
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">${shop.name}</h3>
+                                <p class="text-sm text-gray-500"><i class="fas fa-clock mr-1"></i> ${new Date(shop.createdAt).toLocaleDateString()}</p>
+                            </div>
+                            <span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded uppercase">Pending</span>
+                        </div>
+                        
+                        <div class="space-y-3 mb-6">
+                            <!-- Basic Info -->
+                            <div>
+                                <p class="text-gray-600"><i class="fas fa-map-marker-alt w-5 text-gray-400"></i> ${shop.address}</p>
+                                <p class="text-gray-600"><i class="fas fa-phone w-5 text-gray-400"></i> ${shop.phone}</p>
+                                <p class="text-gray-600"><i class="fas fa-envelope w-5 text-gray-400"></i> ${shop.email || 'N/A'}</p>
+                            </div>
+
+                            <!-- Identity -->
+                            <div class="bg-gray-50 p-3 rounded text-sm">
+                                <p class="font-bold text-gray-700">Identity:</p>
+                                <p class="text-gray-600">Name: ${shop.identityFullName || 'N/A'}</p>
+                            </div>
+
+                            <!-- Bank -->
+                            <div class="bg-gray-50 p-3 rounded text-sm">
+                                <p class="font-bold text-gray-700">Bank Details:</p>
+                                <p class="text-gray-600">${shop.bankName} - ${shop.bankBranch}</p>
+                                <p class="text-gray-600">Acc: ${shop.bankAccountNumber}</p>
+                                <p class="text-gray-600">Holder: ${shop.bankAccountHolder}</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 pt-4 border-t">
+                            <button onclick="processShop('${shop.id}', 'approve')" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg transition">
+                                <i class="fas fa-check mr-1"></i> Approve
+                            </button>
+                            <button onclick="processShop('${shop.id}', 'reject')" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 rounded-lg transition">
+                                <i class="fas fa-times mr-1"></i> Reject
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function processShop(id, action) {
+            if (!confirm(`Are you sure you want to ${action} this shop?`)) return;
+
+            const endpoint = action === 'approve'
+                ? `http://localhost:8080/api/shop/admin/approve/${id}`
+                : `http://localhost:8080/api/shop/admin/reject/${id}`;
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    showToast(`Shop ${action}d successfully!`, "success");
+                    loadPendingShops(); // Reload list
+                } else {
+                    const text = await response.text();
+                    showToast(`Failed: ${text}`, "error");
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Connection error", "error");
+            }
+        }
+
+        function showToast(msg, type) {
+            Toastify({
+                text: msg,
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                style: { background: type === "success" ? "#10B981" : "#EF4444" }
+            }).showToast();
+        }
+
+        loadPendingShops();
+    </script>
+</body>
+
+</html>

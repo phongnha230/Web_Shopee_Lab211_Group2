@@ -1,9 +1,12 @@
 package com.shoppeclone.backend.shop.entity;
 
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.time.LocalDateTime;
 
 @Document(collection = "shops")
@@ -11,16 +14,34 @@ import java.time.LocalDateTime;
 public class Shop {
     @Id
     private String id;
-    
-    @Indexed
-    private String sellerId; // FK to seller_profiles.id (or users.id)
-    
+
+    @Indexed(unique = true)
+    private String ownerId; // Link to User ID
+
     private String name;
-    private Double rating = 0.0;
-    
-    // Status: ACTIVE, BANNED
-    private ShopStatus status = ShopStatus.ACTIVE;
-    
+    private String description;
+    private String address;
+    private String phone;
+    private String email; // Shop Email
+    private String pickupAddress;
+
+    // Identity Info
+    private String identityFullName; // Full Name as per ID
+    private String idCardFront; // URL/Path
+    private String idCardBack; // URL/Path
+
+    // Bank Info
+    private String bankName;
+    private String bankBranch;
+    private String bankAccountNumber;
+    private String bankAccountHolder;
+
+    private ShopStatus status;
+    private String rejectionReason;
+
+    @CreatedDate
     private LocalDateTime createdAt;
+
+    @LastModifiedDate
     private LocalDateTime updatedAt;
 }

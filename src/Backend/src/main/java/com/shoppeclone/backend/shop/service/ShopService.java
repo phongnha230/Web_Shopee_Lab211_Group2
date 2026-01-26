@@ -1,20 +1,19 @@
 package com.shoppeclone.backend.shop.service;
 
-import com.shoppeclone.backend.shop.dto.request.CreateShopRequest;
-import com.shoppeclone.backend.shop.dto.request.UpdateShopRequest;
-import com.shoppeclone.backend.shop.dto.response.ShopResponse;
+import com.shoppeclone.backend.shop.dto.ShopRegisterRequest;
+import com.shoppeclone.backend.shop.entity.Shop;
+
 import java.util.List;
 
 public interface ShopService {
-    ShopResponse createShop(CreateShopRequest request);
+    Shop registerShop(String userEmail, ShopRegisterRequest request);
 
-    ShopResponse getShopById(String id);
+    Shop getMyShop(String userEmail);
 
-    ShopResponse getShopBySellerId(String sellerId);
+    // Admin
+    List<Shop> getPendingShops();
 
-    List<ShopResponse> getAllShops();
+    void approveShop(String shopId);
 
-    ShopResponse updateShop(String id, UpdateShopRequest request);
-
-    void deleteShop(String id);
+    void rejectShop(String shopId, String reason);
 }
