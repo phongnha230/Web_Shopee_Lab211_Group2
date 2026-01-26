@@ -1,6 +1,0 @@
-{
-  "artifactType": "ARTIFACT_TYPE_OTHER",
-  "summary": "Documentation explaining the updated review validation that now requires both order delivered status AND payment completed status, with test scenarios using real database data",
-  "updatedAt": "2025-12-15T16:30:57.809714400Z",
-  "version": "1"
-}

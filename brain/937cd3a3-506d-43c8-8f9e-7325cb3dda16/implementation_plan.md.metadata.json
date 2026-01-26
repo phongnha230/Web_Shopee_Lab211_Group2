@@ -1,5 +1,0 @@
-{
-  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
-  "summary": "Detailed implementation plan for creating the complete folder structure and placeholder files for the Fashion e-commerce Next.js application. Includes all route groups, components, lib files, database schemas, services, hooks, stores, types, styles, and mock data organized by component with clear descriptions.",
-  "updatedAt": "2026-01-23T06:29:21.055640600Z"
-}

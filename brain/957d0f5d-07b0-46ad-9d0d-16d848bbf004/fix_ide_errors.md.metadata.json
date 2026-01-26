@@ -1,5 +1,0 @@
-{
-  "artifactType":  "ARTIFACT_TYPE_WALKTHROUGH",
-  "summary":  "Hướng dẫn giải quyết lỗi IDE hiển thị các import errors và dependency resolution errors trong Spring Boot project, mặc dù project build thành công.",
-  "updatedAt":  "2026-01-11T10:31:30.790090100Z"
-}

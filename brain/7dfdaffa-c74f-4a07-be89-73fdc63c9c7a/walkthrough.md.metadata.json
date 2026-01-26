@@ -1,5 +1,0 @@
-{
-  "artifactType":  "ARTIFACT_TYPE_WALKTHROUGH",
-  "summary":  "Hướng dẫn chi tiết về hệ thống User API không cần database, bao gồm cấu trúc dự án, cách sử dụng qua giao diện web/PowerShell/Postman, kết quả mẫu, và các lưu ý quan trọng về lưu trữ dữ liệu trong bộ nhớ.",
-  "updatedAt":  "2026-01-07T04:34:50.910343800Z"
-}

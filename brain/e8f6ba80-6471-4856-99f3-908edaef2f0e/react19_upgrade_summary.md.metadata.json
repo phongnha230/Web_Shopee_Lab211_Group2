@@ -1,5 +1,0 @@
-{
-  "artifactType":  "ARTIFACT_TYPE_OTHER",
-  "summary":  "Tóm tắt kết quả kiểm tra code hiện tại cho thấy dự án không sử dụng bất kỳ deprecated APIs nào (string refs, propTypes, defaultProps, forwardRef), đã sử dụng ReactDOM.createRoot và functional components với hooks, tương thích 100% với React 19. Bao gồm lệnh nâng cấp cụ thể và checklist kiểm tra sau khi nâng cấp.",
-  "updatedAt":  "2025-12-27T17:58:38.842957100Z"
-}

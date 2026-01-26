@@ -1,5 +1,0 @@
-{
-  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
-  "summary": "Docker deployment guide for Cafe app including list of created files, common Docker commands (build, run, logs, stop), access URLs, and important notes.",
-  "updatedAt": "2025-12-20T14:29:23.932721500Z"
-}

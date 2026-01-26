@@ -1,5 +1,0 @@
-{
-  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
-  "summary": "Plan to connect the Next.js application to Supabase, involving dependency installation, client configuration, and environment setup.",
-  "updatedAt": "2026-01-23T16:34:00.257706600Z"
-}

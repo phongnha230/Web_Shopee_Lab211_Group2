@@ -1,5 +1,0 @@
-{
-  "artifactType":  "ARTIFACT_TYPE_WALKTHROUGH",
-  "summary":  "Tài liệu hướng dẫn chi tiết về quá trình chạy frontend của dự án cafe app, bao gồm: kiến trúc tổng quan (React + Vite), quy trình khởi động từng bước (từ npm run dev đến render UI), luồng xử lý ứng dụng với sơ đồ mermaid, cấu trúc thư mục và giải thích từng folder, các thành phần chính (Zustand state management, Axios services, React Router), cấu hình proxy, và các ví dụ thực tế về luồng hoạt động khi user tương tác với ứng dụng.",
-  "updatedAt":  "2025-12-27T17:52:29.685069400Z"
-}

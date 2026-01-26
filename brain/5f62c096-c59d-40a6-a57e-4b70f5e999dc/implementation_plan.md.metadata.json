@@ -1,5 +1,0 @@
-{
-  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
-  "summary": "Complete implementation plan for adding delete order functionality, including backend API (route and controller), frontend integration (API service and UI), database considerations, and security measures for admin-only access",
-  "updatedAt": "2025-12-12T10:14:29.492161300Z"
-}
