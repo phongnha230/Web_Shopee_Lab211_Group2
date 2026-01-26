@@ -1,0 +1,27 @@
+# Disable Auto-Login After Registration
+
+The goal is to force users to manually log in after creating an account.
+
+## key Changes
+
+### Backend
+#### [MODIFY] [authController.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/controllers/authController.js)
+- Remove JWT token generation in [register](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/services/usersServices.js#5-6) function.
+- Remove `token` from the JSON response.
+
+### Frontend
+#### [MODIFY] [LoginPage.jsx](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Auth/LoginPage.jsx)
+- In [handleRegister](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Auth/LoginPage.jsx#71-121):
+    - Remove check for `response.data.token`.
+    - Remove [setAuthData](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/authStore.js#17-24) call.
+    - Remove `navigate(ROUTES.HOME)`.
+    - Set `setIsRegister(false)` to show login panel.
+    - Show success alert instructing user to login.
+    - Clear password fields.
+
+## Verification
+1. User registers a new account.
+2. Message "Đăng ký thành công! Vui lòng đăng nhập." appears.
+3. Form switches to "Sign In".
+4. User enters credentials.
+5. User logs in successfully.

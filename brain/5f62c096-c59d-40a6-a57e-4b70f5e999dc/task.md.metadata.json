@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_TASK",
+  "summary": "Task checklist for implementing delete order feature across backend (route, controller) and frontend (API service, UI button, state management)",
+  "updatedAt": "2025-12-12T10:14:21.902724900Z",
+  "version": "2"
+}

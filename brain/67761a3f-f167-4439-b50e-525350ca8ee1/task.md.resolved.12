@@ -1,0 +1,37 @@
+# Task: Fix Admin Dashboard Data Loading
+
+## Context
+User reports multiple issues with admin dashboard:
+1. ❌ **Payments page empty** - "Chưa có dữ liệu thanh toán"
+2. ❌ **Cannot add news** - "Tìm thấy liệu để hoặc mô tả"
+3. ❌ **Only 1 order showing** - Should show all orders
+4. ❌ **Data appears lost on server restart**
+
+Backend is confirmed running and connected to MySQL successfully.
+
+## Root Cause (Suspected)
+- Admin pages not loading data from API on mount
+- Using stale localStorage data
+- Missing [loadFromAPI()](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/orderStore.js#12-36) calls in admin components
+
+## Checklist
+
+### Investigation
+- [x] Check AdminDashboardPage for data loading - ✅ Found payments and users load, but orders/news/products don't
+- [x] Check if payments page exists and loads data - ✅ Loads from API on tab switch
+- [x] Check if news management page exists and loads data - ❌ Does NOT load from API
+- [x] Verify payment store implementation - ✅ Working correctly
+- [x] Verify news store implementation - ✅ Has loadFromAPI method
+
+### Fix Implementation
+- [/] Add loadOrders to AdminDashboardPage
+- [/] Add loadNews to AdminDashboardPage
+- [/] Add loadProducts to AdminDashboardPage
+- [ ] Update useEffect to call all load functions
+- [ ] Test data loading from database
+
+### Verification
+- [ ] Test admin dashboard shows all orders
+- [ ] Test payments page shows payment records
+- [ ] Test news creation works
+- [ ] Test data persists after refresh

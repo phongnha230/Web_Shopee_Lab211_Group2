@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary": "Updated walkthrough to include the Dynamic Mock Data implementation. Now documents how the frontend simulates a real backend by using a JavaScript object to store and retrieve product details based on URL parameters.",
+  "updatedAt": "2026-01-25T04:05:02.525326Z",
+  "version": "2"
+}

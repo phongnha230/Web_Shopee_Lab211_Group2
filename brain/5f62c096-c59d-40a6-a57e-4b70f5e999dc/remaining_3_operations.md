@@ -1,0 +1,292 @@
+# 🚀 Hướng Dẫn 3 Operations Còn Lại - Postman
+
+## ✅ Bạn đã làm xong: POST Create News (201 Created)
+
+![POST Success](C:/Users/HPPAVILION/.gemini/antigravity/brain/5f62c096-c59d-40a6-a57e-4b70f5e999dc/uploaded_image_1765467290225.png)
+
+**Response bạn nhận được:**
+```json
+{
+  "id": 1,
+  "title": "Test News",
+  "content": "This is test content",
+  "status": "published",
+  "created_by": 1,
+  "image_url": null,
+  "created_at": "2025-12-11T15:30:47.045Z",
+  "updated_at": "2025-12-11T15:30:47.046Z",
+  "is_pinned": false
+}
+```
+
+---
+
+## 1️⃣ GET - Lấy News Vừa Tạo
+
+### Cách 1: GET Single News by ID
+
+**Setup trong Postman:**
+
+1. **Tạo request mới** hoặc duplicate request POST
+2. **Đổi method** từ `POST` → `GET`
+3. **URL:** `http://localhost:5000/api/news/1`
+   - Số `1` là `id` của news bạn vừa tạo
+4. **Headers:** 
+   - ❌ **XÓA** `Content-Type: application/json`
+   - ❌ **XÓA** `Authorization` (không cần auth cho GET)
+5. **Body:** 
+   - Chọn **none** (GET không cần body)
+6. **Click Send**
+
+**Expected Response (200 OK):**
+```json
+{
+  "id": 1,
+  "title": "Test News",
+  "content": "This is test content",
+  "status": "published",
+  "created_by": 1,
+  "image_url": null,
+  "created_at": "2025-12-11T15:30:47.045Z",
+  "updated_at": "2025-12-11T15:30:47.046Z",
+  "is_pinned": false,
+  "author": {
+    "id": 1,
+    "username": "admin",
+    "email": "admin@example.com"
+  }
+}
+```
+
+### Cách 2: GET All News
+
+**Setup trong Postman:**
+
+1. **Method:** `GET`
+2. **URL:** `http://localhost:5000/api/news`
+3. **Headers:** Không cần
+4. **Body:** none
+5. **Click Send**
+
+**Expected Response (200 OK):**
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "title": "Test News",
+      "content": "This is test content",
+      "status": "published",
+      "created_by": 1,
+      "image_url": null,
+      "created_at": "2025-12-11T15:30:47.045Z",
+      "updated_at": "2025-12-11T15:30:47.046Z",
+      "is_pinned": false,
+      "author": {
+        "id": 1,
+        "username": "admin",
+        "email": "admin@example.com"
+      }
+    }
+  ],
+  "pagination": {
+    "total": 1,
+    "page": 1,
+    "totalPages": 1
+  }
+}
+```
+
+---
+
+## 2️⃣ PUT - Update News
+
+**Setup trong Postman:**
+
+1. **Tạo request mới** hoặc duplicate request POST
+2. **Đổi method** từ `POST` → `PUT`
+3. **URL:** `http://localhost:5000/api/news/1`
+   - Thêm `/1` vào cuối (ID của news cần update)
+4. **Headers:** 
+   - ✅ `Content-Type: application/json`
+   - ✅ `Authorization: Bearer YOUR_TOKEN` (cần auth)
+5. **Body:** Chọn **raw** → **JSON**
+   ```json
+   {
+     "title": "Updated Test News",
+     "content": "This content has been updated!",
+     "status": "published"
+   }
+   ```
+6. **Click Send**
+
+**Expected Response (200 OK):**
+```json
+{
+  "id": 1,
+  "title": "Updated Test News",
+  "content": "This content has been updated!",
+  "status": "published",
+  "created_by": 1,
+  "image_url": null,
+  "created_at": "2025-12-11T15:30:47.045Z",
+  "updated_at": "2025-12-11T15:35:00.000Z",  // ← Thời gian updated mới
+  "is_pinned": false
+}
+```
+
+### 💡 Tips cho PUT:
+
+**Update chỉ status:**
+```json
+{
+  "title": "Updated Test News",
+  "content": "This content has been updated!",
+  "status": "archived"
+}
+```
+
+**Update chỉ title:**
+```json
+{
+  "title": "New Title Only",
+  "content": "This content has been updated!",
+  "status": "published"
+}
+```
+
+---
+
+## 3️⃣ DELETE - Xóa News
+
+**Setup trong Postman:**
+
+1. **Tạo request mới** hoặc duplicate request POST
+2. **Đổi method** từ `POST` → `DELETE`
+3. **URL:** `http://localhost:5000/api/news/1`
+   - Thêm `/1` vào cuối (ID của news cần xóa)
+4. **Headers:** 
+   - ❌ **XÓA** `Content-Type: application/json`
+   - ✅ **GIỮ** `Authorization: Bearer YOUR_TOKEN` (cần auth)
+5. **Body:** Chọn **none** (DELETE không cần body)
+6. **Click Send**
+
+**Expected Response (200 OK):**
+```json
+{
+  "message": "News deleted successfully"
+}
+```
+
+### ✅ Verify đã xóa:
+
+Sau khi DELETE, test lại GET:
+
+**GET:** `http://localhost:5000/api/news/1`
+
+**Expected Response (404 Not Found):**
+```json
+{
+  "message": "News not found"
+}
+```
+
+---
+
+## 📋 Tóm Tắt Nhanh
+
+| Operation | Method | URL | Auth? | Body? |
+|-----------|--------|-----|-------|-------|
+| ✅ Create | POST | `/api/news` | ✅ Yes | ✅ Yes |
+| 1️⃣ Get Single | GET | `/api/news/1` | ❌ No | ❌ No |
+| 1️⃣ Get All | GET | `/api/news` | ❌ No | ❌ No |
+| 2️⃣ Update | PUT | `/api/news/1` | ✅ Yes | ✅ Yes |
+| 3️⃣ Delete | DELETE | `/api/news/1` | ✅ Yes | ❌ No |
+
+---
+
+## 🎯 Thứ Tự Test Nên Làm
+
+```
+1. POST Create News (✅ Đã làm)
+   ↓
+2. GET All News → Thấy 1 news
+   ↓
+3. GET Single News (ID=1) → Thấy chi tiết
+   ↓
+4. PUT Update News (ID=1) → Title/content thay đổi
+   ↓
+5. GET Single News (ID=1) → Thấy data đã update
+   ↓
+6. DELETE News (ID=1) → Xóa thành công
+   ↓
+7. GET All News → Thấy empty array
+```
+
+---
+
+## 🔑 Lưu Ý Quan Trọng
+
+### Authorization Header
+
+Bạn cần dùng **cùng token** từ lúc login cho:
+- ✅ POST Create
+- ✅ PUT Update
+- ✅ DELETE
+
+**Format:**
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTczMzkyNDQwMCwiZXhwIjoxNzMzOTI4MDAwfQ.abc123...
+```
+
+### Content-Type Header
+
+- ✅ **CẦN** cho: POST, PUT (khi gửi JSON)
+- ❌ **KHÔNG CẦN** cho: GET, DELETE
+
+---
+
+## 🐛 Troubleshooting
+
+### Lỗi 401 Unauthorized (PUT/DELETE)
+```json
+{ "message": "No token provided" }
+```
+**Fix:** Thêm `Authorization: Bearer YOUR_TOKEN` vào Headers
+
+### Lỗi 404 Not Found
+```json
+{ "message": "News not found" }
+```
+**Fix:** 
+- Kiểm tra ID có đúng không
+- Có thể news đã bị xóa rồi
+- GET all news để xem ID nào còn tồn tại
+
+### Lỗi 403 Forbidden
+```json
+{ "message": "Not authorized to update this news" }
+```
+**Fix:** 
+- Chỉ admin hoặc người tạo mới update/delete được
+- Login bằng account admin
+
+---
+
+## ✅ Checklist
+
+Làm theo thứ tự này:
+
+- [x] **POST** Create News → 201 Created (Đã làm ✅)
+- [ ] **GET** All News → 200 OK, thấy 1 news
+- [ ] **GET** Single News (ID=1) → 200 OK, thấy chi tiết
+- [ ] **PUT** Update News (ID=1) → 200 OK, title thay đổi
+- [ ] **GET** Single News (ID=1) lần nữa → 200 OK, thấy data mới
+- [ ] **DELETE** News (ID=1) → 200 OK, message success
+- [ ] **GET** All News lần nữa → 200 OK, empty array
+
+---
+
+**Chúc bạn test thành công! 🚀**
+
+Nếu có lỗi gì, chụp màn hình và báo tôi nhé!

@@ -1,0 +1,116 @@
+# Review System Fixes - Implementation Plan
+
+## Completed Fixes
+
+### ✅ Issue 2: Review Button Not Updating After Submission
+**Solution**: Added [loadFromAPI()](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/reviewStore.js#12-28) call after successful review submission in [RateProductModal.jsx](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/components/common/RateProductModal.jsx#L47-L49)
+- After submitting a review, the reviews are reloaded from the API
+- This ensures the button changes from "Đánh giá" to "Sửa đánh giá" immediately
+
+### ✅ Issue 3: Customers Can Spam Reviews
+**Solution**: Added duplicate check in [reviewController.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/controllers/reviewController.js#L9-L18)
+- Backend now checks if user already reviewed the product before creating a new review
+- Returns error message: "Bạn đã đánh giá sản phẩm này rồi. Vui lòng sửa đánh giá thay vì tạo mới."
+- Prevents review spam effectively
+
+---
+
+## Remaining Issue
+
+### ⏳ Issue 1: Admin Cannot Delete Reviews
+
+**Current State**: 
+- Backend has [remove](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/controllers/reviewController.js#85-97) endpoint: `DELETE /api/reviews/:id`
+- Frontend `reviewStore` has [remove()](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/controllers/reviewController.js#85-97) function
+- **Missing**: Admin dashboard UI for review management
+
+**Proposed Solution**: Add a new "Đánh giá" tab to Admin Dashboard
+
+#### Changes Needed
+
+##### [MODIFY] [AdminDashboardPage.jsx](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Admin/AdminDashboardPage.jsx)
+
+1. **Add tab button** (around line 300):
+```javascript
+<button
+  className={`tab-btn ${tab === 'reviews' ? 'active' : ''}`}
+  onClick={() => setTab('reviews')}
+>
+  Đánh giá
+</button>
+```
+
+2. **Add reviews tab content** (after payments tab, around line 1384):
+```javascript
+{tab === 'reviews' && (
+  <div className="dashboard-section">
+    <h3>Quản lý đánh giá</h3>
+    <table className="table">
+      <thead>
+        <tr>
+          <th>Sản phẩm</th>
+          <th>Người dùng</th>
+          <th>Đánh giá</th>
+          <th>Bình luận</th>
+          <th>Ngày tạo</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {reviews.map((review) => (
+          <tr key={review.id}>
+            <td>{getProductName(review.product_id)}</td>
+            <td>{review.userName || review.User?.username || 'Ẩn danh'}</td>
+            <td>{'★'.repeat(review.rating)}</td>
+            <td>{review.comment || '-'}</td>
+            <td>{formatDate(review.created_at)}</td>
+            <td>
+              <button
+                className="btn secondary"
+                onClick={() => {
+                  if (confirm('Xóa đánh giá này?')) removeReview(review.id)
+                }}
+              >
+                Xóa
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
+```
+
+3. **Add required imports and state**:
+```javascript
+const reviews = useReviewStore((s) => s.reviews)
+const loadReviews = useReviewStore((s) => s.loadFromAPI)
+const removeReview = useReviewStore((s) => s.remove)
+```
+
+4. **Load reviews on mount**:
+```javascript
+useEffect(() => {
+  loadReviews()
+}, [loadReviews])
+```
+
+## Verification Plan
+
+### Test Issue 2 Fix:
+1. Login as customer
+2. Go to "Đơn của tôi"
+3. Click "Đánh giá" on a product
+4. Submit review
+5. **Expected**: Button immediately changes to "Sửa đánh giá"
+
+### Test Issue 3 Fix:
+1. Try to submit another review for the same product
+2. **Expected**: Error message appears: "Bạn đã đánh giá sản phẩm này rồi..."
+
+### Test Issue 1 Fix (after implementing):
+1. Login as admin
+2. Go to Dashboard → "Đánh giá" tab
+3. Click "Xóa" on a review
+4. **Expected**: Review is deleted and removed from list

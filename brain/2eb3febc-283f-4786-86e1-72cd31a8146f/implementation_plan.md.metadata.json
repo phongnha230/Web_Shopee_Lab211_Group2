@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "Plan to fix dependency issues by cleaning up root directory and reinstalling dependencies in `my-app`.",
+  "updatedAt": "2026-01-23T17:10:28.725199300Z"
+}

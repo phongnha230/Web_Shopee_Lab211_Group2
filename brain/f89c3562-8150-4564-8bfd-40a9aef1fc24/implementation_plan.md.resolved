@@ -1,0 +1,69 @@
+# Refactor Login Page for Sliding Animation
+
+The goal is to implement the "Double Slider" sign-in/up form pattern.
+
+## Implementation Details
+
+### HTML Structure
+```jsx
+<div className={`login-root`}>
+  <div className={`auth-container ${isRegister ? 'right-panel-active' : ''}`} id="container">
+    
+    {/* Sign Up Form (Left side originally, moves to view when active) */}
+    <div className="form-container sign-up-container">
+       <form className="auth-form">
+          <h1>Create Account</h1>
+          {/* Social icons if needed */}
+          <span>or use your email for registration</span>
+          <input type="text" placeholder="Name" />
+          <input type="email" placeholder="Email" />
+          <input type="password" placeholder="Password" />
+          <button onClick={handleRegister}>Sign Up</button>
+       </form>
+    </div>
+
+    {/* Sign In Form (Right side originally) */}
+    <div className="form-container sign-in-container">
+       <form className="auth-form">
+          <h1>Sign in</h1>
+          {/* Social icons */}
+          <span>or use your account</span>
+          <input type="email" placeholder="Email" />
+          <input type="password" placeholder="Password" />
+          <a href="#">Forgot your password?</a>
+          <button onClick={handleLogin}>Sign In</button>
+       </form>
+    </div>
+
+    {/* Overlay Container */}
+    <div className="overlay-container">
+      <div className="overlay">
+        {/* Left Overlay (Visible when Register is active) */}
+        <div className="overlay-panel overlay-left">
+          <h1>Welcome Back!</h1>
+          <p>To keep connected with us please login with your personal info</p>
+          <button className="ghost" onClick={() => setIsRegister(false)}>Sign In</button>
+        </div>
+        
+        {/* Right Overlay (Visible when Login is active) */}
+        <div className="overlay-panel overlay-right">
+          <h1>Hello, Friend!</h1>
+          <p>Enter your personal details and start journey with us</p>
+          <button className="ghost" onClick={() => setIsRegister(true)}>Sign Up</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+```
+
+### Logic
+-   Reuse existing state (`email`, `password`, `username`, `confirmPassword`, `loading`, `isRegister`).
+-   Reuse [handleLogin](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Auth/LoginPage.jsx#20-61) and [handleRegister](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Auth/LoginPage.jsx#71-114).
+-   Map the "Sign In" button in the overlay to `setIsRegister(false)`.
+-   Map the "Sign Up" button in the overlay to `setIsRegister(true)`.
+
+## Steps
+1.  Rewrite [Frontend/src/pages/Auth/LoginPage.jsx](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Auth/LoginPage.jsx) entirely with the new structure.
+2.  Ensure existing functionality (API calls, validation) is preserved.

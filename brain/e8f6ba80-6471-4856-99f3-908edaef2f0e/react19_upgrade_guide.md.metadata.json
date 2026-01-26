@@ -1,0 +1,5 @@
+{
+  "artifactType":  "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary":  "Hướng dẫn chi tiết nâng cấp React từ 18.3.1 lên React 19, bao gồm: breaking changes quan trọng (propTypes, string refs, ref as prop), quy trình nâng cấp từng bước an toàn, checklist kiểm tra code hiện tại, tính năng mới (Actions, use hook, document metadata), lệnh thực thi cụ thể, và cách rollback nếu có vấn đề.",
+  "updatedAt":  "2025-12-27T17:57:59.735586100Z"
+}

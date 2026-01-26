@@ -1,0 +1,167 @@
+# Thêm 4 Ảnh Sản Phẩm Nổi Bật vào Banner
+
+## Tổng quan
+Đã thêm thành công 4 thẻ ảnh sản phẩm nổi bật vào phần banner, hiển thị ngay bên dưới nút "Xem Menu". Các ảnh có hiệu ứng hover đẹp mắt với label hiện lên khi di chuột.
+
+## Các sản phẩm được chọn
+1. **Cà phê đen** - `/src/assets/cà phê đen.jpeg`
+2. **Matcha latte** - [/src/assets/Matcha.jpeg](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/assets/Matcha.jpeg)
+3. **Trà Đào** - `/src/assets/Trà Đào.jpeg`
+4. **Milo Dằm** - `/src/assets/Milo_Dằm.jpeg`
+
+## Thay đổi Code
+
+### 1. Banner Component ([Banner.jsx](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/components/common/Banner.jsx))
+
+```javascript
+export function Banner() {
+  return (
+    <div className="banner reveal">
+      <div className="banner-bg">
+        <div className="container banner-content">
+          <h2>Thức uống mát lạnh, tươi ngon mỗi ngày</h2>
+          <p>Chọn món yêu thích và đặt ngay. Giao nhanh trong vài phút.</p>
+          <a className="btn animate-float" href="#menu">Xem Menu</a>
+          
+          {/* Featured Products Gallery */}
+          <div className="banner-featured-products">
+            <div className="featured-product-card">
+              <img src="/src/assets/cà phê đen.jpeg" alt="Cà phê đen" />
+              <span className="featured-label">Cà phê đen</span>
+            </div>
+            <div className="featured-product-card">
+              <img src="/src/assets/Matcha.jpeg" alt="Matcha latte" />
+              <span className="featured-label">Matcha latte</span>
+            </div>
+            <div className="featured-product-card">
+              <img src="/src/assets/Trà Đào.jpeg" alt="Trà Đào" />
+              <span className="featured-label">Trà Đào</span>
+            </div>
+            <div className="featured-product-card">
+              <img src="/src/assets/Milo_Dằm.jpeg" alt="Milo Dằm" />
+              <span className="featured-label">Milo Dằm</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+### 2. CSS Styles ([styles.css](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/styles.css))
+
+```css
+/* Banner Featured Products */
+.banner-featured-products {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 40px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.featured-product-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  aspect-ratio: 1;
+}
+
+.featured-product-card:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+}
+
+.featured-product-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.featured-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+  color: white;
+  padding: 12px 8px 8px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.featured-product-card:hover .featured-label {
+  opacity: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .banner-featured-products {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 30px;
+  }
+  
+  .featured-label {
+    font-size: 12px;
+    padding: 10px 6px 6px 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner-featured-products {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+```
+
+## Tính năng
+
+### ✨ Hiệu ứng Hover
+- **Transform**: Khi hover, card sẽ nâng lên (`translateY(-8px)`) và phóng to nhẹ (`scale(1.05)`)
+- **Shadow**: Box-shadow tăng lên để tạo hiệu ứng nổi
+- **Label**: Tên sản phẩm xuất hiện với gradient đen mờ ở dưới cùng
+
+### 📱 Responsive Design
+- **Desktop (>768px)**: Hiển thị 4 ảnh trên 1 hàng
+- **Tablet (≤768px)**: Hiển thị 2x2 grid
+- **Mobile (≤480px)**: Hiển thị 2x2 grid với khoảng cách nhỏ hơn
+
+## Kết quả
+
+### Banner với 4 ảnh sản phẩm
+![Banner với featured products](C:\Users\HPPAVILION\.gemini\antigravity\brain\74920dcb-8e6d-4f2e-8f22-bab70d5ca0d4\banner_images_check_1766046788815.png)
+
+### Hiệu ứng hover với labels hiển thị
+![Labels hiển thị khi hover](C:\Users\HPPAVILION\.gemini\antigravity\brain\74920dcb-8e6d-4f2e-8f22-bab70d5ca0d4\banner_labels_forced_check_1766047110320.png)
+
+## Xác nhận
+
+✅ **Tất cả 4 ảnh load thành công**
+- Cà phê đen ✓
+- Matcha latte ✓
+- Trà Đào ✓
+- Milo Dằm ✓
+
+✅ **Hiệu ứng hover hoạt động tốt**
+- Transform animation mượt mà
+- Labels xuất hiện đúng cách
+- Shadow effect đẹp mắt
+
+✅ **Responsive design**
+- Desktop: 4 cột
+- Tablet/Mobile: 2 cột
+
+## Video Demo
+![Browser recording](C:\Users\HPPAVILION\.gemini\antigravity\brain\74920dcb-8e6d-4f2e-8f22-bab70d5ca0d4\banner_featured_products_1766046308526.webp)

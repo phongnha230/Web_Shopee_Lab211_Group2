@@ -1,0 +1,35 @@
+# Task: Fix Missing Orders on Customer Orders Page
+
+## Context
+User reports that previous orders have disappeared and only the most recent order is showing. This indicates orders are not being properly loaded from the database.
+
+## Root Cause Analysis
+
+### Issues Found:
+1. **`CustomerOrdersPage` doesn't load orders from API** - No `useEffect` to call [loadFromAPI()](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/reviewStore.js#12-28) on mount
+2. **References non-existent function** - Code tries to use `fetchOrders` which doesn't exist in `orderStore`
+3. **Only using localStorage** - Orders are only loaded from localStorage (which may have been cleared)
+
+### How it should work:
+- When `CustomerOrdersPage` mounts, it should call [loadFromAPI()](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/reviewStore.js#12-28) to fetch all orders from MySQL database
+- The store should update with fresh data from the database
+- User should see all their historical orders
+
+## Checklist
+
+### Investigation
+- [x] Check CustomerOrdersPage for order loading
+- [x] Check orderStore implementation
+- [x] Identify missing loadFromAPI call
+- [x] Verify backend API endpoints exist
+
+### Fix Implementation
+- [x] Add [loadFromAPI](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/reviewStore.js#12-28) to CustomerOrdersPage imports
+- [x] Add useEffect to call [loadFromAPI()](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/reviewStore.js#12-28) on mount
+- [x] Remove reference to non-existent `fetchOrders`
+- [/] Test order loading from database
+
+### Verification
+- [ ] Verify all orders load from database
+- [ ] Verify orders display correctly
+- [ ] Test with multiple orders

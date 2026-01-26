@@ -1,0 +1,31 @@
+# Fix Order Visibility Issue
+
+The user reports that orders are disappearing.
+The cause is identified as a mismatch between the frontend's expectation of `customerName` in the order object and the backend's response which lacks this field.
+The frontend `CustomerOrdersPage` filters orders by `o.customerName === customerName`.
+However, `orderController.listOrders` returns orders related to the user (via `user_id`) but does not include the `User` model or the `customerName` field in the response.
+Thus, when orders are loaded from the API, they lack `customerName` and are filtered out by the frontend.
+
+## User Review Required
+> [!NOTE]
+> I will simplify the frontend logic to display all orders returned by the store, relying on the backend's existing security filtering (returning only the user's orders).
+
+## Proposed Changes
+
+### Frontend
+#### [MODIFY] [CustomerOrdersPage.jsx](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Order/CustomerOrdersPage.jsx)
+- Remove the client-side filtering by `customerName` inside `useMemo`.
+- Trust that `orders` from `useOrderStore` are already filtered by the backend for the logged-in user.
+- If necessary, verify `o.user_id` matches the current user's ID, but just trusting the list is usually sufficient if the API is secure.
+
+## Verification Plan
+
+### Manual Verification
+1.  **Place Order**: Log in as a customer, place an order.
+    - Expect: "Thanh toán online đã ghi nhận!" (if online) or receipt.
+2.  **View Orders**: Go to "Đơn của tôi".
+    - Expect: The new order appears in the list.
+3.  **Refresh Page**: Refresh the browser.
+    - Expect: The order persists and is still visible (fetching from API correctly).
+4.  **Logout/Login**: Logout and login again.
+    - Expect: Orders are still visible.

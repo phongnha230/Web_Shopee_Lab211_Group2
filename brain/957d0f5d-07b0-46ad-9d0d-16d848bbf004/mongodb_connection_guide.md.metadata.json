@@ -1,0 +1,5 @@
+{
+  "artifactType":  "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary":  "Hướng dẫn chi tiết cách kết nối Spring Boot với MongoDB local sử dụng database web_shoppe. Bao gồm cách lấy connection string từ MongoDB Compass và cấu hình trong application.properties.",
+  "updatedAt":  "2026-01-11T10:42:51.507910900Z"
+}

@@ -1,0 +1,70 @@
+# Fix News Display Issues
+
+## Vấn đề
+
+Người dùng báo cáo 2 vấn đề khi hiển thị tin tức:
+
+1. **Ảnh không load**: Ảnh hiển thị broken (không load được)
+2. **Text mô tả bị cắt**: Text không hiển thị đầy đủ
+
+![Issue Screenshot 1](C:/Users/HPPAVILION/.gemini/antigravity/brain/74920dcb-8e6d-4f2e-8f22-bab70d5ca0d4/uploaded_image_0_1766052161162.png)
+
+![Issue Screenshot 2](C:/Users/HPPAVILION/.gemini/antigravity/brain/74920dcb-8e6d-4f2e-8f22-bab70d5ca0d4/uploaded_image_1_1766052161162.png)
+
+## Nguyên nhân
+
+### 1. Ảnh không load
+
+Trong [newsStore.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/newsStore.js#L40-L68), khi thêm news mới:
+- Frontend gửi field `img` 
+- Nhưng backend lưu vào field `image_url`
+- Khi load lại, mapping không khớp → ảnh không hiển thị
+
+### 2. Text bị cắt
+
+Trong [HomePage.jsx](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Home/HomePage.jsx#L127-L140), phần hiển thị excerpt:
+- Không có CSS để xử lý text dài
+- Text bị cắt hoặc overflow
+
+## Giải pháp
+
+### Fix 1: Sửa Image URL Mapping
+
+Cập nhật [newsStore.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/newsStore.js) để gửi đúng field `image_url`:
+
+```diff
+async add({ title, img, excerpt }) {
+  try {
+    const response = await newsServices.create({
+      title,
++     image_url: img,  // Send as image_url to match backend field
+      content: excerpt || title,
+      status: 'published'
+    });
+```
+
+### Fix 2: Thêm CSS cho Text Display
+
+Cập nhật [HomePage.jsx](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Home/HomePage.jsx) để hiển thị full text:
+
+```diff
+<div style={{ 
+  color: '#555',
++ wordWrap: 'break-word',
++ whiteSpace: 'normal',
++ lineHeight: '1.5'
+}}>
+  {n.excerpt}
+</div>
+```
+
+## Kết quả
+
+✅ Ảnh giờ load đúng từ backend  
+✅ Text excerpt hiển thị đầy đủ, không bị cắt  
+✅ Layout responsive và đẹp hơn
+
+## Files Changed
+
+- [newsStore.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/newsStore.js#L40-L68)
+- [HomePage.jsx](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Home/HomePage.jsx#L127-L140)

@@ -1,0 +1,85 @@
+# Sửa lỗi News API 500 Error
+
+## Vấn đề
+API `/api/news` trả về lỗi **500 Internal Server Error** khi frontend cố gắng load tin tức.
+
+![Console error showing 500 status](C:\Users\HPPAVILION\.gemini\antigravity\brain\74920dcb-8e6d-4f2e-8f22-bab70d5ca0d4\uploaded_image_1766048511960.png)
+
+## Nguyên nhân gốc rễ
+
+Sau khi thêm detailed error logging, phát hiện lỗi:
+```
+Unknown column 'News.createdAt' in 'order clause'
+```
+
+**Phân tích:**
+- Model News định nghĩa column là `created_at` (snake_case)
+- Controller query sử dụng `createdAt` (camelCase) trong order clause
+- MySQL không tìm thấy column `createdAt` → lỗi 500
+
+## Giải pháp
+
+### 1. Xóa code redundant trong controller
+
+**File**: [newController.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/controllers/newController.js)
+
+Xóa đoạn code tạo association động (không cần thiết vì đã có trong [associations.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/models/associations.js)):
+
+```javascript
+// ❌ Xóa code này
+if (!News.associations.author) {
+  News.belongsTo(User, { foreignKey: 'created_by', as: 'author' });
+}
+```
+
+### 2. Sửa tên column trong order clause
+
+**Thay đổi:**
+```javascript
+// ❌ Sai - dùng camelCase
+order: [['createdAt', 'DESC']]
+
+// ✅ Đúng - dùng snake_case như trong database
+order: [['created_at', 'DESC']]
+```
+
+### 3. Thêm detailed error logging (tạm thời)
+
+Để debug, tạm thời thêm error details:
+```javascript
+res.status(500).json({
+  message: 'Error fetching news',
+  error: error.message,
+  stack: error.stack
+});
+```
+
+## Kết quả
+
+✅ **API hoạt động bình thường!**
+
+- **Backend**: `/api/news` trả về `200 OK` với response:
+  ```json
+  {
+    "data": [],
+    "pagination": {
+      "total": 0,
+      "page": 1,
+      "totalPages": 0
+    }
+  }
+  ```
+
+- **Frontend**: Không còn lỗi trong console, trang load bình thường
+
+- **Database**: Hiện tại chưa có dữ liệu news nên trả về mảng rỗng (đúng như mong đợi)
+
+## Bài học
+
+1. **Column naming consistency**: Cần nhất quán giữa model definition và query
+2. **Sequelize timestamps**: Khi dùng custom column names (`created_at`), phải chỉ định rõ trong query
+3. **Error logging**: Detailed error messages rất quan trọng để debug nhanh
+
+## Files đã sửa
+
+- [newController.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/controllers/newController.js) - Sửa order clause và xóa redundant code

@@ -1,0 +1,305 @@
+# Implementation Plan: Delete Order Feature
+
+## 🎯 Mục Tiêu
+
+Thêm chức năng **xóa order** cho admin, đồng bộ giữa frontend và backend.
+
+## 🔍 Phân Tích
+
+### Hiện Trạng
+- ❌ Không có route DELETE order
+- ❌ Không có controller function xóa order
+- ❌ Frontend không có nút xóa order
+
+### Yêu Cầu
+- ✅ Admin có thể xóa order từ dashboard
+- ✅ Xóa order trên web → xóa luôn trong database
+- ✅ Xóa cả order và order_items (cascade)
+- ✅ Chỉ admin mới được xóa
+
+---
+
+## 📝 Proposed Changes
+
+### Backend
+
+#### 1. [MODIFY] [backend/routes/orderRoutes.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/routes/orderRoutes.js)
+
+**Thêm route DELETE:**
+```javascript
+// Delete order (admin only)
+router.delete('/:id', authMW, allow('admin'), validateId, oc.deleteOrder);
+```
+
+**Vị trí:** Thêm sau dòng 17 (sau route PUT status)
+
+---
+
+#### 2. [MODIFY] [backend/controllers/orderController.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/controllers/orderController.js)
+
+**Thêm function `deleteOrder`:**
+```javascript
+exports.deleteOrder = async (req, res) => {
+  const t = await sequelize.transaction();
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) {
+      return res.status(400).json({ message: 'Invalid order id' });
+    }
+
+    const order = await Order.findByPk(id, { transaction: t });
+    if (!order) {
+      await t.rollback();
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    // Delete order_items first (foreign key constraint)
+    await OrderItem.destroy({ 
+      where: { order_id: id },
+      transaction: t 
+    });
+
+    // Then delete order
+    await order.destroy({ transaction: t });
+
+    await t.commit();
+
+    logger.info('Order deleted', {
+      orderId: id,
+      userId: req.user.id,
+      timestamp: new Date().toISOString()
+    });
+
+    res.json({ 
+      success: true, 
+      message: 'Order deleted successfully' 
+    });
+  } catch (err) {
+    await t.rollback();
+    logger.error('Error deleting order', {
+      error: err.message,
+      orderId: req.params.id,
+      userId: req.user.id,
+      timestamp: new Date().toISOString()
+    });
+    res.status(500).json({ 
+      message: 'Delete order error', 
+      error: err.message 
+    });
+  }
+};
+```
+
+**Vị trí:** Thêm sau function [updateOrderStatus](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/controllers/orderController.js#144-177) (sau dòng 176)
+
+---
+
+### Frontend
+
+#### 3. [MODIFY] [Frontend/src/constants/apiEndpoints.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/constants/apiEndpoints.js)
+
+**Thêm DELETE endpoint:**
+```javascript
+ORDERS: {
+  LIST: '/orders',
+  DETAIL: (id) => `/orders/${id}`,
+  CREATE: '/orders',
+  UPDATE_STATUS: (id) => `/orders/${id}/status`,
+  DELETE: (id) => `/orders/${id}`,  // ← Thêm dòng này
+},
+```
+
+---
+
+#### 4. [MODIFY] Order Service/Store
+
+**Nếu có `orderService.js`:**
+```javascript
+const orderService = {
+  // ... existing methods
+  delete: (id) => api.delete(API_ENDPOINTS.ORDERS.DELETE(id)),
+};
+```
+
+**Nếu có `orderStore.js` (Zustand):**
+```javascript
+export const useOrderStore = create((set, get) => ({
+  // ... existing state
+  
+  async deleteOrder(id) {
+    try {
+      await orderService.delete(id);
+      
+      // Update local state
+      const orders = get().orders.filter(o => o.id !== id);
+      set({ orders });
+      
+      return true;
+    } catch (error) {
+      console.error('Delete order failed:', error);
+      throw error;
+    }
+  }
+}));
+```
+
+---
+
+#### 5. [MODIFY] Admin Order Management UI
+
+**Thêm nút Delete vào danh sách orders:**
+
+```jsx
+// Trong component AdminOrders hoặc OrderList
+const handleDelete = async (orderId) => {
+  if (!window.confirm('Bạn có chắc muốn xóa order này?')) {
+    return;
+  }
+  
+  try {
+    await orderStore.deleteOrder(orderId);
+    // hoặc: await orderService.delete(orderId);
+    
+    alert('Xóa order thành công!');
+    // Refresh danh sách
+    await orderStore.loadOrders();
+  } catch (error) {
+    alert('Lỗi khi xóa order: ' + error.message);
+  }
+};
+
+// Trong JSX
+<button 
+  onClick={() => handleDelete(order.id)}
+  className="btn-delete"
+>
+  🗑️ Xóa
+</button>
+```
+
+---
+
+## 🔒 Security Considerations
+
+### Authorization
+- ✅ Chỉ admin mới có quyền xóa
+- ✅ Middleware `allow('admin')` đảm bảo phân quyền
+- ✅ Frontend cũng nên check role trước khi hiển thị nút xóa
+
+### Data Integrity
+- ✅ Dùng transaction để đảm bảo xóa cả order và order_items
+- ✅ Xóa order_items trước (foreign key constraint)
+- ✅ Rollback nếu có lỗi
+
+---
+
+## ⚠️ Alternative: Soft Delete
+
+> **Lưu ý:** Thay vì xóa hẳn (hard delete), nên cân nhắc **soft delete**:
+> - Thêm field `deleted_at` vào Order model
+> - Khi "xóa", chỉ set `deleted_at = NOW()`
+> - Queries sẽ filter `WHERE deleted_at IS NULL`
+> - Giữ lại lịch sử cho báo cáo
+
+**Nếu muốn soft delete, tôi sẽ implement khác:**
+```javascript
+// Thay vì destroy(), dùng update()
+await order.update({ deleted_at: new Date() }, { transaction: t });
+```
+
+---
+
+## 🧪 Verification Plan
+
+### 1. Backend Testing (Postman)
+
+**DELETE Order:**
+```
+DELETE http://localhost:5000/api/orders/12
+Authorization: Bearer ADMIN_TOKEN
+```
+
+**Expected:** 200 OK
+```json
+{
+  "success": true,
+  "message": "Order deleted successfully"
+}
+```
+
+**Verify database:**
+```sql
+SELECT * FROM orders WHERE id = 12;  -- Should return 0 rows
+SELECT * FROM order_items WHERE order_id = 12;  -- Should return 0 rows
+```
+
+### 2. Frontend Testing
+
+1. Login as admin
+2. Vào trang quản lý orders
+3. Click nút "Xóa" trên một order
+4. Confirm dialog
+5. Verify:
+   - Order biến mất khỏi danh sách
+   - Database không còn order đó
+   - Không có lỗi console
+
+### 3. Error Cases
+
+- ❌ Customer cố xóa → 403 Forbidden
+- ❌ Xóa order không tồn tại → 404 Not Found
+- ❌ Không có token → 401 Unauthorized
+
+---
+
+## 📊 Flow Diagram
+
+```
+[Admin UI] 
+    ↓ Click "Xóa"
+[Confirm Dialog]
+    ↓ Yes
+[Frontend: orderService.delete(id)]
+    ↓ DELETE /api/orders/:id
+[Backend: orderController.deleteOrder]
+    ↓ Check admin role
+    ↓ Find order
+    ↓ Delete order_items (transaction)
+    ↓ Delete order (transaction)
+    ↓ Commit transaction
+[Response: 200 OK]
+    ↓
+[Frontend: Update state, remove from list]
+    ↓
+[UI: Order disappeared]
+```
+
+---
+
+## ✅ Summary
+
+**Files to Modify:**
+1. [backend/routes/orderRoutes.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/routes/orderRoutes.js) - Add DELETE route
+2. [backend/controllers/orderController.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/controllers/orderController.js) - Add deleteOrder function
+3. [Frontend/src/constants/apiEndpoints.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/constants/apiEndpoints.js) - Add DELETE endpoint
+4. `Frontend/src/services/orderService.js` - Add delete method
+5. [Frontend/src/stores/orderStore.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/orderStore.js) - Add deleteOrder action
+6. `Frontend/src/pages/Admin/OrderManagement.jsx` - Add delete button
+
+**Total:** 6 files
+
+**Estimated Time:** 30-45 minutes
+
+---
+
+## 🚨 Important Notes
+
+1. **Backup database** trước khi test xóa
+2. **Test kỹ permissions** - customer không được xóa
+3. **Confirm dialog** - tránh xóa nhầm
+4. **Transaction** - đảm bảo data integrity
+5. **Logging** - log mọi thao tác xóa cho audit trail
+
+---
+
+Bạn muốn tôi implement luôn không? 🚀

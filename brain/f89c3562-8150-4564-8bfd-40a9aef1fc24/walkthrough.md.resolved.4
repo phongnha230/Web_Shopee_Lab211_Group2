@@ -1,0 +1,32 @@
+# Update Review Functionality
+
+I have improved the review experience by allowing users to update their existing reviews.
+
+## Changes
+
+### 1. [Frontend/src/stores/reviewStore.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/reviewStore.js)
+-   Added [updateReview(id, data)](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/reviewStore.js#89-105) action.
+-   Added [getReview(productId, userName)](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/reviewStore.js#80-84) selector.
+-   Updated [forProduct](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/reviewStore.js#66-71) and [average](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/reviewStore.js#72-79) to check both `product_id` (backend) and `productId` (frontend) properties, fixing the issue where reviews were not appearing.
+
+### 2. [Frontend/src/pages/Order/CustomerOrdersPage.jsx](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Order/CustomerOrdersPage.jsx)
+-   Now checks if a review exists for each product item using [getReview](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/reviewStore.js#80-84).
+-   **If Not Reviewed**: Shows "Đánh giá" (Review) button.
+-   **If Reviewed**: Shows "Sửa đánh giá" (Edit Review) button in orange (`#f59e0b`).
+-   Passes the `existingReview` object to the modal.
+
+### 3. [Frontend/src/components/common/RateProductModal.jsx](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/components/common/RateProductModal.jsx)
+-   Accepts `existingReview` prop.
+-   **Pre-filling**: If editing, the star rating and comment text are pre-filled with the existing values.
+-   **Submission**: Calls [updateReview](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/reviewStore.js#89-105) if editing, otherwise calls `addReview`.
+-   **UI**: Button text changes to "Cập nhật" (Update) when in edit mode.
+
+## Verification
+
+1.  **View Existing Reviews**: Go to a product page. You should now see reviews listed (due to the store fix).
+2.  **Edit Review**:
+    -   Go to "Đơn của tôi" (My Orders).
+    -   Find an item you have reviewed. It should show a "Sửa đánh giá" button.
+    -   Click it to open the modal. confirm the stars/text are pre-filled.
+    -   Change the rating or comment and click "Cập nhật".
+    -   Verify the change is reflected in the product reviews list.

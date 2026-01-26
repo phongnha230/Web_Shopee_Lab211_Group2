@@ -1,0 +1,87 @@
+# Fix Missing Orders on Customer Orders Page
+
+## Problem
+
+User reports that previous orders have disappeared and only the most recent order is showing. Orders are not being loaded from the database when the page opens.
+
+## Root Cause
+
+The `CustomerOrdersPage` component has two critical issues:
+
+1. **No database loading on mount** - The page doesn't call [loadFromAPI()](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/orderStore.js#12-36) to fetch orders from MySQL database
+2. **References non-existent function** - Line 13 tries to use `fetchOrders` which doesn't exist in `orderStore`
+
+As a result:
+- Orders are only loaded from localStorage (which may have been cleared)
+- When localStorage is empty or stale, user sees no orders or only partial data
+- Database has all the orders, but frontend never fetches them
+
+## Proposed Changes
+
+### Frontend
+
+#### [MODIFY] [CustomerOrdersPage.jsx](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Order/CustomerOrdersPage.jsx)
+
+**Changes needed:**
+
+1. **Import [loadFromAPI](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/orderStore.js#12-36) from orderStore** (around line 12-13):
+   ```javascript
+   const loadFromAPI = useOrderStore((s) => s.loadFromAPI);
+   ```
+
+2. **Remove the non-existent `fetchOrders` reference** (line 13):
+   ```diff
+   - const fetchOrders = useOrderStore((s) => s.fetchOrders); // Need this to refresh orders
+   ```
+
+3. **Add useEffect to load orders on mount** (after line 29):
+   ```javascript
+   // Load orders from database on mount
+   useEffect(() => {
+     loadFromAPI();
+   }, [loadFromAPI]);
+   ```
+
+This mirrors the pattern used in [MenuPage](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Product/MenuPage.jsx#7-50) for loading products and reviews.
+
+## How It Works
+
+1. **On page mount**: `useEffect` calls [loadFromAPI()](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/orderStore.js#12-36)
+2. **API request**: Fetches all orders for the current user from MySQL (backend filters by `user_id` if not admin)
+3. **Store updates**: Orders are saved to Zustand store and localStorage
+4. **UI updates**: Component re-renders with all orders from database
+5. **User sees**: Complete order history
+
+## Verification Plan
+
+### Manual Verification
+
+1. **Check current state**:
+   - Open browser DevTools → Application → Local Storage
+   - Check if `orders` key exists and what data it contains
+   - Note: localStorage may be empty or have stale data
+
+2. **Test the fix**:
+   - Navigate to "Đơn của tôi" (My Orders) page
+   - Verify all previous orders appear in the table
+   - Check that orders are sorted by newest first
+   - Verify order details are correct (time, table, payment method, status, total)
+
+3. **Test with multiple orders**:
+   - Create a new order
+   - Go back to "Đơn của tôi"
+   - Verify both old and new orders appear
+
+4. **Test data persistence**:
+   - Refresh the page
+   - Verify orders still appear (loaded from database)
+   - Clear localStorage and refresh
+   - Verify orders still load from database
+
+### Backend Verification
+
+The backend API is already working correctly:
+- `GET /api/orders` returns all orders for the current user
+- Includes pagination support
+- Filters by `user_id` automatically for non-admin users
+- Returns orders with items included

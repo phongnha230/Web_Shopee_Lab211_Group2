@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary": "Critical walkthrough documenting the fix for data not saving to MySQL database. Rewrote orderStore and productStore to call backend API instead of only saving to localStorage.",
+  "updatedAt": "2025-12-08T12:46:09.561147200Z",
+  "version": "3"
+}

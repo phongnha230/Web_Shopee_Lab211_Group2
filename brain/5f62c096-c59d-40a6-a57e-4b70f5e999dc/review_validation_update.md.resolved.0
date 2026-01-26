@@ -1,0 +1,294 @@
+# ✅ Đã Sửa: Review Validation
+
+## 🎯 Thay Đổi
+
+**File:** [backend/controllers/reviewController.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/controllers/reviewController.js)
+
+### **Trước đây (❌ Lỗi):**
+```javascript
+// Ai cũng có thể review bất kỳ product nào
+const item = await Review.create({ product_id, rating, comment, user_id });
+```
+
+### **Bây giờ (✅ Đúng):**
+```javascript
+// ✅ CHECK: User đã mua product này chưa?
+const purchasedOrder = await Order.findOne({
+  where: {
+    user_id: userId,
+    status: 'delivered' // Chỉ cho phép review khi đơn đã giao
+  },
+  include: [{
+    model: OrderItem,
+    as: 'items',
+    where: { product_id },
+    required: true
+  }]
+});
+
+if (!purchasedOrder) {
+  return res.status(403).json({ 
+    message: 'Bạn chỉ có thể đánh giá sản phẩm sau khi đã mua và nhận hàng thành công.' 
+  });
+}
+```
+
+---
+
+## 📋 Logic Validation
+
+### **Điều Kiện Để Review:**
+
+1. ✅ **Phải đăng nhập** (có user_id)
+2. ✅ **Phải đã mua product** (có order chứa product_id)
+3. ✅ **Order phải status = 'delivered'** (đã giao hàng)
+4. ✅ **Chưa review product này** (không trùng)
+
+### **Nếu Thiếu Điều Kiện:**
+
+| Trường hợp | HTTP Code | Message |
+|------------|-----------|---------|
+| Chưa đăng nhập | 401 | "Bạn cần đăng nhập để đánh giá sản phẩm" |
+| Chưa mua hoặc chưa nhận hàng | 403 | "Bạn chỉ có thể đánh giá sản phẩm sau khi đã mua và nhận hàng thành công." |
+| Đã review rồi | 400 | "Bạn đã đánh giá sản phẩm này rồi. Vui lòng sửa đánh giá thay vì tạo mới." |
+
+---
+
+## 🧪 Test Scenarios
+
+### **Scenario 1: Review Thành Công ✅**
+
+**Bước 1: Đặt hàng**
+```
+POST /api/orders
+Authorization: Bearer CUSTOMER_TOKEN
+
+Body:
+{
+  "table_number": 5,
+  "items": [
+    {"product_id": 14, "quantity": 2, "unit_price": 25000}
+  ]
+}
+
+Response: 201 Created
+{
+  "order": {
+    "id": 12,
+    "status": "pending",
+    ...
+  }
+}
+```
+
+**Bước 2: Admin giao hàng**
+```
+PUT /api/orders/12/status
+Authorization: Bearer ADMIN_TOKEN
+
+Body:
+{
+  "status": "delivered"
+}
+
+Response: 200 OK
+```
+
+**Bước 3: Customer review**
+```
+POST /api/reviews
+Authorization: Bearer CUSTOMER_TOKEN
+
+Body:
+{
+  "product_id": 14,
+  "rating": 5,
+  "comment": "Cà phê rất ngon!"
+}
+
+Response: 201 Created ✅
+{
+  "id": 1,
+  "product_id": 14,
+  "rating": 5,
+  "comment": "Cà phê rất ngon!",
+  "user_id": 2
+}
+```
+
+---
+
+### **Scenario 2: Review Khi Chưa Mua ❌**
+
+**Test:**
+```
+POST /api/reviews
+Authorization: Bearer CUSTOMER_TOKEN
+
+Body:
+{
+  "product_id": 15,  // Chưa từng mua product này
+  "rating": 5,
+  "comment": "Test"
+}
+
+Response: 403 Forbidden ❌
+{
+  "message": "Bạn chỉ có thể đánh giá sản phẩm sau khi đã mua và nhận hàng thành công."
+}
+```
+
+---
+
+### **Scenario 3: Review Khi Order Chưa Giao ❌**
+
+**Bước 1: Đặt hàng**
+```
+POST /api/orders
+→ Order ID 13, status = "pending"
+```
+
+**Bước 2: Cố review ngay**
+```
+POST /api/reviews
+Body:
+{
+  "product_id": 14,
+  "rating": 5
+}
+
+Response: 403 Forbidden ❌
+{
+  "message": "Bạn chỉ có thể đánh giá sản phẩm sau khi đã mua và nhận hàng thành công."
+}
+```
+
+**Giải thích:** Order vẫn đang "pending", chưa "delivered"
+
+---
+
+### **Scenario 4: Review Trùng ❌**
+
+**Bước 1: Review lần 1**
+```
+POST /api/reviews
+Body: {"product_id": 14, "rating": 5}
+→ 201 Created ✅
+```
+
+**Bước 2: Review lần 2 (cùng product)**
+```
+POST /api/reviews
+Body: {"product_id": 14, "rating": 4}
+
+Response: 400 Bad Request ❌
+{
+  "message": "Bạn đã đánh giá sản phẩm này rồi. Vui lòng sửa đánh giá thay vì tạo mới."
+}
+```
+
+**Fix:** Dùng PUT để update review cũ
+```
+PUT /api/reviews/1
+Body: {"rating": 4, "comment": "Đổi ý, 4 sao"}
+→ 200 OK ✅
+```
+
+---
+
+## 🔄 Complete Workflow
+
+```
+1. Customer Login
+   POST /api/users/login
+   → Token
+
+2. Customer đặt hàng
+   POST /api/orders
+   → Order ID 12, status = "pending"
+
+3. Admin xác nhận
+   PUT /api/orders/12/status
+   Body: {"status": "confirmed"}
+
+4. Admin chuẩn bị
+   PUT /api/orders/12/status
+   Body: {"status": "preparing"}
+
+5. Admin giao hàng
+   PUT /api/orders/12/status
+   Body: {"status": "delivered"} ✅
+
+6. Customer review (BÂY GIỜ MỚI ĐƯỢC)
+   POST /api/reviews
+   Body: {"product_id": 14, "rating": 5}
+   → 201 Created ✅
+```
+
+---
+
+## 📊 Order Status Flow
+
+```
+pending → confirmed → preparing → ready → delivered
+                                              ↑
+                                    Chỉ khi đến đây
+                                    mới được review!
+```
+
+---
+
+## 💡 Lợi Ích
+
+### **Trước đây:**
+- ❌ Ai cũng review được, kể cả chưa mua
+- ❌ Review spam, fake reviews
+- ❌ Không đáng tin cậy
+
+### **Bây giờ:**
+- ✅ Chỉ người mua thật mới review được
+- ✅ Phải nhận hàng rồi mới review
+- ✅ Review đáng tin cậy hơn
+- ✅ Tránh spam, fake reviews
+
+---
+
+## 🧪 Test Checklist
+
+- [ ] Review khi chưa đăng nhập → 401 Unauthorized
+- [ ] Review khi chưa mua product → 403 Forbidden
+- [ ] Review khi order đang pending → 403 Forbidden
+- [ ] Review khi order đang confirmed → 403 Forbidden
+- [ ] Review khi order đang preparing → 403 Forbidden
+- [ ] Review khi order = delivered → 201 Created ✅
+- [ ] Review trùng (đã review rồi) → 400 Bad Request
+- [ ] Update review cũ → 200 OK ✅
+
+---
+
+## 🔧 Debug Tips
+
+Nếu gặp lỗi 403 "Bạn chỉ có thể đánh giá...", check:
+
+1. **User đã mua product chưa?**
+   ```sql
+   SELECT o.id, o.status, oi.product_id 
+   FROM orders o
+   JOIN order_items oi ON o.id = oi.order_id
+   WHERE o.user_id = 2 AND oi.product_id = 14;
+   ```
+
+2. **Order có status = 'delivered' chưa?**
+   ```sql
+   SELECT * FROM orders 
+   WHERE user_id = 2 AND status = 'delivered';
+   ```
+
+3. **Nếu chưa có order delivered:**
+   - Tạo order mới
+   - Update status thành 'delivered'
+   - Rồi mới review
+
+---
+
+**Bây giờ review đã chặt chẽ hơn rồi! 🎉**

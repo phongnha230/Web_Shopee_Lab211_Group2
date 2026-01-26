@@ -1,0 +1,5 @@
+{
+  "artifactType":  "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary":  "Giải thích về các null type safety warnings trong UserController.java và cách xử lý chúng. Bao gồm cả giải pháp tùy chọn để fix hoặc disable warnings.",
+  "updatedAt":  "2026-01-11T10:35:39.257457500Z"
+}

@@ -1,0 +1,55 @@
+# Disable Auto-Login Fix
+
+I have disabled the auto-login feature after registration as requested. Now, when a user registers, they will stay on the login page and must enter their new credentials to log in.
+
+## Changes
+
+### 1. [backend/controllers/authController.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/controllers/authController.js)
+
+**Issue**: The registration endpoint was generating a JWT token and returning it, encouraging immediate login.
+**Fix**: Removed `jwt.sign` and `token` from the response.
+
+```javascript
+// BEFORE
+res.status(201).json({
+  token,
+  user: { ... }
+});
+
+// AFTER
+res.status(201).json({
+  message: 'Registration successful',
+  user: { ... }
+});
+```
+
+### 2. [Frontend/src/pages/Auth/LoginPage.jsx](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Auth/LoginPage.jsx)
+
+**Issue**: The frontend was checking for `response.data.token` and automatically calling [setAuthData](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/authStore.js#17-24) and `navigate`.
+**Fix**: Removed auto-login logic. Now it just shows a success message and switches the form back to "Sign In" mode.
+
+```javascript
+// BEFORE
+if (response.data && response.data.token) {
+    setAuthData({ token, ... });
+    navigate(ROUTES.HOME);
+}
+
+// AFTER
+if (response.data) {
+    alert('Đăng ký thành công! Vui lòng đăng nhập.');
+    setIsRegister(false); // Switch to login form
+    setPassword('');
+}
+```
+
+## Verification
+
+Please verify by:
+1.  Going to the **Sign Up** page.
+2.  Creating a NEW account.
+3.  Confirming that:
+    -   You get a "Đăng ký thành công! Vui lòng đăng nhập" alert.
+    -   You stay on the Login page (the form switches to "Sign In").
+    -   You are **NOT** automatically redirected to the Home page.
+4.  Then, enter your new email/password and click **Sign In** to ensure login still works.

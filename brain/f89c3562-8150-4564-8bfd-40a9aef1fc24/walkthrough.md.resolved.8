@@ -1,0 +1,26 @@
+# Fix: Anonymous & Invalid Date
+
+I have resolved the issues where the username was missing ("Ẩn danh") and the date was broken.
+
+## The Cause
+
+1.  **Missing Name**: The code was trying to "include" the User model using an incorrect import path (`require('../models')` instead of `require('../models/user')`). This meant the database query couldn't join the user table.
+2.  **Invalid Date**: The database column is named `created_at`, but the frontend was looking for `createdAt`. Since automatic timestamps are disabled in the model configuration, Sequelize didn't automaticall alias it.
+
+## The Fix
+
+### 1. [backend/controllers/reviewController.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/controllers/reviewController.js)
+-   Fixed the import: `const User = require('../models/user');`
+-   This ensures the `User` model is correctly passed to Sequelize's `include` option.
+
+### 2. [Frontend/src/pages/Product/ProductReviewsPage.jsx](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Product/ProductReviewsPage.jsx)
+-   Updated the date display to check for `created_at` first:
+    ```javascript
+    new Date(r.created_at || r.createdAt)
+    ```
+
+## Verification
+
+Please refresh the page:
+1.  **Reviews**: You should now see the actual **Username** (e.g., "nguyenvana") instead of "Ẩn danh".
+2.  **Date**: You should see a valid date/time (e.g., "7/12/2025 16:20:00") instead of "Invalid Date".

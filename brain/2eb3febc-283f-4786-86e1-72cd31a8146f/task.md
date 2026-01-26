@@ -1,0 +1,8 @@
+- [x] Check project structure and `node_modules` locations
+- [x] Check `package.json` in root and `my-app`
+- [x] Clean up incorrect installations and reinstall dependencies
+- [x] Check project structure and `node_modules` locations
+- [x] Check `package.json` in root and `my-app`
+- [x] Clean up incorrect installations and reinstall dependencies
+- [x] Verify fix by checking for errors
+- [x] Populate empty placeholder files to fix "not a module" errors

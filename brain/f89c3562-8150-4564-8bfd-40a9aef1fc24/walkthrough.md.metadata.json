@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary": "Removed all MoMo payment integration code.\n\n**Backend Changes:**\n- `paymentController.js`: Removed `createMomoPayment`, `momoCallback`, and helper functions\n- `paymentRoutes.js`: Removed `/momo` and `/momo-callback` routes\n\n**Frontend Changes:**\n- `CustomerOrdersPage.jsx`: Removed MoMo callback handling, payment button, and display logic\n- `apiEndpoints.js`: Removed `MOMO_CREATE` endpoint\n\n**Result:** App now supports only 2 payment methods: Tiền mặt (Cash) and VNPay.",
+  "updatedAt": "2025-12-07T10:22:57.566065900Z",
+  "version": "10"
+}

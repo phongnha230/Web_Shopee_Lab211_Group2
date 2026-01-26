@@ -1,0 +1,21 @@
+# Issue Description
+The user cannot add news because:
+1. The [newController.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/controllers/newController.js) fails to import `News` model correctly (trying to destructure from a function).
+2. The [newRoutes.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/routes/newRoutes.js) file does not define the API endpoints for news operations (list, create, update, delete).
+
+# Proposed Changes
+
+## Backend
+### Controllers
+#### [MODIFY] [newController.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/controllers/newController.js)
+- Fix model imports: Import `News` and `User` directly from their files.
+
+### Routes
+#### [MODIFY] [newRoutes.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/routes/newRoutes.js)
+- Import `newController`
+- Define DELETE, GET, POST, PUT routes mapping to controller methods.
+- Add authentication middleware for write operations.
+
+## Verification Plan
+1. Restart backend (user might need to do this, or I can try to trigger it if I had control, but I'll assume hot reload or manual restart).
+2. Since I cannot interact with the UI, I will verify by notifying the user to try adding news again. I can also try to `curl` the list endpoint to see if it returns 200 (if server is running).

@@ -1,0 +1,49 @@
+# News Functionality Fix
+
+I have fixed the issue where adding news was not working. The problem was caused by missing API routes and incorrect model imports in the controller.
+
+## Changes
+
+### 1. [backend/controllers/newController.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/controllers/newController.js)
+
+**Issue**: The controller was trying to destructure `News` from `require('../models')`, but the [models/index.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/models/index.js) file exports a function, not an object containing models.
+**Fix**: Changed to import `News` and `User` models directly from their respective files.
+
+```javascript
+// BEFORE
+const { News } = require('../models');
+
+// AFTER
+const News = require('../models/news');
+const User = require('../models/user');
+```
+
+### 2. [backend/routes/newRoutes.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/routes/newRoutes.js)
+
+**Issue**: The routes file was empty of logic (just placeholder/test routes) and didn't connect to the controller.
+**Fix**: Defined the actual CRUD routes and connected them to the `newController` methods. Added authentication middleware (`auth`) and role checking (`allow('admin')`) for protected operations (create, update, delete).
+
+```javascript
+const controller = require('../controllers/newController');
+
+// Public routes
+router.get('/', controller.list);
+router.get('/:id', controller.get);
+
+// Protected routes (Admin only)
+router.post('/', auth, allow('admin'), controller.uploadImage, controller.create);
+router.put('/:id', auth, allow('admin'), controller.uploadImage, controller.update);
+router.delete('/:id', auth, allow('admin'), controller.remove);
+```
+
+## Verification
+
+Please verify the fix by:
+1.  **Restarting the backend server** (if it doesn't auto-reload).
+2.  Going to the website and trying to **Add News** again.
+3.  Checking if the list of news loads correctly.
+
+I have reviewed the code and confirmed that:
+-   Routes match the API endpoints used by the Frontend (`/news`, `/news/:id`).
+-   Controller imports are now valid.
+-   Authentication middleware is correctly applied to protect administrative actions.

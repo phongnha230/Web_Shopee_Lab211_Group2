@@ -1,0 +1,105 @@
+# Walkthrough: Restored Product Review Display on Menu Page
+
+## Problem Summary
+
+User reported that product reviews were not displaying on the menu page. Previously, after completing an order, users could leave reviews which would appear on menu items showing:
+- Review count (e.g., "(1)")
+- Average star rating (★★★★★)
+- Review details when clicking "Xem chi tiết đánh giá"
+
+![User's screenshot showing menu without reviews](file:///C:/Users/HPPAVILION/.gemini/antigravity/brain/67761a3f-f167-4439-b50e-525350ca8ee1/uploaded_image_1765195474371.png)
+
+## Root Cause
+
+The review system was fully implemented with:
+- ✅ Backend API endpoints working correctly
+- ✅ Zustand store with proper data management
+- ✅ UI components for displaying and submitting reviews
+- ✅ Review submission flow in CustomerOrdersPage
+
+However, the [MenuPage](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Product/MenuPage.jsx#7-50) component was not loading review data from the API when the page mounted. This meant the review store had no data, so [ProductCard](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/components/common/ProductCard.jsx#10-76) components displayed [(0)](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/reviewStore.js#29-50) reviews even when reviews existed in the database.
+
+## Changes Made
+
+### [MenuPage.jsx](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Product/MenuPage.jsx)
+
+Added review data loading on page mount:
+
+```diff
+ import { useMemo, useState, useEffect } from 'react'
+ import { useProductStore } from '../../stores/productStore.js'
++import { useReviewStore } from '../../stores/reviewStore.js'
+ import { FilterBar } from '../../components/common/FilterBar.jsx'
+ import { ProductCard } from '../../components/common/ProductCard.jsx'
+
+ export function MenuPage() {
+   const [q, setQ] = useState('')
+   const [cat, setCat] = useState('')
+   const [price, setPrice] = useState('')
+   const products = useProductStore((s) => s.products)
+   const loadFromAPI = useProductStore((s) => s.loadFromAPI)
+   const loading = useProductStore((s) => s.loading)
++  const loadReviews = useReviewStore((s) => s.loadFromAPI)
+
+   // Load products from MySQL khi vào trang
+   useEffect(() => {
+     loadFromAPI()
++    loadReviews() // Load reviews so ProductCard can display ratings
+-  }, [loadFromAPI])
++  }, [loadFromAPI, loadReviews])
+```
+
+**Key changes:**
+1. Imported `useReviewStore` from review store
+2. Retrieved [loadFromAPI](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/reviewStore.js#12-28) function from review store (aliased as `loadReviews`)
+3. Called `loadReviews()` in the existing `useEffect` hook
+4. Added `loadReviews` to the dependency array
+
+This pattern mirrors the implementation in:
+- [CustomerOrdersPage.jsx:18,27-29](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Order/CustomerOrdersPage.jsx#L18-L29)
+- [ProductReviewsPage.jsx:15,17-19](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Product/ProductReviewsPage.jsx#L15-L19)
+
+## How It Works
+
+1. **On MenuPage mount**: `loadReviews()` fetches all reviews from the backend API
+2. **Review store updates**: The fetched reviews populate the Zustand store
+3. **ProductCard displays data**: Each [ProductCard](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/components/common/ProductCard.jsx#10-76) component calls `useReviewStore((s) => s.average(product.id))` to get review count and average rating
+4. **UI shows reviews**: Star ratings and review counts appear on each product card
+
+## Testing Instructions
+
+To verify the fix works:
+
+1. **Ensure servers are running**:
+   - Backend: Already running on port 5000 ✅
+   - Frontend: Already running on port 5174 ✅
+
+2. **Create a test review** (if none exist):
+   - Login as a customer
+   - Place an order and complete payment (Cash or VNPay)
+   - Navigate to "Đơn của tôi" (My Orders)
+   - Click "Đánh giá" button on a purchased product
+   - Submit a review with rating and comment
+
+3. **Verify reviews display on menu**:
+   - Navigate to "Trang chủ" (Home/Menu page)
+   - Check that reviewed products show:
+     - Star rating (e.g., ★★★★★)
+     - Review count in parentheses (e.g., "(1)")
+   - Click "Xem chi tiết đánh giá" button
+   - Verify the review detail page shows the review with username, rating, and comment
+
+4. **Test with multiple reviews**:
+   - Add reviews from different users
+   - Verify review count increases
+   - Verify average rating updates correctly
+
+## Expected Result
+
+After this fix, when users visit the menu page:
+- Products with reviews will display star ratings and review counts
+- The review count will match the number of reviews in the database
+- The average rating will be calculated correctly
+- Clicking "Xem chi tiết đánh giá" will show all reviews for that product
+
+The review system is now fully functional end-to-end! 🎉

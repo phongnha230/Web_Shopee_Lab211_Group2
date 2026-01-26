@@ -1,0 +1,54 @@
+# Fix React Key Prop Warning
+
+## Vấn đề
+
+React hiển thị warning: **"Each child in a list should have a unique 'key' prop"**
+
+![Error Screenshot](C:/Users/HPPAVILION/.gemini/antigravity/brain/74920dcb-8e6d-4f2e-8f22-bab70d5ca0d4/uploaded_image_1766051555456.png)
+
+## Nguyên nhân
+
+Trong file [AdminDashboardPage.jsx](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Admin/AdminDashboardPage.jsx#L1417-L1434), tại dòng 1421, code đang sử dụng **array index** (`idx`) làm key:
+
+```jsx
+{detailOrder.items.map((it, idx) => {
+  return (
+    <div className="order-item" key={idx}>  // ❌ Sử dụng index
+      ...
+    </div>
+  )
+})}
+```
+
+Đây là **anti-pattern** trong React vì:
+- Index không phải là unique identifier thực sự
+- Khi thứ tự items thay đổi, React sẽ không thể track đúng component
+- Gây ra performance issues và bugs tiềm ẩn
+
+## Giải pháp
+
+Đã sửa bằng cách kết hợp `productId` và `idx` để tạo unique key:
+
+```diff
+{detailOrder.items.map((it, idx) => {
+  return (
+-   <div className="order-item" key={idx}>
++   <div className="order-item" key={`${it.productId}-${idx}`}>
+      ...
+    </div>
+  )
+})}
+```
+
+## Kết quả
+
+✅ Đã fix lỗi React key prop warning  
+✅ Mỗi item trong list giờ có unique key  
+✅ Không còn warning trong console
+
+## Tác động
+
+**Không có tác động tiêu cực:**
+- Chức năng vẫn hoạt động bình thường
+- Chỉ cải thiện performance và loại bỏ warning
+- Code clean hơn và follow React best practices

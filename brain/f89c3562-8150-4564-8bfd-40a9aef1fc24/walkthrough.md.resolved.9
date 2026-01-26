@@ -1,0 +1,30 @@
+# Fix: Empty Reviews on Refresh
+
+I found and fixed the root cause of the "empty reviews" issue.
+
+## The Problem
+
+When you refresh the page, the reviews became empty (0 đánh giá) because:
+- The frontend was sending the query parameter as `productId`
+- But the backend expects `product_id` (snake_case)
+
+This mismatch meant the backend query filter didn't apply, and when specific product filtering is needed, it returned nothing useful.
+
+## The Fix
+
+Updated [Frontend/src/stores/reviewStore.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/reviewStore.js):
+```diff
+- const params = productId ? { productId } : {};
++ const params = productId ? { product_id: productId } : {};
+```
+
+## About "Ẩn danh" (Anonymous)
+
+The reviews showing "Ẩn danh" is because those existing reviews in the database have `user_id = NULL`. This happened because when they were created, the frontend wasn't explicitly passing the user ID, and the authentication might not have been fully working at that time.
+
+**Going forward**: New reviews created by logged-in users should correctly save the `user_id` from the JWT token (`req.user.id`) and display the real username.
+
+To verify:
+1. Log out and log back in
+2. Create a new review
+3. Refresh - the new review should show your username

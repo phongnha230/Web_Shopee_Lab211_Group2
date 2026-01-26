@@ -1,0 +1,18 @@
+# Usernames in Reviews
+
+I have updated the system to correctly display the name of the person who wrote the review.
+
+## Changes
+
+### 1. Backend ([backend/controllers/reviewController.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/controllers/reviewController.js))
+-   Updated the [list](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/controllers/reviewController.js#15-40) function (GET `/api/reviews`).
+-   Now includes the `User` model in the query to fetch user details (specifically `username`) associated with each review.
+
+### 2. Frontend ([Frontend/src/pages/Product/ProductReviewsPage.jsx](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Product/ProductReviewsPage.jsx))
+-   Updated the display logic to use the real username coming from the database (`r.User.username`).
+-   Added safeguards to fall back to 'Ẩn danh' (Anonymous) if for some reason the user data is missing.
+
+## Verification
+
+1.  **View Reviews**: Go to a product page with reviews.
+2.  **Check Names**: Instead of just seeing the comment text, you should now see the username (e.g., "nguyenvana", "testuser1") above the star rating.

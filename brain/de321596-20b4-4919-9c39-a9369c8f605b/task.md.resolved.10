@@ -1,0 +1,5 @@
+# Sync Order Status Updates to Backend
+
+- [/] Examine current updateStatus implementation
+- [ ] Add backend API call to updateStatus
+- [ ] Test status synchronization

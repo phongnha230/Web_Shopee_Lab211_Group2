@@ -1,0 +1,21 @@
+# Fix for Missing Orders in "Đơn của tôi"
+
+I have addressed the issue where paid orders were not appearing in the "My Orders" list.
+
+## Changes Created
+
+### Frontend Fix
+- **Modified**: [CustomerOrdersPage.jsx](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Order/CustomerOrdersPage.jsx)
+    - Removed the client-side filter `orders.filter((o) => o.customerName === customerName)`.
+    - The page now correctly displays all orders returned by the backend (which are already securely filtered to the current user).
+
+## Verification Results
+
+### Manual Test Steps
+Please perform the following steps to verify the fix:
+
+1.  **Login** to the application as a customer.
+2.  **Navigate** to "Đơn của tôi".
+3.  **Verify** that your past orders are now visible.
+4.  **Place a new order** (pay with VNPay or Cash).
+5.  **Return** to "Đơn của tôi" and verify the new order appears immediately.

@@ -1,0 +1,25 @@
+# Fix: Missing Reviews & Edit State
+
+I have fixed the issue where reviews were not showing up and the "Edit" button was not appearing because the data wasn't being loaded from the server.
+
+## Changes
+
+### 1. [Frontend/src/pages/Product/ProductReviewsPage.jsx](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Product/ProductReviewsPage.jsx)
+-   Added `useEffect` to call [loadFromAPI(id)](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/reviewStore.js#12-28) when the page opens.
+-   This ensures the review list is populated from the backend.
+
+### 2. [Frontend/src/pages/Order/CustomerOrdersPage.jsx](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Order/CustomerOrdersPage.jsx)
+-   Added `useEffect` to call [loadFromAPI()](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/reviewStore.js#12-28) (fetch all) when the page opens.
+-   This ensures the page knows which products the user has already reviewed, allowing it to display the "Sửa đánh giá" (Edit Review) button correctly.
+
+## Verification
+
+1.  **Check Product Reviews**:
+    -   Go to a product page that you have reviewed (e.g., "Trà sữa trân châu").
+    -   Click "Xem chi tiết đánh giá".
+    -   **Expected**: You should now see your review listed (instead of "Chưa có đánh giá nào").
+
+2.  **Check Edit Button**:
+    -   Go to "Đơn của tôi".
+    -   Find the item you reviewed.
+    -   **Expected**: The button should now say "Sửa đánh giá" (Edit Review) instead of "Đánh giá".

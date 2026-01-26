@@ -1,0 +1,31 @@
+# Task: Restore Product Review Feature
+
+## Context
+User reports that the review feature is not working:
+- Previously, after successful order payment, users could leave reviews
+- Reviews should display on menu items showing:
+  - Number of reviews (e.g., "1")
+  - Average star rating
+  - Individual review details when clicking on the product
+- Currently, reviews are not showing up on products like "Trà sữa trân châu"
+
+## Checklist
+
+### Investigation
+- [x] Check review store implementation - ✅ Properly implemented with [loadFromAPI()](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/reviewStore.js#12-28) method
+- [x] Check review controller (backend) - ✅ Backend endpoints working correctly
+- [x] Check review routes (backend) - ✅ Routes are set up
+- [x] Check how reviews are fetched and displayed on menu items - ❌ **ISSUE FOUND**: [MenuPage](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Product/MenuPage.jsx#6-47) doesn't call [loadFromAPI()](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/reviewStore.js#12-28) on mount
+- [x] Check product detail page review display - ✅ `ProductReviewsPage` correctly loads reviews
+- [x] Verify review submission flow after order completion - ✅ `CustomerOrdersPage` loads reviews and allows rating
+
+### Fix Implementation
+- [/] Add review loading to MenuPage component
+- [ ] Test review display on menu items
+- [ ] Verify review count and rating display correctly
+
+### Verification
+- [ ] Test review submission after order
+- [ ] Verify reviews appear on menu items
+- [ ] Verify review count and rating display correctly
+- [ ] Test clicking product to see review details

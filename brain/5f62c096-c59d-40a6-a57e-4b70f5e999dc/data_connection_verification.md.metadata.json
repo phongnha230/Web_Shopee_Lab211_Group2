@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Verification report confirming Order-Payment-Review data connections exist in database with specific testable data (user_id 15, product_id 16, order delivered, payment completed)",
+  "updatedAt": "2025-12-15T16:34:44.594921200Z"
+}

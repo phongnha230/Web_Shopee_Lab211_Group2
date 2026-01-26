@@ -1,0 +1,30 @@
+# Fashion E-commerce Project Structure Creation
+
+## Directory Structure
+- [ ] Create app route groups and pages
+  - [ ] (public) routes
+  - [ ] (auth) routes
+  - [ ] (user) routes
+  - [ ] (admin) routes
+  - [ ] API routes
+- [ ] Create components structure
+  - [ ] common components
+  - [ ] ui components
+  - [ ] homepage components
+  - [ ] product components
+  - [ ] cart components
+  - [ ] filters components
+  - [ ] admin components
+  - [ ] forms components
+- [ ] Create lib structure
+  - [ ] supabase configuration
+  - [ ] api modules
+  - [ ] utility files
+- [ ] Create database files
+- [ ] Create services
+- [ ] Create hooks
+- [ ] Create store (state management)
+- [ ] Create types
+- [ ] Create styles
+- [ ] Create mock data
+- [ ] Create middleware and environment files

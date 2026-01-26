@@ -1,0 +1,70 @@
+# Fix: "User.java is a non-project file" Error
+
+## Vấn đề
+VS Code không nhận diện file [User.java](file:///c:/Users/HPPAVILION/Downloads/Backend/src/Backend/src/main/java/com/shoppeclone/backend/auth/model/User.java) như một phần của project, chỉ báo syntax errors mà không có autocomplete, import tự động, hay các tính năng IDE khác.
+
+## Nguyên nhân
+VS Code Java extension chưa được cấu hình đúng source paths cho Maven project.
+
+## Giải pháp đã áp dụng
+
+### 1. Chạy Maven Compile
+```bash
+mvn clean compile
+```
+✅ Build thành công - dependencies đã được tải về
+
+### 2. Cập nhật VS Code Settings
+Đã thêm cấu hình vào [.vscode/settings.json](file:///c:/Users/HPPAVILION/Downloads/Backend/src/Backend/.vscode/settings.json):
+
+```json
+{
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.project.sourcePaths": [
+        "src/main/java"
+    ],
+    "java.project.outputPath": "target/classes",
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar"
+    ]
+}
+```
+
+**Các settings quan trọng:**
+- `java.project.sourcePaths`: Chỉ định `src/main/java` là source folder
+- `java.configuration.updateBuildConfiguration`: Tự động update khi [pom.xml](file:///c:/Users/HPPAVILION/Downloads/Backend/src/Backend/pom.xml) thay đổi
+- `java.project.outputPath`: Chỉ định output folder cho compiled classes
+
+## Bước tiếp theo (cần làm thủ công)
+
+### Reload VS Code Window
+1. Nhấn **Ctrl + Shift + P**
+2. Gõ: `Developer: Reload Window`
+3. Nhấn Enter
+
+> [!IMPORTANT]
+> Sau khi reload, VS Code sẽ re-index project và nhận diện đúng [User.java](file:///c:/Users/HPPAVILION/Downloads/Backend/src/Backend/src/main/java/com/shoppeclone/backend/auth/model/User.java) như một project file.
+
+### Kiểm tra kết quả
+Sau khi reload, file [User.java](file:///c:/Users/HPPAVILION/Downloads/Backend/src/Backend/src/main/java/com/shoppeclone/backend/auth/model/User.java) sẽ:
+- ✅ Có autocomplete cho Java classes
+- ✅ Có import suggestions
+- ✅ Hiển thị đầy đủ errors/warnings (không chỉ syntax errors)
+- ✅ Hỗ trợ Go to Definition, Find References, etc.
+
+## Nếu vẫn chưa work
+
+### Option 1: Clean Java Language Server Workspace
+1. **Ctrl + Shift + P** → `Java: Clean Java Language Server Workspace`
+2. Chọn **Restart and delete**
+3. Đợi VS Code restart và re-index
+
+### Option 2: Rebuild Project
+```bash
+mvn clean install -DskipTests
+```
+
+### Option 3: Kiểm tra Java Extension
+- Đảm bảo đã cài extension: **Extension Pack for Java** (Microsoft)
+- Check Java version: `java -version` (cần Java 21 theo [pom.xml](file:///c:/Users/HPPAVILION/Downloads/Backend/src/Backend/pom.xml))

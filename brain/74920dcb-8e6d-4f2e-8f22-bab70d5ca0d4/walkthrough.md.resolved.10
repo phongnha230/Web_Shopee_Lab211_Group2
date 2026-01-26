@@ -1,0 +1,95 @@
+# Fix News Image Upload Issues
+
+## Vấn đề
+
+Người dùng báo cáo ảnh tin tức **biến mất** sau khi reload trang:
+
+1. **Bước 1**: Thêm tin tức với ảnh → Ảnh hiển thị OK
+2. **Bước 2**: Vào trang chủ → Ảnh vẫn hiển thị
+3. **Bước 3**: Reload trang chủ → Ảnh biến mất (broken)
+4. **Bước 4**: Quay lại Admin → Ảnh vẫn broken
+
+![Admin - Ảnh broken](C:/Users/HPPAVILION/.gemini/antigravity/brain/74920dcb-8e6d-4f2e-8f22-bab70d5ca0d4/uploaded_image_0_1766052533548.png)
+
+![Trang chủ - Ảnh broken](C:/Users/HPPAVILION/.gemini/antigravity/brain/74920dcb-8e6d-4f2e-8f22-bab70d5ca0d4/uploaded_image_1_1766052533548.png)
+
+![Admin với ảnh hiển thị](C:/Users/HPPAVILION/.gemini/antigravity/brain/74920dcb-8e6d-4f2e-8f22-bab70d5ca0d4/uploaded_image_2_1766052533548.png)
+
+![Form thêm tin](C:/Users/HPPAVILION/.gemini/antigravity/brain/74920dcb-8e6d-4f2e-8f22-bab70d5ca0d4/uploaded_image_3_1766052533548.png)
+
+## Nguyên nhân
+
+### Backend chỉ nhận file upload
+
+Trong [newController.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/controllers/newController.js#L80-L99):
+
+```javascript
+// Trước đây
+const news = await News.create({
+  title,
+  content,
+  status,
+  created_by: userId,
+  image_url: req.file ? `/uploads/${req.file.filename}` : null  // ❌ Chỉ nhận file upload
+});
+```
+
+**Vấn đề**: Frontend gửi base64 string hoặc URL trong `req.body.image_url`, nhưng backend chỉ lưu nếu có `req.file` (file upload thực sự).
+
+### Database schema không đủ lớn
+
+Trong [news.js model](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/models/news.js#L8):
+
+```javascript
+image_url: { type: DataTypes.STRING(255), allowNull: true }  // ❌ Chỉ 255 ký tự
+```
+
+**Vấn đề**: Base64 images thường rất dài (hàng nghìn ký tự), nhưng database chỉ cho phép 255 ký tự.
+
+## Giải pháp
+
+### Fix 1: Backend nhận cả base64/URL
+
+```javascript
+// Sau khi sửa
+const { title, content, status = 'draft', image_url } = req.body;
+
+let finalImageUrl = null;
+if (image_url) {
+  // ✅ Nhận base64 hoặc URL từ body
+  finalImageUrl = image_url;
+} else if (req.file) {
+  // ✅ Hoặc nhận file upload
+  finalImageUrl = `/uploads/${req.file.filename}`;
+}
+
+const news = await News.create({
+  title,
+  content,
+  status,
+  created_by: userId,
+  image_url: finalImageUrl
+});
+```
+
+### Fix 2: Tăng kích thước database column
+
+```diff
+- image_url: { type: DataTypes.STRING(255), allowNull: true }
++ image_url: { type: DataTypes.TEXT, allowNull: true }
+```
+
+## Kết quả
+
+✅ Backend giờ nhận cả base64 string và file upload  
+✅ Database có thể lưu ảnh base64 dài  
+✅ Ảnh không bị mất sau khi reload trang
+
+## Files Changed
+
+- [newController.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/controllers/newController.js) - Create & Update functions
+- [news.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/models/news.js) - Database schema
+
+## Lưu ý
+
+⚠️ **Cần migrate database**: Sau khi thay đổi model, bạn cần chạy migration hoặc update database schema để thay đổi column `image_url` từ VARCHAR(255) sang TEXT.

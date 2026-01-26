@@ -1,0 +1,44 @@
+# Fixes for Order Persistence and News API Issues
+
+I have addressed multiple issues that were preventing orders from displaying correctly and causing crashes.
+
+## Changes Made
+
+### 1. Frontend Order Filtering Fix
+- **Modified**: [CustomerOrdersPage.jsx](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Order/CustomerOrdersPage.jsx#L32-L40)
+    - Removed the client-side filter that was checking for `customerName` match
+    - The backend already filters orders by `user_id`, so this was redundant and causing valid orders to be hidden
+
+### 2. Order Data Normalization
+- **Modified**: [orderStore.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/orderStore.js#L20-L32)
+    - Added normalization of backend data to frontend format:
+        - `total_amount` → `total`
+        - `created_at` → `createdAt`
+        - `table_number` → `address`
+        - `product_id` → `productId` (in items array)
+    - This ensures compatibility between backend snake_case and frontend camelCase
+
+### 3. Defensive Coding for Total Field
+- **Modified**: [CustomerOrdersPage.jsx](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/pages/Order/CustomerOrdersPage.jsx#L97)
+    - Added fallback: [(o.total ?? o.total_amount ?? 0)](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/controllers/newController.js#54-80) to prevent crashes if normalization fails
+- **Modified**: [orderStore.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/Frontend/src/stores/orderStore.js#L23)
+    - Added `|| 0` to ensure `total` is always a valid number
+
+### 4. News API 500 Error Fix
+- **Modified**: [newController.js](file:///c:/Users/HPPAVILION/Documents/Cusor/Cafe_app/my-app/backend/controllers/newController.js)
+    - Added runtime check to ensure `News.belongsTo(User, { as: 'author' })` association exists before querying
+    - This fixes the "500 Internal Server Error" when fetching news
+
+## Verification Steps
+
+Please test the following:
+
+1. **Login** as a customer
+2. **Navigate** to "Đơn của tôi" (My Orders)
+3. **Verify** that:
+    - Orders are displayed without crashes
+    - Total amounts show correctly
+    - Table numbers display properly
+4. **Navigate** to the News page
+5. **Verify** that news loads without 500 errors
+6. **Place a new order** and verify it appears immediately in "My Orders"
