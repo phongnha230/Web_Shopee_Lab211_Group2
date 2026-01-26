@@ -21,4 +21,7 @@ public interface UserService {
     void updateAddressByEmail(String email, String addressId, AddressRequest request);
 
     void deleteAddressByEmail(String email, String addressId);
+
+    // ADMIN
+    void promoteUser(String email, String roleName);
 }

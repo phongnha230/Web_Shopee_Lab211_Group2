@@ -107,6 +107,12 @@
                         </a>
                     </div>
 
+                    <!-- Link Kênh người bán -->
+                    <a href="seller-register.html" id="sellerChannelLink"
+                        class="text-white hover:text-orange-100 text-sm font-medium mr-4 transition hidden">
+                        Seller Channel
+                    </a>
+
                     <!-- 🔐 ĐÃ LOGIN -->
                     <div id="userNav" class="hidden flex items-center space-x-3 text-white">
                         <a href="profile.html" class="flex items-center space-x-2 cursor-pointer hover:opacity-90">
@@ -724,9 +730,16 @@
                 if (userAvatar) {
                     userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=fff&color=f97316`;
                 }
+
+                // Show Seller Channel link
+                const sellerLink = document.getElementById('sellerChannelLink');
+                if (sellerLink) sellerLink.classList.remove('hidden');
+
             } else {
                 guestNav.classList.remove('hidden');
                 userNav.classList.add('hidden');
+                const sellerLink = document.getElementById('sellerChannelLink');
+                if (sellerLink) sellerLink.classList.add('hidden');
             }
         }
 
@@ -739,11 +752,15 @@
                 localStorage.removeItem('userName');
                 localStorage.removeItem('refreshToken');
 
-                // Update UI immediately
                 document.getElementById('guestNav').classList.remove('hidden');
                 document.getElementById('userNav').classList.add('hidden');
+                document.getElementById('logoutBtn').classList.add('hidden');
 
-                // Optional: Clear cart badge or other user-specific UI immediately
+                // Hide Seller Channel link
+                const sellerLink = document.getElementById('sellerChannelLink');
+                if (sellerLink) sellerLink.classList.add('hidden');
+
+                // Check for Admin Role (Decode JWT)cart badge or other user-specific UI immediately
                 const cartBadge = document.getElementById('cartBadge');
                 if (cartBadge) cartBadge.style.display = 'none';
 

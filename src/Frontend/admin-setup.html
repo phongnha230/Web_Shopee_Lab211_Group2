@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Setup Tool - ShoppeClone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md border-t-4 border-orange-500">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+            <i class="fas fa-tools text-orange-500"></i> Admin Setup Tool
+        </h1>
+        <p class="text-gray-500 mb-6 text-sm">Use this hidden tool to promote users to Admin or Seller roles.</p>
+
+        <form id="setupForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">User Email</label>
+                <input type="email" id="email" required placeholder="example@gmail.com"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none transition">
+            </div>
+
+            <div class="grid grid-cols-1 gap-3">
+                <button type="button" onclick="promote('ROLE_ADMIN')"
+                    class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition transform active:scale-95">
+                    <i class="fas fa-user-shield mr-2"></i> Make Admin
+                </button>
+            </div>
+
+            <button type="button" onclick="promote('ROLE_USER')"
+                class="w-full bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg text-sm transition">
+                <i class="fas fa-user mr-2"></i> Demote to User
+            </button>
+        </form>
+
+        <div id="statusArea" class="mt-6 hidden p-4 rounded-lg text-sm"></div>
+    </div>
+
+    <script>
+        async function promote(roleName) {
+            const email = document.getElementById('email').value.trim();
+            if (!email) {
+                showToast("Please enter an email address!", "error");
+                return;
+            }
+
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            btn.disabled = true;
+
+            try {
+                // Call promoted endpoint
+                const response = await fetch(`http://localhost:8080/api/user/promote?email=${encodeURIComponent(email)}&roleName=${roleName}`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    const text = await response.text();
+                    showToast(text, "success");
+                    showStatus(text, "success");
+                } else {
+                    const error = await response.text(); // Backend usually returns text for this endpoint
+                    showToast("Error: " + error, "error");
+                    showStatus("Failed: " + error, "error");
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Connection failed. Is backend running?", "error");
+                showStatus("Connection error", "error");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function showStatus(msg, type) {
+            const el = document.getElementById('statusArea');
+            el.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+
+            if (type === 'success') {
+                el.classList.add('bg-green-100', 'text-green-800');
+                el.innerHTML = `<i class="fas fa-check-circle mr-2"></i> ${msg}`;
+            } else {
+                el.classList.add('bg-red-100', 'text-red-800');
+                el.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i> ${msg}`;
+            }
+            el.classList.remove('hidden');
+        }
+
+        function showToast(msg, type) {
+            Toastify({
+                text: msg,
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                style: {
+                    background: type === "success" ? "#10B981" : "#EF4444",
+                }
+            }).showToast();
+        }
+    </script>
+</body>
+
+</html>
