@@ -738,8 +738,17 @@
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('userName');
                 localStorage.removeItem('refreshToken');
-                showToast('👋 Logged out successfully!');
-                setTimeout(() => window.location.reload(), 1000);
+
+                // Update UI immediately
+                document.getElementById('guestNav').classList.remove('hidden');
+                document.getElementById('userNav').classList.add('hidden');
+
+                // Optional: Clear cart badge or other user-specific UI immediately
+                const cartBadge = document.getElementById('cartBadge');
+                if (cartBadge) cartBadge.style.display = 'none';
+
+                // No toast, no reload (or reload immediately if preferred, but UI update is smoother)
+                // window.location.reload(); 
             }
         }
 
