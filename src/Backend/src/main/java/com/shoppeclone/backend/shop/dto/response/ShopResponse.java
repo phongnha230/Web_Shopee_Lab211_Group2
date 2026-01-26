@@ -10,6 +10,17 @@ public class ShopResponse {
     private String sellerId;
     private String name;
     private Double rating;
+
+    // Pickup Address (for Shipper integration)
+    private String province;
+    private String district;
+    private String ward;
+    private String address;
+
+    // Contact Information
+    private String phone;
+    private String email;
+
     private ShopStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

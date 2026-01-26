@@ -28,6 +28,17 @@ public class ShopServiceImpl implements ShopService {
         Shop shop = new Shop();
         shop.setSellerId(request.getSellerId());
         shop.setName(request.getName());
+
+        // Set pickup address
+        shop.setProvince(request.getProvince());
+        shop.setDistrict(request.getDistrict());
+        shop.setWard(request.getWard());
+        shop.setAddress(request.getAddress());
+
+        // Set contact information
+        shop.setPhone(request.getPhone());
+        shop.setEmail(request.getEmail());
+
         shop.setCreatedAt(LocalDateTime.now());
         shop.setUpdatedAt(LocalDateTime.now());
 
@@ -64,6 +75,29 @@ public class ShopServiceImpl implements ShopService {
         if (request.getName() != null) {
             shop.setName(request.getName());
         }
+
+        // Update address if provided
+        if (request.getProvince() != null) {
+            shop.setProvince(request.getProvince());
+        }
+        if (request.getDistrict() != null) {
+            shop.setDistrict(request.getDistrict());
+        }
+        if (request.getWard() != null) {
+            shop.setWard(request.getWard());
+        }
+        if (request.getAddress() != null) {
+            shop.setAddress(request.getAddress());
+        }
+
+        // Update contact if provided
+        if (request.getPhone() != null) {
+            shop.setPhone(request.getPhone());
+        }
+        if (request.getEmail() != null) {
+            shop.setEmail(request.getEmail());
+        }
+
         if (request.getStatus() != null) {
             shop.setStatus(request.getStatus());
         }
@@ -87,6 +121,17 @@ public class ShopServiceImpl implements ShopService {
         response.setSellerId(shop.getSellerId());
         response.setName(shop.getName());
         response.setRating(shop.getRating());
+
+        // Map pickup address (for Shipper integration)
+        response.setProvince(shop.getProvince());
+        response.setDistrict(shop.getDistrict());
+        response.setWard(shop.getWard());
+        response.setAddress(shop.getAddress());
+
+        // Map contact information
+        response.setPhone(shop.getPhone());
+        response.setEmail(shop.getEmail());
+
         response.setStatus(shop.getStatus());
         response.setCreatedAt(shop.getCreatedAt());
         response.setUpdatedAt(shop.getUpdatedAt());
