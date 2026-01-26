@@ -1,3 +1,14 @@
 
 # Environment Variables
 .env
+
+# AI System Files (Ignore)
+brain/
+conversations/
+knowledge/
+data/
+annotations/
+.vscode/
+mcp_config.json
+onboarding.json
+onboarding.json.lock

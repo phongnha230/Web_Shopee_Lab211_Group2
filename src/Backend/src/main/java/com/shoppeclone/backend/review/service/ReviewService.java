@@ -1,0 +1,45 @@
+package com.shoppeclone.backend.review.service;
+
+import com.shoppeclone.backend.review.dto.request.CreateReviewRequest;
+import com.shoppeclone.backend.review.dto.request.UpdateReviewRequest;
+import com.shoppeclone.backend.review.dto.response.ReviewResponse;
+
+import java.util.List;
+
+public interface ReviewService {
+
+    /**
+     * Create a new review for a product
+     */
+    ReviewResponse createReview(CreateReviewRequest request);
+
+    /**
+     * Get all reviews for a specific product
+     */
+    List<ReviewResponse> getReviewsByProductId(String productId);
+
+    /**
+     * Get all reviews by a specific user
+     */
+    List<ReviewResponse> getReviewsByUserId(String userId);
+
+    /**
+     * Get a single review by ID
+     */
+    ReviewResponse getReviewById(String id);
+
+    /**
+     * Update an existing review
+     */
+    ReviewResponse updateReview(String id, UpdateReviewRequest request);
+
+    /**
+     * Delete a review
+     */
+    void deleteReview(String id);
+
+    /**
+     * Get average rating for a product
+     */
+    Double getAverageRating(String productId);
+}
