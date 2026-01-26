@@ -11,16 +11,26 @@ import java.time.LocalDateTime;
 public class Shop {
     @Id
     private String id;
-    
+
     @Indexed
     private String sellerId; // FK to seller_profiles.id (or users.id)
-    
+
     private String name;
     private Double rating = 0.0;
-    
+
+    // Pickup Address (for Shipper to collect products)
+    private String province; // Tỉnh/Thành phố
+    private String district; // Quận/Huyện
+    private String ward; // Phường/Xã
+    private String address; // Địa chỉ chi tiết (số nhà, tên đường)
+
+    // Contact Information
+    private String phone; // Số điện thoại shop
+    private String email; // Email shop
+
     // Status: ACTIVE, BANNED
     private ShopStatus status = ShopStatus.ACTIVE;
-    
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
