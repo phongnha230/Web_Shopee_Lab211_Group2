@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users - Shopee Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script> if (!localStorage.getItem('isAdminLoggedIn')) window.location.href = 'admin-login.html'; </script>
+    <style>
+        /* Toggle Switch Custom Style */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #10B981;
+        }
+
+        .toggle-checkbox:checked+.toggle-label {
+            background-color: #10B981;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 font-sans text-slate-800">
+
+    <div class="flex h-screen overflow-hidden">
+        <aside class="w-64 bg-[#0f172a] text-slate-300 flex-shrink-0 hidden md:flex flex-col shadow-xl z-20">
+            <div class="h-16 flex items-center px-6 border-b border-slate-800">
+                <div
+                    class="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center text-white font-bold mr-3">
+                    S</div>
+                <h1 class="text-lg font-bold text-white">SHOPEE ADMIN</h1>
+            </div>
+            <nav class="flex-1 overflow-y-auto py-6 space-y-1">
+                <a href="admin.html"
+                    class="sidebar-link active flex items-center px-6 py-3 text-white hover:bg-white/5 transition-colors">
+                    <i class="fas fa-chart-pie w-6"></i>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+
+                <p class="px-6 text-xs font-bold text-slate-500 uppercase tracking-widest mt-6 mb-3">Operations</p>
+
+                <a href="admin-orders.html"
+                    class="sidebar-link flex items-center px-6 py-3 hover:bg-white/5 hover:text-white transition-colors">
+                    <i class="fas fa-shopping-cart w-6"></i>
+                    <span class="font-medium">Orders</span>
+                </a>
+
+                <a href="admin-products.html"
+                    class="sidebar-link flex items-center px-6 py-3 hover:bg-white/5 hover:text-white transition-colors">
+                    <i class="fas fa-box w-6"></i>
+                    <span class="font-medium">Products</span>
+                </a>
+
+                <a href="admin-disputes.html"
+                    class="sidebar-link flex items-center px-6 py-3 hover:bg-white/5 hover:text-white transition-colors">
+                    <i class="fas fa-gavel w-6"></i>
+                    <span class="font-medium">Disputes</span>
+                </a>
+
+                <p class="px-6 text-xs font-bold text-slate-500 uppercase tracking-widest mt-6 mb-3">Management</p>
+
+                <a href="admin-users.html"
+                    class="sidebar-link flex items-center px-6 py-3 hover:bg-white/5 hover:text-white transition-colors">
+                    <i class="fas fa-users w-6"></i>
+                    <span class="font-medium">Users</span>
+                </a>
+
+                <a href="admin-sellers.html"
+                    class="sidebar-link flex items-center px-6 py-3 hover:bg-white/5 hover:text-white transition-colors">
+                    <i class="fas fa-store w-6"></i>
+                    <span class="font-medium">Sellers & Shops</span>
+                </a>
+
+            </nav>
+        </aside>
+
+        <div class="flex-1 flex flex-col h-full relative">
+            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 z-10">
+                <h2 class="text-xl font-bold text-slate-800">User Management</h2>
+                <div class="flex items-center gap-3">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-sm font-bold text-slate-800">Admin</p>
+                        <p class="text-xs text-green-500">Online</p>
+                    </div>
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=0f172a&color=fff"
+                        class="w-9 h-9 rounded-full border">
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-slate-50 p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="relative w-72">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="searchInput" onkeyup="filterUsers()"
+                            placeholder="Search users by email..."
+                            class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
+                    </div>
+                    <button
+                        class="bg-indigo-500 hover:bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-indigo-500/20 flex items-center gap-2 transition-all">
+                        <i class="fas fa-file-export"></i> Export CSV
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 border-b border-slate-200">
+                            <tr>
+                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">User
+                                    Profile</th>
+                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Role
+                                </th>
+                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Joined
+                                    Date</th>
+                                <th
+                                    class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
+                                    Status</th>
+                                <th
+                                    class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
+                                    Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody" class="divide-y divide-slate-100">
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // MOCK DATA: Danh sách User giả lập
+        const users = [
+            { id: 1, name: "Nguyen Van A", email: "vana@gmail.com", role: "Customer", joined: "2023-10-15", status: true },
+            { id: 2, name: "Tran Thi B", email: "thib@hotmail.com", role: "Seller", joined: "2023-11-02", status: true },
+            { id: 3, name: "Admin System", email: "admin@shopee.com", role: "Admin", joined: "2023-01-01", status: true },
+            { id: 4, name: "Le Van C", email: "levanc@yahoo.com", role: "Customer", joined: "2023-12-20", status: false }, // User bị khóa
+            { id: 5, name: "Pham Thi D", email: "phamd@gmail.com", role: "Customer", joined: "2024-01-05", status: true },
+        ];
+
+        function renderUsers(data) {
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = data.map(user => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <img src="https://ui-avatars.com/api/?name=${user.name}&background=random&color=fff" class="w-10 h-10 rounded-full border border-slate-200">
+                            <div>
+                                <p class="font-semibold text-slate-800">${user.name}</p>
+                                <p class="text-xs text-slate-500">${user.email}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold 
+                            ${user.role === 'Admin' ? 'bg-purple-100 text-purple-700' :
+                    user.role === 'Seller' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}">
+                            ${user.role}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-slate-600">${user.joined}</td>
+                    <td class="px-6 py-4 text-center">
+                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" name="toggle" id="toggle-${user.id}" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer ${user.status ? 'right-0 border-green-400' : 'left-0 border-gray-300'}" ${user.status ? 'checked' : ''} onclick="toggleStatus(${user.id})"/>
+                            <label for="toggle-${user.id}" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer ${user.status ? 'bg-green-400' : ''}"></label>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <button class="text-slate-400 hover:text-blue-500 mx-1 transition-colors" title="Edit"><i class="fas fa-edit"></i></button>
+                        <button class="text-slate-400 hover:text-red-500 mx-1 transition-colors" title="Delete" onclick="deleteUser(${user.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Search Filter
+        function filterUsers() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = users.filter(u => u.email.toLowerCase().includes(query) || u.name.toLowerCase().includes(query));
+            renderUsers(filtered);
+        }
+
+        // Toggle Active/Ban
+        function toggleStatus(id) {
+            const user = users.find(u => u.id === id);
+            user.status = !user.status;
+            // Trong thực tế, gọi API cập nhật trạng thái ở đây
+            const statusText = user.status ? "Activated" : "Banned";
+            // alert(`User ${user.name} has been ${statusText}`); 
+            // Render lại để cập nhật màu sắc toggle
+            renderUsers(document.getElementById('searchInput').value ? users.filter(u => u.name.includes(document.getElementById('searchInput').value)) : users);
+        }
+
+        // Delete User
+        function deleteUser(id) {
+            if (confirm("Are you sure you want to remove this user?")) {
+                const index = users.findIndex(u => u.id === id);
+                if (index > -1) {
+                    users.splice(index, 1);
+                    renderUsers(users);
+                }
+            }
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => renderUsers(users));
+    </script>
+</body>
+
+</html>
