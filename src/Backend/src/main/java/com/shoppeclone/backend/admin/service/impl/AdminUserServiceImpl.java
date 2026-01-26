@@ -164,10 +164,7 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .anyMatch(role -> role.getName().equals("ROLE_ADMIN"));
 
         if (isAdmin) {
-            long adminCount = userRepository.findAll().stream()
-                    .filter(u -> u.getRoles().stream()
-                            .anyMatch(r -> r.getName().equals("ROLE_ADMIN")))
-                    .count();
+            long adminCount = userRepository.countByRolesName("ROLE_ADMIN");
 
             if (adminCount <= 1) {
                 throw new RuntimeException("Cannot delete the last admin user");

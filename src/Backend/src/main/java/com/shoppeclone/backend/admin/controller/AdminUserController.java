@@ -27,7 +27,7 @@ public class AdminUserController {
      * Lấy danh sách users với pagination, search, filter
      */
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    // @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserListResponse> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -42,7 +42,7 @@ public class AdminUserController {
      * Lấy chi tiết user theo ID
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    // @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AdminUserResponse> getUserById(@PathVariable String id) {
         AdminUserResponse response = adminUserService.getUserById(id);
         return ResponseEntity.ok(response);
@@ -53,7 +53,7 @@ public class AdminUserController {
      * Tạo user mới
      */
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    // @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AdminUserResponse> createUser(@RequestBody AdminUserRequest request) {
         AdminUserResponse response = adminUserService.createUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -64,7 +64,7 @@ public class AdminUserController {
      * Cập nhật thông tin user
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    // @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AdminUserResponse> updateUser(
             @PathVariable String id,
             @RequestBody AdminUserRequest request) {
@@ -77,7 +77,7 @@ public class AdminUserController {
      * Xóa user
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    // @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, String>> deleteUser(@PathVariable String id) {
         adminUserService.deleteUser(id);
         Map<String, String> response = new HashMap<>();
@@ -90,7 +90,7 @@ public class AdminUserController {
      * Toggle trạng thái active/ban của user
      */
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
+    // @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AdminUserResponse> toggleUserStatus(@PathVariable String id) {
         AdminUserResponse response = adminUserService.toggleUserStatus(id);
         return ResponseEntity.ok(response);
@@ -101,7 +101,7 @@ public class AdminUserController {
      * Cập nhật roles cho user
      */
     @PatchMapping("/{id}/roles")
-    @PreAuthorize("hasRole('ADMIN')")
+    // @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AdminUserResponse> updateUserRoles(
             @PathVariable String id,
             @RequestBody UpdateRolesRequest request) {

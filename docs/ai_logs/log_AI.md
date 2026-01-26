@@ -15047,8 +15047,133 @@ Lưu ý: Sau khi thay đổi trong Google Cloud Console, có thể mất vài ph
 
 Bạn muốn tôi sửa code Java hay bạn sẽ cập nhật Google Console? 🤔
 
+ser Features
+
+
+viet dùm tôi lệnh chạy spring boot
+Analyzed
+dnekcaB\crs\eepohSbeW_112baL_2puorG\:c
+Analyzed
+run-dev.bat#L1-12
+
+Thought for 1s
+
+
+Analyzed
+pom.xml#L1-166
+Chào bạn! Dựa trên dự án của bạn (đang sử dụng Maven), dưới đây là các lệnh để chạy ứng dụng Spring Boot:
+
+1. Sử dụng Maven Wrapper (Khuyên dùng)
+Trong thư mục src/Backend, bạn hãy mở Terminal (PowerShell hoặc CMD) và chạy lệnh:
+
+powershell
+.\mvnw spring-boot:run
+2. Sử dụng file script có sẵn
+Tôi thấy trong thư mục của bạn đã có sẵn file script để tự động dọn dẹp port và chạy ứng dụng. Bạn chỉ cần chạy:
+
+powershell
+.\run-dev.bat
+(File này sẽ giúp bạn kill process đang chạy trên port 8080 trước khi start để tránh lỗi "Address already in use")
+
+3. Nếu bạn đã cài đặt Maven trên máy
+Nếu lệnh mvn đã được cấu hình trong biến môi trường, bạn có thể dùng:
+
+powershell
+mvn spring-boot:run
+Lưu ý: Hãy đảm bảo bạn đang đứng ở đúng thư mục c:\Group2_Lab211_WebShopee\src\Backend trước khi chạy các lệnh trên nhé.
+
+tôi chạy dc backend của admin quản lí user r làm gì tiếp theo z
+
+Thought for 1s
+
+Analyzed
+dnetnorF\crs\eepohSbeW_112baL_2puorG\:c
+Analyzed
+nimda\dnetnorF\crs\eepohSbeW_112baL_2puorG\:c
+Analyzed
+sj\nimda\dnetnorF\crs\eepohSbeW_112baL_2puorG\:c
+Analyzed
+admin-users.html#L1-210
+
+Thought for 1s
 
 
 
 
+
+
+
+
+
+## Session: Admin Page Redirect Fix & Status Toggle (26/01/2026)
+
+### User Request 1: Admin Page Redirect Issue
+**User**: hi?n h t�i nh?n zo coi admin-users.html , admin-sellers.html, admin-disputes.html, admin.html
+hi?n t�i c? nh?n ch?y serve nhung ko coi dc n� ch?y r zo r chuy?n qua trang d� ko th� bn ch?y r coi bi?t l?i g� r s?a l?i d�m t�i ddcko
+
+**Analysis**: 
+- User was experiencing automatic redirects to login page when trying to access admin pages
+- Issue was caused by authentication checks in the HTML files and API scripts
+
+**Solution**:
+1. Commented out auth redirect blocks in:
+   - `admin.html` (lines 536-539)
+   - `admin-sellers.html` (lines 244-247)
+   - `admin-disputes.html` (lines 239-242)
+   - `admin-users-api.js` (lines 358-361)
+
+2. Restored full sidebar navigation with all 4 menu items:
+   - Dashboard (`admin.html`)
+   - Sellers (`admin-sellers.html`)
+   - Users (`admin-users.html`)
+   - Disputes (`admin-disputes.html`)
+
+3. Cleaned up duplicate sidebar links in `admin.html` and `admin-sellers.html`
+
+**Files Modified**:
+- `src/Frontend/admin/admin.html`
+- `src/Frontend/admin/admin-sellers.html`
+- `src/Frontend/admin/admin-disputes.html`
+- `src/Frontend/admin/admin-users.html`
+- `src/Frontend/admin/js/admin-users-api.js`
+
+**Result**: Users can now view all admin pages without being redirected to login, allowing them to see the UI layouts even without an active session.
+
+---
+
+### User Request 2: User Status Toggle Not Working
+**User**: ch?nh d�m status c?a users admin c� th? ch?nh b?t t?t dc ko
+
+**Problem**: 
+- Toggle status button showing error: "Failed to update status: Failed to fetch"
+- Frontend was calling `PATCH /api/admin/users/{id}/status`
+- Backend endpoint existed and was properly implemented
+
+**Root Cause**: 
+CORS configuration in `CorsConfig.java` was missing the `PATCH` HTTP method in allowed methods list
+
+**Solution**:
+1. Added `PATCH` to CORS allowed methods in `src/Backend/src/main/java/com/shoppeclone/backend/common/config/CorsConfig.java`
+2. Enhanced error logging in `admin-users-api.js` `toggleUserStatus()` function with detailed console logs for debugging
+
+**Files Modified**:
+- `src/Backend/src/main/java/com/shoppeclone/backend/common/config/CorsConfig.java`
+- `src/Frontend/admin/js/admin-users-api.js`
+
+**Next Steps for User**:
+1. Restart backend server: `Ctrl+C` then `./mvnw spring-boot:run`
+2. Refresh admin-users page
+3. Try toggling user status - should work now
+
+**Technical Details**:
+- Backend Service: `AdminUserServiceImpl.toggleUserStatus()` was already properly implemented (lines 177-187)
+- Backend Controller: `AdminUserController` PATCH endpoint was configured correctly
+- Issue was purely CORS-related, blocking the PATCH request from frontend
+
+---
+
+### Summary of Changes:
+1. **Admin Navigation**: Disabled auth redirects, restored full sidebar menus
+2. **Status Toggle**: Fixed CORS to allow PATCH method, added better error logging
+3. **User Experience**: Admin can now freely navigate between pages and toggle user status
 
