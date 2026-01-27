@@ -82,10 +82,31 @@
 
             <!-- Right Actions -->
             <div class="flex items-center gap-6">
-                <button class="relative text-gray-500 hover:text-blue-600 transition">
-                    <i class="fas fa-bell text-lg"></i>
-                    <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
-                </button>
+                <!-- Notification Wrapper -->
+                <div class="relative">
+                    <button id="notificationBtn" class="relative text-gray-500 hover:text-blue-600 transition">
+                        <i class="fas fa-bell text-lg"></i>
+                        <span id="notificationBadge"
+                            class="hidden absolute -top-1 -right-0.5 w-2 h-2 bg-red-600 rounded-full ring-2 ring-white text-[8px] flex items-center justify-center text-white"></span>
+                    </button>
+
+                    <!-- Dropdown -->
+                    <div id="notificationDropdown"
+                        class="hidden absolute top-10 right-0 w-80 bg-white shadow-xl rounded-lg border border-gray-100 z-50 overflow-hidden text-gray-800">
+                        <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-700">Notifications</h3>
+                            <button id="markAllReadBtn"
+                                class="text-xs text-blue-600 hover:text-blue-800 font-medium">Mark all
+                                read</button>
+                        </div>
+                        <div id="notificationList" class="max-h-80 overflow-y-auto">
+                            <div class="p-4 text-center text-gray-500 text-sm">Loading...</div>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-2 border-t border-gray-100 text-center">
+                            <a href="#" class="text-xs text-gray-500 hover:text-blue-600">View all</a>
+                        </div>
+                    </div>
+                </div>
                 <div
                     class="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 font-medium">
                     <i class="far fa-calendar-alt"></i>
@@ -904,6 +925,7 @@
             }
         }
     </script>
+    <script src="js/notification.js"></script>
 </body>
 
 </html>
