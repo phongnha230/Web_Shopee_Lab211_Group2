@@ -683,13 +683,13 @@
 
             try {
                 // Fetch first 100 users (Paged API)
-                const response = await fetch('http://localhost:8080/api/user/admin/list?page=0&limit=100', {
+                const response = await fetch('http://localhost:8080/api/admin/users?page=0&size=100', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 if (response.ok) {
                     const pageData = await response.json();
-                    allUsers = pageData.content || []; // Extract from Page object
+                    allUsers = pageData.users || []; // Extract from UserListResponse
 
                     renderUsers(allUsers);
                     if (allUsers.length === 0) empty.classList.remove('hidden');
@@ -770,21 +770,23 @@
             if (!confirm(`Are you sure you want to ${action} this user?`)) return;
 
             try {
-                const shouldLock = currentActive;
-                const response = await fetch(`http://localhost:8080/api/user/admin/lock/${userId}?lock=${shouldLock}`, {
-                    method: 'POST',
+                // Use PATCH /api/admin/users/{id}/status to toggle status
+                const response = await fetch(`http://localhost:8080/api/admin/users/${userId}/status`, {
+                    method: 'PATCH',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 if (response.ok) {
                     showToast(`User ${action}ed successfully`, "success");
+                    // Update local state
                     const userIndex = allUsers.findIndex(u => u.id === userId);
                     if (userIndex !== -1) {
                         allUsers[userIndex].active = !currentActive;
                         renderUsers(allUsers);
                     }
                 } else {
-                    showToast("Action failed", "error");
+                    const errorText = await response.text();
+                    showToast(`Action failed: ${errorText}`, "error");
                 }
             } catch (e) {
                 console.error(e);
