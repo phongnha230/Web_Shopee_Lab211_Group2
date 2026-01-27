@@ -32,11 +32,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",
-                                "/api/auth/oauth/**")
+                                "/api/webhooks/**") // Allow Webhooks explicitly
                         .permitAll()
-
-                        // 🔥 QUAN TRỌNG: KHÔNG CHẶN REQUEST KHÁC
-                        .anyRequest().permitAll())
+                        .requestMatchers("/api/**").authenticated() // Secure other APIs
+                        .anyRequest().permitAll()) // Allow static resources or others
 
                 // ✅ JWT → STATELESS
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
