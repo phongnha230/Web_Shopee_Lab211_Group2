@@ -6,51 +6,535 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - ShoppeClone</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
-<body class="bg-gray-50 flex h-screen">
+<body class="bg-gray-50 flex h-screen font-sans">
 
     <!-- Sidebar -->
-    <aside class="w-64 bg-gray-800 text-white flex flex-col">
-        <div class="p-6 text-2xl font-bold text-center border-b border-gray-700">
-            ADMIN PANEL
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full z-10">
+        <div class="p-6 flex items-center gap-3 border-b border-gray-100">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
+                <i class="fas fa-chart-bar"></i>
+            </div>
+            <span class="text-xl font-bold text-gray-800">AdminPanel</span>
         </div>
-        <nav class="flex-1 p-4 space-y-2">
-            <a href="#" class="block px-4 py-2 bg-gray-700 rounded-lg text-white font-semibold flex items-center gap-3">
-                <i class="fas fa-store"></i> Shop Approvals
+
+        <!-- User Profile Snippet in Sidebar -->
+        <div class="p-6 flex items-center gap-3">
+            <img id="adminAvatar" src="https://ui-avatars.com/api/?name=Admin&background=random"
+                class="w-10 h-10 rounded-full">
+            <div>
+                <p id="adminName" class="text-sm font-bold text-gray-800">Admin</p>
+                <p class="text-xs text-gray-500">Administrator</p>
+            </div>
+        </div>
+
+        <div class="px-6 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Menu</div>
+
+        <nav class="flex-1 px-4 space-y-1 overflow-y-auto">
+            <a href="#" onclick="switchView('dashboard')" id="nav-dashboard"
+                class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-600 rounded-lg font-medium transition">
+                <i class="fas fa-th-large w-5"></i> Dashboard
+            </a>
+            <a href="#" onclick="switchView('orders')" id="nav-orders"
+                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
+                <i class="fas fa-shopping-cart w-5"></i> Orders
+            </a>
+            <a href="#" onclick="switchView('products')" id="nav-products"
+                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
+                <i class="fas fa-box w-5"></i> Products
+            </a>
+            <a href="#" onclick="switchView('shops')" id="nav-shops"
+                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
+                <i class="fas fa-store w-5"></i> Shops
                 <span id="pendingCount"
-                    class="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full hidden">0</span>
+                    class="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
             </a>
-            <a href="admin-setup.html"
-                class="block px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg transition flex items-center gap-3">
-                <i class="fas fa-tools"></i> Developer Tools
+            <a href="#" onclick="switchView('disputes')" id="nav-disputes"
+                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
+                <i class="fas fa-exclamation-circle w-5"></i> Disputes
             </a>
+            <a href="#" onclick="switchView('users')" id="nav-users"
+                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
+                <i class="fas fa-users w-5"></i> Users
+            </a>
+
+            <div class="my-4 border-b border-gray-100"></div>
+
             <a href="index.html"
-                class="block px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg transition flex items-center gap-3 mt-8">
-                <i class="fas fa-home"></i> Back to Store
+                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
+                <i class="fas fa-home w-5"></i> Back to Store
+            </a>
+            <a href="#" onclick="logout()"
+                class="flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 rounded-lg font-medium transition">
+                <i class="fas fa-sign-out-alt w-5"></i> Logout
             </a>
         </nav>
     </aside>
 
-    <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto p-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-8">Pending Shop Approvals</h1>
+    <!-- Main Content Wrapper -->
+    <div class="flex-1 ml-64 flex flex-col h-screen overflow-hidden">
 
-        <div id="shopList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Shop Cards Will Be Loaded Here -->
-            <div class="text-center w-full col-span-3 py-10 text-gray-500">
-                <i class="fas fa-spinner fa-spin text-2xl"></i> Loading requests...
+        <!-- Top Header -->
+        <header class="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-8 z-10 shrink-0">
+            <!-- Search -->
+            <div class="relative w-96">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" placeholder="Search analytics, orders, or products..."
+                    class="w-full pl-10 pr-4 py-2 bg-gray-100 border-none rounded-lg text-sm focus:ring-2 focus:ring-blue-100 outline-none transition">
             </div>
-        </div>
-    </main>
 
+            <!-- Right Actions -->
+            <div class="flex items-center gap-6">
+                <button class="relative text-gray-500 hover:text-blue-600 transition">
+                    <i class="fas fa-bell text-lg"></i>
+                    <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
+                </button>
+                <div
+                    class="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 font-medium">
+                    <i class="far fa-calendar-alt"></i>
+                    <span>Oct 24, 2023</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Scrollable Area -->
+        <main class="flex-1 overflow-y-auto bg-gray-50 p-8">
+
+            <!-- VIEW: DASHBOARD (Default) -->
+            <div id="view-dashboard" class="space-y-8">
+                <!-- Header Section -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+                    <div>
+                        <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Marketplace Overview</h1>
+                        <p class="text-gray-500 mt-1">Real-time health check and performance metrics for administrators.
+                        </p>
+                    </div>
+                    <div class="flex gap-2">
+                        <div class="bg-white border border-gray-200 rounded-lg p-1 flex">
+                            <button
+                                class="px-4 py-1.5 text-sm font-medium bg-blue-600 text-white rounded shadow-sm">Today</button>
+                            <button
+                                class="px-4 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded">Yesterday</button>
+                            <button class="px-4 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded">Last
+                                7 Days</button>
+                        </div>
+                        <button
+                            class="bg-white border border-gray-200 text-gray-700 px-4 py-1.5 rounded-lg text-sm font-medium shadow-sm hover:bg-gray-50 flex items-center gap-2">
+                            Filters <i class="fas fa-filter text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <!-- Card 1 -->
+                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
+                        <div class="flex justify-between items-start mb-4">
+                            <div
+                                class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-lg">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                            <span class="bg-green-50 text-green-600 text-xs font-bold px-2 py-1 rounded-full">+5.2% <i
+                                    class="fas fa-arrow-up text-[10px]"></i></span>
+                        </div>
+                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Total GMV</p>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1">$4.23M</h3>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
+                        <div class="flex justify-between items-start mb-4">
+                            <div
+                                class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-lg">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <span class="bg-green-50 text-green-600 text-xs font-bold px-2 py-1 rounded-full">+12.4% <i
+                                    class="fas fa-arrow-up text-[10px]"></i></span>
+                        </div>
+                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Total Orders</p>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1">12,450</h3>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
+                        <div class="flex justify-between items-start mb-4">
+                            <div
+                                class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-lg">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <span class="bg-green-50 text-green-600 text-xs font-bold px-2 py-1 rounded-full">+8.1% <i
+                                    class="fas fa-arrow-up text-[10px]"></i></span>
+                        </div>
+                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Active Users</p>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1">8,102</h3>
+                    </div>
+
+                    <!-- Card 4 -->
+                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
+                        <div class="flex justify-between items-start mb-4">
+                            <div
+                                class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-lg">
+                                <i class="fas fa-store"></i>
+                            </div>
+                            <span class="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-1 rounded-full">0.0% <i
+                                    class="fas fa-minus text-[10px]"></i></span>
+                        </div>
+                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Active Shops</p>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1">1,205</h3>
+                    </div>
+
+                    <!-- Card 5 -->
+                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
+                        <div class="flex justify-between items-start mb-4">
+                            <div
+                                class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-lg">
+                                <i class="fas fa-bullseye"></i>
+                            </div>
+                            <span class="bg-red-50 text-red-600 text-xs font-bold px-2 py-1 rounded-full">-0.2% <i
+                                    class="fas fa-arrow-down text-[10px]"></i></span>
+                        </div>
+                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Conversion</p>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1">3.2%</h3>
+                    </div>
+                </div>
+
+                <!-- Middle Section: Chart + Promo -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Chart -->
+                    <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800">Sales Trend</h3>
+                                <p class="text-xs text-gray-500">Hourly order volume & GMV</p>
+                            </div>
+                            <div class="bg-gray-100 rounded-lg p-1 flex text-xs font-medium">
+                                <button class="px-3 py-1 bg-white shadow-sm rounded">Volume</button>
+                                <button class="px-3 py-1 text-gray-500">Value</button>
+                            </div>
+                        </div>
+                        <div class="h-64">
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Flash Sale Card -->
+                    <div
+                        class="bg-blue-600 text-white p-6 rounded-2xl shadow-lg flex flex-col justify-between relative overflow-hidden group">
+                        <div class="relative z-10">
+                            <div
+                                class="flex items-center gap-2 mb-2 text-yellow-300 font-bold text-xs uppercase tracking-wider">
+                                <i class="fas fa-bolt"></i> Flash Sale Live
+                            </div>
+                            <h2 class="text-2xl font-bold mb-1">Mega Electronics</h2>
+                            <p class="text-blue-200 text-sm mb-6">High traffic event active now.</p>
+
+                            <div class="mb-6">
+                                <div class="flex justify-between text-xs font-medium mb-1">
+                                    <span>Inventory Sold</span>
+                                    <span>85%</span>
+                                </div>
+                                <div class="w-full bg-blue-800 rounded-full h-2.5">
+                                    <div class="bg-yellow-400 h-2.5 rounded-full" style="width: 85%"></div>
+                                </div>
+                            </div>
+
+                            <div
+                                class="bg-blue-800/50 backdrop-blur rounded-lg p-3 flex justify-between items-center mb-4">
+                                <span class="text-xs font-medium uppercase text-blue-200">Ends In</span>
+                                <div class="flex gap-1 font-mono text-lg font-bold">
+                                    <span class="bg-white/10 px-1.5 rounded">02</span>:
+                                    <span class="bg-white/10 px-1.5 rounded">14</span>:
+                                    <span class="bg-white/10 px-1.5 rounded">05</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button
+                            class="relative z-10 w-full bg-white text-blue-700 font-bold py-2.5 rounded-lg shadow hover:bg-blue-50 transition">
+                            Manage Campaign
+                        </button>
+
+                        <!-- Decorative Circle -->
+                        <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-500 rounded-full blur-3xl opacity-50">
+                        </div>
+                        <div
+                            class="absolute -left-10 bottom-10 w-32 h-32 bg-purple-500 rounded-full blur-3xl opacity-30">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Revenue By Category -->
+                    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                        <h3 class="text-lg font-bold text-gray-800 mb-6">Revenue by Category</h3>
+                        <div class="space-y-6">
+                            <!-- Item 1 -->
+                            <div>
+                                <div class="flex justify-between text-sm font-medium text-gray-700 mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-3 h-3 rounded-full bg-blue-600"></span> Electronics
+                                    </div>
+                                    <span>$1.2M (35%)</span>
+                                </div>
+                                <div class="w-full bg-gray-100 rounded-full h-2">
+                                    <div class="bg-blue-600 h-2 rounded-full" style="width: 35%"></div>
+                                </div>
+                            </div>
+                            <!-- Item 2 -->
+                            <div>
+                                <div class="flex justify-between text-sm font-medium text-gray-700 mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-3 h-3 rounded-full bg-teal-500"></span> Fashion
+                                    </div>
+                                    <span>$850K (25%)</span>
+                                </div>
+                                <div class="w-full bg-gray-100 rounded-full h-2">
+                                    <div class="bg-teal-500 h-2 rounded-full" style="width: 25%"></div>
+                                </div>
+                            </div>
+                            <!-- Item 3 -->
+                            <div>
+                                <div class="flex justify-between text-sm font-medium text-gray-700 mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-3 h-3 rounded-full bg-purple-500"></span> Home & Living
+                                    </div>
+                                    <span>$500K (15%)</span>
+                                </div>
+                                <div class="w-full bg-gray-100 rounded-full h-2">
+                                    <div class="bg-purple-500 h-2 rounded-full" style="width: 15%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Selling Products -->
+                    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-bold text-gray-800">Top Selling Products</h3>
+                            <a href="#" class="text-sm font-bold text-blue-600 hover:underline">View All</a>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm text-gray-600">
+                                <thead class="bg-gray-50 text-gray-500 font-semibold uppercase text-xs">
+                                    <tr>
+                                        <th class="px-4 py-3 rounded-l-lg">#</th>
+                                        <th class="px-4 py-3">Product Name</th>
+                                        <th class="px-4 py-3">Price</th>
+                                        <th class="px-4 py-3">Sales</th>
+                                        <th class="px-4 py-3 rounded-r-lg">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100">
+                                    <tr class="hover:bg-gray-50 transition">
+                                        <td class="px-4 py-3 font-medium text-blue-600">01</td>
+                                        <td class="px-4 py-3 flex items-center gap-3">
+                                            <div class="w-8 h-8 bg-gray-200 rounded flex-shrink-0"></div>
+                                            <div>
+                                                <p class="font-bold text-gray-800">Wireless Earbuds</p>
+                                                <p class="text-xs text-gray-400">Electronics</p>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 font-medium">$129.00</td>
+                                        <td class="px-4 py-3 text-green-600 font-bold">+12%</td>
+                                        <td class="px-4 py-3"><span
+                                                class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">IN
+                                                STOCK</span></td>
+                                    </tr>
+                                    <tr class="hover:bg-gray-50 transition">
+                                        <td class="px-4 py-3 font-medium text-blue-600">02</td>
+                                        <td class="px-4 py-3 flex items-center gap-3">
+                                            <div class="w-8 h-8 bg-gray-200 rounded flex-shrink-0"></div>
+                                            <div>
+                                                <p class="font-bold text-gray-800">Smart Watch 4</p>
+                                                <p class="text-xs text-gray-400">Wearables</p>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 font-medium">$299.00</td>
+                                        <td class="px-4 py-3 text-green-600 font-bold">+8%</td>
+                                        <td class="px-4 py-3"><span
+                                                class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">IN
+                                                STOCK</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: SHOPS (The original Pending Approval Logic) -->
+            <div id="view-shops" class="hidden space-y-8">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-3xl font-bold text-gray-800">Shop Management</h1>
+                    <div class="flex gap-2">
+                        <button onclick="loadPendingShops()"
+                            class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition"><i
+                                class="fas fa-sync-alt mr-2"></i> Refresh</button>
+                    </div>
+                </div>
+
+                <!-- Tabs/Filters for Shops -->
+                <div class="flex border-b border-gray-200">
+                    <button class="px-6 py-3 border-b-2 border-blue-600 text-blue-600 font-bold">Pending
+                        Approvals</button>
+                    <button class="px-6 py-3 text-gray-500 hover:text-gray-700">Active Shops</button>
+                    <button class="px-6 py-3 text-gray-500 hover:text-gray-700">Rejected</button>
+                </div>
+
+                <div id="shopList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Cards Loaded via JS -->
+                    <div class="text-center w-full col-span-3 py-10 text-gray-500">
+                        <i class="fas fa-spinner fa-spin text-2xl"></i> Loading requests...
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: OTHERS (Placeholder) -->
+            <div id="view-orders" class="hidden h-full flex flex-col items-center justify-center text-gray-400">
+                <i class="fas fa-shopping-cart text-6xl mb-4"></i>
+                <h2 class="text-2xl font-bold">Orders Management</h2>
+                <p>Module under development</p>
+            </div>
+            <div id="view-products" class="hidden h-full flex flex-col items-center justify-center text-gray-400">
+                <i class="fas fa-box text-6xl mb-4"></i>
+                <h2 class="text-2xl font-bold">Products Management</h2>
+                <p>Module under development</p>
+            </div>
+            <div id="view-disputes" class="hidden h-full flex flex-col items-center justify-center text-gray-400">
+                <i class="fas fa-exclamation-circle text-6xl mb-4"></i>
+                <h2 class="text-2xl font-bold">Disputes Management</h2>
+                <p>Module under development</p>
+            </div>
+            <!-- VIEW: USERS -->
+            <div id="view-users" class="hidden space-y-8">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-3xl font-bold text-gray-800">User Management</h1>
+                    <div class="flex gap-2">
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" id="userListSearch" oninput="filterUsers()" placeholder="Search users..."
+                                class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 outline-none">
+                        </div>
+                        <button onclick="loadUsers()"
+                            class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition"><i
+                                class="fas fa-sync-alt"></i></button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-gray-600">
+                            <thead class="bg-gray-50 text-gray-500 font-semibold uppercase text-xs">
+                                <tr>
+                                    <th class="px-6 py-4">User</th>
+                                    <th class="px-6 py-4">Contact</th>
+                                    <th class="px-6 py-4">Role</th>
+                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-6 py-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody" class="divide-y divide-gray-100">
+                                <!-- Users Loaded JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="userLoading" class="text-center py-10 text-gray-500 hidden">
+                        <i class="fas fa-spinner fa-spin text-2xl"></i> Loading users...
+                    </div>
+                    <div id="userEmpty" class="text-center py-10 text-gray-500 hidden">
+                        No users found.
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- MAIN SCRIPT -->
     <script>
         const token = localStorage.getItem('accessToken');
+        const user = localStorage.getItem('userName') || 'Admin';
+
         if (!token) window.location.href = 'login.html';
 
+        // Update Sidebar Profile
+        document.getElementById('adminName').textContent = user;
+        document.getElementById('adminAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user)}&background=random&color=fff`;
+
+        // --- NAVIGATION LOGIC ---
+        function switchView(viewName) {
+            // Hide all views
+            document.querySelectorAll('[id^="view-"]').forEach(el => el.classList.add('hidden'));
+            // Show selected view
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+
+            // Update Sidebar Active State
+            document.querySelectorAll('aside nav a').forEach(el => {
+                el.classList.remove('bg-blue-50', 'text-blue-600');
+                el.classList.add('text-gray-600', 'hover:bg-gray-50');
+            });
+            const activeLink = document.getElementById(`nav-${viewName}`);
+            if (activeLink) {
+                activeLink.classList.remove('text-gray-600', 'hover:bg-gray-50');
+                activeLink.classList.add('bg-blue-50', 'text-blue-600');
+            }
+
+            // If switching to shops, load data
+            if (viewName === 'shops') {
+                loadPendingShops();
+            }
+        }
+
+        // --- CHART JS (MOCK DATA) ---
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        // Gradient fill
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.2)'); // Blue with opacity
+        gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'],
+                datasets: [{
+                    label: 'Order Volume',
+                    data: [12, 19, 15, 25, 22, 30, 28],
+                    borderColor: '#2563EB', // Blue-600
+                    backgroundColor: gradient,
+                    borderWidth: 3,
+                    tension: 0.4, // Smooth curve
+                    pointRadius: 4,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#2563EB',
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        display: false,
+                        beginAtZero: true
+                    },
+                    x: {
+                        grid: { display: false, drawBorder: false },
+                        ticks: { color: '#9CA3AF', font: { size: 10 } }
+                    }
+                }
+            }
+        });
+
+        // --- SHOP APPROVAL LOGIC (EXISTING) ---
         async function loadPendingShops() {
             try {
                 const response = await fetch('http://localhost:8080/api/shop/admin/pending', {
@@ -60,6 +544,7 @@
                 if (response.ok) {
                     const shops = await response.json();
                     renderShops(shops);
+                    updatePendingCount(shops.length);
                 } else {
                     document.getElementById('shopList').innerHTML = `<div class="text-red-500 w-full col-span-3 text-center">Failed to load: ${response.status}</div>`;
                 }
@@ -69,62 +554,61 @@
             }
         }
 
+        function updatePendingCount(count) {
+            const badge = document.getElementById('pendingCount');
+            badge.textContent = count;
+            if (count > 0) badge.classList.remove('hidden');
+            else badge.classList.add('hidden');
+        }
+
         function renderShops(shops) {
             const container = document.getElementById('shopList');
-            const badge = document.getElementById('pendingCount');
 
             if (shops.length === 0) {
                 container.innerHTML = `
-                    <div class="col-span-3 text-center py-20 bg-white rounded-lg shadow-sm">
-                        <i class="fas fa-clipboard-check text-6xl text-gray-300 mb-4"></i>
-                        <p class="text-gray-500 text-lg">No pending applications</p>
+                    <div class="col-span-3 text-center py-20 bg-white rounded-lg shadow-sm border border-dashed border-gray-300">
+                        <i class="fas fa-clipboard-check text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500 text-sm">No pending applications</p>
                     </div>`;
-                badge.classList.add('hidden');
                 return;
             }
 
-            badge.textContent = shops.length;
-            badge.classList.remove('hidden');
-
             container.innerHTML = shops.map(shop => `
-                <div class="bg-white rounded-lg shadow-md border hover:shadow-lg transition overflow-hidden">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition overflow-hidden">
                     <div class="p-5">
                         <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="text-xl font-bold text-gray-800">${shop.name}</h3>
-                                <p class="text-sm text-gray-500"><i class="fas fa-clock mr-1"></i> ${new Date(shop.createdAt).toLocaleDateString()}</p>
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
+                                    ${shop.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-bold text-gray-800">${shop.name}</h3>
+                                    <p class="text-xs text-gray-500">ID: ...${shop.id.substr(-6)}</p>
+                                </div>
                             </div>
-                            <span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded uppercase">Pending</span>
+                            <span class="bg-yellow-50 text-yellow-700 text-[10px] font-bold px-2 py-1 rounded border border-yellow-200 uppercase">Pending</span>
                         </div>
                         
-                        <div class="space-y-3 mb-6">
-                            <!-- Basic Info -->
-                            <div>
-                                <p class="text-gray-600"><i class="fas fa-map-marker-alt w-5 text-gray-400"></i> ${shop.address}</p>
-                                <p class="text-gray-600"><i class="fas fa-phone w-5 text-gray-400"></i> ${shop.phone}</p>
-                                <p class="text-gray-600"><i class="fas fa-envelope w-5 text-gray-400"></i> ${shop.email || 'N/A'}</p>
-                            </div>
-
-                            <!-- Identity -->
-                            <div class="bg-gray-50 p-3 rounded text-sm">
-                                <p class="font-bold text-gray-700">Identity:</p>
-                                <p class="text-gray-600">Name: ${shop.identityFullName || 'N/A'}</p>
-                            </div>
-
-                            <!-- Bank -->
-                            <div class="bg-gray-50 p-3 rounded text-sm">
-                                <p class="font-bold text-gray-700">Bank Details:</p>
-                                <p class="text-gray-600">${shop.bankName} - ${shop.bankBranch}</p>
-                                <p class="text-gray-600">Acc: ${shop.bankAccountNumber}</p>
-                                <p class="text-gray-600">Holder: ${shop.bankAccountHolder}</p>
-                            </div>
+                        <div class="space-y-3 mb-6 bg-gray-50 p-4 rounded-lg">
+                           <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <i class="fas fa-user-circle w-4 text-gray-400"></i>
+                                <span class="truncate">${shop.identityFullName || 'Unknown Owner'}</span>
+                           </div>
+                           <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <i class="fas fa-phone w-4 text-gray-400"></i>
+                                <span>${shop.phone}</span>
+                           </div>
+                           <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <i class="fas fa-map-marker-alt w-4 text-gray-400"></i>
+                                <span class="truncate w-full">${shop.address}</span>
+                           </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-3 pt-4 border-t">
-                            <button onclick="processShop('${shop.id}', 'approve')" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg transition">
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="processShop('${shop.id}', 'approve')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition text-sm">
                                 <i class="fas fa-check mr-1"></i> Approve
                             </button>
-                            <button onclick="processShop('${shop.id}', 'reject')" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 rounded-lg transition">
+                            <button onclick="processShop('${shop.id}', 'reject')" class="bg-white border border-gray-200 text-red-500 hover:bg-red-50 font-bold py-2 rounded-lg transition text-sm">
                                 <i class="fas fa-times mr-1"></i> Reject
                             </button>
                         </div>
@@ -148,7 +632,7 @@
 
                 if (response.ok) {
                     showToast(`Shop ${action}d successfully!`, "success");
-                    loadPendingShops(); // Reload list
+                    loadPendingShops();
                 } else {
                     const text = await response.text();
                     showToast(`Failed: ${text}`, "error");
@@ -169,7 +653,144 @@
             }).showToast();
         }
 
-        loadPendingShops();
+        function logout() {
+            if (confirm("Logout from Admin Panel?")) {
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('userName');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // --- HASH NAVIGATION & INIT ---
+        window.addEventListener('load', () => {
+            const hash = window.location.hash.replace('#', '') || 'dashboard';
+            switchView(hash);
+            loadPendingShops(); // Pre-load counts
+        });
+
+        // --- USER MANAGEMENT LOGIC (Re-injected) ---
+        let allUsers = [];
+
+        async function loadUsers() {
+            const tableBody = document.getElementById('userTableBody');
+            const loading = document.getElementById('userLoading');
+            const empty = document.getElementById('userEmpty');
+
+            // Reset UI
+            tableBody.innerHTML = '';
+            loading.classList.remove('hidden');
+            empty.classList.add('hidden');
+
+            try {
+                // Fetch first 100 users (Paged API)
+                const response = await fetch('http://localhost:8080/api/user/admin/list?page=0&limit=100', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const pageData = await response.json();
+                    allUsers = pageData.content || []; // Extract from Page object
+
+                    renderUsers(allUsers);
+                    if (allUsers.length === 0) empty.classList.remove('hidden');
+                } else {
+                    console.error("Backend Error:", await response.text());
+                    showToast("Failed to load users: " + response.status, "error");
+                }
+            } catch (e) {
+                console.error(e);
+                showToast("Connection error", "error");
+            } finally {
+                loading.classList.add('hidden');
+            }
+        }
+
+        function renderUsers(users) {
+            const tableBody = document.getElementById('userTableBody');
+            if (!users || users.length === 0) return;
+
+            tableBody.innerHTML = users.map(user => {
+                const active = user.active !== undefined ? user.active : true;
+                const roles = user.roles || [];
+
+                return `
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-lg">
+                                ${user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-800">${user.fullName || 'No Name'}</p>
+                                <p class="text-xs text-gray-500">${user.email}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-gray-600">
+                        ${user.phone || '<span class="text-gray-400 italic">N/A</span>'}
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex flex-wrap gap-1">
+                            ${roles.map(role => {
+                    const color = role === 'ROLE_ADMIN' ? 'bg-red-100 text-red-700' : (role === 'ROLE_SELLER' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700');
+                    return `<span class="${color} text-xs font-bold px-2 py-1 rounded border border-opacity-20">${role.replace('ROLE_', '')}</span>`;
+                }).join('')}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                         <span class="${active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'} text-xs font-bold px-2 py-1 rounded flex items-center w-fit gap-1">
+                            <i class="fas fa-circle text-[8px]"></i> ${active ? 'Active' : 'Locked'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                         ${!roles.includes('ROLE_ADMIN') ? `
+                            <button onclick="toggleUserLock('${user.id}', ${active})" 
+                                class="${active ? 'text-red-500 hover:bg-red-50' : 'text-green-600 hover:bg-green-50'} p-2 rounded-lg transition" 
+                                title="${active ? 'Lock User' : 'Unlock User'}">
+                                <i class="fas ${active ? 'fa-lock' : 'fa-lock-open'}"></i>
+                            </button>
+                         ` : '<span class="text-gray-400 text-xs italic">Admin</span>'}
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        function filterUsers() {
+            const term = document.getElementById('userListSearch').value.toLowerCase();
+            const filtered = allUsers.filter(u =>
+                (u.fullName && u.fullName.toLowerCase().includes(term)) ||
+                (u.email && u.email.toLowerCase().includes(term)) ||
+                (u.phone && u.phone.includes(term))
+            );
+            renderUsers(filtered);
+        }
+
+        async function toggleUserLock(userId, currentActive) {
+            const action = currentActive ? 'lock' : 'unlock';
+            if (!confirm(`Are you sure you want to ${action} this user?`)) return;
+
+            try {
+                const shouldLock = currentActive;
+                const response = await fetch(`http://localhost:8080/api/user/admin/lock/${userId}?lock=${shouldLock}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    showToast(`User ${action}ed successfully`, "success");
+                    const userIndex = allUsers.findIndex(u => u.id === userId);
+                    if (userIndex !== -1) {
+                        allUsers[userIndex].active = !currentActive;
+                        renderUsers(allUsers);
+                    }
+                } else {
+                    showToast("Action failed", "error");
+                }
+            } catch (e) {
+                console.error(e);
+                showToast("Connection error", "error");
+            }
+        }
     </script>
 </body>
 
