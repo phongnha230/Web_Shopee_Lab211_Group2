@@ -40,14 +40,6 @@
                 class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-600 rounded-lg font-medium transition">
                 <i class="fas fa-th-large w-5"></i> Dashboard
             </a>
-            <a href="#" onclick="switchView('orders')" id="nav-orders"
-                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
-                <i class="fas fa-shopping-cart w-5"></i> Orders
-            </a>
-            <a href="#" onclick="switchView('products')" id="nav-products"
-                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
-                <i class="fas fa-box w-5"></i> Products
-            </a>
             <a href="#" onclick="switchView('shops')" id="nav-shops"
                 class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
                 <i class="fas fa-store w-5"></i> Shops
@@ -805,13 +797,6 @@
                                     title="Delete User">
                                     <i class="fas fa-trash"></i>
                                 </button>
-                                
-                                <!-- Lock/Unlock Button -->
-                                <button onclick="toggleUserLock('${user.id}', ${active})" 
-                                    class="text-gray-500 hover:bg-gray-50 p-2 rounded-lg transition" 
-                                    title="${active ? 'Lock User' : 'Unlock User'}">
-                                    <i class="fas ${active ? 'fa-lock' : 'fa-lock-open'}"></i>
-                                </button>
                             ` : '<span class="text-gray-400 text-xs italic ml-2">Admin</span>'}
                         </div>
                     </td>
@@ -829,34 +814,7 @@
             renderUsers(filtered);
         }
 
-        async function toggleUserLock(userId, currentActive) {
-            const action = currentActive ? 'lock' : 'unlock';
-            if (!confirm(`Are you sure you want to ${action} this user?`)) return;
 
-            try {
-                // Use PATCH /api/admin/users/{id}/status to toggle status
-                const response = await fetch(`http://localhost:8080/api/admin/users/${userId}/status`, {
-                    method: 'PATCH',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (response.ok) {
-                    showToast(`User ${action}ed successfully`, "success");
-                    // Update local state
-                    const userIndex = allUsers.findIndex(u => u.id === userId);
-                    if (userIndex !== -1) {
-                        allUsers[userIndex].active = !currentActive;
-                        renderUsers(allUsers);
-                    }
-                } else {
-                    const errorText = await response.text();
-                    showToast(`Action failed: ${errorText}`, "error");
-                }
-            } catch (e) {
-                console.error(e);
-                showToast("Connection error", "error");
-            }
-        }
 
         // --- EDIT USER FUNCTIONS ---
         async function openEditModal(userId) {
