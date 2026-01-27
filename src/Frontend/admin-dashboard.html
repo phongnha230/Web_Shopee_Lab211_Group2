@@ -485,9 +485,11 @@
                 activeLink.classList.add('bg-blue-50', 'text-blue-600');
             }
 
-            // If switching to shops, load data
+            // Load data when switching to specific views
             if (viewName === 'shops') {
                 loadPendingShops();
+            } else if (viewName === 'users') {
+                loadUsers();
             }
         }
 
