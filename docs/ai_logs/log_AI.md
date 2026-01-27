@@ -15210,3 +15210,29 @@ Model
 
 
 
+
+---
+# LOG UPDATE: 2026-01-27 - Admin User & Shop Management
+
+## 1. User Management Fixes & Cleanup
+- **Fixed CORS Error**: Added PATCH method to CorsConfig.java to allow user status updates.
+- **Removed Auto-Cleanup**: Deleted UserCleanupService, removed lastLoginDate from User model, and removed scheduled tasks.
+- **UI Update**: Removed Lock/Unlock button from User Management UI in dmin-dashboard.html.
+
+## 2. Shop Management Feature (New)
+- **Backend**: Verified ShopService and ShopController for Approving/Rejecting shops.
+- **Frontend**: Updated dmin-dashboard.html:
+  - Added "Approve" button: Promotes user to ROLE_SELLER and activates shop.
+  - Added "Reject" button: Prompts admin for reason, rejects shop, and saves reason.
+
+## 3. Notification Integration
+- **Service**: Integrated NotificationService into ShopServiceImpl.
+- **Logic**:
+  - Sending "Shop Approved" notification to user on approval.
+  - Sending "Shop Rejected" notification (with reason) to user on rejection.
+
+## 4. Git Synchronization
+- Performed multiple Pull/Merge/Push cycles to sync with main branch.
+- Validated no conflicts remained.
+
+---
