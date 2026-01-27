@@ -42,4 +42,23 @@ public class EmailService {
         mailSender.send(message);
         System.out.println("✅ Password reset OTP email sent to: " + to);
     }
+
+    public void sendLoginAlert(String to, String time, String ip, String device) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Security Alert: New Login Detected");
+        message.setText(
+                "Hello,\n\n" +
+                        "We detected a new login to your ShoppeClone account.\n\n" +
+                        "Time: " + time + "\n" +
+                        "IP Address: " + ip + "\n" +
+                        "Device: " + device + "\n\n" +
+                        "If this was you, you can ignore this email.\n" +
+                        "If you did not log in, please change your password immediately.\n\n" +
+                        "Best regards,\n" +
+                        "ShoppeClone Team");
+
+        mailSender.send(message);
+        System.out.println("⚠️ Login alert email sent to: " + to);
+    }
 }
