@@ -678,11 +678,21 @@
         }
 
         async function processShop(id, action) {
-            if (!confirm(`Are you sure you want to ${action} this shop?`)) return;
+            let reason = '';
+            if (action === 'reject') {
+                reason = prompt("Please enter the reason for rejection:");
+                if (reason === null) return; // User cancelled
+                if (!reason.trim()) {
+                    alert("Reason is required for rejection.");
+                    return;
+                }
+            } else {
+                if (!confirm(`Are you sure you want to ${action} this shop?`)) return;
+            }
 
             const endpoint = action === 'approve'
                 ? `http://localhost:8080/api/shop/admin/approve/${id}`
-                : `http://localhost:8080/api/shop/admin/reject/${id}`;
+                : `http://localhost:8080/api/shop/admin/reject/${id}?reason=${encodeURIComponent(reason)}`;
 
             try {
                 const response = await fetch(endpoint, {
@@ -691,7 +701,7 @@
                 });
 
                 if (response.ok) {
-                    showToast(`Shop ${action}d successfully!`, "success");
+                    showToast(`Shop ${action}ed successfully!`, "success");
                     loadPendingShops();
                 } else {
                     const text = await response.text();
