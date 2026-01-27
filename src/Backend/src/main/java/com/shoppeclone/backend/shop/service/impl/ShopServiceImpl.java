@@ -23,6 +23,7 @@ public class ShopServiceImpl implements ShopService {
     private final ShopRepository shopRepository;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final com.shoppeclone.backend.user.service.NotificationService notificationService;
 
     @Override
     @Transactional
@@ -94,6 +95,13 @@ public class ShopServiceImpl implements ShopService {
             user.getRoles().add(sellerRole);
             userRepository.save(user);
         }
+
+        // 3. Send Notification
+        notificationService.createNotification(
+                user.getId(),
+                "Shop Approved 🎉",
+                "Congratulations! Your shop '" + shop.getName() + "' has been approved. You can now start selling.",
+                "SHOP_APPROVED");
     }
 
     @Override
@@ -106,6 +114,13 @@ public class ShopServiceImpl implements ShopService {
         shop.setRejectionReason(reason);
         shop.setUpdatedAt(LocalDateTime.now());
         shopRepository.save(shop);
+
+        // Send Notification
+        notificationService.createNotification(
+                shop.getOwnerId(),
+                "Shop Registration Rejected ❌",
+                "Your shop application for '" + shop.getName() + "' was rejected. Reason: " + reason,
+                "SHOP_REJECTED");
     }
 
     private User getUserByEmail(String email) {
