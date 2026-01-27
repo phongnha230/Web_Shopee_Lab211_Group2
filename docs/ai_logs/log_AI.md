@@ -14971,7 +14971,11 @@ Xóa sạch (Reset): Đã xóa toàn bộ 20.000 user cũ (cả user rác và us
 Nạp lại (Re-import): Đã nạp lại file users_10k.csv (dữ liệu xịn xò 100% Việt Nam).
 Hiện tại Database chỉ còn đúng 10.013 user sạch đẹp. Anh/chị yên tâm là không còn bị lẫn mấy cái user cũ nữa đâu nhé!
 
+<<<<<<<< HEAD:docs/ai_logs/log AI.md
+ôi lỗi này nó ko vào trang index.html
+========
 v để push lên
+>>>>>>>> cf3e103d36ea35773fa4703615a0987927db9ffb:docs/ai_logs/log_AI.md
 
 
 bạn tôi vừa làm file env example bnj làm cho mình file .env i ạ
@@ -15047,6 +15051,11 @@ Lưu ý: Sau khi thay đổi trong Google Cloud Console, có thể mất vài ph
 
 Bạn muốn tôi sửa code Java hay bạn sẽ cập nhật Google Console? 🤔
 
+<<<<<<<< HEAD:docs/ai_logs/log AI.md
+
+
+========
+>>>>>>>> cf3e103d36ea35773fa4703615a0987927db9ffb:docs/ai_logs/log_AI.md
 
 
 

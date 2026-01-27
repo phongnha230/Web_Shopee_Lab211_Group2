@@ -24,7 +24,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class OAuthServiceImpl implements OAuthService {
 
-    // 🔥 SỬA: Dùng URL không có .html để tránh bị Server redirect làm mất params
+    // 🔥 FIX: Khớp với Google Cloud Console redirect URI
     private static final String GOOGLE_REDIRECT_URI = "http://localhost:3000/auth/callback/google";
 
     private final UserRepository userRepository;
@@ -67,27 +67,38 @@ public class OAuthServiceImpl implements OAuthService {
 
     @Override
     public AuthResponse authenticateWithGoogle(String code) {
+        try {
+            System.out.println("🔍 DEBUG: Starting Google authentication with code: " + code);
 
-        String accessToken = exchangeCodeForToken(code);
-        GoogleUserInfo googleUser = getUserInfo(accessToken);
+            String accessToken = exchangeCodeForToken(code);
+            System.out.println("✅ DEBUG: Got access token");
 
-        // 🔥 NULL CHECK: Validate GoogleUserInfo
-        if (googleUser == null) {
-            throw new RuntimeException("Failed to get user info from Google");
+            GoogleUserInfo googleUser = getUserInfo(accessToken);
+            System.out
+                    .println("✅ DEBUG: Got Google user info: " + (googleUser != null ? googleUser.getEmail() : "null"));
+
+            if (googleUser == null) {
+                throw new RuntimeException("Failed to get Google user info");
+            }
+
+            User user = findOrCreateUser(googleUser);
+            System.out.println("✅ DEBUG: User found/created: " + (user != null ? user.getEmail() : "null"));
+
+            if (user == null) {
+                throw new RuntimeException("Failed to create or find user for email: " + googleUser.getEmail());
+            }
+
+            String jwtAccessToken = jwtUtil.generateAccessToken(user.getEmail());
+            String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+
+            saveUserSession(user, refreshToken);
+
+            return new AuthResponse(jwtAccessToken, refreshToken, "Bearer", mapToUserDto(user));
+        } catch (Exception e) {
+            System.err.println("❌ ERROR in authenticateWithGoogle: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Google authentication failed: " + e.getMessage(), e);
         }
-        if (googleUser.getEmail() == null || googleUser.getEmail().isEmpty()) {
-            throw new RuntimeException("Google user email is null or empty");
-        }
-
-        // findOrCreateUser will throw exception if it fails, no need for null check
-        User user = findOrCreateUser(googleUser);
-
-        String jwtAccessToken = jwtUtil.generateAccessToken(user.getEmail());
-        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
-
-        saveUserSession(user, refreshToken);
-
-        return new AuthResponse(jwtAccessToken, refreshToken, "Bearer", mapToUserDto(user));
     }
 
     // ====================== PRIVATE ======================
