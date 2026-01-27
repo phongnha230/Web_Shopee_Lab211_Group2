@@ -36,11 +36,15 @@ public class WebhookController {
             order.getShipping().setStatus(payload.getStatus());
 
             if ("DELIVERED".equalsIgnoreCase(payload.getStatus())) {
-                order.setOrderStatus(OrderStatus.DELIVERED);
+                order.setOrderStatus(OrderStatus.COMPLETED);
                 order.getShipping().setDeliveredAt(LocalDateTime.now());
+                if (order.getCompletedAt() == null) {
+                    order.setCompletedAt(LocalDateTime.now());
+                }
                 order.setPaymentStatus(com.shoppeclone.backend.order.entity.PaymentStatus.PAID); // COD assumption
             } else if ("RETURNED".equalsIgnoreCase(payload.getStatus())) {
                 order.setOrderStatus(OrderStatus.CANCELLED); // Or RETURNED if enum exists
+                order.setCancelledAt(LocalDateTime.now());
             }
         }
 

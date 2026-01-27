@@ -139,6 +139,15 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order updateOrderStatus(String orderId, OrderStatus status) {
         Order order = getOrder(orderId);
+
+        // Update timestamps based on status
+        if (status == OrderStatus.SHIPPED && order.getShippedAt() == null) {
+            order.setShippedAt(LocalDateTime.now());
+        }
+        if (status == OrderStatus.COMPLETED && order.getCompletedAt() == null) {
+            order.setCompletedAt(LocalDateTime.now());
+        }
+
         order.setOrderStatus(status);
         order.setUpdatedAt(LocalDateTime.now());
         return orderRepository.save(order);
@@ -148,7 +157,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public Order cancelOrder(String orderId) {
         Order order = getOrder(orderId);
-        if (order.getOrderStatus() == OrderStatus.DELIVERED || order.getOrderStatus() == OrderStatus.CANCELLED) {
+        if (order.getOrderStatus() == OrderStatus.COMPLETED || order.getOrderStatus() == OrderStatus.CANCELLED) {
             throw new RuntimeException("Cannot cancel order in state: " + order.getOrderStatus());
         }
 
@@ -162,6 +171,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         order.setOrderStatus(OrderStatus.CANCELLED);
+        order.setCancelledAt(LocalDateTime.now()); // Set cancelledAt
         order.setUpdatedAt(LocalDateTime.now());
         return orderRepository.save(order);
     }
@@ -183,11 +193,14 @@ public class OrderServiceImpl implements OrderService {
         if (providerId != null)
             shipping.setProviderId(providerId);
 
-        // Auto update status to SHIPPING if tracking code is present
+        // Auto update status to SHIPPED if tracking code is present
         if (trackingCode != null && !trackingCode.isEmpty()) {
-            shipping.setStatus("SHIPPING");
+            shipping.setStatus("SHIPPED"); // Assuming string status in OrderShipping matches
             shipping.setShippedAt(LocalDateTime.now());
-            order.setOrderStatus(OrderStatus.SHIPPING);
+            order.setOrderStatus(OrderStatus.SHIPPED);
+            if (order.getShippedAt() == null) {
+                order.setShippedAt(LocalDateTime.now());
+            }
         }
 
         order.setUpdatedAt(LocalDateTime.now());

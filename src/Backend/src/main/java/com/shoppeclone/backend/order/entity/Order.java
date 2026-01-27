@@ -30,4 +30,8 @@ public class Order {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime shippedAt;
+    private LocalDateTime completedAt;
+    private LocalDateTime cancelledAt;
+    private String cancelReason;
 }
