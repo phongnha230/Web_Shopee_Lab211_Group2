@@ -15236,3 +15236,45 @@ Model
 - Validated no conflicts remained.
 
 ---
+
+
+
+1. Xây dựng nền tảng kết nối API (Infrastructure)
+
+Created: js/config.js để lưu API_URL gốc.
+Created: js/api.js làm wrapper trung gian cho fetch, tự động đính kèm Authorization: Bearer <token> và xử lý lỗi 401 (chưa đăng nhập).
+2. Triển khai Service Layer
+
+Implemented: 
+CartService
+, ProductService, FlashSaleService, VoucherService, OrderService để tách biệt logic gọi API khỏi giao diện.
+Logic: Chuyển đổi toàn bộ thao tác thêm/sửa/xóa giỏ hàng và áp dụng mã giảm giá sang gọi API Backend.
+3. Sửa lỗi "Forbidden" & Tích hợp Chi tiết sản phẩm (
+product-detail.html
+)
+
+Fixed: Cập nhật logic 
+addToCart
+ để gửi đúng variantId (thay vì product ID chung chung) và số lượng theo yêu cầu của Backend 
+CartController
+.
+Refactored: Viết lại logic hiển thị sản phẩm để lấy dữ liệu từ API /api/products/{id} thay vì file mock tĩnh.
+4. Khôi phục dữ liệu & Cấu hình Backend
+
+Seeding Data: Tạo 
+ProductSeeder.java
+ (CommandLineRunner) để tự động thêm dữ liệu mẫu (Tai nghe, Giày, Điện thoại...) vào MongoDB khi chạy ứng dụng.
+Schema Update: Bổ sung trường images vào 
+Product.java
+ để hỗ trợ lưu đường dẫn ảnh từ Seeder.
+Security: Cập nhật 
+SecurityConfig.java
+ để cho phép truy cập công khai (permitAll) vào endpoint /api/products/**, giúp khách vãng lai xem được sản phẩm mà không bị lỗi 403.
+5. Kết quả
+
+Frontend hiện đang chạy với dữ liệu thực từ Backend.
+Chức năng "Thêm vào giỏ", "Xem giỏ hàng", "Checkout" hoạt động chuẩn với API.
+Dữ liệu mẫu tự động được nạp lại nếu database trống.
+Good
+Bad
+Review Changes
