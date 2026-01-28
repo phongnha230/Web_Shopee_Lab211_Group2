@@ -35,7 +35,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",
+                                "/api/shop/upload-id-card", // Allow image upload for testing
                                 "/api/webhooks/**") // Allow Webhooks explicitly
+                        .permitAll()
+                        // ✅ Allow Public GET Access (View Products, Categories, Shops)
+                        .requestMatchers(org.springframework.http.HttpMethod.GET,
+                                "/api/products/**",
+                                "/api/categories/**",
+                                "/api/shop/**",
+                                "/api/reviews/**")
                         .permitAll()
                         .requestMatchers("/api/**").authenticated() // Secure other APIs
                         .anyRequest().permitAll()) // Allow static resources or others

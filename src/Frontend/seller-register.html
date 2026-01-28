@@ -154,18 +154,34 @@
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-600 mb-2">Front of ID Card</label>
-                                    <div
-                                        class="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center bg-gray-50 cursor-pointer hover:bg-gray-100 transition h-32">
-                                        <i class="fas fa-camera text-gray-400 text-2xl mb-2"></i>
-                                        <span class="text-xs text-gray-500">Click to upload</span>
+                                    <div class="relative border-2 border-dashed border-gray-300 rounded-lg p-2 h-40 flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100 transition overflow-hidden group">
+                                        <input type="file" id="frontImageFile" accept="image/*" onchange="previewImage(this, 'frontPreview')" 
+                                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                        
+                                        <div id="frontPreview" class="absolute inset-0 hidden">
+                                            <img src="" class="w-full h-full object-cover">
+                                        </div>
+                                        
+                                        <div class="text-center p-4">
+                                            <i class="fas fa-camera text-gray-400 text-2xl mb-2"></i>
+                                            <span class="block text-xs text-gray-500">Click to upload</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-600 mb-2">Back of ID Card</label>
-                                    <div
-                                        class="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center bg-gray-50 cursor-pointer hover:bg-gray-100 transition h-32">
-                                        <i class="fas fa-camera text-gray-400 text-2xl mb-2"></i>
-                                        <span class="text-xs text-gray-500">Click to upload</span>
+                                    <div class="relative border-2 border-dashed border-gray-300 rounded-lg p-2 h-40 flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100 transition overflow-hidden group">
+                                        <input type="file" id="backImageFile" accept="image/*" onchange="previewImage(this, 'backPreview')" 
+                                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                        
+                                        <div id="backPreview" class="absolute inset-0 hidden">
+                                            <img src="" class="w-full h-full object-cover">
+                                        </div>
+
+                                        <div class="text-center p-4">
+                                            <i class="fas fa-camera text-gray-400 text-2xl mb-2"></i>
+                                            <span class="block text-xs text-gray-500">Click to upload</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -264,6 +280,45 @@
             document.getElementById('headerName').textContent = userName;
             document.getElementById('headerAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random`;
         }
+        
+        // Preview Upload Image
+        function previewImage(input, previewId) {
+            const previewDiv = document.getElementById(previewId);
+            const img = previewDiv.querySelector('img');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                    previewDiv.classList.remove('hidden');
+                }
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                 previewDiv.classList.add('hidden');
+            }
+        }
+
+        async function uploadImage(file, folderName = 'shop_identity') {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('folder', folderName);
+
+            const response = await fetch('http://localhost:8080/api/upload', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Upload failed');
+            }
+
+            const data = await response.json();
+            return data.url;
+        }
 
         function goToStep(step) {
             const step1Content = document.getElementById('step1-content');
@@ -322,30 +377,51 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing';
             btn.disabled = true;
 
-            // Concatenate Address
-            const detail = document.getElementById('addressDetail').value;
-            const ward = document.getElementById('ward').value;
-            const district = document.getElementById('district').value;
-            const province = document.getElementById('province').value;
-            const fullAddress = `${detail}, ${ward}, ${district}, ${province}`.replace(/, ,/g, ',');
-
-            const data = {
-                // Step 1
-                name: document.getElementById('name').value,
-                phone: document.getElementById('phone').value,
-                address: fullAddress,
-                email: document.getElementById('email').value,
-                description: 'New Shop', // Hidden field removed, using default
-
-                // Step 2
-                identityFullName: document.getElementById('identityFullName').value,
-                bankName: document.getElementById('bankName').value,
-                bankBranch: document.getElementById('bankBranch').value,
-                bankAccountNumber: document.getElementById('bankAccountNumber').value,
-                bankAccountHolder: document.getElementById('bankAccountHolder').value
-            };
-
             try {
+                // 1. Upload Images
+                const frontFile = document.getElementById('frontImageFile').files[0];
+                const backFile = document.getElementById('backImageFile').files[0];
+                let idCardFrontUrl = "";
+                let idCardBackUrl = "";
+
+                // Checking if files are selected is good practice for "Identity" but technically not required by DTO validations yet, 
+                // but let's assume we want them.
+                if (frontFile) {
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Uploading Front ID...';
+                    idCardFrontUrl = await uploadImage(frontFile);
+                }
+                if (backFile) {
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Uploading Back ID...';
+                    idCardBackUrl = await uploadImage(backFile);
+                }
+
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Registering...';
+
+                // Concatenate Address
+                const detail = document.getElementById('addressDetail').value;
+                const ward = document.getElementById('ward').value;
+                const district = document.getElementById('district').value;
+                const province = document.getElementById('province').value;
+                const fullAddress = `${detail}, ${ward}, ${district}, ${province}`.replace(/, ,/g, ',');
+
+                const data = {
+                    // Step 1
+                    name: document.getElementById('name').value,
+                    phone: document.getElementById('phone').value,
+                    address: fullAddress,
+                    email: document.getElementById('email').value,
+                    description: 'New Shop', 
+
+                    // Step 2
+                    identityFullName: document.getElementById('identityFullName').value,
+                    idCardFront: idCardFrontUrl,
+                    idCardBack: idCardBackUrl,
+                    bankName: document.getElementById('bankName').value,
+                    bankBranch: document.getElementById('bankBranch').value,
+                    bankAccountNumber: document.getElementById('bankAccountNumber').value,
+                    bankAccountHolder: document.getElementById('bankAccountHolder').value
+                };
+
                 const response = await fetch('http://localhost:8080/api/shop/register', {
                     method: 'POST',
                     headers: {
@@ -364,16 +440,22 @@
                     step2Circle.innerHTML = '<i class="fas fa-check"></i>';
                 } else {
                     const text = await response.text();
-                    if (response.status === 500 && text.includes("already have a shop")) {
-                        showToast("You already have a registered shop!", "warning");
-                        setTimeout(() => window.location.href = 'index.html', 2000);
-                    } else {
-                        showToast("Failed: " + text, "error");
+                    // Try parsing JSON error
+                    try {
+                        const errJson = JSON.parse(text);
+                        showToast("Failed: " + (errJson.message || text), "error");
+                    } catch(e) {
+                         if (response.status === 500 && text.includes("already have a shop")) {
+                            showToast("You already have a registered shop!", "warning");
+                            setTimeout(() => window.location.href = 'index.html', 2000);
+                        } else {
+                            showToast("Failed: " + text, "error");
+                        }
                     }
                 }
             } catch (err) {
                 console.error(err);
-                showToast("Connection error", "error");
+                showToast("Error: " + err.message, "error");
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;

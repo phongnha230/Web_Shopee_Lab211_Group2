@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Data
 public class CreateProductVariantRequest {
-    @NotBlank(message = "ID sản phẩm không được để trống")
+    // Product ID is set from URL path parameter, not from request body
     private String productId;
 
     private String size;

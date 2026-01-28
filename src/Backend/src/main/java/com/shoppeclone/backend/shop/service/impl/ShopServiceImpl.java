@@ -43,6 +43,10 @@ public class ShopServiceImpl implements ShopService {
         shop.setEmail(request.getEmail());
         shop.setDescription(request.getDescription());
 
+        // ✅ Map ID Card Images
+        shop.setIdCardFront(request.getIdCardFront());
+        shop.setIdCardBack(request.getIdCardBack());
+
         // Map Step 2 Info
         shop.setIdentityFullName(request.getIdentityFullName());
         shop.setBankName(request.getBankName());
