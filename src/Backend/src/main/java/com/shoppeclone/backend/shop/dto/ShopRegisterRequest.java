@@ -25,5 +25,9 @@ public class ShopRegisterRequest {
     private String bankAccountNumber;
     private String bankAccountHolder;
 
+    // ✅ Added to match Frontend
+    private String idCardFront;
+    private String idCardBack;
+
     // In real app, we might want file uploads for ID Card, etc.
 }
