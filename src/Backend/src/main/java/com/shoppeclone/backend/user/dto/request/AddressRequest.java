@@ -10,7 +10,7 @@ public class AddressRequest {
     @NotBlank(message = "Recipient name is required")
     private String fullName;
 
-    @Pattern(regexp = "^(0[0-9]{9})$", message = "Invalid phone number")
+    @Pattern(regexp = "^(0[0-9]{9})$", message = "Phone number must be 10 digits and start with 0")
     private String phone;
 
     @NotBlank(message = "Address is required")

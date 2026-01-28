@@ -14,19 +14,19 @@ import java.util.Set;
 public class User {
     @Id
     private String id;
-    
+
     @Indexed(unique = true)
     private String email;
-    
+
     private String password;
     private String fullName;
     private String phone;
     private boolean emailVerified = false;
     private boolean active = true;
-    
-    @DBRef
+
+    // @DBRef <-- Xoá dòng này để lưu Role trực tiếp vào trong User (Embed)
     private Set<Role> roles = new HashSet<>();
-    
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

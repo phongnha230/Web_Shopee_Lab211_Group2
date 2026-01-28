@@ -24,6 +24,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
+    private final com.shoppeclone.backend.auth.repository.RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
     // ========= PROFILE =========
@@ -126,9 +127,26 @@ public class UserServiceImpl implements UserService {
         User user = getUserByEmail(email);
 
         Address address = addressRepository.findByIdAndUserId(addressId, user.getId())
-                .orElseThrow(() -> new RuntimeException("Địa chỉ không tồn tại"));
+                .orElseThrow(() -> new RuntimeException("Address not found"));
 
         addressRepository.delete(address);
+    }
+
+    // ========= ADMIN =========
+
+    @Override
+    @Transactional
+    public void promoteUser(String email, String roleName) {
+        User user = getUserByEmail(email);
+        Role role = roleRepository.findByName(roleName)
+                .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
+
+        // Add role if not exists
+        boolean hasRole = user.getRoles().stream().anyMatch(r -> r.getName().equals(roleName));
+        if (!hasRole) {
+            user.getRoles().add(role);
+            userRepository.save(user);
+        }
     }
 
     // ========= HELPER =========

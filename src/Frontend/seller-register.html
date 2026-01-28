@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Centre - Become a Seller</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <style>
+        .step-circle {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 flex flex-col min-h-screen font-sans">
+
+    <!-- Header -->
+    <header class="bg-white shadow border-b border-gray-200">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center max-w-6xl">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-shopping-bag text-orange-500 text-2xl"></i>
+                <h1 class="text-xl font-bold text-gray-800">Shopee Seller Centre</h1>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-2">
+                    <img id="headerAvatar" src="https://ui-avatars.com/api/?name=User&background=random"
+                        class="w-8 h-8 rounded-full">
+                    <span id="headerName" class="font-medium text-gray-700 text-sm">User</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-10 max-w-4xl">
+
+        <h2 class="text-3xl font-bold text-gray-800 text-center mb-2">Become a Seller</h2>
+        <p class="text-gray-500 text-center mb-10">Set up your shop profile to start selling today.</p>
+
+        <!-- Container -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+
+            <!-- Stepper -->
+            <div class="flex justify-center items-center py-6 border-b border-gray-100 relative">
+                <!-- Step 1 -->
+                <div class="flex items-center relative z-10 bg-white px-2">
+                    <div id="step1-circle" class="step-circle bg-orange-500 text-white mr-2">1</div>
+                    <span id="step1-text" class="text-orange-500 font-bold text-sm">Shop Information</span>
+                </div>
+
+                <!-- Line -->
+                <div class="w-32 h-0.5 bg-gray-200 mx-[-10px]"></div>
+
+                <!-- Step 2 -->
+                <div class="flex items-center relative z-10 bg-white px-2">
+                    <div id="step2-circle" class="step-circle border border-gray-400 text-gray-400 mr-2">2</div>
+                    <span id="step2-text" class="text-gray-500 font-medium text-sm">Identity & Bank</span>
+                </div>
+            </div>
+
+            <!-- Form Container -->
+            <div class="p-8 md:px-16 md:py-10">
+                <form id="shopForm" onsubmit="handleNext(event)" class="space-y-6">
+
+                    <!-- STEP 1: SHOP INFORMATION -->
+                    <div id="step1-content">
+                        <!-- Shop Name -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-bold text-gray-800 mb-2">Shop Name</label>
+                            <input type="text" id="name" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none text-sm placeholder-gray-400"
+                                placeholder="Enter your shop name">
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-bold text-gray-800 mb-2">Phone Number</label>
+                            <div class="flex gap-4">
+                                <input type="text" id="phone" required
+                                    class="flex-grow px-4 py-2 border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none text-sm placeholder-gray-400"
+                                    placeholder="Enter your phone number">
+                            </div>
+                        </div>
+
+                        <!-- Pickup Address -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-bold text-gray-800 mb-2">Pickup Address</label>
+                            <div class="grid grid-cols-3 gap-3 mb-3">
+                                <select id="province"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded bg-white text-sm text-gray-600 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none">
+                                    <option value="">Province</option>
+                                    <option value="Hanoi">Hanoi</option>
+                                    <option value="Ho Chi Minh">Ho Chi Minh</option>
+                                </select>
+                                <select id="district"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded bg-white text-sm text-gray-600 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none">
+                                    <option value="">District</option>
+                                    <option value="District 1">District 1</option>
+                                </select>
+                                <select id="ward"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded bg-white text-sm text-gray-600 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none">
+                                    <option value="">Ward</option>
+                                    <option value="Ward 1">Ward 1</option>
+                                </select>
+                            </div>
+                            <textarea id="addressDetail" rows="3" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none text-sm placeholder-gray-400 resize-none"
+                                placeholder="Detail address"></textarea>
+                        </div>
+
+                        <!-- Shop Email -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-bold text-gray-800 mb-2">Shop Email</label>
+                            <input type="email" id="email" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none text-sm placeholder-gray-400"
+                                placeholder="Enter your shop email">
+                        </div>
+
+                        <div class="flex justify-end pt-4">
+                            <button type="button" onclick="goToStep(2)"
+                                class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-8 rounded transition text-sm flex items-center">
+                                Next <i class="fas fa-chevron-right ml-2 text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: IDENTITY & BANK -->
+                    <div id="step2-content" class="hidden">
+
+                        <!-- Identity Verification -->
+                        <div class="mb-8">
+                            <h3 class="flex items-center text-lg font-bold text-gray-800 mb-4">
+                                <i class="fas fa-shield-alt text-orange-500 mr-2"></i> Identity Verification
+                            </h3>
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Full Name (as per ID)</label>
+                                <input type="text" id="identityFullName"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded outline-none text-sm"
+                                    placeholder="Enter your full legal name">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-2">Front of ID Card</label>
+                                    <div
+                                        class="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center bg-gray-50 cursor-pointer hover:bg-gray-100 transition h-32">
+                                        <i class="fas fa-camera text-gray-400 text-2xl mb-2"></i>
+                                        <span class="text-xs text-gray-500">Click to upload</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-2">Back of ID Card</label>
+                                    <div
+                                        class="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center bg-gray-50 cursor-pointer hover:bg-gray-100 transition h-32">
+                                        <i class="fas fa-camera text-gray-400 text-2xl mb-2"></i>
+                                        <span class="text-xs text-gray-500">Click to upload</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bank Account -->
+                        <div class="mb-6">
+                            <h3 class="flex items-center text-lg font-bold text-gray-800 mb-4">
+                                <i class="fas fa-university text-orange-500 mr-2"></i> Bank Account Details
+                            </h3>
+
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Bank Name</label>
+                                    <select id="bankName"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded outline-none text-sm bg-white">
+                                        <option value="">Select your bank</option>
+                                        <option value="Vietcombank">Vietcombank</option>
+                                        <option value="Techcombank">Techcombank</option>
+                                        <option value="MB Bank">MB Bank</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Branch Name</label>
+                                    <input type="text" id="bankBranch"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded outline-none text-sm"
+                                        placeholder="Enter branch name">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Account Number</label>
+                                    <input type="text" id="bankAccountNumber"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded outline-none text-sm"
+                                        placeholder="Account number">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Account Holder
+                                        Name</label>
+                                    <input type="text" id="bankAccountHolder"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded outline-none text-sm"
+                                        placeholder="Same as your ID">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Terms -->
+                        <div class="flex items-center mb-6">
+                            <input type="checkbox" id="terms"
+                                class="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500">
+                            <label for="terms" class="ml-2 text-sm text-gray-600">I agree to the <a href="#"
+                                    class="text-orange-500">Terms of Service</a> and Privacy Policy.</label>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="flex justify-between pt-4 border-t">
+                            <button type="button" onclick="goToStep(1)"
+                                class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-2 px-6 rounded transition text-sm">
+                                Back
+                            </button>
+                            <button type="submit" id="submitBtn"
+                                class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded transition text-sm shadow-lg">
+                                Complete Registration
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+
+                <!-- Success State -->
+                <div id="statusArea" class="hidden text-center py-10">
+                    <div class="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-6">
+                        <i class="fas fa-check text-green-500 text-4xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Registration Submitted!</h3>
+                    <p class="text-gray-500 text-base mb-8">Your application is pending Admin approval. <br>We will
+                        notify you once it's processed.</p>
+                    <a href="index.html"
+                        class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-8 rounded transition">Back
+                        to Home</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Check login
+        const token = localStorage.getItem('accessToken');
+        const userName = localStorage.getItem('userName') || 'User';
+
+        if (!token) {
+            alert('Please login first!');
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('headerName').textContent = userName;
+            document.getElementById('headerAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random`;
+        }
+
+        function goToStep(step) {
+            const step1Content = document.getElementById('step1-content');
+            const step2Content = document.getElementById('step2-content');
+
+            const step1Circle = document.getElementById('step1-circle');
+            const step1Text = document.getElementById('step1-text');
+            const step2Circle = document.getElementById('step2-circle');
+            const step2Text = document.getElementById('step2-text');
+
+            if (step === 2) {
+                // Validate Step 1
+                const name = document.getElementById('name').value;
+                const phone = document.getElementById('phone').value;
+                const email = document.getElementById('email').value;
+                if (!name || !phone || !email) {
+                    showToast("Please fill in all required fields!", "error");
+                    return;
+                }
+
+                step1Content.classList.add('hidden');
+                step2Content.classList.remove('hidden');
+
+                // Update Stepper UI
+                step1Circle.innerHTML = '<i class="fas fa-check"></i>';
+
+                step2Circle.classList.remove('border', 'border-gray-400', 'text-gray-400');
+                step2Circle.classList.add('bg-orange-500', 'text-white');
+                step2Text.classList.remove('text-gray-500');
+                step2Text.classList.add('text-orange-500', 'font-bold');
+
+            } else {
+                step2Content.classList.add('hidden');
+                step1Content.classList.remove('hidden');
+
+                // Revert Stepper UI (Simplistic)
+                step1Circle.innerHTML = '1';
+                step2Circle.classList.add('border', 'border-gray-400', 'text-gray-400');
+                step2Circle.classList.remove('bg-orange-500', 'text-white');
+                step2Text.classList.add('text-gray-500');
+                step2Text.classList.remove('text-orange-500', 'font-bold');
+            }
+        }
+
+        async function handleNext(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const originalText = btn.innerHTML;
+
+            // Validate Terms
+            if (!document.getElementById('terms').checked) {
+                showToast("Please agree to the Terms of Service!", "error");
+                return;
+            }
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing';
+            btn.disabled = true;
+
+            // Concatenate Address
+            const detail = document.getElementById('addressDetail').value;
+            const ward = document.getElementById('ward').value;
+            const district = document.getElementById('district').value;
+            const province = document.getElementById('province').value;
+            const fullAddress = `${detail}, ${ward}, ${district}, ${province}`.replace(/, ,/g, ',');
+
+            const data = {
+                // Step 1
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone').value,
+                address: fullAddress,
+                email: document.getElementById('email').value,
+                description: 'New Shop', // Hidden field removed, using default
+
+                // Step 2
+                identityFullName: document.getElementById('identityFullName').value,
+                bankName: document.getElementById('bankName').value,
+                bankBranch: document.getElementById('bankBranch').value,
+                bankAccountNumber: document.getElementById('bankAccountNumber').value,
+                bankAccountHolder: document.getElementById('bankAccountHolder').value
+            };
+
+            try {
+                const response = await fetch('http://localhost:8080/api/shop/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    document.getElementById('shopForm').classList.add('hidden');
+                    document.getElementById('statusArea').classList.remove('hidden');
+
+                    // Final Stepper Update
+                    const step2Circle = document.getElementById('step2-circle');
+                    step2Circle.innerHTML = '<i class="fas fa-check"></i>';
+                } else {
+                    const text = await response.text();
+                    if (response.status === 500 && text.includes("already have a shop")) {
+                        showToast("You already have a registered shop!", "warning");
+                        setTimeout(() => window.location.href = 'index.html', 2000);
+                    } else {
+                        showToast("Failed: " + text, "error");
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Connection error", "error");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function showToast(msg, type) {
+            Toastify({
+                text: msg,
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                style: { background: type === "success" ? "#10B981" : (type === "warning" ? "#F59E0B" : "#EF4444") }
+            }).showToast();
+        }
+    </script>
+</body>
+
+</html>

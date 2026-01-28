@@ -13,8 +13,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -32,11 +35,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",
-                                "/api/auth/oauth/**")
+                                "/api/webhooks/**") // Allow Webhooks explicitly
                         .permitAll()
-
-                        // 🔥 QUAN TRỌNG: KHÔNG CHẶN REQUEST KHÁC
-                        .anyRequest().permitAll())
+                        .requestMatchers("/api/**").authenticated() // Secure other APIs
+                        .anyRequest().permitAll()) // Allow static resources or others
 
                 // ✅ JWT → STATELESS
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

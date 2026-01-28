@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Shopee Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<script>
+    // AUTH GUARD: Chuyển hướng nếu chưa đăng nhập
+    if (!localStorage.getItem('accessToken')) {
+        alert('⚠️ You must login to checkout!');
+        window.location.href = 'login.html';
+    }
+</script>
+</head>
+
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-orange-500 to-orange-600 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center py-4">
+                <i class="fas fa-shopping-bag text-3xl text-white mr-3"></i>
+                <span class="text-2xl font-bold text-white">Shopee Clone</span>
+                <span class="mx-4 text-white">|</span>
+                <span class="text-xl text-white">Checkout</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Checkout Form -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Delivery Address -->
+                <!-- Delivery Address -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold flex items-center">
+                            <i class="fas fa-map-marker-alt text-orange-500 mr-2"></i>
+                            Delivery Address
+                        </h2>
+                        <button class="text-blue-500 font-semibold text-sm hover:underline">Change</button>
+                    </div>
+
+                    <!-- Default Address Card -->
+                    <div id="defaultAddressCard"
+                        class="border border-orange-500 bg-orange-50 rounded-lg p-4 flex items-start gap-3 mb-4 cursor-pointer relative">
+                        <i class="fas fa-check-circle text-orange-500 text-xl mt-1"></i>
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-bold text-gray-800" id="addrName">Alex Johnson</span>
+                                <span class="text-gray-500 text-sm" id="addrPhone">(+1) 555-0123</span>
+                                <span
+                                    class="bg-orange-500 text-white text-xs px-2 py-0.5 rounded font-bold">DEFAULT</span>
+                                <span
+                                    class="bg-gray-200 text-gray-600 text-xs px-2 py-0.5 rounded font-bold">HOME</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-1" id="addrStreet">Unit 402, Sunset Boulevard Apartments
+                            </p>
+                            <p class="text-gray-600 text-sm" id="addrRegion">88 West Coast Road, Santa Monica, CA 90401
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Add New Address Button -->
+                    <button onclick="toggleAddressForm()"
+                        class="w-full border-2 border-dashed border-gray-300 text-gray-500 rounded-lg p-3 hover:border-orange-500 hover:text-orange-500 transition flex items-center justify-center gap-2 font-semibold">
+                        <i class="fas fa-plus"></i> Add New Address
+                    </button>
+
+                    <!-- Hidden Address Form -->
+                    <div id="newAddressForm" class="hidden mt-4 border-t pt-4">
+                        <h3 class="font-bold text-lg mb-3">New Address</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input id="inputName" type="text" placeholder="Full Name"
+                                class="border rounded px-4 py-2 focus:outline-none focus:border-orange-500">
+                            <input id="inputPhone" type="tel" placeholder="Phone Number"
+                                class="border rounded px-4 py-2 focus:outline-none focus:border-orange-500">
+                            <input id="inputStreet" type="text" placeholder="Street Address"
+                                class="md:col-span-2 border rounded px-4 py-2 focus:outline-none focus:border-orange-500">
+                            <input id="inputCity" type="text" placeholder="City"
+                                class="border rounded px-4 py-2 focus:outline-none focus:border-orange-500">
+                            <input id="inputZip" type="text" placeholder="Postal Code"
+                                class="border rounded px-4 py-2 focus:outline-none focus:border-orange-500">
+                        </div>
+                        <div class="flex justify-end gap-2 mt-4">
+                            <button onclick="toggleAddressForm()"
+                                class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
+                            <button onclick="saveAddress()"
+                                class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">Save
+                                Address</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Ordered -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold mb-4">Products Ordered</h2>
+                    <div id="checkoutItems" class="space-y-4 mb-4">
+                        <!-- Items loaded by JS -->
+                    </div>
+                    <textarea placeholder="Message to Seller (Optional)" rows="2"
+                        class="w-full border rounded px-4 py-2 focus:outline-none focus:border-orange-500 text-sm bg-gray-50"></textarea>
+                </div>
+
+                <!-- Shipping Options -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold mb-4">
+                        <i class="fas fa-truck text-orange-500 mr-2"></i>
+                        Shipping Option
+                    </h2>
+                    <div class="space-y-3">
+                        <label
+                            class="flex items-center justify-between p-3 border-2 border-orange-500 rounded cursor-pointer">
+                            <div class="flex items-center">
+                                <input type="radio" name="shipping" value="standard" checked class="mr-3">
+                                <div>
+                                    <p class="font-semibold">Standard Delivery</p>
+                                    <p class="text-sm text-gray-500">Receive by 3-5 days</p>
+                                </div>
+                            </div>
+                            <span class="font-bold">₫15</span>
+                        </label>
+                        <label
+                            class="flex items-center justify-between p-3 border rounded cursor-pointer hover:border-orange-300">
+                            <div class="flex items-center">
+                                <input type="radio" name="shipping" value="express" class="mr-3">
+                                <div>
+                                    <p class="font-semibold">Express Shipping</p>
+                                    <p class="text-sm text-gray-500">Receive by 1-2 days</p>
+                                </div>
+                            </div>
+                            <span class="font-bold">₫30</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold mb-4">
+                        <i class="fas fa-credit-card text-orange-500 mr-2"></i>
+                        Payment Method
+                    </h2>
+                    <div class="space-y-3">
+                        <label class="flex items-center p-3 border-2 border-orange-500 rounded cursor-pointer">
+                            <input type="radio" name="payment" value="cod" checked class="mr-3">
+                            <i class="fas fa-money-bill-wave text-2xl text-green-600 mr-3"></i>
+                            <div>
+                                <p class="font-semibold">Cash on Delivery</p>
+                                <p class="text-sm text-gray-500">Pay when you receive</p>
+                            </div>
+                        </label>
+                        <label class="flex items-center p-3 border rounded cursor-pointer hover:border-orange-300">
+                            <input type="radio" name="payment" value="card" class="mr-3">
+                            <i class="fas fa-credit-card text-2xl text-blue-600 mr-3"></i>
+                            <div>
+                                <p class="font-semibold">Credit/Debit Card</p>
+                                <p class="text-sm text-gray-500">Visa, Mastercard, JCB</p>
+                            </div>
+                        </label>
+                        <label class="flex items-center p-3 border rounded cursor-pointer hover:border-orange-300">
+                            <input type="radio" name="payment" value="ewallet" class="mr-3">
+                            <i class="fas fa-wallet text-2xl text-purple-600 mr-3"></i>
+                            <div>
+                                <p class="font-semibold">E-Wallet</p>
+                                <p class="text-sm text-gray-500">Momo, ZaloPay, ShopeePay</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary (Right Sidebar) -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow p-6 sticky top-6">
+                    <h3 class="text-xl font-bold mb-4">Order Summary</h3>
+
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between text-gray-600">
+                            <span>Subtotal</span>
+                            <span id="checkoutSubtotal">₫0</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600">
+                            <span>Shipping Fee</span>
+                            <span id="checkoutShipping">₫15</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600">
+                            <span>Discount</span>
+                            <span class="text-green-600">-₫0</span>
+                        </div>
+                        <hr>
+                        <div class="flex justify-between text-xl font-bold">
+                            <span>Total Payment</span>
+                            <span class="text-orange-600" id="checkoutTotal">₫15</span>
+                        </div>
+                    </div>
+
+                    <button onclick="placeOrder()"
+                        class="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg font-bold transition mb-3">
+                        Place Order
+                    </button>
+
+                    <a href="cart.html" class="block text-center text-orange-600 hover:text-orange-700">
+                        <i class="fas fa-arrow-left mr-1"></i> Back to Cart
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        function renderCheckoutItems() {
+            const container = document.getElementById('checkoutItems');
+
+            if (cart.length === 0) {
+                window.location.href = 'cart.html';
+                return;
+            }
+
+            container.innerHTML = cart.map(item => `
+                <div class="flex items-center gap-4 pb-4 border-b">
+                    <img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-cover rounded">
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-800">${item.name}</h4>
+                        <p class="text-sm text-gray-500">Quantity: ${item.quantity}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-gray-800">₫${item.price * item.quantity}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            updateCheckoutSummary();
+        }
+
+        function updateCheckoutSummary() {
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const shipping = 15;
+            const total = subtotal + shipping;
+
+            document.getElementById('checkoutSubtotal').textContent = `₫${subtotal}`;
+            document.getElementById('checkoutTotal').textContent = `₫${total}`;
+        }
+
+        function placeOrder() {
+            // Calculate Total
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const shipping = 15;
+            const total = subtotal + shipping;
+
+            // Save Total for Success Page
+            localStorage.setItem('lastOrderTotal', `₫${total}`);
+
+            // Clear Cart
+            localStorage.setItem('cart', JSON.stringify([]));
+
+            // Redirect
+            window.location.href = 'order-success.html';
+        }
+
+        function toggleAddressForm() {
+            const form = document.getElementById('newAddressForm');
+            form.classList.toggle('hidden');
+        }
+
+        function saveAddress() {
+            const name = document.getElementById('inputName').value;
+            const phone = document.getElementById('inputPhone').value;
+            const street = document.getElementById('inputStreet').value;
+            const city = document.getElementById('inputCity').value;
+            const zip = document.getElementById('inputZip').value;
+
+            if (!name || !phone || !street || !city) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            // Update Default Address Card
+            document.getElementById('addrName').textContent = name;
+            document.getElementById('addrPhone').textContent = phone;
+            document.getElementById('addrStreet').textContent = street;
+            document.getElementById('addrRegion').textContent = `${city} ${zip ? ', ' + zip : ''}`;
+
+            // Reset and Close Form
+            document.getElementById('inputName').value = '';
+            document.getElementById('inputPhone').value = '';
+            document.getElementById('inputStreet').value = '';
+            document.getElementById('inputCity').value = '';
+            document.getElementById('inputZip').value = '';
+            toggleAddressForm();
+
+            alert('Address updated successfully!');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCheckoutItems();
+
+            // Sync User Name to Address
+            const userName = localStorage.getItem('userName');
+            if (userName) {
+                document.getElementById('addrName').textContent = userName;
+            }
+        });
+    </script>
+</body>
+
+</html>

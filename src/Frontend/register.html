@@ -136,30 +136,121 @@
 
             </div>
 
+            <!-- SLIDER JS -->
             <script>
-                async function googleLogin(event) {
-                    event.preventDefault();
-
-                    try {
-                        const res = await fetch(
-                            'http://localhost:8080/api/auth/oauth/google/url?redirect_uri=http://localhost:3000/auth/callback/google.html'
-                        );
-
-                        const data = await res.json();
-
-                        if (data.authUrl) {
-                            // 🔥 SWITCH TO GOOGLE
-                            window.location.href = data.authUrl;
-                        } else {
-                            alert('❌ Could not get Google URL');
-                        }
-                    } catch (err) {
-                        alert('❌ Google Login Error');
-                        console.error(err);
-                    }
-                }
+                const images = document.querySelectorAll("#slider img");
+                let current = 0;
+                setInterval(() => {
+                    images[current].style.opacity = 0;
+                    current = (current + 1) % images.length;
+                    images[current].style.opacity = 1;
+                }, 3000);
             </script>
+        </div>
+    </div>
 
+    <script>
+        async function goToOTP() {
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const password = document.getElementById('password').value;
+
+            if (!fullName || !email || !password || !phone) {
+                alert('⚠️ Please fill in all required fields!');
+                return;
+            }
+
+            // Validate Phone (VN format: 10 digits, starts with 0)
+            const phoneRegex = /^0\d{9}$/;
+            if (!phoneRegex.test(phone)) {
+                alert('❌ Phone number must be 10 digits and start with 0 (e.g., 0912345678)!');
+                return;
+            }
+
+            // Validate Password Regex
+            const strongPasswordRegex = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+            if (!strongPasswordRegex.test(password)) {
+                alert('❌ Password must be at least 8 characters, include uppercase, lowercase, and number!');
+                return;
+            }
+
+            // Save to localStorage for OTP step
+            localStorage.setItem('pendingEmail', email);
+            localStorage.setItem('pendingPassword', password);
+            localStorage.setItem('pendingName', fullName);
+            localStorage.setItem('pendingPhone', phone);
+
+            try {
+                // Call Register API (Backend will send OTP automatically)
+                const res = await fetch('http://localhost:8080/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fullName: fullName,
+                        email: email,
+                        phone: phone,
+                        password: password
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert('✅ Registration successful! OTP sent to your email.');
+                    window.location.href = 'otp.html';
+                } else {
+                    // FALLBACK: If email already exists, try to resend OTP (user might have failed verification previously)
+                    if (data.message && (data.message.includes('Email already exists') || data.message.includes('Email đã tồn tại'))) {
+                        const confirmResend = confirm('⚠️ Email already registered. Do you want to receive a new OTP to verify this account?');
+                        if (confirmResend) {
+                            try {
+                                const otpRes = await fetch('http://localhost:8080/api/auth/send-otp', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ email })
+                                });
+                                if (otpRes.ok) {
+                                    alert('✅ New OTP sent! Redirecting to verification...');
+                                    window.location.href = 'otp.html';
+                                    return;
+                                }
+                            } catch (e) {
+                                console.error(e);
+                            }
+                        }
+                    }
+
+                    alert('❌ ' + (data.message || 'Registration failed'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('❌ Server connection error');
+            }
+        }
+
+        async function googleLogin(event) {
+            event.preventDefault();
+
+            try {
+                const res = await fetch(
+                    'http://localhost:8080/api/auth/oauth/google/url?redirect_uri=http://localhost:3000/auth/callback/google.html'
+                );
+
+                const data = await res.json();
+
+                if (data.authUrl) {
+                    // 🔥 SWITCH TO GOOGLE
+                    window.location.href = data.authUrl;
+                } else {
+                    alert('❌ Could not get Google URL');
+                }
+            } catch (err) {
+                alert('❌ Google Login Error');
+                console.error(err);
+            }
+        }
+    </script>
 </body>
 
 </html>

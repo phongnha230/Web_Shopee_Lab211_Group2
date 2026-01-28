@@ -50,7 +50,7 @@ public class AuthController {
     @PostMapping("/send-otp")
     public ResponseEntity<Map<String, String>> sendOtp(@Valid @RequestBody SendOtpRequest request) {
         otpService.sendOtpEmail(request.getEmail());
-        return ResponseEntity.ok(Map.of("message", "Mã OTP đã được gửi đến email của bạn"));
+        return ResponseEntity.ok(Map.of("message", "OTP code has been sent to your email"));
     }
 
     // ✅ MỚI: Verify OTP

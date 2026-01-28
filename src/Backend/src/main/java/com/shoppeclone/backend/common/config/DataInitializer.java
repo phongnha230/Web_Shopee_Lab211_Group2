@@ -9,35 +9,27 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
-    
+
     private final RoleRepository roleRepository;
-    
+
     @Override
     public void run(String... args) {
-        // Kiểm tra nếu chưa có role nào thì tạo
-        if (roleRepository.count() == 0) {
-            
-            // Role USER
-            Role userRole = new Role();
-            userRole.setName("ROLE_USER");
-            userRole.setDescription("Người dùng thông thường");
-            roleRepository.save(userRole);
-            
-            // Role ADMIN
-            Role adminRole = new Role();
-            adminRole.setName("ROLE_ADMIN");
-            adminRole.setDescription("Quản trị viên");
-            roleRepository.save(adminRole);
-            
-            // Role SELLER
-            Role sellerRole = new Role();
-            sellerRole.setName("ROLE_SELLER");
-            sellerRole.setDescription("Người bán hàng");
-            roleRepository.save(sellerRole);
-            
-            System.out.println("✅ Đã khởi tạo các Role thành công!");
+        createRoleIfNotFound("ROLE_USER", "Regular User");
+        createRoleIfNotFound("ROLE_ADMIN", "Administrator");
+        createRoleIfNotFound("ROLE_SELLER", "Seller");
+
+        System.out.println("✅ Role verification and initialization completed!");
+    }
+
+    private void createRoleIfNotFound(String roleName, String description) {
+        if (roleRepository.findByName(roleName).isEmpty()) {
+            Role role = new Role();
+            role.setName(roleName);
+            role.setDescription(description);
+            roleRepository.save(role);
+            System.out.println("👉 Created new role: " + roleName);
         } else {
-            System.out.println("✅ Roles đã tồn tại, bỏ qua khởi tạo.");
+            System.out.println("✅ Role already exists: " + roleName);
         }
     }
 }

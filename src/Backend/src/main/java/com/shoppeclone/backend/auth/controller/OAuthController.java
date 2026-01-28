@@ -28,6 +28,7 @@ public class OAuthController {
             @RequestBody Map<String, String> body) {
 
         String code = body.get("code");
+        System.out.println("DEBUG: OAuthController received code: " + code);
         AuthResponse auth = oauthService.authenticateWithGoogle(code);
         return ResponseEntity.ok(auth);
     }

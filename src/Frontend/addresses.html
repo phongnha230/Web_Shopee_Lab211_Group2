@@ -316,6 +316,12 @@
                 isDefault: document.getElementById('isDefault').checked
             };
 
+            // Validate Phone
+            if (!/^0\d{9}$/.test(data.phone)) {
+                showToast('❌ Phone number must be 10 digits and start with 0!', 'error');
+                return;
+            }
+
             try {
                 const url = addressId
                     ? `${API_URL}/user/addresses/${addressId}`

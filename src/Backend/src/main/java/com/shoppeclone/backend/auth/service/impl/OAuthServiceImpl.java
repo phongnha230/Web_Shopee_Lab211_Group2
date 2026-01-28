@@ -15,23 +15,31 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import com.shoppeclone.backend.common.service.EmailService;
+import com.shoppeclone.backend.user.service.NotificationService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class OAuthServiceImpl implements OAuthService {
 
-    // 🔥 FIX CỨNG redirect URI – KHÔNG TRUYỀN TỪ FE
-    private static final String GOOGLE_REDIRECT_URI = "http://localhost:3000/auth/callback/google.html";
+    // 🔥 FIX: Khớp với Google Cloud Console redirect URI
+    private static final String GOOGLE_REDIRECT_URI = "http://localhost:3000/auth/callback/google";
 
     private final UserRepository userRepository;
     private final OAuthAccountRepository oauthAccountRepository;
     private final RoleRepository roleRepository;
     private final UserSessionRepository sessionRepository;
     private final JwtUtil jwtUtil;
+    private final NotificationService notificationService;
+    private final EmailService emailService;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -49,7 +57,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     @Override
     public String getGoogleAuthUrl() {
-        return UriComponentsBuilder
+        String url = UriComponentsBuilder
                 .fromUriString("https://accounts.google.com/o/oauth2/v2/auth")
                 .queryParam("client_id", clientId)
                 .queryParam("redirect_uri", GOOGLE_REDIRECT_URI)
@@ -58,21 +66,76 @@ public class OAuthServiceImpl implements OAuthService {
                 .queryParam("prompt", "consent")
                 .build()
                 .toUriString();
+
+        System.out.println("🔍 DEBUG: Using Redirect URI: '" + GOOGLE_REDIRECT_URI + "'");
+        System.out.println("🔍 DEBUG: Full Auth URL: " + url);
+
+        return url;
     }
 
     @Override
     public AuthResponse authenticateWithGoogle(String code) {
+        try {
+            System.out.println("🔍 DEBUG: Starting Google authentication with code: " + code);
 
-        String accessToken = exchangeCodeForToken(code);
-        GoogleUserInfo googleUser = getUserInfo(accessToken);
-        User user = findOrCreateUser(googleUser);
+            String accessToken = exchangeCodeForToken(code);
+            System.out.println("✅ DEBUG: Got access token");
 
-        String jwtAccessToken = jwtUtil.generateAccessToken(user.getEmail());
-        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+            GoogleUserInfo googleUser = getUserInfo(accessToken);
+            System.out
+                    .println("✅ DEBUG: Got Google user info: " + (googleUser != null ? googleUser.getEmail() : "null"));
 
-        saveUserSession(user, refreshToken);
+            if (googleUser == null) {
+                throw new RuntimeException("Failed to get Google user info");
+            }
 
-        return new AuthResponse(jwtAccessToken, refreshToken, "Bearer", mapToUserDto(user));
+            User user = findOrCreateUser(googleUser);
+            System.out.println("✅ DEBUG: User found/created: " + (user != null ? user.getEmail() : "null"));
+
+            if (user == null) {
+                throw new RuntimeException("Failed to create or find user for email: " + googleUser.getEmail());
+            }
+
+            String jwtAccessToken = jwtUtil.generateAccessToken(user.getEmail());
+            String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+
+            saveUserSession(user, refreshToken);
+
+            saveUserSession(user, refreshToken);
+
+            // 🔥 NOTIFICATION Logic
+            try {
+                ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
+                        .getRequestAttributes();
+                if (attributes != null) {
+                    HttpServletRequest httpRequest = attributes.getRequest();
+                    String ip = httpRequest.getHeader("X-Forwarded-For");
+                    if (ip == null || ip.isEmpty())
+                        ip = httpRequest.getRemoteAddr();
+
+                    String userAgent = httpRequest.getHeader("User-Agent");
+                    String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy"));
+
+                    // 1. Save Notification
+                    notificationService.createNotification(
+                            user.getId(),
+                            "New Google Login Detected",
+                            "New login via Google at " + time + " from IP: " + ip,
+                            "SECURITY");
+
+                    // 2. Send Email
+                    emailService.sendLoginAlert(user.getEmail(), time, ip, userAgent);
+                }
+            } catch (Exception e) {
+                System.err.println("❌ Failed to send login notification: " + e.getMessage());
+            }
+
+            return new AuthResponse(jwtAccessToken, refreshToken, "Bearer", mapToUserDto(user));
+        } catch (Exception e) {
+            System.err.println("❌ ERROR in authenticateWithGoogle: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Google authentication failed: " + e.getMessage(), e);
+        }
     }
 
     // ====================== PRIVATE ======================
@@ -116,47 +179,128 @@ public class OAuthServiceImpl implements OAuthService {
         ResponseEntity<GoogleUserInfo> response = restTemplate.exchange(userInfoUri, HttpMethod.GET, entity,
                 GoogleUserInfo.class);
 
-        return response.getBody();
+        GoogleUserInfo userInfo = response.getBody();
+
+        // 🔥 NULL CHECK: Validate response body
+        if (userInfo == null) {
+            System.out.println("❌ ERROR: Google UserInfo response body is null");
+            throw new RuntimeException("Google UserInfo response is null");
+        }
+
+        System.out.println("✅ Got user info from Google: " + userInfo.getEmail());
+        return userInfo;
     }
 
     private User findOrCreateUser(GoogleUserInfo googleUser) {
-
-        OAuthAccount oauthAccount = oauthAccountRepository
-                .findByProviderAndProviderId("google", googleUser.getId())
-                .orElse(null);
-
-        User user;
-
-        if (oauthAccount != null) {
-            user = oauthAccount.getUser();
-        } else {
-            user = userRepository.findByEmail(googleUser.getEmail()).orElse(null);
-
-            if (user == null) {
-                user = new User();
-                user.setEmail(googleUser.getEmail());
-                user.setFullName(googleUser.getName());
-                user.setEmailVerified(true);
-                user.setCreatedAt(LocalDateTime.now());
-
-                Role role = roleRepository.findByName("ROLE_USER")
-                        .orElseThrow();
-                user.setRoles(Set.of(role));
-
-                userRepository.save(user);
-            }
-
-            OAuthAccount oa = new OAuthAccount();
-            oa.setUser(user);
-            oa.setProvider("google");
-            oa.setProviderId(googleUser.getId());
-            oa.setEmail(googleUser.getEmail());
-            oa.setCreatedAt(LocalDateTime.now());
-
-            oauthAccountRepository.save(oa);
+        // 🔥 NULL CHECK: Validate input
+        if (googleUser == null) {
+            throw new RuntimeException("GoogleUserInfo is null");
+        }
+        if (googleUser.getEmail() == null || googleUser.getEmail().isEmpty()) {
+            throw new RuntimeException("Google user email is null or empty");
         }
 
-        return user;
+        System.out.println("DEBUG: findOrCreateUser called for email: " + googleUser.getEmail());
+
+        try {
+            OAuthAccount oauthAccount = oauthAccountRepository
+                    .findByProviderAndProviderId("google", googleUser.getId())
+                    .orElse(null);
+
+            System.out.println("DEBUG: Found existing OAuthAccount? " + (oauthAccount != null));
+
+            User user;
+
+            if (oauthAccount != null) {
+                user = oauthAccount.getUser();
+                System.out.println("DEBUG: User retrieved from OAuthAccount.");
+                if (user == null) {
+                    System.out.println(
+                            "⚠️ WARNING: OAuthAccount exists but user is null! Falling back to email search...");
+                    user = userRepository.findByEmail(googleUser.getEmail()).orElse(null);
+
+                    if (user == null) {
+                        System.out.println("DEBUG: User not found by email, creating new...");
+                        user = createNewUser(googleUser);
+                    } else {
+                        System.out.println("DEBUG: User found by email: " + user.getEmail()
+                                + ". Linking to existing OAuthAccount.");
+                    }
+
+                    // Link the user back to the OAuthAccount
+                    oauthAccount.setUser(user);
+                    oauthAccountRepository.save(oauthAccount);
+                }
+            } else {
+                user = userRepository.findByEmail(googleUser.getEmail()).orElse(null);
+                System.out.println("DEBUG: Found existing User by email? " + (user != null));
+
+                if (user == null) {
+                    user = createNewUser(googleUser);
+                }
+
+                try {
+                    OAuthAccount oa = new OAuthAccount();
+                    oa.setUser(user);
+                    oa.setProvider("google");
+                    oa.setProviderId(googleUser.getId());
+                    oa.setEmail(googleUser.getEmail());
+                    oa.setCreatedAt(LocalDateTime.now());
+
+                    System.out.println("DEBUG: Saving new OAuthAccount for: " + googleUser.getEmail());
+                    oauthAccountRepository.save(oa);
+                    System.out.println("DEBUG: OAuthAccount saved successfully!");
+                } catch (Exception e) {
+                    System.out.println("❌ ERROR: Failed to save OAuthAccount: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+
+            System.out.println("✅ DEBUG: Returning user with ID: " + user.getId());
+            return user;
+
+        } catch (Exception e) {
+            System.out.println("❌ CRITICAL ERROR in findOrCreateUser: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to create or find user: " + e.getMessage(), e);
+        }
+    }
+
+    private User createNewUser(GoogleUserInfo googleUser) {
+        System.out.println("DEBUG: Creating new user...");
+        User user = new User();
+        user.setEmail(googleUser.getEmail());
+        user.setFullName(googleUser.getName());
+        user.setPassword(null); // OAuth users don't have password
+        user.setEmailVerified(true);
+        user.setActive(true);
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
+
+        Role role = roleRepository.findByName("ROLE_USER")
+                .orElseGet(() -> {
+                    System.out.println("⚠️ Role ROLE_USER not found. Creating it now...");
+                    Role newRole = new Role();
+                    newRole.setName("ROLE_USER");
+                    newRole.setDescription("Regular User");
+                    return roleRepository.save(newRole);
+                });
+        user.setRoles(Set.of(role));
+
+        try {
+            System.out.println("DEBUG: Saving new User: " + user.getEmail());
+            user = userRepository.save(user);
+            System.out.println("DEBUG: User saved with ID: " + user.getId());
+
+            if (user == null || user.getId() == null) {
+                throw new RuntimeException("User save failed - returned null");
+            }
+            return user;
+        } catch (Exception e) {
+            System.out.println("❌ ERROR: Failed to save user: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to save user to database", e);
+        }
     }
 
     private void saveUserSession(User user, String refreshToken) {

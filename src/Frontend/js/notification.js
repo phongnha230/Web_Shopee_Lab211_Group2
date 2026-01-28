@@ -54,7 +54,6 @@ async function loadNotifications() {
             if (!isAdminDashboard) {
                 notifications = notifications.filter(n => n.type !== 'SECURITY');
             }
-
             renderNotifications(notifications);
             updateBadge(notifications);
         }

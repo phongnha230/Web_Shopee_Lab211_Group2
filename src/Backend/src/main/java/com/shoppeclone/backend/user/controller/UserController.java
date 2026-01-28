@@ -85,4 +85,11 @@ public class UserController {
         userService.deleteAddressByEmail(getEmail(authentication), addressId);
         return ResponseEntity.ok("Address deleted successfully");
     }
+
+    // ADMIN
+    @PostMapping("/promote")
+    public ResponseEntity<String> promoteUser(@RequestParam String email, @RequestParam String roleName) {
+        userService.promoteUser(email, roleName);
+        return ResponseEntity.ok("User promoted to " + roleName + " successfully!");
+    }
 }

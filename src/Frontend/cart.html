@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - Shopee Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<script>
+    // AUTH GUARD: Chuyển hướng nếu chưa đăng nhập
+    if (!localStorage.getItem('accessToken')) {
+        alert('⚠️ You must login to view your cart!');
+        window.location.href = 'login.html';
+    }
+</script>
+</head>
+
+<body class="bg-gray-50">
+    <!-- Header -->
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between py-4 gap-8">
+                <!-- Left: Logo & Title -->
+                <div class="flex items-center gap-4 min-w-fit">
+                    <a href="index.html" class="flex items-center gap-2 text-orange-500 hover:opacity-90">
+                        <i class="fas fa-shopping-bag text-3xl"></i>
+                        <span class="text-2xl font-bold">Shopee Clone</span>
+                    </a>
+                    <div class="h-8 w-[1px] bg-orange-500 hidden sm:block"></div>
+                    <span class="text-xl text-gray-700 hidden sm:block">Shopping Cart</span>
+                </div>
+
+                <!-- Middle: Search Bar -->
+                <div class="flex-1 max-w-2xl hidden md:block">
+                    <div class="relative flex items-center">
+                        <input type="text" placeholder="Search for products, brands and shops"
+                            class="w-full bg-gray-100 text-gray-700 border border-transparent focus:bg-white focus:border-orange-500 rounded-sm py-2 px-4 outline-none transition-all placeholder-gray-400">
+                        <button
+                            class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-sm absolute right-0 top-0 bottom-0 flex items-center justify-center transition">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right: Icons & User -->
+                <div class="flex items-center gap-5 text-gray-600 min-w-fit">
+                    <button class="relative hover:text-orange-500 transition">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span
+                            class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                    </button>
+                    <button class="hover:text-orange-500 transition">
+                        <i class="fas fa-question-circle text-xl"></i>
+                    </button>
+
+                    <!-- Dynamic User -->
+                    <div id="userNav" class="flex items-center gap-2 cursor-pointer hover:text-orange-500 transition">
+                        <img id="userAvatar" src="" alt="User" class="w-8 h-8 rounded-full border border-gray-200">
+                        <span id="userName" class="font-medium text-sm hidden lg:block">Loading...</span>
+                        <button onclick="logout()" class="ml-2 text-sm text-red-500 hover:text-red-700">Logout</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Search Bar (visible only on small screens) -->
+            <div class="md:hidden pb-3">
+                <div class="relative flex items-center">
+                    <input type="text" placeholder="Search..."
+                        class="w-full bg-gray-100 border border-transparent focus:border-orange-500 rounded px-3 py-1.5 outline-none">
+                    <button class="absolute right-0 top-0 bottom-0 px-3 text-orange-500"><i
+                            class="fas fa-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="text-sm text-gray-500">
+            <a href="index.html" class="hover:text-orange-500">Home</a>
+            <span class="mx-2">/</span>
+            <span class="text-gray-800">Shopping Cart</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <!-- Empty Cart State -->
+        <div id="emptyCart"
+            class="hidden flex flex-col items-center justify-center bg-white rounded shadow-sm p-12 mb-8">
+            <img src="https://deo.shopeemobile.com/shopee/shopee-pcmall-live-sg/cart/9bdd8040b334d31946f4.png"
+                alt="Empty Cart" class="w-32 mb-4">
+            <p class="text-gray-500 text-lg mb-6">Your shopping cart is empty</p>
+            <a href="index.html"
+                class="bg-orange-500 text-white px-10 py-2.5 rounded hover:bg-orange-600 transition uppercase font-medium">Go
+                Shopping Now</a>
+        </div>
+
+        <div id="cartContent" class="flex flex-col lg:flex-row gap-6">
+            <!-- Left: Cart Items -->
+            <div class="flex-1 space-y-4">
+
+                <!-- Table Header -->
+                <div class="bg-white rounded shadow-sm p-4 grid grid-cols-12 gap-4 items-center text-gray-500 text-sm">
+                    <div class="col-span-6 flex items-center">
+                        <input type="checkbox" id="selectAllTop" onchange="toggleSelectAll(this)"
+                            class="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500 mr-4 cursor-pointer">
+                        <span>Product</span>
+                    </div>
+                    <div class="col-span-2 text-center">Unit Price</div>
+                    <div class="col-span-2 text-center">Quantity</div>
+                    <div class="col-span-1 text-center">Total Price</div>
+                    <div class="col-span-1 text-center">Actions</div>
+                </div>
+
+                <!-- Shop Group Wrapper (Simulated) -->
+                <div class="bg-white rounded shadow-sm border border-gray-100">
+                    <!-- Shop Header -->
+                    <div class="p-4 border-b border-gray-100 flex items-center gap-3">
+                        <input type="checkbox" id="selectShop" onchange="toggleSelectAll(this)"
+                            class="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500 cursor-pointer">
+                        <i class="fas fa-store text-gray-700"></i>
+                        <span class="font-bold text-gray-800">TechZone Official</span>
+                        <span class="bg-orange-500 text-white text-[10px] px-1 rounded font-bold">MALL</span>
+                        <button class="ml-auto text-orange-500 text-sm flex items-center gap-1 hover:text-orange-600">
+                            <i class="far fa-comment-dots"></i> Chat
+                        </button>
+                    </div>
+
+                    <!-- Items Container -->
+                    <div id="cartItems">
+                        <!-- Items rendered via JS -->
+                    </div>
+
+                    <!-- Shop Voucher Row -->
+                    <div
+                        class="px-4 py-3 bg-orange-50 flex items-center justify-between border-t border-dashed border-orange-200">
+                        <div class="flex items-center gap-2 text-sm text-orange-600">
+                            <i class="fas fa-ticket-alt"></i>
+                            <span>Shop Voucher: $5 off min. spend $50</span>
+                        </div>
+                        <button class="text-blue-500 text-sm font-medium hover:underline">Change</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right: Order Summary Sidebar -->
+            <div class="w-full lg:w-96 space-y-4">
+                <!-- Platform Voucher -->
+                <div class="bg-white rounded shadow-sm p-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <div class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                            <i class="fas fa-ticket-alt text-orange-500"></i> Platform Voucher
+                        </div>
+                        <button class="text-blue-500 text-sm hover:underline">Select Code</button>
+                    </div>
+                    <div class="bg-green-50 text-green-700 text-xs px-3 py-2 rounded flex items-center gap-2">
+                        <i class="fas fa-shipping-fast"></i> Free Shipping Applied
+                    </div>
+                </div>
+
+                <!-- Summary Details -->
+                <div class="bg-white rounded shadow-sm p-6 sticky top-24">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Order Summary</h3>
+
+                    <div class="space-y-3 text-sm text-gray-600 mb-6 border-b border-gray-100 pb-6">
+                        <div class="flex justify-between">
+                            <span>Subtotal (<span id="summaryItemCount">0</span> items)</span>
+                            <span id="subtotal" class="font-medium text-gray-800">₫0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Shipping Fee</span>
+                            <span id="shippingFee" class="font-medium text-gray-800">₫0</span>
+                        </div>
+                        <div class="flex justify-between text-green-600">
+                            <span>Shipping Discount</span>
+                            <span id="shippingDiscount">-₫0</span>
+                        </div>
+                        <div class="flex justify-between text-orange-500">
+                            <span>Shop Vouchers</span>
+                            <span id="voucherDiscount">-₫0</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-end mb-6">
+                        <span class="text-gray-600">Total</span>
+                        <div class="text-right">
+                            <div id="total" class="text-2xl font-bold text-orange-500">₫0</div>
+                            <div class="text-[10px] text-gray-400">VAT included, where applicable</div>
+                        </div>
+                    </div>
+
+                    <button onclick="goCheckout()"
+                        class="w-full bg-orange-500 hover:bg-orange-600 text-white py-3.5 rounded font-bold uppercase tracking-wide shadow-lg shadow-orange-200 transition transform hover:-translate-y-0.5">
+                        Check Out
+                    </button>
+
+                    <div class="mt-4 flex gap-2 justify-center">
+                        <div class="w-10 h-6 bg-gray-100 rounded"></div>
+                        <div class="w-10 h-6 bg-gray-100 rounded"></div>
+                        <div class="w-10 h-6 bg-gray-100 rounded"></div>
+                        <div class="w-10 h-6 bg-gray-100 rounded"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- You May Also Like -->
+        <div class="mt-12">
+            <h2 class="text-xl font-bold text-gray-800 mb-6 uppercase">You may also like</h2>
+            <div id="recommendedGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <!-- Recommended items loaded via JS -->
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        // Mock Recommended Data
+        const RECOMMENDED_PRODUCTS = [
+            { id: 'rec1', name: "Sony WH-1000XM5 Noise Canceling", price: 248, image: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=400", sold: '1.2k' },
+            { id: 'rec2', name: "Apple Watch Series 8 GPS", price: 399, image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=400", sold: '500+' },
+            { id: 'rec3', name: "Polaroid Now I-Type Instant Camera", price: 99, image: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400", sold: '89' },
+            { id: 'rec4', name: "Mini Succulent Plant Set", price: 12, image: "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=400", sold: '2.1k' },
+            { id: 'rec5', name: "Dell XPS 13 Laptop 16GB RAM", price: 1199, image: "https://images.unsplash.com/photo-1593642632823-8f78536709c6?w=400", sold: '150' },
+            { id: 'rec6', name: "Ergonomic Office Chair with Lumbar", price: 89, image: "https://images.unsplash.com/photo-1580480055273-228ff5388ef8?w=400", sold: '890' },
+        ];
+
+        function renderCart() {
+            const container = document.getElementById('cartItems');
+            const emptyState = document.getElementById('emptyCart');
+            const content = document.getElementById('cartContent');
+
+            if (cart.length === 0) {
+                content.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                renderRecommended();
+                return;
+            } else {
+                content.classList.remove('hidden');
+                emptyState.classList.add('hidden');
+            }
+
+            container.innerHTML = cart.map((item, index) => {
+                // Default checked state
+                if (typeof item.checked === 'undefined') item.checked = true;
+
+                return `
+                <div class="grid grid-cols-12 gap-4 items-center p-4 border-b last:border-0 border-gray-100 hover:bg-gray-50 transition">
+                    <!-- Product Info (Col 1-6) -->
+                    <div class="col-span-6 flex items-start gap-3">
+                        <input type="checkbox" onchange="toggleItem(${index})" ${item.checked ? 'checked' : ''} 
+                            class="mt-8 w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500 cursor-pointer flex-shrink-0">
+                        
+                        <img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-cover rounded border border-gray-200">
+                        
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-sm font-medium text-gray-800 line-clamp-2 mb-1" title="${item.name}">${item.name}</h3>
+                            
+                            ${(item.color || item.size) ? `
+                                <div class="inline-flex items-center gap-1 bg-gray-100 text-gray-500 text-xs px-2 py-1 rounded cursor-pointer hover:bg-gray-200" title="Click to change variation">
+                                    <span>Variation: ${[item.color, item.size].filter(Boolean).join(', ')}</span>
+                                    <i class="fas fa-chevron-down text-[10px]"></i>
+                                </div>
+                            ` : ''}
+                            
+                            <img src="https://deo.shopeemobile.com/shopee/shopee-pcmall-live-sg/productdetailspage/2c53a3a41285038f.png" alt="Free Return" class="h-4 mt-2 object-contain hidden lg:block">
+                        </div>
+                    </div>
+
+                    <!-- Unit Price (Col 7-8) -->
+                    <div class="col-span-2 text-center text-sm">
+                        <div class="text-gray-400 line-through text-xs">₫${(item.price * 1.2).toFixed(2)}</div>
+                        <div class="text-gray-800 font-medium">₫${item.price}</div>
+                    </div>
+
+                    <!-- Quantity (Col 9-10) -->
+                    <div class="col-span-2 flex justify-center">
+                        <div class="flex items-center border border-gray-300 rounded-sm">
+                            <button onclick="updateQuantity(${index}, -1)" class="px-2 py-1 hover:bg-gray-100 text-gray-600 border-r border-gray-300">-</button>
+                            <input type="text" value="${item.quantity}" readonly class="w-10 text-center text-sm outline-none">
+                            <button onclick="updateQuantity(${index}, 1)" class="px-2 py-1 hover:bg-gray-100 text-gray-600 border-l border-gray-300">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Total Price (Col 11) -->
+                    <div class="col-span-1 text-center font-bold text-orange-500 text-sm">
+                        ₫${(item.price * item.quantity).toFixed(2)}
+                    </div>
+
+                    <!-- Actions (Col 12) -->
+                    <div class="col-span-1 text-center">
+                        <button onclick="removeItem(${index})" class="text-gray-400 hover:text-red-500 transition">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            `}).join('');
+
+            updateSummary();
+            renderRecommended();
+        }
+
+        function renderRecommended() {
+            const grid = document.getElementById('recommendedGrid');
+            grid.innerHTML = RECOMMENDED_PRODUCTS.map(p => `
+                <div class="bg-white rounded hover:shadow-md transition cursor-pointer border border-transparent hover:border-orange-500 p-2">
+                    <div class="relative mb-2">
+                        <img src="${p.image}" class="w-full h-40 object-cover rounded-sm">
+                        <div class="absolute bottom-0 left-0 bg-yellow-400 text-xs px-1 font-bold">Find Similar</div>
+                    </div>
+                    <div class="text-sm font-medium text-gray-800 line-clamp-2 mb-2 h-10">${p.name}</div>
+                    <div class="flex justify-between items-end">
+                        <div class="text-orange-500 font-bold">$${p.price}</div>
+                        <div class="text-xs text-gray-500">${p.sold} sold</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleItem(index) {
+            cart[index].checked = !cart[index].checked;
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateSummary();
+        }
+
+        function toggleSelectAll(source) {
+            const isChecked = source.checked;
+            cart.forEach(item => item.checked = isChecked);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCart();
+            document.getElementById('selectAllTop').checked = isChecked;
+            document.getElementById('selectShop').checked = isChecked;
+        }
+
+        function updateSummary() {
+            const checkedItems = cart.filter(item => item.checked !== false);
+            const itemCount = checkedItems.reduce((sum, item) => sum + item.quantity, 0);
+            const subtotal = checkedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            // Logic Shipping Fee: If items > 0, standard fee $5 (simulated). If > $100, free shipping.
+            let shipping = itemCount > 0 ? 5 : 0;
+            let shippingDiscount = 0;
+            let shopVoucher = 0;
+
+            if (subtotal > 100) {
+                shippingDiscount = 5; // Free shipping
+            }
+
+            if (subtotal > 50) {
+                shopVoucher = 5; // Mock shop voucher
+            }
+
+            const total = subtotal + shipping - shippingDiscount - shopVoucher;
+
+            document.getElementById('summaryItemCount').textContent = itemCount;
+            document.getElementById('subtotal').textContent = `₫${subtotal.toFixed(2)}`;
+            document.getElementById('shippingFee').textContent = `₫${shipping}`;
+            document.getElementById('shippingDiscount').textContent = shippingDiscount > 0 ? `-₫${shippingDiscount}` : '₫0';
+            document.getElementById('voucherDiscount').textContent = shopVoucher > 0 ? `-₫${shopVoucher}` : '₫0';
+
+            document.getElementById('total').textContent = `₫${(total > 0 ? total : 0).toFixed(2)}`;
+
+            const checkoutBtn = document.querySelector('button[onclick="goCheckout()"]');
+            if (itemCount === 0) {
+                checkoutBtn.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-400');
+                checkoutBtn.classList.remove('bg-orange-500', 'hover:bg-orange-600', 'shadow-lg');
+                checkoutBtn.disabled = true;
+            } else {
+                checkoutBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-400');
+                checkoutBtn.classList.add('bg-orange-500', 'hover:bg-orange-600', 'shadow-lg');
+                checkoutBtn.disabled = false;
+            }
+
+            // Sync header checkboxes
+            const allChecked = cart.length > 0 && cart.every(item => item.checked);
+            const selectAllTop = document.getElementById('selectAllTop');
+            const selectShop = document.getElementById('selectShop');
+            if (selectAllTop) selectAllTop.checked = allChecked;
+            if (selectShop) selectShop.checked = allChecked;
+        }
+
+        function updateQuantity(index, change) {
+            cart[index].quantity += change;
+            if (cart[index].quantity <= 0) {
+                if (confirm('Remove this item?')) {
+                    cart.splice(index, 1);
+                } else {
+                    cart[index].quantity = 1; // Revert
+                }
+            }
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCart();
+        }
+
+        function removeItem(index) {
+            if (confirm('Remove this item from cart?')) {
+                cart.splice(index, 1);
+                localStorage.setItem('cart', JSON.stringify(cart));
+                renderCart();
+            }
+        }
+
+        function goCheckout() {
+            if (cart.length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
+            window.location.href = 'checkout.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCart();
+            updateNavbar();
+        });
+
+        function updateNavbar() {
+            const userName = localStorage.getItem('userName') || 'User';
+            document.getElementById('userName').textContent = userName;
+            document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=ffedd5&color=f97316`;
+        }
+
+        function logout() {
+            if (confirm('Logout?')) {
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('userName');
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+
+</html>
