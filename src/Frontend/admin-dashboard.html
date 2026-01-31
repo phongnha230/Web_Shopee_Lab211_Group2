@@ -110,9 +110,16 @@
                 <div
                     class="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 font-medium">
                     <i class="far fa-calendar-alt"></i>
-                    <span>Oct 24, 2023</span>
+                    <span id="currentDate">Oct 24, 2023</span>
                 </div>
             </div>
+
+            <script>
+                // Update Date
+                const dateElement = document.getElementById('currentDate');
+                const options = { year: 'numeric', month: 'short', day: 'numeric' };
+                dateElement.textContent = new Date().toLocaleDateString('en-US', options);
+            </script>
         </header>
 
         <!-- Main Scrollable Area -->
@@ -394,12 +401,25 @@
 
                 <!-- Tabs/Filters for Shops -->
                 <div class="flex border-b border-gray-200">
-                    <button class="px-6 py-3 border-b-2 border-blue-600 text-blue-600 font-bold">Pending
+                    <button onclick="loadPendingShops(); setActiveTab(this)"
+                        class="px-6 py-3 border-b-2 border-blue-600 text-blue-600 font-bold tab-btn">Pending
                         Approvals</button>
-                    <button class="px-6 py-3 text-gray-500 hover:text-gray-700">Active Shops</button>
-                    <button class="px-6 py-3 text-gray-500 hover:text-gray-700">Rejected</button>
+                    <button onclick="loadActiveShops(); setActiveTab(this)"
+                        class="px-6 py-3 text-gray-500 hover:text-gray-700 tab-btn">Active Shops</button>
+                    <button onclick="loadRejectedShops(); setActiveTab(this)"
+                        class="px-6 py-3 text-gray-500 hover:text-gray-700 tab-btn">Rejected</button>
                 </div>
 
+                <script>
+                    function setActiveTab(btn) {
+                        document.querySelectorAll('.tab-btn').forEach(b => {
+                            b.classList.remove('border-b-2', 'border-blue-600', 'text-blue-600', 'font-bold');
+                            b.classList.add('text-gray-500');
+                        });
+                        btn.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-bold');
+                        btn.classList.remove('text-gray-500');
+                    }
+                </script>
                 <div id="shopList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Cards Loaded via JS -->
                     <div class="text-center w-full col-span-3 py-10 text-gray-500">
@@ -740,6 +760,144 @@
 
         // --- USER MANAGEMENT LOGIC (Re-injected) ---
         let allUsers = [];
+
+        async function loadActiveShops() {
+            try {
+                const response = await fetch('http://localhost:8080/api/shop/admin/active', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const shops = await response.json();
+                    renderActiveShops(shops);
+                } else {
+                    document.getElementById('shopList').innerHTML = `<div class="text-red-500 w-full col-span-3 text-center">Failed to load active shops: ${response.status}</div>`;
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('shopList').innerHTML = `<div class="text-red-500 w-full col-span-3 text-center">Connection failed</div>`;
+            }
+        }
+
+        function renderActiveShops(shops) {
+            const container = document.getElementById('shopList');
+
+            if (shops.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-3 text-center py-20 bg-white rounded-lg shadow-sm border border-dashed border-gray-300">
+                        <i class="fas fa-store-slash text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500 text-sm">No active shops found</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = shops.map(shop => `
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition overflow-hidden">
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-lg">
+                                    ${shop.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-bold text-gray-800">${shop.name}</h3>
+                                    <p class="text-xs text-gray-500">ID: ...${shop.id.substr(-6)}</p>
+                                </div>
+                            </div>
+                            <span class="bg-green-50 text-green-700 text-[10px] font-bold px-2 py-1 rounded border border-green-200 uppercase">Active</span>
+                        </div>
+                        
+                        <div class="space-y-3 mb-6 bg-gray-50 p-4 rounded-lg">
+                           <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <i class="fas fa-user-circle w-4 text-gray-400"></i>
+                                <span class="truncate">${shop.identityFullName || 'Unknown Owner'}</span>
+                           </div>
+                           <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <i class="fas fa-phone w-4 text-gray-400"></i>
+                                <span>${shop.phone}</span>
+                           </div>
+                           <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <i class="fas fa-map-marker-alt w-4 text-gray-400"></i>
+                                <span class="truncate w-full">${shop.address}</span>
+                           </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-3">
+                             <button class="bg-gray-100 text-gray-600 font-bold py-2 rounded-lg text-sm cursor-not-allowed" disabled>
+                                <i class="fas fa-check-circle mr-1"></i> Running
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadRejectedShops() {
+            try {
+                const response = await fetch('http://localhost:8080/api/shop/admin/rejected', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const shops = await response.json();
+                    renderRejectedShops(shops);
+                } else {
+                    document.getElementById('shopList').innerHTML = `<div class="text-red-500 w-full col-span-3 text-center">Failed to load rejected shops: ${response.status}</div>`;
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('shopList').innerHTML = `<div class="text-red-500 w-full col-span-3 text-center">Connection failed</div>`;
+            }
+        }
+
+        function renderRejectedShops(shops) {
+            const container = document.getElementById('shopList');
+
+            if (shops.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-3 text-center py-20 bg-white rounded-lg shadow-sm border border-dashed border-gray-300">
+                        <i class="fas fa-store-slash text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500 text-sm">No rejected shops found</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = shops.map(shop => `
+                <div class="bg-white rounded-xl shadow-sm border border-red-100 hover:shadow-md transition overflow-hidden">
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold text-lg">
+                                    ${shop.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-bold text-gray-800">${shop.name}</h3>
+                                    <p class="text-xs text-gray-500">ID: ...${shop.id.substr(-6)}</p>
+                                </div>
+                            </div>
+                            <span class="bg-red-50 text-red-700 text-[10px] font-bold px-2 py-1 rounded border border-red-200 uppercase">Rejected</span>
+                        </div>
+                        
+                        <!-- Rejection Reason -->
+                        <div class="mb-4 bg-red-50 border-l-4 border-red-500 p-3 rounded-r text-sm">
+                            <p class="font-bold text-red-800 text-xs mb-1">REASON:</p>
+                            <p class="text-red-700 italic">"${shop.rejectionReason || 'No reason provided'}"</p>
+                        </div>
+
+                        <div class="space-y-3 mb-6 bg-gray-50 p-4 rounded-lg">
+                           <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <i class="fas fa-user-circle w-4 text-gray-400"></i>
+                                <span class="truncate">${shop.identityFullName || 'Unknown Owner'}</span>
+                           </div>
+                           <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <i class="fas fa-phone w-4 text-gray-400"></i>
+                                <span>${shop.phone}</span>
+                           </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
 
         async function loadUsers() {
             const tableBody = document.getElementById('userTableBody');

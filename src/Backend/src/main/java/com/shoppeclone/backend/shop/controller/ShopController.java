@@ -89,6 +89,16 @@ public class ShopController {
         return ResponseEntity.ok(shopService.getPendingShops());
     }
 
+    @GetMapping("/admin/active")
+    public ResponseEntity<List<Shop>> getActiveShops() {
+        return ResponseEntity.ok(shopService.getActiveShops());
+    }
+
+    @GetMapping("/admin/rejected")
+    public ResponseEntity<List<Shop>> getRejectedShops() {
+        return ResponseEntity.ok(shopService.getRejectedShops());
+    }
+
     @PostMapping("/admin/approve/{shopId}")
     public ResponseEntity<String> approveShop(@PathVariable String shopId) {
         shopService.approveShop(shopId);

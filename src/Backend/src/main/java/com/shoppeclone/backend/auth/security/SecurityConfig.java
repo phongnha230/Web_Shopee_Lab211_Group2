@@ -45,6 +45,8 @@ public class SecurityConfig {
                                 "/api/shop/**",
                                 "/api/reviews/**")
                         .permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // ✅ Allow CORS
+                                                                                                         // Preflight
                         .requestMatchers("/api/**").authenticated() // Secure other APIs
                         .anyRequest().permitAll()) // Allow static resources or others
 
