@@ -17,7 +17,7 @@
     <!-- Sidebar -->
     <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full z-10">
         <div class="p-6 flex items-center gap-3 border-b border-gray-100">
-            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
+            <div class="w-8 h-8 bg-[#AD3029] rounded-lg flex items-center justify-center text-white font-bold">
                 <i class="fas fa-chart-bar"></i>
             </div>
             <span class="text-xl font-bold text-gray-800">AdminPanel</span>
@@ -37,28 +37,28 @@
 
         <nav class="flex-1 px-4 space-y-1 overflow-y-auto">
             <a href="#" onclick="switchView('dashboard')" id="nav-dashboard"
-                class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-600 rounded-lg font-medium transition">
+                class="flex items-center gap-3 px-4 py-3 bg-[#FEEFCD] text-[#AD3029] rounded-lg font-medium transition">
                 <i class="fas fa-th-large w-5"></i> Dashboard
             </a>
             <a href="#" onclick="switchView('shops')" id="nav-shops"
-                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
+                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-[#FEEFCD]/50 rounded-lg font-medium transition">
                 <i class="fas fa-store w-5"></i> Shops
                 <span id="pendingCount"
-                    class="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+                    class="ml-auto bg-[#AD3029] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
             </a>
             <a href="#" onclick="switchView('disputes')" id="nav-disputes"
-                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
+                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-[#FEEFCD]/50 rounded-lg font-medium transition">
                 <i class="fas fa-exclamation-circle w-5"></i> Disputes
             </a>
             <a href="#" onclick="switchView('users')" id="nav-users"
-                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
+                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-[#FEEFCD]/50 rounded-lg font-medium transition">
                 <i class="fas fa-users w-5"></i> Users
             </a>
 
             <div class="my-4 border-b border-gray-100"></div>
 
             <a href="index.html"
-                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
+                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-[#FEEFCD]/50 rounded-lg font-medium transition">
                 <i class="fas fa-home w-5"></i> Back to Store
             </a>
             <a href="#" onclick="logout()"
@@ -77,17 +77,17 @@
             <div class="relative w-96">
                 <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                 <input type="text" placeholder="Search analytics, orders, or products..."
-                    class="w-full pl-10 pr-4 py-2 bg-gray-100 border-none rounded-lg text-sm focus:ring-2 focus:ring-blue-100 outline-none transition">
+                    class="w-full pl-10 pr-4 py-2 bg-gray-100 border-none rounded-lg text-sm focus:ring-2 focus:ring-[#AD3029]/20 outline-none transition">
             </div>
 
             <!-- Right Actions -->
             <div class="flex items-center gap-6">
                 <!-- Notification Wrapper -->
                 <div class="relative">
-                    <button id="notificationBtn" class="relative text-gray-500 hover:text-blue-600 transition">
+                    <button id="notificationBtn" class="relative text-gray-500 hover:text-[#AD3029] transition">
                         <i class="fas fa-bell text-lg"></i>
                         <span id="notificationBadge"
-                            class="hidden absolute -top-1 -right-0.5 w-2 h-2 bg-red-600 rounded-full ring-2 ring-white text-[8px] flex items-center justify-center text-white"></span>
+                            class="hidden absolute -top-1 -right-0.5 w-2 h-2 bg-[#AD3029] rounded-full ring-2 ring-white text-[8px] flex items-center justify-center text-white"></span>
                     </button>
 
                     <!-- Dropdown -->
@@ -95,15 +95,15 @@
                         class="hidden absolute top-10 right-0 w-80 bg-white shadow-xl rounded-lg border border-gray-100 z-50 overflow-hidden text-gray-800">
                         <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
                             <h3 class="font-semibold text-gray-700">Notifications</h3>
-                            <button id="markAllReadBtn"
-                                class="text-xs text-blue-600 hover:text-blue-800 font-medium">Mark all
+                            <button id="markAllReadBtn" class="text-xs text-[#AD3029] hover:opacity-80 font-medium">Mark
+                                all
                                 read</button>
                         </div>
                         <div id="notificationList" class="max-h-80 overflow-y-auto">
                             <div class="p-4 text-center text-gray-500 text-sm">Loading...</div>
                         </div>
                         <div class="bg-gray-50 px-4 py-2 border-t border-gray-100 text-center">
-                            <a href="#" class="text-xs text-gray-500 hover:text-blue-600">View all</a>
+                            <a href="#" class="text-xs text-gray-500 hover:text-[#AD3029]">View all</a>
                         </div>
                     </div>
                 </div>
@@ -137,7 +137,7 @@
                     <div class="flex gap-2">
                         <div class="bg-white border border-gray-200 rounded-lg p-1 flex">
                             <button
-                                class="px-4 py-1.5 text-sm font-medium bg-blue-600 text-white rounded shadow-sm">Today</button>
+                                class="px-4 py-1.5 text-sm font-medium bg-[#AD3029] text-white rounded shadow-sm">Today</button>
                             <button
                                 class="px-4 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded">Yesterday</button>
                             <button class="px-4 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded">Last
@@ -151,40 +151,12 @@
                 </div>
 
                 <!-- Stats Cards Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    <!-- Card 1 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Active Users Card -->
                     <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-4">
                             <div
-                                class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-lg">
-                                <i class="fas fa-dollar-sign"></i>
-                            </div>
-                            <span class="bg-green-50 text-green-600 text-xs font-bold px-2 py-1 rounded-full">+5.2% <i
-                                    class="fas fa-arrow-up text-[10px]"></i></span>
-                        </div>
-                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Total GMV</p>
-                        <h3 id="totalGMVCount" class="text-2xl font-bold text-gray-800 mt-1">Loading...</h3>
-                    </div>
-
-                    <!-- Card 2 -->
-                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
-                        <div class="flex justify-between items-start mb-4">
-                            <div
-                                class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-lg">
-                                <i class="fas fa-shopping-cart"></i>
-                            </div>
-                            <span class="bg-green-50 text-green-600 text-xs font-bold px-2 py-1 rounded-full">+12.4% <i
-                                    class="fas fa-arrow-up text-[10px]"></i></span>
-                        </div>
-                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Total Orders</p>
-                        <h3 id="totalOrdersCount" class="text-2xl font-bold text-gray-800 mt-1">Loading...</h3>
-                    </div>
-
-                    <!-- Card 3 -->
-                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
-                        <div class="flex justify-between items-start mb-4">
-                            <div
-                                class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-lg">
+                                class="w-10 h-10 bg-[#FEEFCD] text-[#AD3029] rounded-lg flex items-center justify-center text-lg">
                                 <i class="fas fa-users"></i>
                             </div>
                             <span class="bg-green-50 text-green-600 text-xs font-bold px-2 py-1 rounded-full">+8.1% <i
@@ -194,11 +166,11 @@
                         <h3 id="totalUsersCount" class="text-2xl font-bold text-gray-800 mt-1">Loading...</h3>
                     </div>
 
-                    <!-- Card 4 -->
+                    <!-- Active Shops Card -->
                     <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-4">
                             <div
-                                class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-lg">
+                                class="w-10 h-10 bg-[#FEEFCD] text-[#AD3029] rounded-lg flex items-center justify-center text-lg">
                                 <i class="fas fa-store"></i>
                             </div>
                             <span class="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-1 rounded-full">0.0% <i
@@ -208,11 +180,11 @@
                         <h3 id="activeShopsCount" class="text-2xl font-bold text-gray-800 mt-1">Loading...</h3>
                     </div>
 
-                    <!-- Card 5 -->
+                    <!-- Total Disputes Card -->
                     <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-4">
                             <div
-                                class="w-10 h-10 bg-red-50 text-red-600 rounded-lg flex items-center justify-center text-lg">
+                                class="w-10 h-10 bg-[#AD3029]/10 text-[#AD3029] rounded-lg flex items-center justify-center text-lg">
                                 <i class="fas fa-exclamation-triangle"></i>
                             </div>
                         </div>
@@ -242,14 +214,14 @@
 
                     <!-- Flash Sale Card -->
                     <div
-                        class="bg-blue-600 text-white p-6 rounded-2xl shadow-lg flex flex-col justify-between relative overflow-hidden group">
+                        class="bg-[#AD3029] text-white p-6 rounded-2xl shadow-lg flex flex-col justify-between relative overflow-hidden group">
                         <div class="relative z-10">
                             <div
                                 class="flex items-center gap-2 mb-2 text-yellow-300 font-bold text-xs uppercase tracking-wider">
                                 <i class="fas fa-bolt"></i> Flash Sale Live
                             </div>
                             <h2 class="text-2xl font-bold mb-1">Mega Electronics</h2>
-                            <p class="text-blue-200 text-sm mb-6">High traffic event active now.</p>
+                            <p class="text-white/80 text-sm mb-6">High traffic event active now.</p>
 
                             <div class="mb-6">
                                 <div class="flex justify-between text-xs font-medium mb-1">
@@ -335,7 +307,7 @@
                     <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                         <div class="flex justify-between items-center mb-6">
                             <h3 class="text-lg font-bold text-gray-800">Top Selling Products</h3>
-                            <a href="#" class="text-sm font-bold text-blue-600 hover:underline">View All</a>
+                            <a href="#" class="text-sm font-bold text-[#AD3029] hover:underline">View All</a>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm text-gray-600">
@@ -350,7 +322,7 @@
                                 </thead>
                                 <tbody class="divide-y divide-gray-100">
                                     <tr class="hover:bg-gray-50 transition">
-                                        <td class="px-4 py-3 font-medium text-blue-600">01</td>
+                                        <td class="px-4 py-3 font-medium text-[#AD3029]">01</td>
                                         <td class="px-4 py-3 flex items-center gap-3">
                                             <div class="w-8 h-8 bg-gray-200 rounded flex-shrink-0"></div>
                                             <div>
@@ -365,7 +337,7 @@
                                                 STOCK</span></td>
                                     </tr>
                                     <tr class="hover:bg-gray-50 transition">
-                                        <td class="px-4 py-3 font-medium text-blue-600">02</td>
+                                        <td class="px-4 py-3 font-medium text-[#AD3029]">02</td>
                                         <td class="px-4 py-3 flex items-center gap-3">
                                             <div class="w-8 h-8 bg-gray-200 rounded flex-shrink-0"></div>
                                             <div>
@@ -392,7 +364,7 @@
                     <h1 class="text-3xl font-bold text-gray-800">Shop Management</h1>
                     <div class="flex gap-2">
                         <button onclick="loadPendingShops()"
-                            class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition"><i
+                            class="bg-[#AD3029] text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition"><i
                                 class="fas fa-sync-alt mr-2"></i> Refresh</button>
                     </div>
                 </div>
@@ -400,7 +372,7 @@
                 <!-- Tabs/Filters for Shops -->
                 <div class="flex border-b border-gray-200">
                     <button onclick="loadPendingShops(); setActiveTab(this)"
-                        class="px-6 py-3 border-b-2 border-blue-600 text-blue-600 font-bold tab-btn">Pending
+                        class="px-6 py-3 border-b-2 border-[#AD3029] text-[#AD3029] font-bold tab-btn">Pending
                         Approvals</button>
                     <button onclick="loadActiveShops(); setActiveTab(this)"
                         class="px-6 py-3 text-gray-500 hover:text-gray-700 tab-btn">Active Shops</button>
@@ -411,10 +383,10 @@
                 <script>
                     function setActiveTab(btn) {
                         document.querySelectorAll('.tab-btn').forEach(b => {
-                            b.classList.remove('border-b-2', 'border-blue-600', 'text-blue-600', 'font-bold');
+                            b.classList.remove('border-b-2', 'border-[#AD3029]', 'text-[#AD3029]', 'font-bold');
                             b.classList.add('text-gray-500');
                         });
-                        btn.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-bold');
+                        btn.classList.add('border-b-2', 'border-[#AD3029]', 'text-[#AD3029]', 'font-bold');
                         btn.classList.remove('text-gray-500');
                     }
                 </script>
@@ -442,7 +414,7 @@
                 <div class="flex justify-between items-center">
                     <h1 class="text-3xl font-bold text-gray-800">Disputes Management</h1>
                     <button onclick="loadDisputes()"
-                        class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition">
+                        class="bg-[#AD3029] text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition">
                         <i class="fas fa-sync-alt mr-2"></i> Refresh
                     </button>
                 </div>
@@ -478,10 +450,10 @@
                         <div class="relative">
                             <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                             <input type="text" id="userListSearch" oninput="filterUsers()" placeholder="Search users..."
-                                class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 outline-none">
+                                class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FEEFCD] outline-none">
                         </div>
                         <button onclick="loadUsers()"
-                            class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition"><i
+                            class="bg-[#AD3029] text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition"><i
                                 class="fas fa-sync-alt"></i></button>
                     </div>
                 </div>
@@ -529,7 +501,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Common Reasons</label>
                     <select id="rejectionReasonSelect" onchange="handleReasonChange()"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#AD3029]/20 outline-none">
                         <option value="">-- Select a reason --</option>
                         <option value="Incomplete or invalid business documentation">Incomplete or invalid business
                             documentation</option>
@@ -549,7 +521,7 @@
                 <div id="customReasonDiv" class="hidden">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Custom Reason</label>
                     <textarea id="customReasonInput" rows="3" placeholder="Enter your custom rejection reason..."
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#AD3029]/20 outline-none resize-none"></textarea>
                 </div>
 
                 <div class="flex gap-3 pt-4">
@@ -582,24 +554,24 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
                     <input type="text" id="editFullName" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#AD3029]/20 outline-none">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
                     <input type="email" id="editEmail" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#AD3029]/20 outline-none">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
                     <input type="tel" id="editPhone"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#AD3029]/20 outline-none">
                 </div>
 
                 <div class="flex gap-3 pt-4">
                     <button type="submit"
-                        class="flex-1 bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition">
+                        class="flex-1 bg-[#AD3029] text-white py-2 rounded-lg font-bold hover:opacity-90 transition">
                         Save Changes
                     </button>
                     <button type="button" onclick="closeEditModal()"
@@ -631,13 +603,13 @@
 
             // Update Sidebar Active State
             document.querySelectorAll('aside nav a').forEach(el => {
-                el.classList.remove('bg-blue-50', 'text-blue-600');
-                el.classList.add('text-gray-600', 'hover:bg-gray-50');
+                el.classList.remove('bg-[#FEEFCD]', 'text-[#AD3029]');
+                el.classList.add('text-gray-600', 'hover:bg-[#FEEFCD]/50');
             });
             const activeLink = document.getElementById(`nav-${viewName}`);
             if (activeLink) {
-                activeLink.classList.remove('text-gray-600', 'hover:bg-gray-50');
-                activeLink.classList.add('bg-blue-50', 'text-blue-600');
+                activeLink.classList.remove('text-gray-600', 'hover:bg-[#FEEFCD]/50');
+                activeLink.classList.add('bg-[#FEEFCD]', 'text-[#AD3029]');
             }
 
             // Load data when switching to specific views
@@ -739,7 +711,7 @@
                     <div class="p-5">
                         <div class="flex justify-between items-start mb-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
+                                <div class="w-10 h-10 rounded-full bg-[#FEEFCD] text-[#AD3029] font-bold text-lg flex items-center justify-center">
                                     ${shop.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div>
@@ -766,7 +738,7 @@
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
-                            <button onclick="processShop('${shop.id}', 'approve')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition text-sm">
+                            <button onclick="processShop('${shop.id}', 'approve')" class="bg-[#AD3029] hover:opacity-90 text-white font-bold py-2 rounded-lg transition text-sm">
                                 <i class="fas fa-check mr-1"></i> Approve
                             </button>
                             <button onclick="processShop('${shop.id}', 'reject')" class="bg-white border border-gray-200 text-red-500 hover:bg-red-50 font-bold py-2 rounded-lg transition text-sm">
@@ -928,7 +900,7 @@
                     <div class="p-5">
                         <div class="flex justify-between items-start mb-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-lg">
+                                <div class="w-10 h-10 rounded-full bg-[#FEEFCD] text-[#AD3029] font-bold text-lg flex items-center justify-center">
                                     ${shop.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div>
@@ -936,7 +908,7 @@
                                     <p class="text-xs text-gray-500">ID: ...${shop.id.substr(-6)}</p>
                                 </div>
                             </div>
-                            <span class="bg-green-50 text-green-700 text-[10px] font-bold px-2 py-1 rounded border border-green-200 uppercase">Active</span>
+                            <span class="bg-[#FEEFCD] text-[#AD3029] text-[10px] font-bold px-2 py-1 rounded border border-[#AD3029]/20 uppercase">Active</span>
                         </div>
                         
                         <div class="space-y-3 mb-6 bg-gray-50 p-4 rounded-lg">
@@ -955,7 +927,7 @@
                         </div>
 
                         <div class="grid grid-cols-1 gap-3">
-                             <button class="bg-gray-100 text-gray-600 font-bold py-2 rounded-lg text-sm cursor-not-allowed" disabled>
+                             <button class="bg-[#FEEFCD]/50 text-[#AD3029] font-bold py-2 rounded-lg text-sm cursor-not-allowed" disabled>
                                 <i class="fas fa-check-circle mr-1"></i> Running
                             </button>
                         </div>
@@ -1077,7 +1049,7 @@
                 <tr class="hover:bg-gray-50 transition">
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-lg">
+                            <div class="w-10 h-10 rounded-full bg-[#FEEFCD] text-[#AD3029] font-bold text-lg flex items-center justify-center">
                                 ${user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
                             </div>
                             <div>
@@ -1092,7 +1064,7 @@
                     <td class="px-6 py-4">
                         <div class="flex flex-wrap gap-1">
                             ${roles.map(role => {
-                    const color = role === 'ROLE_ADMIN' ? 'bg-red-100 text-red-700' : (role === 'ROLE_SELLER' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700');
+                    const color = role === 'ROLE_ADMIN' ? 'bg-[#AD3029] text-white' : (role === 'ROLE_SELLER' ? 'bg-[#FEEFCD] text-[#AD3029]' : 'bg-gray-100 text-gray-700');
                     return `<span class="${color} text-xs font-bold px-2 py-1 rounded border border-opacity-20">${role.replace('ROLE_', '')}</span>`;
                 }).join('')}
                         </div>
@@ -1106,7 +1078,7 @@
                         <div class="flex items-center justify-end gap-2">
                             <!-- Edit Button -->
                             <button onclick="openEditModal('${user.id}')" 
-                                class="text-blue-500 hover:bg-blue-50 p-2 rounded-lg transition" 
+                                class="text-[#AD3029] hover:bg-[#FEEFCD]/50 p-2 rounded-lg transition" 
                                 title="Edit User">
                                 <i class="fas fa-edit"></i>
                             </button>
@@ -1238,31 +1210,18 @@
                     // Update UI with real data
                     document.getElementById('totalUsersCount').textContent = stats.totalUsers.toLocaleString();
                     document.getElementById('activeShopsCount').textContent = stats.activeShops.toLocaleString();
-                    document.getElementById('totalOrdersCount').textContent = stats.totalOrders.toLocaleString();
-
-                    // Format GMV as currency
-                    const gmvFormatted = stats.totalGMV >= 1000000
-                        ? `$${(stats.totalGMV / 1000000).toFixed(2)}M`
-                        : stats.totalGMV >= 1000
-                            ? `$${(stats.totalGMV / 1000).toFixed(2)}K`
-                            : `$${stats.totalGMV.toFixed(2)}`;
-                    document.getElementById('totalGMVCount').textContent = gmvFormatted;
                     document.getElementById('totalDisputesCount').textContent = stats.totalDisputes.toLocaleString();
                 } else {
                     console.error('Failed to load dashboard stats:', response.status);
                     // Show error state
                     document.getElementById('totalUsersCount').textContent = 'Error';
                     document.getElementById('activeShopsCount').textContent = 'Error';
-                    document.getElementById('totalOrdersCount').textContent = 'Error';
-                    document.getElementById('totalGMVCount').textContent = 'Error';
                     document.getElementById('totalDisputesCount').textContent = 'Error';
                 }
             } catch (err) {
                 console.error('Error loading dashboard stats:', err);
                 document.getElementById('totalUsersCount').textContent = 'Error';
                 document.getElementById('activeShopsCount').textContent = 'Error';
-                document.getElementById('totalOrdersCount').textContent = 'Error';
-                document.getElementById('totalGMVCount').textContent = 'Error';
                 document.getElementById('totalDisputesCount').textContent = 'Error';
             }
         }
@@ -1316,7 +1275,7 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <button onclick="reviewDispute('${dispute.id}')" class="text-blue-600 hover:text-blue-800 font-bold text-xs ring-1 ring-blue-600/20 px-2 py-1 rounded">
+                        <button onclick="reviewDispute('${dispute.id}')" class="text-[#AD3029] hover:opacity-80 font-bold text-xs ring-1 ring-[#AD3029]/20 px-2 py-1 rounded">
                             Review
                         </button>
                     </td>
@@ -1327,7 +1286,7 @@
         function getStatusBadgeClass(status) {
             switch (status) {
                 case 'OPEN': return 'bg-yellow-100 text-yellow-700';
-                case 'IN_REVIEW': return 'bg-blue-100 text-blue-700';
+                case 'IN_REVIEW': return 'bg-[#FEEFCD] text-[#AD3029]';
                 case 'RESOLVED': return 'bg-green-100 text-green-700';
                 case 'REJECTED': return 'bg-red-100 text-red-700';
                 default: return 'bg-gray-100 text-gray-700';

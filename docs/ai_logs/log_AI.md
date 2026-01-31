@@ -15228,3 +15228,36 @@ Dữ liệu mẫu tự động được nạp lại nếu database trống.
 Good
 Bad
 Review Changes
+
+---
+# LOG UPDATE: 2026-01-31 - Admin Dashboard Refinement & Shopee Rebranding
+
+## 1. Dashboard Statistics & Layout Refinement
+- **Optimization**: Removed non-functional "Total GMV" and "Total Orders" cards to focus on high-priority metrics.
+- **New Layout**: Adjusted the statistics grid to a balanced 3-column layout:
+  - **Active Users**: Real-time platform user count.
+  - **Active Shops**: Real-time approved seller count.
+  - **Total Disputes**: New live statistic card for pending/resolved issues.
+- **Logic**: Updated `loadDashboardStats()` in `admin-dashboard.html` to only fetch and render the 3 active cards.
+
+## 2. Disputes Management Integration
+- **Management View**: Fully integrated the "Disputes" tab in the admin panel.
+- **Features**: 
+  - List view with Dispute ID, Order ID, Reason, and Status.
+  - Functional "Review" system for updating status (OPEN, IN_REVIEW, RESOLVED, REJECTED).
+
+## 3. UI Rebranding (Shopee Signature Theme)
+- **Signature Palette**: Aligned the Admin Dashboard with the main Shopee identity:
+  - **Primary**: `#AD3029` (Shopee Red/Orange).
+  - **Secondary**: `#FEEFCD` (Cream/Light Yellow).
+- **Scope**: Rebranded Sidebar, Header, Notification links, Statistics cards, Management tables, and all interactive modals/buttons.
+
+## 4. System Stability
+- **Git Sync**: Successfully pulled from `main` and resolved conflicts.
+- **Cleanup**: Removed redundant Chart.js logic to prevent console errors.
+
+### Status
+✅ Dashboard Refined
+✅ Color Sync with Shopee Theme
+✅ Disputes Management LIVE
+✅ Git Synced with Main Branch
