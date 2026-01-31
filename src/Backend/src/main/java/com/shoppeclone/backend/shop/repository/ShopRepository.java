@@ -15,4 +15,8 @@ public interface ShopRepository extends MongoRepository<Shop, String> {
     boolean existsByOwnerId(String ownerId);
 
     List<Shop> findByStatus(ShopStatus status);
+
+    long countByStatus(ShopStatus status);
+
+    Optional<Shop> findByName(String name);
 }

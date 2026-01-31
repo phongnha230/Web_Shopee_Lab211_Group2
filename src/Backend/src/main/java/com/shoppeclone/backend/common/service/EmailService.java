@@ -61,4 +61,38 @@ public class EmailService {
         mailSender.send(message);
         System.out.println("⚠️ Login alert email sent to: " + to);
     }
+
+    public void sendShopApprovalEmail(String to, String shopName) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Shop Application Approved - ShoppeClone");
+        message.setText(
+                "Hello,\n\n" +
+                        "Congratulations! Your shop application for '" + shopName + "' has been APPROVED.\n\n" +
+                        "You can now access your Shop Dashboard and start listing products.\n\n" +
+                        "Login here: http://localhost:3000/login\n\n" +
+                        "Best regards,\n" +
+                        "ShoppeClone Admin Team");
+
+        mailSender.send(message);
+        System.out.println("✅ Shop Approval email sent to: " + to);
+    }
+
+    public void sendShopRejectionEmail(String to, String shopName, String reason) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Shop Application Rejected - ShoppeClone");
+        message.setText(
+                "Hello,\n\n" +
+                        "We regret to inform you that your shop application for '" + shopName
+                        + "' has been REJECTED.\n\n" +
+                        "Reason: " + reason + "\n\n" +
+                        "You can contact us for more details or submit a new application after addressing the issues.\n\n"
+                        +
+                        "Best regards,\n" +
+                        "ShoppeClone Admin Team");
+
+        mailSender.send(message);
+        System.out.println("❌ Shop Rejection email sent to: " + to);
+    }
 }
