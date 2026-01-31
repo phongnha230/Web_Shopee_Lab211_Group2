@@ -15184,7 +15184,7 @@ config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIO
 ## 3. UI/UX Fixes
 - **Layout Fix**: Fixed broken layout in Admin Dashboard (User table overlap) by correcting closing div tags.
 - **Dynamic Date**: Replaced static date with real-time JavaScript date in Admin Dashboard header.
-
+![alt text](image.png)
 ---
 
 

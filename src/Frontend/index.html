@@ -9,49 +9,98 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        @keyframes bounceShopee {
+        /* ===== ShopeeClone Red + Beige (MATCH SIGN IN PAGE) ===== */
 
-            0%,
-            20%,
-            50%,
-            80%,
-            100% {
-                transform: translateY(0);
-            }
+        /* ========== BRAND COLORS ==========
+       Red   : #AD3029
+       Red H : #8f2621
+       Beige : #FEEFCD
+       Beige2: #F8E8D0
+    =================================== */
 
-            40% {
-                transform: translateY(-10px);
-            }
-
-            60% {
-                transform: translateY(-5px);
-            }
+        /* ===== TEXT ===== */
+        .text-orange-500,
+        .text-orange-600 {
+            color: #AD3029 !important;
         }
 
-        .bounce-shopee {
-            animation: bounceShopee 2s infinite;
+        /* ===== PRIMARY BACKGROUND (RED) ===== */
+        .bg-orange-500,
+        .bg-orange-600 {
+            background-color: #AD3029 !important;
+            color: white !important;
         }
 
-        .flash-sale {
-            background: linear-gradient(45deg, #ff5722, #ff8a50, #ff5722);
-            background-size: 200% 200%;
-            animation: gradient 1.5s ease infinite;
+        .hover\:bg-orange-600:hover,
+        .hover\:bg-orange-700:hover {
+            background-color: #8f2621 !important;
         }
 
-        @keyframes gradient {
-            0% {
-                background-position: 0% 50%;
-            }
+        /* ===== GRADIENT (RED → RED SOFT) ===== */
+        .from-orange-500 {
+            --tw-gradient-from: #AD3029 !important;
+        }
 
-            50% {
-                background-position: 100% 50%;
-            }
+        .to-orange-600 {
+            --tw-gradient-to: #CD5252 !important;
+        }
 
-            100% {
-                background-position: 0% 50%;
-            }
+        /* ===== BORDER ===== */
+        .border-orange-500,
+        .border-orange-600 {
+            border-color: #AD3029 !important;
+        }
+
+        /* ===== ICONS ===== */
+        i.text-orange-500,
+        svg.text-orange-500 {
+            color: #AD3029 !important;
+        }
+
+        /* ===== BEIGE SURFACES ===== */
+        .bg-yellow-400,
+        .bg-yellow-300,
+        .bg-yellow-200 {
+            background-color: #FEEFCD !important;
+            color: #AD3029 !important;
+        }
+
+        .bg-yellow-100 {
+            background-color: #F8E8D0 !important;
+        }
+
+        /* ===== OUTLINE / GOOGLE STYLE BUTTON ===== */
+        .border-yellow-400,
+        .border-yellow-300 {
+            border-color: #AD3029 !important;
+        }
+
+        /* ===== SEARCH / ACTION BUTTON ===== */
+        button.bg-orange-600 {
+            background-color: #AD3029 !important;
+            color: white !important;
+        }
+
+        button.bg-orange-600:hover {
+            background-color: #8f2621 !important;
+        }
+
+
+        /* Optional: gray nền nhẹ */
+        .bg-gray-100 {
+            background-color: #F8E8D0 !important;
+        }
+
+        /* ===== HEADER RED GRADIENT ===== */
+        .header-gradient {
+            background: linear-gradient(90deg,
+                    #AD3029 0%,
+                    #C8453E 50%,
+                    #E06B5F 100%) !important;
         }
     </style>
+
+
 </head>
 
 <body class="bg-gray-100">
