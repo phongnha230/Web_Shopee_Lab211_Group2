@@ -70,4 +70,12 @@ public class OrderController {
         // TODO: Check if admin/seller
         return ResponseEntity.ok(orderService.updateShipment(orderId, trackingCode, providerId));
     }
+
+    @PutMapping("/{orderId}/assign-shipper")
+    public ResponseEntity<Order> assignShipper(
+            @PathVariable String orderId,
+            @RequestParam String shipperId) {
+        // TODO: Check if admin/seller
+        return ResponseEntity.ok(orderService.assignShipper(orderId, shipperId));
+    }
 }

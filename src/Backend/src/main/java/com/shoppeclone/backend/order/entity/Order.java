@@ -28,6 +28,12 @@ public class Order {
     private List<OrderItem> items = new ArrayList<>();
     private OrderShipping shipping;
 
+    // Shipper-related fields
+    private String shipperId; // ID of assigned shipper
+    private LocalDateTime assignedAt; // When order was assigned to shipper
+    private String deliveryNote; // Note from shipper about delivery
+    private String proofOfDeliveryUrl; // Image URL of delivery proof
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime shippedAt;

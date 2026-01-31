@@ -18,4 +18,6 @@ public interface OrderService {
     Order cancelOrder(String orderId);
 
     Order updateShipment(String orderId, String trackingCode, String providerId);
+
+    Order assignShipper(String orderId, String shipperId);
 }

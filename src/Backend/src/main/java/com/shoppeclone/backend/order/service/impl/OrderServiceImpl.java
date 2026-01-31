@@ -12,6 +12,9 @@ import com.shoppeclone.backend.product.repository.ProductVariantRepository;
 import com.shoppeclone.backend.shipping.entity.ShippingProvider;
 import com.shoppeclone.backend.shipping.repository.ShippingProviderRepository;
 import com.shoppeclone.backend.shipping.service.ShippingService;
+import com.shoppeclone.backend.payment.service.PaymentService;
+import com.shoppeclone.backend.payment.repository.PaymentMethodRepository;
+import com.shoppeclone.backend.payment.entity.PaymentMethod;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +35,8 @@ public class OrderServiceImpl implements OrderService {
     private final ProductVariantRepository productVariantRepository;
     private final ShippingProviderRepository shippingProviderRepository;
     private final ShippingService shippingService;
+    private final PaymentService paymentService;
+    private final PaymentMethodRepository paymentMethodRepository;
 
     @Override
     @Transactional
@@ -122,6 +127,14 @@ public class OrderServiceImpl implements OrderService {
             cartService.removeCartItem(userId, item.getVariantId());
         }
 
+        // 8. Create Payment
+        if (request.getPaymentMethod() != null) {
+            PaymentMethod paymentMethod = paymentMethodRepository.findByCode(request.getPaymentMethod())
+                    .orElseThrow(() -> new RuntimeException("Payment method not found: " + request.getPaymentMethod()));
+
+            paymentService.createPayment(savedOrder.getId(), paymentMethod.getId(), savedOrder.getTotalPrice());
+        }
+
         return savedOrder;
     }
 
@@ -204,6 +217,18 @@ public class OrderServiceImpl implements OrderService {
         }
 
         order.setUpdatedAt(LocalDateTime.now());
+        return orderRepository.save(order);
+    }
+
+    @Override
+    @Transactional
+    public Order assignShipper(String orderId, String shipperId) {
+        Order order = getOrder(orderId);
+
+        order.setShipperId(shipperId);
+        order.setAssignedAt(LocalDateTime.now());
+        order.setUpdatedAt(LocalDateTime.now());
+
         return orderRepository.save(order);
     }
 }
