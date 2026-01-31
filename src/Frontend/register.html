@@ -41,53 +41,62 @@
 </head>
 
 <body
-    class="h-screen flex items-center justify-center bg-gradient-to-br from-purple-400 via-purple-300 to-purple-500 overflow-hidden">
-
+    class="h-screen flex items-center justify-center bg-gradient-to-br from-[#FEEFCD] via-[#F8E8D0] to-[#AD3029]/20 overflow-hidden">
 
     <!-- Animated blobs -->
     <div
-        class="absolute w-96 h-96 bg-purple-600/30 rounded-full blur-3xl top-[-100px] left-[-100px] animate-[blob_20s_infinite]">
+        class="absolute w-96 h-96 bg-[#AD3029]/25 rounded-full blur-3xl top-[-100px] left-[-100px] animate-[blob_20s_infinite]">
     </div>
     <div
-        class="absolute w-96 h-96 bg-pink-400/30 rounded-full blur-3xl bottom-[-100px] right-[-100px] animate-[blob_25s_infinite]">
+        class="absolute w-96 h-96 bg-[#AD3029]/20 rounded-full blur-3xl bottom-[-100px] right-[-100px] animate-[blob_25s_infinite]">
     </div>
 
     <div
-        class="relative z-10 w-full max-w-5xl bg-white/30 backdrop-blur-xl rounded-3xl shadow-2xl flex overflow-hidden">
+        class="relative z-10 w-full max-w-5xl bg-white/60 backdrop-blur-xl rounded-3xl shadow-2xl flex overflow-hidden">
 
         <!-- LEFT FORM -->
         <div class="w-1/2 p-12">
-            <h2 class="text-3xl font-extrabold text-purple-700">ShoppeClone</h2>
-            <h3 class="text-xl font-semibold text-gray-800 mt-6">Create your account</h3>
-            <p class="text-gray-600 mb-8">Sign up to start shopping with us</p>
+            <h2 class="text-3xl font-extrabold text-[#AD3029]">
+                ShopeeClone
+            </h2>
+
+            <h3 class="text-xl font-semibold text-gray-800 mt-6">
+                Create your account
+            </h3>
+            <p class="text-gray-600 mb-8">
+                Sign up to start shopping with us
+            </p>
 
             <!-- FORM INPUTS -->
             <input id="fullName" placeholder="Full Name"
-                class="w-full mb-5 bg-transparent border-b-2 border-gray-400 focus:border-purple-600 outline-none py-2">
+                class="w-full mb-5 bg-transparent border-b-2 border-gray-400 focus:border-[#AD3029] outline-none py-2">
+
             <input id="email" placeholder="Email" type="email"
-                class="w-full mb-5 bg-transparent border-b-2 border-gray-400 focus:border-purple-600 outline-none py-2">
+                class="w-full mb-5 bg-transparent border-b-2 border-gray-400 focus:border-[#AD3029] outline-none py-2">
+
             <input id="phone" placeholder="Phone"
-                class="w-full mb-5 bg-transparent border-b-2 border-gray-400 focus:border-purple-600 outline-none py-2">
+                class="w-full mb-5 bg-transparent border-b-2 border-gray-400 focus:border-[#AD3029] outline-none py-2">
+
             <input id="password" placeholder="Password" type="password"
-                class="w-full mb-6 bg-transparent border-b-2 border-gray-400 focus:border-purple-600 outline-none py-2">
+                class="w-full mb-6 bg-transparent border-b-2 border-gray-400 focus:border-[#AD3029] outline-none py-2">
 
             <!-- SIGN UP BUTTON -->
             <button onclick="goToOTP()"
-                class="w-full py-3 rounded-full bg-gradient-to-r from-purple-600 to-purple-500 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
+                class="w-full py-3 rounded-full bg-gradient-to-r from-[#AD3029] to-[#CD5252] text-white font-semibold shadow-lg hover:opacity-90 transition-all duration-200">
                 Sign Up & Verify OTP
             </button>
 
-
             <div class="flex items-center my-6">
-                <div class="flex-1 h-px bg-gray-400"></div>
+                <div class="flex-1 h-px bg-gray-300"></div>
                 <span class="mx-4 text-sm text-gray-600">or</span>
-                <div class="flex-1 h-px bg-gray-400"></div>
+                <div class="flex-1 h-px bg-gray-300"></div>
             </div>
 
-            <!-- CORRECT GOOGLE BUTTON - DO NOT MODIFY -->
+            <!-- GOOGLE BUTTON -->
             <a id="googleBtn" href="#" onclick="googleLogin(event)">
-                <button
-                    class="w-full flex items-center justify-center gap-3 py-3 rounded-full bg-white shadow hover:bg-gray-100 transition">
+                <button class="w-full flex items-center justify-center gap-3 py-3 rounded-full 
+                     bg-[#FEEFCD] border-2 border-[#AD3029] 
+                     shadow hover:bg-[#F8E8D0] hover:shadow-md transition">
                     <svg class="w-5 h-5" viewBox="0 0 48 48">
                         <path fill="#EA4335"
                             d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.73 17.74 9.5 24 9.5z" />
@@ -98,45 +107,45 @@
                         <path fill="#34A853"
                             d="M24 48c6.48 0 11.93-2.13 15.9-5.81l-7.49-5.82c-2.08 1.4-4.73 2.23-8.41 2.23-6.26 0-11.57-4.23-13.46-9.94l-7.99 6.19C6.51 42.62 14.62 48 24 48z" />
                     </svg>
-                    <span class="text-gray-700 font-medium">Continue with Google</span>
+                    <span class="text-gray-700 font-medium">
+                        Continue with Google
+                    </span>
                 </button>
             </a>
 
-
             <p class="text-center text-sm text-gray-700 mt-6">
                 Already have an account?
-                <a href="/login.html" class="text-purple-700 font-semibold hover:underline">Sign in</a>
+                <a href="/login.html" class="text-[#AD3029] font-semibold hover:underline">
+                    Sign in
+                </a>
             </p>
         </div>
 
         <!-- RIGHT IMAGE SLIDER (KEEP AS IS) -->
         <div class="w-1/2 relative overflow-hidden rounded-r-3xl">
             <div id="slider" class="w-full h-full relative">
-                <!-- 12 images keep as is -->
-                <img src="https://i.pinimg.com/1200x/ae/43/cc/ae43cc9f03e4c2993b6dabab06afadb2.jpg"
+                <img src="https://i.pinimg.com/736x/5d/40/3c/5d403cda692e3422b807fb9a9855ad55.jpg"
                     class="slide absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-100">
-                <img src="https://i.pinimg.com/1200x/31/1d/ce/311dcecc2944049d12f3086e1ab985ab.jpg"
+                <img src="https://i.pinimg.com/1200x/07/61/f7/0761f7ad31e2ec6027b99f35cc7919ba.jpg"
                     class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
-                <img src="https://i.pinimg.com/736x/b7/9f/1c/b79f1cbca6649e3ea6388dc3a19610ca.jpg"
+                <img src="https://i.pinimg.com/736x/86/af/cb/86afcbb28b56c87859eec07afbc77716.jpg"
                     class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
-                <img src="https://i.pinimg.com/1200x/47/76/14/4776142a7e8565819c9dd7d32b3719f6.jpg"
+                <img src="https://i.pinimg.com/736x/37/90/25/37902567ece8d87fb5b645310b5bb5da.jpg"
                     class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
-                <img src="https://i.pinimg.com/736x/10/81/75/1081754c47b9a668deedb509fe137066.jpg"
+                <img src="https://i.pinimg.com/1200x/eb/dd/0d/ebdd0dd42b05704fa97984bc26543ae5.jpg"
                     class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
-                <img src="https://i.pinimg.com/736x/f0/ab/ce/f0abcee0ad6ad1caf957d255be94067d.jpg"
+                <img src="https://i.pinimg.com/736x/90/fb/9c/90fb9c4f3f246c0b10fb11fc46514528.jpg"
                     class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
-                <img src="https://i.pinimg.com/736x/f4/e6/0d/f4e60d2eef4fd10245ed1290a6cf6802.jpg"
+                <img src="https://i.pinimg.com/736x/e5/a5/c8/e5a5c81f052347378df0f04dfeba1074.jpg"
                     class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
-                <img src="https://i.pinimg.com/736x/65/a2/00/65a200d40d831444c3f82241344b53fb.jpg"
+                <img src="https://i.pinimg.com/736x/5e/42/d2/5e42d29e245f4892b10d20620cdf9d8b.jpg"
                     class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
-                <img src="https://i.pinimg.com/1200x/6b/04/9d/6b049dccf1c6c9d60acf323a8d157b92.jpg"
+                <img src="https://i.pinimg.com/736x/1c/35/c7/1c35c72bc20b12501cf30e6656d7754c.jpg"
                     class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
-                <img src="https://i.pinimg.com/736x/20/14/4c/20144c31ba7a91235a03aca091549c4b.jpg"
+                <img src="https://i.pinimg.com/736x/30/97/77/3097779da71ff587e99915c9945becd2.jpg"
                     class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
-
             </div>
 
-            <!-- SLIDER JS -->
             <script>
                 const images = document.querySelectorAll("#slider img");
                 let current = 0;
@@ -146,8 +155,11 @@
                     images[current].style.opacity = 1;
                 }, 3000);
             </script>
+
+            <div class="absolute inset-0 bg-[#AD3029]/10"></div>
         </div>
     </div>
+
 
     <script>
         async function goToOTP() {
