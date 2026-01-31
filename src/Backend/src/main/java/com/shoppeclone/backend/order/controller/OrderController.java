@@ -6,6 +6,8 @@ import com.shoppeclone.backend.order.dto.OrderRequest;
 import com.shoppeclone.backend.order.entity.Order;
 import com.shoppeclone.backend.order.entity.OrderStatus;
 import com.shoppeclone.backend.order.service.OrderService;
+import com.shoppeclone.backend.shop.entity.Shop;
+import com.shoppeclone.backend.shop.service.ShopService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,6 +23,7 @@ public class OrderController {
 
     private final OrderService orderService;
     private final UserRepository userRepository;
+    private final ShopService shopService;
 
     private String getUserId(UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername())
@@ -69,5 +72,23 @@ public class OrderController {
             @RequestParam(required = false) String providerId) {
         // TODO: Check if admin/seller
         return ResponseEntity.ok(orderService.updateShipment(orderId, trackingCode, providerId));
+    }
+
+    // Seller endpoint: Get orders for their shop
+    @GetMapping("/shop/{shopId}")
+    public ResponseEntity<List<Order>> getShopOrders(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String shopId,
+            @RequestParam(required = false) OrderStatus status) {
+        // Verify that the user owns this shop
+        String userEmail = userDetails.getUsername();
+        Shop shop = shopService.getMyShop(userEmail);
+
+        if (!shop.getId().equals(shopId)) {
+            return ResponseEntity.status(403).build(); // Forbidden
+        }
+
+        List<Order> orders = orderService.getOrdersByShopId(shopId, status);
+        return ResponseEntity.ok(orders);
     }
 }

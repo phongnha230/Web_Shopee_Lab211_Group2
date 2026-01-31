@@ -19,9 +19,8 @@ public class ShopRegisterRequest {
     private String description;
 
     // Step 2 Fields
-    private String identityFullName;
+    private String identityIdCard; // 12-digit ID Card Number
     private String bankName;
-    private String bankBranch;
     private String bankAccountNumber;
     private String bankAccountHolder;
 

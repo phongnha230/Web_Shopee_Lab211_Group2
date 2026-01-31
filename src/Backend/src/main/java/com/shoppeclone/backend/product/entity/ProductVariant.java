@@ -21,6 +21,9 @@ public class ProductVariant {
     private BigDecimal price;
     private Integer stock = 0;
 
+    // Optional: Specific image for this variant (e.g. Red Shirt image)
+    private String imageUrl;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

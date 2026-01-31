@@ -4,6 +4,7 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.index.Indexed;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Document(collection = "products")
@@ -20,6 +21,13 @@ public class Product {
 
     // Status: ACTIVE, HIDDEN
     private ProductStatus status = ProductStatus.ACTIVE;
+
+    // Aggregated data for display
+    private BigDecimal minPrice;
+    private BigDecimal maxPrice;
+    private Integer totalStock;
+    private Double rating = 0.0;
+    private Integer sold = 0;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
