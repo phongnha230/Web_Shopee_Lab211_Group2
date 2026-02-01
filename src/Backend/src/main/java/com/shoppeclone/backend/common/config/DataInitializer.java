@@ -2,11 +2,15 @@ package com.shoppeclone.backend.common.config;
 
 import com.shoppeclone.backend.auth.model.Role;
 import com.shoppeclone.backend.auth.repository.RoleRepository;
+import com.shoppeclone.backend.product.entity.Category;
+import com.shoppeclone.backend.product.repository.CategoryRepository;
 import com.shoppeclone.backend.payment.entity.PaymentMethod;
 import com.shoppeclone.backend.payment.repository.PaymentMethodRepository;
 import com.shoppeclone.backend.shipping.entity.ShippingProvider;
 import com.shoppeclone.backend.shipping.repository.ShippingProviderRepository;
 import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +19,7 @@ import org.springframework.stereotype.Component;
 public class DataInitializer implements CommandLineRunner {
 
     private final RoleRepository roleRepository;
+    private final CategoryRepository categoryRepository;
     private final PaymentMethodRepository paymentMethodRepository;
     private final ShippingProviderRepository shippingProviderRepository;
 
@@ -27,6 +32,41 @@ public class DataInitializer implements CommandLineRunner {
         createRoleIfNotFound("ROLE_SHIPPER", "Delivery Person");
         System.out.println("✅ Role verification and initialization completed!");
 
+        seedCategories();
+    }
+
+    private void seedCategories() {
+        List<String> allowedCategories = List.of(
+                "Fashion",
+                "Electronics",
+                "Mobile & Gadgets",
+                "Home",
+                "Beauty",
+                "Baby & Toys",
+                "Sports",
+                "Food",
+                "Books");
+
+        // 1. Remove categories NOT in the allowed list
+        List<Category> existingCategories = categoryRepository.findAll();
+        for (Category cat : existingCategories) {
+            if (!allowedCategories.contains(cat.getName())) {
+                categoryRepository.delete(cat);
+                System.out.println("❌ Removed deprecated category: " + cat.getName());
+            }
+        }
+
+        // 2. Add missing categories
+        for (String name : allowedCategories) {
+            if (!categoryRepository.existsByName(name)) {
+                Category cat = new Category();
+                cat.setName(name);
+                cat.setCreatedAt(LocalDateTime.now());
+                cat.setUpdatedAt(LocalDateTime.now());
+                categoryRepository.save(cat);
+                System.out.println("👉 Seeded Category: " + name);
+            }
+        }
         // Seed Payment Methods
         seedPaymentMethods();
         System.out.println("✅ Payment methods initialization completed!");

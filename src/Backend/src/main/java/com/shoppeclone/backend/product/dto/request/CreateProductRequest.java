@@ -2,6 +2,7 @@ package com.shoppeclone.backend.product.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import java.util.List;
 
 @Data
 public class CreateProductRequest {
@@ -12,4 +13,9 @@ public class CreateProductRequest {
     private String name;
 
     private String description;
+
+    // New fields for One-Shot Creation
+    private List<CreateProductVariantRequest> variants;
+    private List<String> images; // List of Image URLs
+    private String categoryId;
 }

@@ -24,15 +24,15 @@ public class Shop {
     private String phone;
     private String email; // Shop Email
     private String pickupAddress;
+    private String logo;
 
     // Identity Info
-    private String identityFullName; // Full Name as per ID
+    private String identityIdCard; // 12-digit ID Card Number
     private String idCardFront; // URL/Path
     private String idCardBack; // URL/Path
 
     // Bank Info
     private String bankName;
-    private String bankBranch;
     private String bankAccountNumber;
     private String bankAccountHolder;
 

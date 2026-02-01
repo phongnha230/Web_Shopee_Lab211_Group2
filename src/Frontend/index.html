@@ -793,7 +793,10 @@
         /* ===============================
            2️⃣ UPDATE NAVBAR (CỐT LÕI)
         ================================ */
-        function updateNavbar() {
+        /* ===============================
+           2️⃣ UPDATE NAVBAR (CỐT LÕI)
+        ================================ */
+        async function updateNavbar() {
             const token = localStorage.getItem('accessToken');
             const userName = localStorage.getItem('userName') || 'User';
 
@@ -801,7 +804,6 @@
             const userNav = document.getElementById('userNav');
             const userNameEl = document.getElementById('userName');
             const userAvatar = document.getElementById('userAvatar');
-
             const sellerLink = document.getElementById('sellerChannelLink');
             const adminLink = document.getElementById('adminPanelLink');
 
@@ -813,29 +815,21 @@
                     userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=fff&color=f97316`;
                 }
 
-                // Show Seller Channel link
-                if (sellerLink) sellerLink.classList.remove('hidden');
+                // CHECK SHOP STATUS
+                await checkShopStatus(token, sellerLink);
 
-                // Check for Admin Role via JWT Decode (Simple version)
+                // CHECK ADMIN ROLE
                 try {
                     const payload = JSON.parse(atob(token.split('.')[1]));
-                    // Roles usually in "roles" or "scope" or "authorities"
-                    // Adjust based on your JWT structure. Assuming standard Spring Security structure?
-                    // Or we can just blindly show it if the user IS logged in for now, OR rely on a more robust check?
-                    // Let's print payload to console for debugging if needed, but for now check for 'ADMIN' string in token text if lazy, 
-                    // or better: 
-                    const roles = payload.roles || []; // Assuming backend puts roles here
-                    // If roles is array of strings:
-                    if (Array.isArray(roles) && roles.includes("ROLE_ADMIN")) {
-                        if (adminLink) adminLink.classList.remove('hidden');
+                    const roles = payload.roles || [];
+                    let isAdmin = false;
+
+                    if (Array.isArray(roles)) {
+                        isAdmin = roles.some(r => r === "ROLE_ADMIN" || r.name === "ROLE_ADMIN" || r.authority === "ROLE_ADMIN");
                     }
-                    // If roles is string (e.g. "ROLE_USER,ROLE_ADMIN")
-                    else if (typeof roles === 'string' && roles.includes("ROLE_ADMIN")) {
-                        if (adminLink) adminLink.classList.remove('hidden');
-                    }
-                    // If roles is array of objects {authority: "ROLE_ADMIN"}
-                    else if (Array.isArray(roles) && roles.some(r => r.authority === 'ROLE_ADMIN' || r.name === 'ROLE_ADMIN')) {
-                        if (adminLink) adminLink.classList.remove('hidden');
+
+                    if (isAdmin && adminLink) {
+                        adminLink.classList.remove('hidden');
                     }
                 } catch (e) {
                     console.error("Error parsing token roles", e);
@@ -846,6 +840,33 @@
                 userNav.classList.add('hidden');
                 if (sellerLink) sellerLink.classList.add('hidden');
                 if (adminLink) adminLink.classList.add('hidden');
+            }
+        }
+
+        async function checkShopStatus(token, linkElement) {
+            if (!linkElement) return;
+
+            try {
+                const response = await fetch('http://localhost:8080/api/shop/my-shop', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    // User has a shop -> Go to Dashboard
+                    linkElement.href = "seller-dashboard.html";
+                    linkElement.innerHTML = '<i class="fas fa-store mr-1"></i>My Shop';
+                    linkElement.classList.remove('hidden');
+                } else if (response.status === 404) {
+                    // User has NO shop -> Go to Register
+                    linkElement.href = "seller-register.html";
+                    linkElement.innerHTML = 'Seller Register';
+                    linkElement.classList.remove('hidden');
+                }
+            } catch (err) {
+                console.error("Failed to check shop status", err);
+                // Default fallback
+                linkElement.href = "seller-register.html";
+                linkElement.classList.remove('hidden');
             }
         }
 

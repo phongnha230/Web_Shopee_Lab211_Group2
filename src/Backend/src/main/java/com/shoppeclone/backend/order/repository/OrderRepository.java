@@ -7,6 +7,11 @@ import java.util.List;
 public interface OrderRepository extends MongoRepository<Order, String> {
     List<Order> findByUserId(String userId);
 
+    // Query orders by shop ID (for seller)
+    List<Order> findByShopId(String shopId);
+
+    // Query orders by shop ID and status
+    List<Order> findByShopIdAndOrderStatus(String shopId, com.shoppeclone.backend.order.entity.OrderStatus orderStatus);
     List<Order> findByShipperId(String shipperId);
 
     // Support nested query for shipping tracking code
