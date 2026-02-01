@@ -13,6 +13,10 @@ public interface ShopService {
     // Admin
     List<Shop> getPendingShops();
 
+    List<Shop> getActiveShops();
+
+    List<Shop> getRejectedShops();
+
     void approveShop(String shopId);
 
     void rejectShop(String shopId, String reason);

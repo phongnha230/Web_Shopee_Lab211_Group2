@@ -90,5 +90,11 @@ public class OrderController {
 
         List<Order> orders = orderService.getOrdersByShopId(shopId, status);
         return ResponseEntity.ok(orders);
+    @PutMapping("/{orderId}/assign-shipper")
+    public ResponseEntity<Order> assignShipper(
+            @PathVariable String orderId,
+            @RequestParam String shipperId) {
+        // TODO: Check if admin/seller
+        return ResponseEntity.ok(orderService.assignShipper(orderId, shipperId));
     }
 }

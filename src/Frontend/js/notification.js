@@ -45,7 +45,15 @@ async function loadNotifications() {
         });
 
         if (response.ok) {
-            const notifications = await response.json();
+            let notifications = await response.json();
+
+            // 🔥 Filter out SECURITY notifications if NOT in Admin Dashboard
+            // Check for a specific element that only exists in Admin Dashboard (e.g., 'adminAvatar')
+            const isAdminDashboard = document.getElementById('adminAvatar');
+
+            if (!isAdminDashboard) {
+                notifications = notifications.filter(n => n.type !== 'SECURITY');
+            }
             renderNotifications(notifications);
             updateBadge(notifications);
         }

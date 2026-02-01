@@ -25,6 +25,7 @@ public class ShopServiceImpl implements ShopService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final com.shoppeclone.backend.user.service.NotificationService notificationService;
+    private final com.shoppeclone.backend.common.service.EmailService emailService;
 
     @Override
     @Transactional
@@ -73,6 +74,16 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
+    public List<Shop> getActiveShops() {
+        return shopRepository.findByStatus(ShopStatus.ACTIVE);
+    }
+
+    @Override
+    public List<Shop> getRejectedShops() {
+        return shopRepository.findByStatus(ShopStatus.REJECTED);
+    }
+
+    @Override
     @Transactional
     public void approveShop(String shopId) {
         Shop shop = shopRepository.findById(shopId)
@@ -106,6 +117,13 @@ public class ShopServiceImpl implements ShopService {
                 "Shop Approved 🎉",
                 "Congratulations! Your shop '" + shop.getName() + "' has been approved. You can now start selling.",
                 "SHOP_APPROVED");
+
+        // 4. Send Email
+        try {
+            emailService.sendShopApprovalEmail(user.getEmail(), shop.getName());
+        } catch (Exception e) {
+            System.err.println("Failed to send approval email: " + e.getMessage());
+        }
     }
 
     @Override
@@ -113,6 +131,10 @@ public class ShopServiceImpl implements ShopService {
     public void rejectShop(String shopId, String reason) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new RuntimeException("Shop not found"));
+
+        // Retrieve User to get Email
+        User user = userRepository.findById(shop.getOwnerId())
+                .orElseThrow(() -> new RuntimeException("Shop owner not found"));
 
         shop.setStatus(ShopStatus.REJECTED);
         shop.setRejectionReason(reason);
@@ -125,6 +147,13 @@ public class ShopServiceImpl implements ShopService {
                 "Shop Registration Rejected ❌",
                 "Your shop application for '" + shop.getName() + "' was rejected. Reason: " + reason,
                 "SHOP_REJECTED");
+
+        // Send Email
+        try {
+            emailService.sendShopRejectionEmail(user.getEmail(), shop.getName(), reason);
+        } catch (Exception e) {
+            System.err.println("Failed to send rejection email: " + e.getMessage());
+        }
     }
 
     @Override

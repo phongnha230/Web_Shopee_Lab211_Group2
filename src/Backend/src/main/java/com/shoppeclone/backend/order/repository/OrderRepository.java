@@ -12,6 +12,7 @@ public interface OrderRepository extends MongoRepository<Order, String> {
 
     // Query orders by shop ID and status
     List<Order> findByShopIdAndOrderStatus(String shopId, com.shoppeclone.backend.order.entity.OrderStatus orderStatus);
+    List<Order> findByShipperId(String shipperId);
 
     // Support nested query for shipping tracking code
     @org.springframework.data.mongodb.repository.Query("{'shipping.trackingCode': ?0}")
