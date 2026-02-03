@@ -1,5 +1,4 @@
-][
-    package com.shoppeclone.backend.shipper.service.impl;
+package com.shoppeclone.backend.shipper.service.impl;
 
 import com.shoppeclone.backend.order.entity.Order;
 import com.shoppeclone.backend.order.entity.OrderStatus;

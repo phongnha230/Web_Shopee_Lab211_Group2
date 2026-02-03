@@ -20,15 +20,15 @@
             <div class="w-8 h-8 bg-[#AD3029] rounded-lg flex items-center justify-center text-white font-bold">
                 <i class="fas fa-chart-bar"></i>
             </div>
-            <span class="text-xl font-bold text-gray-800">AdminPanel</span>
+            <span class="text-xl font-bold text-[#AD3029]">AdminPanel</span>
         </div>
 
         <!-- User Profile Snippet in Sidebar -->
         <div class="p-6 flex items-center gap-3">
-            <img id="adminAvatar" src="https://ui-avatars.com/api/?name=Admin&background=random"
+            <img id="adminAvatar" src="https://ui-avatars.com/api/?name=Admin&background=AD3029&color=fff"
                 class="w-10 h-10 rounded-full">
             <div>
-                <p id="adminName" class="text-sm font-bold text-gray-800">Admin</p>
+                <p id="adminName" class="text-sm font-bold text-[#AD3029]">Admin</p>
                 <p class="text-xs text-gray-500">Administrator</p>
             </div>
         </div>
@@ -136,12 +136,13 @@
                     </div>
                     <div class="flex gap-2">
                         <div class="bg-white border border-gray-200 rounded-lg p-1 flex">
-                            <button
+                            <button id="btn-today" onclick="handleTimeFilter(1)"
                                 class="px-4 py-1.5 text-sm font-medium bg-[#AD3029] text-white rounded shadow-sm">Today</button>
-                            <button
+                            <button id="btn-yesterday" onclick="handleTimeFilter(0)"
                                 class="px-4 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded">Yesterday</button>
-                            <button class="px-4 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded">Last
-                                7 Days</button>
+                            <button id="btn-7days" onclick="handleTimeFilter(7)"
+                                class="px-4 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded">Last 7
+                                Days</button>
                         </div>
                         <button
                             class="bg-white border border-gray-200 text-gray-700 px-4 py-1.5 rounded-lg text-sm font-medium shadow-sm hover:bg-gray-50 flex items-center gap-2">
@@ -199,8 +200,8 @@
                     <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                         <div class="flex justify-between items-center mb-6">
                             <div>
-                                <h3 class="text-lg font-bold text-gray-800">Sales Trend</h3>
-                                <p class="text-xs text-gray-500">Hourly order volume & GMV</p>
+                                <h3 class="text-lg font-bold text-gray-800">Registration Trend</h3>
+                                <p class="text-xs text-gray-500">Daily new users & shops (Last 7 days)</p>
                             </div>
                             <div class="bg-gray-100 rounded-lg p-1 flex text-xs font-medium">
                                 <button class="px-3 py-1 bg-white shadow-sm rounded">Volume</button>
@@ -212,92 +213,93 @@
                         </div>
                     </div>
 
-                    <!-- Flash Sale Card -->
+                    <!-- Operations Summary Card -->
                     <div
                         class="bg-[#AD3029] text-white p-6 rounded-2xl shadow-lg flex flex-col justify-between relative overflow-hidden group">
                         <div class="relative z-10">
-                            <div
-                                class="flex items-center gap-2 mb-2 text-yellow-300 font-bold text-xs uppercase tracking-wider">
-                                <i class="fas fa-bolt"></i> Flash Sale Live
-                            </div>
-                            <h2 class="text-2xl font-bold mb-1">Mega Electronics</h2>
-                            <p class="text-white/80 text-sm mb-6">High traffic event active now.</p>
+                            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                                <i class="fas fa-clipboard-list"></i> Operations Summary
+                            </h2>
+                            <div class="space-y-3">
 
-                            <div class="mb-6">
-                                <div class="flex justify-between text-xs font-medium mb-1">
-                                    <span>Inventory Sold</span>
-                                    <span>85%</span>
+                                <!-- Open Disputes -->
+                                <div
+                                    class="flex justify-between items-center bg-white/10 p-3 rounded-lg backdrop-blur-sm hover:bg-white/20 transition cursor-pointer">
+                                    <div class="flex items-center gap-3">
+                                        <div class="bg-white/20 p-2 rounded">
+                                            <i class="fas fa-exclamation-circle text-orange-300"></i>
+                                        </div>
+                                        <div class="text-sm font-medium">New Disputes</div>
+                                    </div>
+                                    <div id="openDisputesCount" class="text-xl font-bold">0</div>
                                 </div>
-                                <div class="w-full bg-blue-800 rounded-full h-2.5">
-                                    <div class="bg-yellow-400 h-2.5 rounded-full" style="width: 85%"></div>
-                                </div>
-                            </div>
-
-                            <div
-                                class="bg-blue-800/50 backdrop-blur rounded-lg p-3 flex justify-between items-center mb-4">
-                                <span class="text-xs font-medium uppercase text-blue-200">Ends In</span>
-                                <div class="flex gap-1 font-mono text-lg font-bold">
-                                    <span class="bg-white/10 px-1.5 rounded">02</span>:
-                                    <span class="bg-white/10 px-1.5 rounded">14</span>:
-                                    <span class="bg-white/10 px-1.5 rounded">05</span>
+                                <!-- Pending Shops -->
+                                <div
+                                    class="flex justify-between items-center bg-white/10 p-3 rounded-lg backdrop-blur-sm hover:bg-white/20 transition cursor-pointer">
+                                    <div class="flex items-center gap-3">
+                                        <div class="bg-white/20 p-2 rounded">
+                                            <i class="fas fa-store text-blue-300"></i>
+                                        </div>
+                                        <div class="text-sm font-medium">Pending Shops</div>
+                                    </div>
+                                    <div id="pendingShopsCountSummary" class="text-xl font-bold">0</div>
                                 </div>
                             </div>
                         </div>
-
-                        <button
-                            class="relative z-10 w-full bg-white text-blue-700 font-bold py-2.5 rounded-lg shadow hover:bg-blue-50 transition">
-                            Manage Campaign
-                        </button>
 
                         <!-- Decorative Circle -->
-                        <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-500 rounded-full blur-3xl opacity-50">
+                        <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/20 rounded-full blur-3xl opacity-50">
                         </div>
                         <div
-                            class="absolute -left-10 bottom-10 w-32 h-32 bg-purple-500 rounded-full blur-3xl opacity-30">
+                            class="absolute -left-10 bottom-10 w-32 h-32 bg-yellow-400/20 rounded-full blur-3xl opacity-30">
                         </div>
                     </div>
                 </div>
 
                 <!-- Bottom Grid -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Revenue By Category -->
+                    <!-- User Distribution -->
                     <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-                        <h3 class="text-lg font-bold text-gray-800 mb-6">Revenue by Category</h3>
-                        <div class="space-y-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-6">User Distribution</h3>
+                        <div id="distributionContainer" class="space-y-6">
+                            <!-- Items will be loaded dynamically -->
                             <!-- Item 1 -->
                             <div>
                                 <div class="flex justify-between text-sm font-medium text-gray-700 mb-2">
                                     <div class="flex items-center gap-2">
-                                        <span class="w-3 h-3 rounded-full bg-blue-600"></span> Electronics
+                                        <span class="w-3 h-3 rounded-full bg-[#AD3029]"></span> Electronics
                                     </div>
                                     <span>$1.2M (35%)</span>
                                 </div>
                                 <div class="w-full bg-gray-100 rounded-full h-2">
-                                    <div class="bg-blue-600 h-2 rounded-full" style="width: 35%"></div>
+                                    <div class="bg-[#AD3029] h-2 rounded-full" style="width: 35%"></div>
                                 </div>
                             </div>
                             <!-- Item 2 -->
                             <div>
                                 <div class="flex justify-between text-sm font-medium text-gray-700 mb-2">
                                     <div class="flex items-center gap-2">
-                                        <span class="w-3 h-3 rounded-full bg-teal-500"></span> Fashion
+                                        <span class="w-3 h-3 rounded-full bg-orange-400"></span> Fashion
                                     </div>
                                     <span>$850K (25%)</span>
                                 </div>
                                 <div class="w-full bg-gray-100 rounded-full h-2">
-                                    <div class="bg-teal-500 h-2 rounded-full" style="width: 25%"></div>
+                                    <div class="bg-orange-400 h-2 rounded-full" style="width: 25%"></div>
                                 </div>
                             </div>
                             <!-- Item 3 -->
                             <div>
                                 <div class="flex justify-between text-sm font-medium text-gray-700 mb-2">
                                     <div class="flex items-center gap-2">
-                                        <span class="w-3 h-3 rounded-full bg-purple-500"></span> Home & Living
+                                        <span
+                                            class="w-3 h-3 rounded-full bg-[#FEEFCD] border border-[#AD3029]/20"></span>
+                                        Home & Living
                                     </div>
                                     <span>$500K (15%)</span>
                                 </div>
                                 <div class="w-full bg-gray-100 rounded-full h-2">
-                                    <div class="bg-purple-500 h-2 rounded-full" style="width: 15%"></div>
+                                    <div class="bg-[#FEEFCD] h-2 rounded-full border border-[#AD3029]/10"
+                                        style="width: 15%"></div>
                                 </div>
                             </div>
                         </div>
@@ -307,7 +309,8 @@
                     <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                         <div class="flex justify-between items-center mb-6">
                             <h3 class="text-lg font-bold text-gray-800">Top Selling Products</h3>
-                            <a href="#" class="text-sm font-bold text-[#AD3029] hover:underline">View All</a>
+                            <a href="#" onclick="switchView('products')"
+                                class="text-sm font-bold text-[#AD3029] hover:underline">View All</a>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm text-gray-600">
@@ -320,7 +323,7 @@
                                         <th class="px-4 py-3 rounded-r-lg">Status</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-100">
+                                <tbody id="topProductsTableBody" class="divide-y divide-gray-100">
                                     <tr class="hover:bg-gray-50 transition">
                                         <td class="px-4 py-3 font-medium text-[#AD3029]">01</td>
                                         <td class="px-4 py-3 flex items-center gap-3">
@@ -354,6 +357,39 @@
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: PRODUCTS (New) -->
+            <div id="view-products" class="hidden space-y-8">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-3xl font-bold text-gray-800">All Products</h1>
+                    <div class="flex gap-2">
+                        <button onclick="loadProducts()"
+                            class="bg-[#AD3029] text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition"><i
+                                class="fas fa-sync-alt mr-2"></i> Refresh</button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr
+                                    class="bg-gray-50 border-b border-gray-100 text-xs uppercase text-gray-500 font-semibold">
+                                    <th class="px-6 py-4">#</th>
+                                    <th class="px-6 py-4">ID</th>
+                                    <th class="px-6 py-4">Product Name</th>
+                                    <th class="px-6 py-4">Price</th>
+                                    <th class="px-6 py-4">Description</th>
+                                    <th class="px-6 py-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productsList" class="divide-y divide-gray-50">
+                                <!-- Products loaded via JS -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -592,7 +628,7 @@
 
         // Update Sidebar Profile
         document.getElementById('adminName').textContent = user;
-        document.getElementById('adminAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user)}&background=random&color=fff`;
+        document.getElementById('adminAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user)}&background=AD3029&color=fff`;
 
         // --- NAVIGATION LOGIC ---
         function switchView(viewName) {
@@ -615,6 +651,8 @@
             // Load data when switching to specific views
             if (viewName === 'shops') {
                 loadPendingShops();
+            } else if (viewName === 'products') {
+                loadProducts();
             } else if (viewName === 'users') {
                 loadUsers();
             } else if (viewName === 'disputes') {
@@ -624,48 +662,101 @@
             }
         }
 
-        // --- CHART JS (MOCK DATA) ---
-        const ctx = document.getElementById('salesChart').getContext('2d');
-        // Gradient fill
-        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.2)'); // Blue with opacity
-        gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+        // --- DASHBOARD FILTER LOGIC ---
+        function handleTimeFilter(days) {
+            // Update button styles
+            const buttons = {
+                1: document.getElementById('btn-today'),
+                0: document.getElementById('btn-yesterday'),
+                7: document.getElementById('btn-7days')
+            };
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'],
-                datasets: [{
-                    label: 'Order Volume',
-                    data: [12, 19, 15, 25, 22, 30, 28],
-                    borderColor: '#2563EB', // Blue-600
-                    backgroundColor: gradient,
-                    borderWidth: 3,
-                    tension: 0.4, // Smooth curve
-                    pointRadius: 4,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#2563EB',
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
+            Object.values(buttons).forEach(btn => {
+                btn.classList.remove('bg-[#AD3029]', 'text-white', 'shadow-sm');
+                btn.classList.add('text-gray-600', 'hover:bg-gray-50');
+            });
+
+            const activeBtn = buttons[days];
+            if (activeBtn) {
+                activeBtn.classList.remove('text-gray-600', 'hover:bg-gray-50');
+                activeBtn.classList.add('bg-[#AD3029]', 'text-white', 'shadow-sm');
+            }
+
+            // Reload stats
+            loadDashboardStats(days);
+        }
+
+        // --- CHART JS (REGISTRATION TREND) ---
+        let registrationChart;
+
+        function initRegistrationChart() {
+            const ctx = document.getElementById('salesChart').getContext('2d');
+
+            registrationChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'New Users',
+                            data: [],
+                            borderColor: '#AD3029', // Shopee red
+                            backgroundColor: 'rgba(173, 48, 41, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            fill: true
+                        },
+                        {
+                            label: 'New Shops',
+                            data: [],
+                            borderColor: '#F97316', // Orange
+                            backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            fill: true
+                        }
+                    ]
                 },
-                scales: {
-                    y: {
-                        display: false,
-                        beginAtZero: true
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: { boxWidth: 10, font: { size: 10 } }
+                        }
                     },
-                    x: {
-                        grid: { display: false, drawBorder: false },
-                        ticks: { color: '#9CA3AF', font: { size: 10 } }
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { font: { size: 10 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 10 } }
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
+
+        function updateRegistrationChart(userTrend, shopTrend) {
+            if (!registrationChart) return;
+
+            const labels = userTrend.map(t => t.date);
+            const userData = userTrend.map(t => t.count);
+            const shopData = shopTrend.map(t => t.count);
+
+            registrationChart.data.labels = labels;
+            registrationChart.data.datasets[0].data = userData;
+            registrationChart.data.datasets[1].data = shopData;
+            registrationChart.update();
+        }
+
+        initRegistrationChart();
 
         // --- SHOP APPROVAL LOGIC (EXISTING) ---
         async function loadPendingShops() {
@@ -1198,9 +1289,9 @@
         }
 
         // Load Dashboard Statistics
-        async function loadDashboardStats() {
+        async function loadDashboardStats(days = 1) {
             try {
-                const response = await fetch('http://localhost:8080/api/admin/dashboard/stats', {
+                const response = await fetch(`http://localhost:8080/api/admin/dashboard/stats?days=${days}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -1211,6 +1302,25 @@
                     document.getElementById('totalUsersCount').textContent = stats.totalUsers.toLocaleString();
                     document.getElementById('activeShopsCount').textContent = stats.activeShops.toLocaleString();
                     document.getElementById('totalDisputesCount').textContent = stats.totalDisputes.toLocaleString();
+
+                    // Update Operations Summary
+                    if (document.getElementById('openDisputesCount')) {
+                        document.getElementById('openDisputesCount').textContent = (stats.openDisputes || 0).toLocaleString();
+                    }
+                    if (document.getElementById('pendingShopsCountSummary')) {
+                        document.getElementById('pendingShopsCountSummary').textContent = (stats.pendingShops || 0).toLocaleString();
+                    }
+
+                    // Update Chart with real trend data
+                    if (stats.userTrend && stats.shopTrend) {
+                        updateRegistrationChart(stats.userTrend, stats.shopTrend);
+                    }
+
+                    // Update User Distribution
+                    if (stats.distribution) {
+                        updateDistributionUI(stats.distribution);
+                    }
+                    updateTopProducts(stats.topProducts || []);
                 } else {
                     console.error('Failed to load dashboard stats:', response.status);
                     // Show error state
@@ -1224,6 +1334,68 @@
                 document.getElementById('activeShopsCount').textContent = 'Error';
                 document.getElementById('totalDisputesCount').textContent = 'Error';
             }
+        }
+
+
+
+        function updateDistributionUI(distribution) {
+            const container = document.getElementById('distributionContainer');
+            if (!container) return;
+
+            const colors = ['bg-[#AD3029]', 'bg-orange-400', 'bg-yellow-400'];
+            const dotColors = ['bg-[#AD3029]', 'bg-orange-400', 'bg-yellow-100 border border-orange-200'];
+
+            container.innerHTML = distribution.map((item, index) => {
+                const color = colors[index % colors.length];
+                const dotColor = dotColors[index % dotColors.length];
+
+                return `
+                    <div>
+                        <div class="flex justify-between text-sm font-medium text-gray-700 mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full ${dotColor}"></span> ${item.label}
+                            </div>
+                            <span>${item.value.toLocaleString()} (${item.percentage}%)</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-2">
+                            <div class="${color} h-2 rounded-full" style="width: ${item.percentage}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+
+
+        function updateTopProducts(products) {
+            const tableBody = document.getElementById('topProductsTableBody');
+            if (!tableBody) return;
+
+            if (products.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No sales data yet.</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = products.map((product, index) => `
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-4 py-3 font-medium text-[#AD3029]">${(index + 1).toString().padStart(2, '0')}</td>
+                    <td class="px-4 py-3 flex items-center gap-3">
+                        <div class="w-8 h-8 bg-gray-200 rounded flex-shrink-0 flex items-center justify-center text-gray-400">
+                             <i class="fas fa-box"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-gray-800 line-clamp-1">${product.name}</p>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 font-medium">$${product.price.toLocaleString()}</td>
+                    <td class="px-4 py-3 text-green-600 font-bold">${product.sold} sold</td>
+                    <td class="px-4 py-3">
+                        <span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded uppercase">
+                            ${product.status.replace('_', ' ')}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
         }
 
         // --- DISPUTES LOGIC ---
@@ -1323,6 +1495,63 @@
 
         // Initialize Dashboard on load
         loadDashboardStats();
+
+        // --- PRODUCTS LOGIC ---
+        async function loadProducts() {
+            const container = document.getElementById('productsList');
+            if (!container) return;
+
+            container.innerHTML = '<tr><td colspan="6" class="px-6 py-10 text-center text-gray-500"><i class="fas fa-spinner fa-spin text-2xl"></i> Loading products...</td></tr>';
+
+            try {
+                const response = await fetch('http://localhost:8080/api/products', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const products = await response.json();
+                    renderProducts(products);
+                } else {
+                    container.innerHTML = '<tr><td colspan="6" class="px-6 py-10 text-center text-red-500">Failed to load products.</td></tr>';
+                }
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = '<tr><td colspan="6" class="px-6 py-10 text-center text-red-500">Connection error.</td></tr>';
+            }
+        }
+
+        function renderProducts(products) {
+            const container = document.getElementById('productsList');
+            if (products.length === 0) {
+                container.innerHTML = '<tr><td colspan="6" class="px-6 py-10 text-center text-gray-500">No products found.</td></tr>';
+                return;
+            }
+
+            container.innerHTML = products.map((product, index) => `
+                <tr class="hover:bg-gray-50 transition border-b border-gray-100 last:border-0">
+                    <td class="px-6 py-4 font-medium text-gray-900">#${(index + 1)}</td>
+                    <td class="px-6 py-4 text-gray-600">${product.id.substring(0, 8)}...</td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                             <div class="w-10 h-10 bg-gray-100 rounded flex items-center justify-center text-gray-400">
+                                <i class="fas fa-box"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-800 line-clamp-1 max-w-[200px]" title="${product.name}">${product.name}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-gray-800 font-medium">$${(product.minPrice || 0).toLocaleString()}</td>
+                    <td class="px-6 py-4 text-gray-600 max-w-[200px] truncate" title="${product.description || ''}">${product.description || 'N/A'}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase 
+                            ${product.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}">
+                            ${product.status}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
 
 
     </script>
