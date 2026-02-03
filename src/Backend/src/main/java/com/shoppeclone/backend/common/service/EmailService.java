@@ -62,7 +62,6 @@ public class EmailService {
         System.out.println("⚠️ Login alert email sent to: " + to);
     }
 
-<<<<<<< Updated upstream
     public void sendShopApprovalEmail(String to, String shopName) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
@@ -95,7 +94,8 @@ public class EmailService {
 
         mailSender.send(message);
         System.out.println("❌ Shop Rejection email sent to: " + to);
-=======
+    }
+
     public void sendWelcomeEmail(String to, String name) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
@@ -110,6 +110,5 @@ public class EmailService {
 
         mailSender.send(message);
         System.out.println("🎉 Welcome email sent to: " + to);
->>>>>>> Stashed changes
     }
 }
