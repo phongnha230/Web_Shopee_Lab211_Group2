@@ -16,14 +16,9 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import com.shoppeclone.backend.common.service.EmailService;
-import com.shoppeclone.backend.user.service.NotificationService;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -38,7 +33,7 @@ public class OAuthServiceImpl implements OAuthService {
     private final RoleRepository roleRepository;
     private final UserSessionRepository sessionRepository;
     private final JwtUtil jwtUtil;
-    private final NotificationService notificationService;
+
     private final EmailService emailService;
 
     private final RestTemplate restTemplate = new RestTemplate();
@@ -103,32 +98,8 @@ public class OAuthServiceImpl implements OAuthService {
 
             saveUserSession(user, refreshToken);
 
-            // 🔥 NOTIFICATION Logic
-            try {
-                ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
-                        .getRequestAttributes();
-                if (attributes != null) {
-                    HttpServletRequest httpRequest = attributes.getRequest();
-                    String ip = httpRequest.getHeader("X-Forwarded-For");
-                    if (ip == null || ip.isEmpty())
-                        ip = httpRequest.getRemoteAddr();
-
-                    String userAgent = httpRequest.getHeader("User-Agent");
-                    String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy"));
-
-                    // 1. Save Notification
-                    notificationService.createNotification(
-                            user.getId(),
-                            "New Google Login Detected",
-                            "New login via Google at " + time + " from IP: " + ip,
-                            "SECURITY");
-
-                    // 2. Send Email
-                    emailService.sendLoginAlert(user.getEmail(), time, ip, userAgent);
-                }
-            } catch (Exception e) {
-                System.err.println("❌ Failed to send login notification: " + e.getMessage());
-            }
+            // Login notifications removed as per user request - only show registration
+            // notifications
 
             return new AuthResponse(jwtAccessToken, refreshToken, "Bearer", mapToUserDto(user));
         } catch (Exception e) {

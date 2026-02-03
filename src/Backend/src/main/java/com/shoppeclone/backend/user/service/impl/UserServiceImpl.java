@@ -40,6 +40,9 @@ public class UserServiceImpl implements UserService {
         User user = getUserByEmail(email);
         user.setFullName(request.getFullName());
         user.setPhone(request.getPhone());
+        if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
+            user.setAvatar(request.getAvatar());
+        }
         user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
     }
@@ -172,6 +175,7 @@ public class UserServiceImpl implements UserService {
         dto.setEmail(user.getEmail());
         dto.setFullName(user.getFullName());
         dto.setPhone(user.getPhone());
+        dto.setAvatar(user.getAvatar());
         dto.setEmailVerified(user.isEmailVerified());
         dto.setRoles(
                 user.getRoles()

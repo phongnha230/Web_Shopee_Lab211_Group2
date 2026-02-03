@@ -62,6 +62,7 @@ public class EmailService {
         System.out.println("⚠️ Login alert email sent to: " + to);
     }
 
+<<<<<<< Updated upstream
     public void sendShopApprovalEmail(String to, String shopName) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
@@ -94,5 +95,21 @@ public class EmailService {
 
         mailSender.send(message);
         System.out.println("❌ Shop Rejection email sent to: " + to);
+=======
+    public void sendWelcomeEmail(String to, String name) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Welcome to ShoppeClone! 🎉");
+        message.setText(
+                "Hello " + name + ",\n\n" +
+                        "Welcome to ShoppeClone! Your account has been successfully verified.\n\n" +
+                        "You can now log in and start shopping with us.\n" +
+                        "We hope you have a great experience!\n\n" +
+                        "Best regards,\n" +
+                        "ShoppeClone Team");
+
+        mailSender.send(message);
+        System.out.println("🎉 Welcome email sent to: " + to);
+>>>>>>> Stashed changes
     }
 }

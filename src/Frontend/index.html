@@ -145,7 +145,7 @@
 
                             <!-- Dropdown -->
                             <div id="notificationDropdown"
-                                class="hidden absolute top-10 right-0 w-80 bg-white shadow-xl rounded-lg border border-gray-100 z-50 overflow-hidden text-gray-800">
+                                class="hidden absolute top-10 right-0 w-80 bg-white shadow-xl rounded-lg border border-gray-100 z-[9999] overflow-hidden text-gray-800">
                                 <div
                                     class="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
                                     <h3 class="font-semibold text-gray-700">Notifications</h3>
@@ -153,11 +153,14 @@
                                         class="text-xs text-blue-600 hover:text-blue-800 font-medium">Mark all
                                         read</button>
                                 </div>
-                                <div id="notificationList" class="max-h-80 overflow-y-auto">
+                                <div id="notificationList" class="max-h-60 overflow-y-auto">
                                     <div class="p-4 text-center text-gray-500 text-sm">Loading...</div>
                                 </div>
                                 <div class="bg-gray-50 px-4 py-2 border-t border-gray-100 text-center">
-                                    <a href="#" class="text-xs text-gray-500 hover:text-blue-600">View all</a>
+                                    <button onclick="expandNotifications()"
+                                        class="text-xs text-gray-500 hover:text-blue-600 font-medium">
+                                        <span id="viewAllText">View all</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>

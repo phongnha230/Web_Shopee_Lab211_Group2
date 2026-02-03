@@ -92,18 +92,22 @@
 
                     <!-- Dropdown -->
                     <div id="notificationDropdown"
-                        class="hidden absolute top-10 right-0 w-80 bg-white shadow-xl rounded-lg border border-gray-100 z-50 overflow-hidden text-gray-800">
+                        class="hidden absolute top-10 right-0 w-80 bg-white shadow-xl rounded-lg border border-gray-100 z-[9999] overflow-hidden text-gray-800">
                         <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-700">Notifications</h3>
                             <h3 class="font-semibold text-gray-700">Notifications</h3>
                             <button id="markAllReadBtn" class="text-xs text-[#AD3029] hover:opacity-80 font-medium">Mark
                                 all
                                 read</button>
                         </div>
-                        <div id="notificationList" class="max-h-80 overflow-y-auto">
+                        <div id="notificationList" class="max-h-60 overflow-y-auto">
                             <div class="p-4 text-center text-gray-500 text-sm">Loading...</div>
                         </div>
                         <div class="bg-gray-50 px-4 py-2 border-t border-gray-100 text-center">
-                            <a href="#" class="text-xs text-gray-500 hover:text-[#AD3029]">View all</a>
+                            <button onclick="expandNotifications()"
+                                class="text-xs text-gray-500 hover:text-[#AD3029] font-medium">
+                                <span id="viewAllText">View all</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -155,8 +159,40 @@
                     <!-- Active Users Card -->
                     <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-4">
-                            <div
+                            <div <<<<<<< Updated upstream
                                 class="w-10 h-10 bg-[#FEEFCD] text-[#AD3029] rounded-lg flex items-center justify-center text-lg">
+                                =======
+                                class="w-10 h-10 bg-red-50 text-[#AD3029] rounded-lg flex items-center justify-center
+                                text-lg">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                            <span class="bg-green-50 text-green-600 text-xs font-bold px-2 py-1 rounded-full">+5.2% <i
+                                    class="fas fa-arrow-up text-[10px]"></i></span>
+                        </div>
+                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Total GMV</p>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1">$4.23M</h3>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
+                        <div class="flex justify-between items-start mb-4">
+                            <div
+                                class="w-10 h-10 bg-red-50 text-[#AD3029] rounded-lg flex items-center justify-center text-lg">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <span class="bg-green-50 text-green-600 text-xs font-bold px-2 py-1 rounded-full">+12.4% <i
+                                    class="fas fa-arrow-up text-[10px]"></i></span>
+                        </div>
+                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Total Orders</p>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1">12,450</h3>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
+                        <div class="flex justify-between items-start mb-4">
+                            <div
+                                class="w-10 h-10 bg-red-50 text-[#AD3029] rounded-lg flex items-center justify-center text-lg">
+                                >>>>>>> Stashed changes
                                 <i class="fas fa-users"></i>
                             </div>
                             <span class="bg-green-50 text-green-600 text-xs font-bold px-2 py-1 rounded-full">+8.1% <i
@@ -169,8 +205,12 @@
                     <!-- Active Shops Card -->
                     <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-4">
-                            <div
+                            <div <<<<<<< Updated upstream
                                 class="w-10 h-10 bg-[#FEEFCD] text-[#AD3029] rounded-lg flex items-center justify-center text-lg">
+                                =======
+                                class="w-10 h-10 bg-red-50 text-[#AD3029] rounded-lg flex items-center justify-center
+                                text-lg">
+                                >>>>>>> Stashed changes
                                 <i class="fas fa-store"></i>
                             </div>
                             <span class="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-1 rounded-full">0.0% <i
@@ -183,9 +223,14 @@
                     <!-- Total Disputes Card -->
                     <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-4">
-                            <div
+                            <div <<<<<<< Updated upstream
                                 class="w-10 h-10 bg-[#AD3029]/10 text-[#AD3029] rounded-lg flex items-center justify-center text-lg">
                                 <i class="fas fa-exclamation-triangle"></i>
+                                =======
+                                class="w-10 h-10 bg-red-50 text-[#AD3029] rounded-lg flex items-center justify-center
+                                text-lg">
+                                <i class="fas fa-bullseye"></i>
+                                >>>>>>> Stashed changes
                             </div>
                         </div>
                         <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Total Disputes</p>
@@ -221,36 +266,40 @@
                                 <i class="fas fa-bolt"></i> Flash Sale Live
                             </div>
                             <h2 class="text-2xl font-bold mb-1">Mega Electronics</h2>
-                            <p class="text-white/80 text-sm mb-6">High traffic event active now.</p>
+                            <<<<<<< Updated upstream <p class="text-white/80 text-sm mb-6">High traffic event active
+                                now.</p>
+                                =======
+                                <p class="text-red-200 text-sm mb-6">High traffic event active now.</p>
+                                >>>>>>> Stashed changes
 
-                            <div class="mb-6">
-                                <div class="flex justify-between text-xs font-medium mb-1">
-                                    <span>Inventory Sold</span>
-                                    <span>85%</span>
+                                <div class="mb-6">
+                                    <div class="flex justify-between text-xs font-medium mb-1">
+                                        <span>Inventory Sold</span>
+                                        <span>85%</span>
+                                    </div>
+                                    <div class="w-full bg-red-800 rounded-full h-2.5">
+                                        <div class="bg-yellow-400 h-2.5 rounded-full" style="width: 85%"></div>
+                                    </div>
                                 </div>
-                                <div class="w-full bg-blue-800 rounded-full h-2.5">
-                                    <div class="bg-yellow-400 h-2.5 rounded-full" style="width: 85%"></div>
-                                </div>
-                            </div>
 
-                            <div
-                                class="bg-blue-800/50 backdrop-blur rounded-lg p-3 flex justify-between items-center mb-4">
-                                <span class="text-xs font-medium uppercase text-blue-200">Ends In</span>
-                                <div class="flex gap-1 font-mono text-lg font-bold">
-                                    <span class="bg-white/10 px-1.5 rounded">02</span>:
-                                    <span class="bg-white/10 px-1.5 rounded">14</span>:
-                                    <span class="bg-white/10 px-1.5 rounded">05</span>
+                                <div
+                                    class="bg-red-800/50 backdrop-blur rounded-lg p-3 flex justify-between items-center mb-4">
+                                    <span class="text-xs font-medium uppercase text-red-200">Ends In</span>
+                                    <div class="flex gap-1 font-mono text-lg font-bold">
+                                        <span class="bg-white/10 px-1.5 rounded">02</span>:
+                                        <span class="bg-white/10 px-1.5 rounded">14</span>:
+                                        <span class="bg-white/10 px-1.5 rounded">05</span>
+                                    </div>
                                 </div>
-                            </div>
                         </div>
 
                         <button
-                            class="relative z-10 w-full bg-white text-blue-700 font-bold py-2.5 rounded-lg shadow hover:bg-blue-50 transition">
+                            class="relative z-10 w-full bg-white text-[#8B2520] font-bold py-2.5 rounded-lg shadow hover:bg-red-50 transition">
                             Manage Campaign
                         </button>
 
                         <!-- Decorative Circle -->
-                        <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-500 rounded-full blur-3xl opacity-50">
+                        <div class="absolute -right-10 -top-10 w-40 h-40 bg-red-500 rounded-full blur-3xl opacity-50">
                         </div>
                         <div
                             class="absolute -left-10 bottom-10 w-32 h-32 bg-purple-500 rounded-full blur-3xl opacity-30">
@@ -268,12 +317,12 @@
                             <div>
                                 <div class="flex justify-between text-sm font-medium text-gray-700 mb-2">
                                     <div class="flex items-center gap-2">
-                                        <span class="w-3 h-3 rounded-full bg-blue-600"></span> Electronics
+                                        <span class="w-3 h-3 rounded-full bg-[#AD3029]"></span> Electronics
                                     </div>
                                     <span>$1.2M (35%)</span>
                                 </div>
                                 <div class="w-full bg-gray-100 rounded-full h-2">
-                                    <div class="bg-blue-600 h-2 rounded-full" style="width: 35%"></div>
+                                    <div class="bg-[#AD3029] h-2 rounded-full" style="width: 35%"></div>
                                 </div>
                             </div>
                             <!-- Item 2 -->
@@ -363,21 +412,26 @@
                 <div class="flex justify-between items-center">
                     <h1 class="text-3xl font-bold text-gray-800">Shop Management</h1>
                     <div class="flex gap-2">
-                        <button onclick="loadPendingShops()"
-                            class="bg-[#AD3029] text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition"><i
-                                class="fas fa-sync-alt mr-2"></i> Refresh</button>
+                        <button onclick="loadPendingShops()" <<<<<<< Updated upstream
+                            class="bg-[#AD3029] text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition"><i=======class="bg-[#AD3029]
+                                text-white px-4 py-2 rounded-lg font-bold hover:bg-[#8B2520] transition"><i>>>>>>>
+                                    Stashed changes
+                                    class="fas fa-sync-alt mr-2"></i> Refresh</button>
                     </div>
                 </div>
 
                 <!-- Tabs/Filters for Shops -->
                 <div class="flex border-b border-gray-200">
-                    <button onclick="loadPendingShops(); setActiveTab(this)"
+                    <<<<<<< Updated upstream <button onclick="loadPendingShops(); setActiveTab(this)"
                         class="px-6 py-3 border-b-2 border-[#AD3029] text-[#AD3029] font-bold tab-btn">Pending
-                        Approvals</button>
-                    <button onclick="loadActiveShops(); setActiveTab(this)"
-                        class="px-6 py-3 text-gray-500 hover:text-gray-700 tab-btn">Active Shops</button>
-                    <button onclick="loadRejectedShops(); setActiveTab(this)"
-                        class="px-6 py-3 text-gray-500 hover:text-gray-700 tab-btn">Rejected</button>
+                        =======
+                        <button class="px-6 py-3 border-b-2 border-[#AD3029] text-[#AD3029] font-bold">Pending
+                            >>>>>>> Stashed changes
+                            Approvals</button>
+                        <button onclick="loadActiveShops(); setActiveTab(this)"
+                            class="px-6 py-3 text-gray-500 hover:text-gray-700 tab-btn">Active Shops</button>
+                        <button onclick="loadRejectedShops(); setActiveTab(this)"
+                            class="px-6 py-3 text-gray-500 hover:text-gray-700 tab-btn">Rejected</button>
                 </div>
 
                 <script>
@@ -450,41 +504,48 @@
                         <div class="relative">
                             <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                             <input type="text" id="userListSearch" oninput="filterUsers()" placeholder="Search users..."
+                                <<<<<<< Updated upstream
                                 class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FEEFCD] outline-none">
                         </div>
                         <button onclick="loadUsers()"
-                            class="bg-[#AD3029] text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition"><i
-                                class="fas fa-sync-alt"></i></button>
+                            class="bg-[#AD3029] text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition"><i=======class="pl-10
+                                pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-100
+                                outline-none">
                     </div>
-                </div>
-
-                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm text-gray-600">
-                            <thead class="bg-gray-50 text-gray-500 font-semibold uppercase text-xs">
-                                <tr>
-                                    <th class="px-6 py-4">User</th>
-                                    <th class="px-6 py-4">Contact</th>
-                                    <th class="px-6 py-4">Role</th>
-                                    <th class="px-6 py-4">Status</th>
-                                    <th class="px-6 py-4 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="userTableBody" class="divide-y divide-gray-100">
-                                <!-- Users Loaded JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                    <div id="userLoading" class="text-center py-10 text-gray-500 hidden">
-                        <i class="fas fa-spinner fa-spin text-2xl"></i> Loading users...
-                    </div>
-                    <div id="userEmpty" class="text-center py-10 text-gray-500 hidden">
-                        No users found.
-                    </div>
+                    <button onclick="loadUsers()"
+                        class="bg-[#AD3029] text-white px-4 py-2 rounded-lg font-bold hover:bg-[#8B2520] transition"><i>>>>>>>
+                            Stashed changes
+                            class="fas fa-sync-alt"></i></button>
                 </div>
             </div>
 
-        </main>
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-600">
+                        <thead class="bg-gray-50 text-gray-500 font-semibold uppercase text-xs">
+                            <tr>
+                                <th class="px-6 py-4">User</th>
+                                <th class="px-6 py-4">Contact</th>
+                                <th class="px-6 py-4">Role</th>
+                                <th class="px-6 py-4">Status</th>
+                                <th class="px-6 py-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody" class="divide-y divide-gray-100">
+                            <!-- Users Loaded JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="userLoading" class="text-center py-10 text-gray-500 hidden">
+                    <i class="fas fa-spinner fa-spin text-2xl"></i> Loading users...
+                </div>
+                <div id="userEmpty" class="text-center py-10 text-gray-500 hidden">
+                    No users found.
+                </div>
+            </div>
+    </div>
+
+    </main>
     </div>
 
     <!-- Rejection Reason Modal -->
@@ -553,25 +614,40 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                    <input type="text" id="editFullName" required
+                    <input type="text" id="editFullName" required <<<<<<< Updated upstream
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#AD3029]/20 outline-none">
+                    =======
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500
+                    outline-none">
+                    >>>>>>> Stashed changes
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                    <input type="email" id="editEmail" required
+                    <input type="email" id="editEmail" required <<<<<<< Updated upstream
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#AD3029]/20 outline-none">
+                    =======
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500
+                    outline-none">
+                    >>>>>>> Stashed changes
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-                    <input type="tel" id="editPhone"
+                    <input type="tel" id="editPhone" <<<<<<< Updated upstream
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#AD3029]/20 outline-none">
+                    =======
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500
+                    outline-none">
+                    >>>>>>> Stashed changes
                 </div>
 
                 <div class="flex gap-3 pt-4">
-                    <button type="submit"
+                    <button type="submit" <<<<<<< Updated upstream
                         class="flex-1 bg-[#AD3029] text-white py-2 rounded-lg font-bold hover:opacity-90 transition">
+                        =======
+                        class="flex-1 bg-[#AD3029] text-white py-2 rounded-lg font-bold hover:bg-[#8B2520] transition">
+                        >>>>>>> Stashed changes
                         Save Changes
                     </button>
                     <button type="button" onclick="closeEditModal()"
@@ -603,6 +679,7 @@
 
             // Update Sidebar Active State
             document.querySelectorAll('aside nav a').forEach(el => {
+<<<<<<< Updated upstream
                 el.classList.remove('bg-[#FEEFCD]', 'text-[#AD3029]');
                 el.classList.add('text-gray-600', 'hover:bg-[#FEEFCD]/50');
             });
@@ -610,6 +687,15 @@
             if (activeLink) {
                 activeLink.classList.remove('text-gray-600', 'hover:bg-[#FEEFCD]/50');
                 activeLink.classList.add('bg-[#FEEFCD]', 'text-[#AD3029]');
+=======
+                el.classList.remove('bg-red-50', 'text-[#AD3029]');
+                el.classList.add('text-gray-600', 'hover:bg-gray-50');
+            });
+            const activeLink = document.getElementById(`nav-${viewName}`);
+            if (activeLink) {
+                activeLink.classList.remove('text-gray-600', 'hover:bg-gray-50');
+                activeLink.classList.add('bg-red-50', 'text-[#AD3029]');
+>>>>>>> Stashed changes
             }
 
             // Load data when switching to specific views
@@ -638,13 +724,13 @@
                 datasets: [{
                     label: 'Order Volume',
                     data: [12, 19, 15, 25, 22, 30, 28],
-                    borderColor: '#2563EB', // Blue-600
+                    borderColor: '#AD3029', // [#AD3029]
                     backgroundColor: gradient,
                     borderWidth: 3,
                     tension: 0.4, // Smooth curve
                     pointRadius: 4,
                     pointBackgroundColor: '#fff',
-                    pointBorderColor: '#2563EB',
+                    pointBorderColor: '#AD3029',
                     fill: true
                 }]
             },
@@ -711,7 +797,11 @@
                     <div class="p-5">
                         <div class="flex justify-between items-start mb-4">
                             <div class="flex items-center gap-3">
+<<<<<<< Updated upstream
                                 <div class="w-10 h-10 rounded-full bg-[#FEEFCD] text-[#AD3029] font-bold text-lg flex items-center justify-center">
+=======
+                                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-[#AD3029] font-bold text-lg">
+>>>>>>> Stashed changes
                                     ${shop.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div>
@@ -738,7 +828,11 @@
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
+<<<<<<< Updated upstream
                             <button onclick="processShop('${shop.id}', 'approve')" class="bg-[#AD3029] hover:opacity-90 text-white font-bold py-2 rounded-lg transition text-sm">
+=======
+                            <button onclick="processShop('${shop.id}', 'approve')" class="bg-[#AD3029] hover:bg-[#8B2520] text-white font-bold py-2 rounded-lg transition text-sm">
+>>>>>>> Stashed changes
                                 <i class="fas fa-check mr-1"></i> Approve
                             </button>
                             <button onclick="processShop('${shop.id}', 'reject')" class="bg-white border border-gray-200 text-red-500 hover:bg-red-50 font-bold py-2 rounded-lg transition text-sm">
@@ -1064,7 +1158,11 @@
                     <td class="px-6 py-4">
                         <div class="flex flex-wrap gap-1">
                             ${roles.map(role => {
+<<<<<<< Updated upstream
                     const color = role === 'ROLE_ADMIN' ? 'bg-[#AD3029] text-white' : (role === 'ROLE_SELLER' ? 'bg-[#FEEFCD] text-[#AD3029]' : 'bg-gray-100 text-gray-700');
+=======
+                    const color = role === 'ROLE_ADMIN' ? 'bg-red-100 text-red-700' : (role === 'ROLE_SELLER' ? 'bg-red-100 text-[#8B2520]' : 'bg-gray-100 text-gray-700');
+>>>>>>> Stashed changes
                     return `<span class="${color} text-xs font-bold px-2 py-1 rounded border border-opacity-20">${role.replace('ROLE_', '')}</span>`;
                 }).join('')}
                         </div>
@@ -1078,7 +1176,11 @@
                         <div class="flex items-center justify-end gap-2">
                             <!-- Edit Button -->
                             <button onclick="openEditModal('${user.id}')" 
+<<<<<<< Updated upstream
                                 class="text-[#AD3029] hover:bg-[#FEEFCD]/50 p-2 rounded-lg transition" 
+=======
+                                class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition" 
+>>>>>>> Stashed changes
                                 title="Edit User">
                                 <i class="fas fa-edit"></i>
                             </button>
