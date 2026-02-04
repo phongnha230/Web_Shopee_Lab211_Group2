@@ -265,9 +265,9 @@
             }
 
             try {
-                await CartAPI.updateQuantity(variantId, newQuantity);
-                await loadCart(); // Reload cart
-                showToast('✅ Cart updated!');
+                backendCart = await CartAPI.updateQuantity(variantId, newQuantity);
+                renderCart();
+                // showToast('✅ Cart updated!'); // Optional: removed to reduce noise on quick clicks
             } catch (error) {
                 console.error('Error updating quantity:', error);
                 alert('Failed to update quantity: ' + error.message);
@@ -278,8 +278,8 @@
             if (!confirm('Remove this item from cart?')) return;
 
             try {
-                await CartAPI.removeItem(variantId);
-                await loadCart(); // Reload cart
+                backendCart = await CartAPI.removeItem(variantId);
+                renderCart();
                 showToast('✅ Item removed!');
             } catch (error) {
                 console.error('Error removing item:', error);

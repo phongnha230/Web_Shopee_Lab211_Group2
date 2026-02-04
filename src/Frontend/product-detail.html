@@ -403,6 +403,7 @@
 
         // --- DYNAMIC LOADING LOGIC ---
         document.addEventListener('DOMContentLoaded', async () => {
+            try {
             const params = new URLSearchParams(window.location.search);
             let id = params.get('id');
 
@@ -593,8 +594,14 @@
                 document.getElementById('descContainer').appendChild(debugDiv);
             }
 
-            updateNavbar();
-            updateCartBadge();
+            } catch (err) {
+                console.error("Critical Error in Product Detail Init:", err);
+                document.getElementById('productTitle').textContent = "Error Loading Product";
+                document.getElementById('descContainer').innerHTML = `<div class="p-4 bg-red-100 text-red-700 rounded">Error: ${err.message}. Please check console.</div>`;
+            } finally {
+                updateNavbar();
+                updateCartBadge();
+            }
         });
 
         // UI Functions
@@ -673,6 +680,27 @@
 
             // Unique ID based on product + variations for LOCAL STORAGE
             const cartItemId = `${id || product.id}-${color || ''}-${size || ''}`;
+            // Find specific variant ID based on selection
+            let variantId = id || product.id; // Default to product ID
+            
+            if (window.isCurrentReal && product.variants && product.variants.length > 0) {
+                // Find variant matching color and size
+                const matchedVariant = product.variants.find(v => {
+                    const colorMatch = !color || v.color === color;
+                    const sizeMatch = !size || v.size === size;
+                    return colorMatch && sizeMatch;
+                });
+                
+                if (matchedVariant) {
+                    variantId = matchedVariant.id;
+                    console.log("Selected Variant ID:", variantId);
+                } else {
+                    console.warn("No matching variant found for selection, utilizing default ProductID.");
+                }
+            }
+            
+            // Unique ID based on product + variations
+            const cartItemId = `${variantId}-${color || 'default'}-${size || 'default'}`;
 
             const existing = cart.find(item => item.cartItemId === cartItemId);
 
@@ -705,6 +733,16 @@
             try {
                 const token = localStorage.getItem('accessToken');
                 const response = await fetch(`${API_BASE_URL}/cart/add?variantId=${variantIdToUse}&quantity=${quantity}`, {
+            
+            localStorage.setItem('cart', JSON.stringify(cart));
+
+            // Backend Sync
+            try {
+                const token = localStorage.getItem('accessToken');
+                // Use the resolved variantId
+                console.log(`Adding to cart: VariantId=${variantId}, Qty=${quantity}`);
+                
+                const response = await fetch(`http://localhost:8080/api/cart/add?variantId=${variantId}&quantity=${quantity}`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -764,6 +802,22 @@
                     variantIdToUse = selectedVariant.id;
                 } else {
                     variantIdToUse = product.variants[0].id; // Default to first
+            // Find specific variant ID based on selection
+            let variantId = id || product.id; // Default to product ID
+            
+            if (window.isCurrentReal && product.variants && product.variants.length > 0) {
+                // Find variant matching color and size
+                const matchedVariant = product.variants.find(v => {
+                    const colorMatch = !color || v.color === color;
+                    const sizeMatch = !size || v.size === size;
+                    return colorMatch && sizeMatch;
+                });
+                
+                if (matchedVariant) {
+                    variantId = matchedVariant.id;
+                    console.log("Buy Now - Selected Variant ID:", variantId);
+                } else {
+                    console.warn("Buy Now - No matching variant, utilizing default.");
                 }
             }
 
@@ -779,6 +833,7 @@
                 id: id || product.id,
                 variantId: variantIdToUse,
                 cartItemId: `${id || product.id}-${color || ''}-${size || ''}`,
+                cartItemId: `${variantId}-${color || 'default'}-${size || 'default'}`,
                 name: product.name,
                 price: priceVal,
                 image: (product.images && product.images.length > 0) ? product.images[0] : (product.image || 'https://via.placeholder.com/200'),
@@ -796,6 +851,8 @@
 
                 // Add this product to cart (using URL params, not JSON body)
                 const response = await fetch(`${API_BASE_URL}/cart/add?variantId=${variantIdToUse}&quantity=${quantity}`, {
+                console.log(`Buy Now fetching: VariantId=${variantId}`);
+                const response = await fetch(`http://localhost:8080/api/cart/add?variantId=${variantId}&quantity=${quantity}`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`
