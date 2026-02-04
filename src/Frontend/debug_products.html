@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Products</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="p-8 bg-gray-100">
+    <h1 class="text-2xl font-bold mb-4">Product Debugger</h1>
+    <div id="status" class="mb-4 text-blue-600">Starting check...</div>
+    <div id="results" class="space-y-4"></div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8080/api';
+
+        async function runCheck() {
+            const status = document.getElementById('status');
+            const results = document.getElementById('results');
+
+            // 1. Fetch All Products
+            status.textContent = 'Fetching all products...';
+            try {
+                const response = await fetch(`${API_BASE_URL}/products`);
+                if (!response.ok) throw new Error(`Failed to fetch list: ${response.status}`);
+                const products = await response.json();
+
+                status.textContent = `Found ${products.length} products. Checking details...`;
+
+                if (products.length === 0) {
+                    results.innerHTML = '<div class="p-4 bg-yellow-100 text-yellow-800">No products found in database.</div>';
+                    return;
+                }
+
+                for (const p of products) {
+                    const div = document.createElement('div');
+                    div.className = 'p-4 bg-white rounded shadow';
+
+                    // Check Details
+                    let detailStatus = 'PENDING';
+                    let detailError = '';
+                    try {
+                        const detailRes = await fetch(`${API_BASE_URL}/products/${p.id}`);
+                        if (detailRes.ok) {
+                            const detail = await detailRes.json();
+                            detailStatus = 'OK';
+
+                            // Check Images
+                            const hasImages = detail.images && detail.images.length > 0;
+                            div.innerHTML = `
+                                <div class="font-bold flex justify-between">
+                                    <span>${p.name} (ID: ${p.id})</span>
+                                    <span class="text-green-600">FETCH OK</span>
+                                </div>
+                                <div class="text-sm mt-2">
+                                    <p>Images: <span class="${hasImages ? 'text-green-600' : 'text-red-500'}">${hasImages ? detail.images.length : 'NONE'}</span></p>
+                                    <p>Image URL[0]: ${hasImages ? `<a href="${detail.images[0]}" target="_blank" class="text-blue-500 underline truncate block">${detail.images[0]}</a>` : 'N/A'}</p>
+                                    <p>Detail ID match: ${detail.id === p.id ? 'YES' : 'NO'}</p>
+                                </div>
+                            `;
+                        } else {
+                            detailStatus = 'FAIL';
+                            div.innerHTML = `
+                                <div class="font-bold flex justify-between">
+                                    <span>${p.name} (ID: ${p.id})</span>
+                                    <span class="text-red-600">FETCH FAIL (${detailRes.status})</span>
+                                </div>
+                            `;
+                        }
+                    } catch (e) {
+                        div.innerHTML = `
+                                <div class="font-bold flex justify-between">
+                                    <span>${p.name} (ID: ${p.id})</span>
+                                    <span class="text-red-600">ERROR: ${e.message}</span>
+                                </div>
+                            `;
+                    }
+                    results.appendChild(div);
+                }
+                status.textContent = 'Check complete.';
+
+            } catch (e) {
+                status.textContent = `CRITICAL ERROR: ${e.message}`;
+            }
+        }
+
+        runCheck();
+    </script>
+</body>
+
+</html>

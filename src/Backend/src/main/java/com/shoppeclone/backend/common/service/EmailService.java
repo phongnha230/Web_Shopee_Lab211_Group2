@@ -94,6 +94,7 @@ public class EmailService {
 
         mailSender.send(message);
         System.out.println("❌ Shop Rejection email sent to: " + to);
+
     }
 
     public void sendWelcomeEmail(String to, String name) {

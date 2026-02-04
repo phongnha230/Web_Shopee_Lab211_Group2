@@ -181,6 +181,11 @@ public class ShopServiceImpl implements ShopService {
         return shopRepository.save(shop);
     }
 
+    @Override
+    public Shop getShopById(String shopId) {
+        return shopRepository.findById(shopId).orElse(null);
+    }
+
     private User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));

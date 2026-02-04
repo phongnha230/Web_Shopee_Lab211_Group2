@@ -9,98 +9,49 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* ===== ShopeeClone Red + Beige (MATCH SIGN IN PAGE) ===== */
+        @keyframes bounceShopee {
 
-        /* ========== BRAND COLORS ==========
-       Red   : #AD3029
-       Red H : #8f2621
-       Beige : #FEEFCD
-       Beige2: #F8E8D0
-    =================================== */
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
 
-        /* ===== TEXT ===== */
-        .text-orange-500,
-        .text-orange-600 {
-            color: #AD3029 !important;
+            40% {
+                transform: translateY(-10px);
+            }
+
+            60% {
+                transform: translateY(-5px);
+            }
         }
 
-        /* ===== PRIMARY BACKGROUND (RED) ===== */
-        .bg-orange-500,
-        .bg-orange-600 {
-            background-color: #AD3029 !important;
-            color: white !important;
+        .bounce-shopee {
+            animation: bounceShopee 2s infinite;
         }
 
-        .hover\:bg-orange-600:hover,
-        .hover\:bg-orange-700:hover {
-            background-color: #8f2621 !important;
+        .flash-sale {
+            background: linear-gradient(45deg, #ff5722, #ff8a50, #ff5722);
+            background-size: 200% 200%;
+            animation: gradient 1.5s ease infinite;
         }
 
-        /* ===== GRADIENT (RED → RED SOFT) ===== */
-        .from-orange-500 {
-            --tw-gradient-from: #AD3029 !important;
-        }
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
 
-        .to-orange-600 {
-            --tw-gradient-to: #CD5252 !important;
-        }
+            50% {
+                background-position: 100% 50%;
+            }
 
-        /* ===== BORDER ===== */
-        .border-orange-500,
-        .border-orange-600 {
-            border-color: #AD3029 !important;
-        }
-
-        /* ===== ICONS ===== */
-        i.text-orange-500,
-        svg.text-orange-500 {
-            color: #AD3029 !important;
-        }
-
-        /* ===== BEIGE SURFACES ===== */
-        .bg-yellow-400,
-        .bg-yellow-300,
-        .bg-yellow-200 {
-            background-color: #FEEFCD !important;
-            color: #AD3029 !important;
-        }
-
-        .bg-yellow-100 {
-            background-color: #F8E8D0 !important;
-        }
-
-        /* ===== OUTLINE / GOOGLE STYLE BUTTON ===== */
-        .border-yellow-400,
-        .border-yellow-300 {
-            border-color: #AD3029 !important;
-        }
-
-        /* ===== SEARCH / ACTION BUTTON ===== */
-        button.bg-orange-600 {
-            background-color: #AD3029 !important;
-            color: white !important;
-        }
-
-        button.bg-orange-600:hover {
-            background-color: #8f2621 !important;
-        }
-
-
-        /* Optional: gray nền nhẹ */
-        .bg-gray-100 {
-            background-color: #F8E8D0 !important;
-        }
-
-        /* ===== HEADER RED GRADIENT ===== */
-        .header-gradient {
-            background: linear-gradient(90deg,
-                    #AD3029 0%,
-                    #C8453E 50%,
-                    #E06B5F 100%) !important;
+            100% {
+                background-position: 0% 50%;
+            }
         }
     </style>
-
-
 </head>
 
 <body class="bg-gray-100">
@@ -145,7 +96,7 @@
 
                             <!-- Dropdown -->
                             <div id="notificationDropdown"
-                                class="hidden absolute top-10 right-0 w-80 bg-white shadow-xl rounded-lg border border-gray-100 z-[9999] overflow-hidden text-gray-800">
+                                class="hidden absolute top-10 right-0 w-80 bg-white shadow-xl rounded-lg border border-gray-100 z-50 overflow-hidden text-gray-800">
                                 <div
                                     class="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
                                     <h3 class="font-semibold text-gray-700">Notifications</h3>
@@ -153,14 +104,11 @@
                                         class="text-xs text-blue-600 hover:text-blue-800 font-medium">Mark all
                                         read</button>
                                 </div>
-                                <div id="notificationList" class="max-h-60 overflow-y-auto">
+                                <div id="notificationList" class="max-h-80 overflow-y-auto">
                                     <div class="p-4 text-center text-gray-500 text-sm">Loading...</div>
                                 </div>
                                 <div class="bg-gray-50 px-4 py-2 border-t border-gray-100 text-center">
-                                    <button onclick="expandNotifications()"
-                                        class="text-xs text-gray-500 hover:text-blue-600 font-medium">
-                                        <span id="viewAllText">View all</span>
-                                    </button>
+                                    <a href="#" class="text-xs text-gray-500 hover:text-blue-600">View all</a>
                                 </div>
                             </div>
                         </div>
@@ -205,7 +153,7 @@
                         </button>
                     </div>
 
-                    <button onclick="window.location.href='cart-backend.html'"
+                    <button onclick="window.location.href='cart.html'"
                         class="relative p-2 hover:bg-orange-400 rounded-full transition">
                         <i class="fas fa-shopping-cart text-xl text-white"></i>
                         <span id="cartBadge"
@@ -345,13 +293,112 @@
                         <div class="bg-black text-white px-2 py-1 rounded text-sm font-bold">23</div>
                     </div>
                 </div>
-                <a href="flash-sale.html" class="text-orange-500 font-semibold hover:text-orange-600">See All →</a>
+                <a href="#products" class="text-orange-500 font-semibold hover:text-orange-600">See All →</a>
             </div>
 
             <!-- Categories & Flash Sale Products Grid -->
-            <div id="flashSaleList" class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
-                <!-- Products will be loaded here -->
-                <div class="col-span-full text-center text-gray-400 py-8">Loading Flash Sale...</div>
+            <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
+                <!-- Product Card 1 -->
+                <div onclick="goToProduct('1')"
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop"
+                            alt="Headphones" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold">
+                            50%</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-orange-600 text-lg font-bold">₫99</p>
+                        <div class="w-full bg-orange-200 h-2 rounded-full mt-2">
+                            <div class="bg-orange-600 h-2 rounded-full" style="width: 40%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 2 -->
+                <div onclick="goToProduct('2')"
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400&h=400&fit=crop"
+                            alt="Sneakers" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold">
+                            50%</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-orange-600 text-lg font-bold">₫102</p>
+                        <div class="w-full bg-orange-200 h-2 rounded-full mt-2">
+                            <div class="bg-orange-600 h-2 rounded-full" style="width: 73%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 3 -->
+                <div onclick="goToProduct('3')"
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&h=400&fit=crop"
+                            alt="Watch" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold">
+                            50%</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-orange-600 text-lg font-bold">₫15</p>
+                        <div class="w-full bg-orange-200 h-2 rounded-full mt-2">
+                            <div class="bg-orange-600 h-2 rounded-full" style="width: 88%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 4 -->
+                <div onclick="goToProduct('4')"
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop"
+                            alt="Shoes" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold">
+                            50%</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-orange-600 text-lg font-bold">₫120</p>
+                        <div class="w-full bg-orange-200 h-2 rounded-full mt-2">
+                            <div class="bg-orange-600 h-2 rounded-full" style="width: 56%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 5 -->
+                <div onclick="goToProduct('5')"
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop"
+                            alt="Phone" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold">
+                            50%</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-orange-600 text-lg font-bold">₫199</p>
+                        <div class="w-full bg-orange-200 h-2 rounded-full mt-2">
+                            <div class="bg-orange-600 h-2 rounded-full" style="width: 90%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 6 -->
+                <div onclick="goToProduct('6')"
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop"
+                            alt="Headphones" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold">
+                            50%</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-orange-600 text-lg font-bold">₫45</p>
+                        <div class="w-full bg-orange-200 h-2 rounded-full mt-2">
+                            <div class="bg-orange-600 h-2 rounded-full" style="width: 60%"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -360,9 +407,72 @@
     <section class="bg-white py-6 mb-4">
         <div class="max-w-7xl mx-auto px-4">
             <h2 class="text-xl font-bold text-gray-800 mb-4">CATEGORIES</h2>
-            <div id="categoryList" class="grid grid-cols-3 md:grid-cols-10 gap-4 text-center">
-                <!-- Categories will be loaded here -->
-                <div class="col-span-full text-center text-gray-400">Loading Categories...</div>
+            <div class="grid grid-cols-3 md:grid-cols-10 gap-4 text-center">
+                <div onclick="window.location.href='category.html?category=Fashion'"
+                    class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-tshirt text-2xl text-orange-500"></i>
+                    </div>
+                    <p class="text-xs">Fashion</p>
+                </div>
+                <div onclick="window.location.href='category.html?category=Electronics'"
+                    class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-laptop text-2xl text-orange-500"></i>
+                    </div>
+                    <p class="text-xs">Electronics</p>
+                </div>
+                <div onclick="window.location.href='category.html?category=Mobile'"
+                    class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-mobile-alt text-2xl text-orange-500"></i>
+                    </div>
+                    <p class="text-xs">Mobile & Gadgets</p>
+                </div>
+                <div onclick="window.location.href='category.html?category=Home'"
+                    class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-home text-2xl text-orange-500"></i>
+                    </div>
+                    <p class="text-xs">Home</p>
+                </div>
+                <div class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-heart text-2xl text-orange-500"></i>
+                    </div>
+                    <p class="text-xs">Beauty</p>
+                </div>
+                <div class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-baby text-2xl text-orange-500"></i>
+                    </div>
+                    <p class="text-xs">Baby & Toys</p>
+                </div>
+                <div onclick="window.location.href='category.html?category=Sports'"
+                    class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-dumbbell text-2xl text-orange-500"></i>
+                    </div>
+                    <p class="text-xs">Sports</p>
+                </div>
+                <div class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-utensils text-2xl text-orange-500"></i>
+                    </div>
+                    <p class="text-xs">Food</p>
+                </div>
+                <div class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-book text-2xl text-orange-500"></i>
+                    </div>
+                    <p class="text-xs">Books</p>
+                </div>
+                <div class="flex flex-col items-center cursor-pointer hover:text-orange-500 transition">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-ellipsis-h text-2xl text-orange-500"></i>
+                    </div>
+                    <p class="text-xs">More</p>
+                </div>
             </div>
         </div>
     </section>
@@ -373,234 +483,137 @@
         <section id="products" class="mb-12">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-800">DAILY DISCOVER</h2>
-                <a href="daily-discover.html" class="text-orange-500 font-semibold hover:text-orange-600">See More</a>
+                <a href="#" class="text-orange-500 font-semibold hover:text-orange-600">See More</a>
             </div>
-            <div id="dailyDiscoverList" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                <!-- Products will be loaded here -->
-                <div class="col-span-full text-center text-gray-400 py-8">Loading Daily Discover...</div>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <!-- Product 1 -->
+                <div onclick="goToProduct('101')"
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop"
+                            alt="Camera" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-orange-600 text-white px-2 py-1 rounded text-xs font-bold">
+                            25% OFF</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2">Nikon D3500 DSLR Camera with 18-55mm VR
+                            Lens</p>
+                        <p class="text-orange-600 text-lg font-bold">₫36.00</p>
+                        <div class="flex items-center text-xs text-gray-500 mt-1">
+                            <i class="fas fa-star text-yellow-400"></i>
+                            <span class="ml-1">4.9</span>
+                            <span class="ml-2">Sold 120</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 2 -->
+                <div onclick="goToProduct('102')"
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop"
+                            alt="Nike Shoes" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-orange-600 text-white px-2 py-1 rounded text-xs font-bold">
+                            50% OFF</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2">Nike Air Max Classic Red Shoes Original
+                        </p>
+                        <p class="text-orange-600 text-lg font-bold">₫210.00</p>
+                        <div class="flex items-center text-xs text-gray-500 mt-1">
+                            <i class="fas fa-star text-yellow-400"></i>
+                            <span class="ml-1">4.7</span>
+                            <span class="ml-2">Sold 540</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 3 -->
+                <div onclick="goToProduct('103')"
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop"
+                            alt="Bottle" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold">
+                            NEW</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2">Botol Minum Olahraga Stainless Steel 1L
+                        </p>
+                        <p class="text-orange-600 text-lg font-bold">₫15.69</p>
+                        <div class="flex items-center text-xs text-gray-500 mt-1">
+                            <i class="fas fa-star text-yellow-400"></i>
+                            <span class="ml-1">5.0</span>
+                            <span class="ml-2">Sold 980</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 4 -->
+                <div onclick="goToProduct('104')"
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&h=400&fit=crop"
+                            alt="Water Bottle" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-blue-600 text-white px-2 py-1 rounded text-xs font-bold">
+                            BEST</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2">Stainless Steel Water Bottle Blue
+                            Premium</p>
+                        <p class="text-orange-600 text-lg font-bold">₫14.50</p>
+                        <div class="flex items-center text-xs text-gray-500 mt-1">
+                            <i class="fas fa-star text-yellow-400"></i>
+                            <span class="ml-1">4.8</span>
+                            <span class="ml-2">Sold 760</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 5 -->
+                <div onclick="goToProduct('105')"
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?w=400&h=400&fit=crop"
+                            alt="Chair" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-orange-600 text-white px-2 py-1 rounded text-xs font-bold">
+                            SALE</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2">Modern Blue Velvet Dining Chair Luxury
+                        </p>
+                        <p class="text-orange-600 text-lg font-bold">₫495.00</p>
+                        <div class="flex items-center text-xs text-gray-500 mt-1">
+                            <i class="fas fa-star text-yellow-400"></i>
+                            <span class="ml-1">4.9</span>
+                            <span class="ml-2">Sold 230</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 6 -->
+                <div onclick="goToProduct('106')"
+                    class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400&h=400&fit=crop"
+                            alt="Sneakers" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold">
+                            HOT</div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2">Converse Classic White Sneakers Unisex
+                        </p>
+                        <p class="text-orange-600 text-lg font-bold">₫65.89</p>
+                        <div class="flex items-center text-xs text-gray-500 mt-1">
+                            <i class="fas fa-star text-yellow-400"></i>
+                            <span class="ml-1">4.6</span>
+                            <span class="ml-2">Sold 1540</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
-
-    <script>
-        // API Base URL
-        const API_BASE_URL = 'http://localhost:8080/api';
-
-        // Load products & categories when page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            loadHomepageProducts();
-            loadHomepageCategories();
-        });
-
-        async function loadHomepageCategories() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/categories`);
-                if (!response.ok) throw new Error('Failed to fetch categories');
-
-                const categories = await response.json();
-                const container = document.getElementById('categoryList');
-                container.innerHTML = ''; // Clear loading
-
-                // Icon Mapping Helper
-                const getIcon = (name) => {
-                    const lowerName = name.toLowerCase();
-                    if (lowerName.includes('fashion') || lowerName.includes('shirt') || lowerName.includes('cloth')) return 'fa-tshirt';
-                    if (lowerName.includes('electronic') || lowerName.includes('laptop') || lowerName.includes('tech')) return 'fa-laptop';
-                    if (lowerName.includes('mobile') || lowerName.includes('phone')) return 'fa-mobile-alt';
-                    if (lowerName.includes('home') || lowerName.includes('house')) return 'fa-home';
-                    if (lowerName.includes('beauty') || lowerName.includes('skin') || lowerName.includes('face')) return 'fa-heart';
-                    if (lowerName.includes('baby') || lowerName.includes('toy') || lowerName.includes('kid')) return 'fa-baby';
-                    if (lowerName.includes('sport') || lowerName.includes('gym')) return 'fa-dumbbell';
-                    if (lowerName.includes('food') || lowerName.includes('cook')) return 'fa-utensils';
-                    if (lowerName.includes('book') || lowerName.includes('read')) return 'fa-book';
-                    if (lowerName.includes('shoe') || lowerName.includes('sneaker')) return 'fa-shoe-prints';
-                    if (lowerName.includes('watch')) return 'fa-clock';
-                    return 'fa-tags'; // Default
-                };
-
-                categories.forEach(category => {
-                    // Map "House" or "Furniture" to "Home" if needed for consistency with User's UI
-                    let displayName = category.name;
-                    if (displayName && displayName.toLowerCase() === 'house') displayName = 'Home';
-
-                    // Safe ID Resolution
-                    const catId = category.id || category._id;
-                    if (!catId) {
-                        console.error('Missing ID for category:', category);
-                        return;
-                    }
-
-                    const iconClass = getIcon(displayName || 'Category');
-
-                    // Revert to DIV + OnClick (User Requirement)
-                    const div = document.createElement('div');
-                    div.className = 'flex flex-col items-center cursor-pointer hover:text-orange-500 transition group';
-
-                    div.onclick = function () {
-                        if (!catId) {
-                            console.error('Category ID missing for:', displayName);
-                            return;
-                        }
-
-                        // Clean navigation without debug noise
-                        window.location.href = `category.html?id=${catId}&name=${encodeURIComponent(displayName || 'Category')}`;
-                    };
-
-                    div.innerHTML = `
-                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-orange-100 transition">
-                            <i class="fas ${iconClass} text-2xl text-orange-500"></i>
-                        </div>
-                        <p class="text-xs font-medium text-center line-clamp-2 px-1">${displayName || 'Category'}</p>
-                    `;
-                    container.appendChild(div);
-                });
-
-                // Add "More" button if needed, or just let users scroll/see all
-                // For layout balance, if not divisible by 10, maybe we don't care.
-
-            } catch (error) {
-                console.error('Error loading categories:', error);
-                document.getElementById('categoryList').innerHTML = '<div class="col-span-full text-center text-red-500">Error loading categories.</div>';
-            }
-        }
-
-        async function loadHomepageProducts() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/products`);
-                if (!response.ok) throw new Error('Failed to fetch products');
-
-                const products = await response.json();
-
-                if (products.length === 0) {
-                    document.getElementById('flashSaleList').innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">No products available yet.</div>';
-                    document.getElementById('dailyDiscoverList').innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">No products available yet.</div>';
-                    return;
-                }
-
-                // SORT LOGIC: Show NEWEST products in Flash Sale
-                // Clone array to avoid affecting original order if needed elsewhere (though here it's fine)
-                const sortedProducts = [...products].sort((a, b) => {
-                    return new Date(b.createdAt) - new Date(a.createdAt);
-                });
-
-                // Render Flash Sale (Newest 6 products)
-                // This ensures newly created products appear here immediately
-                const flashSaleProducts = sortedProducts.slice(0, 6);
-                renderProductList(flashSaleProducts, 'flashSaleList', true);
-
-                // Render Daily Discover (ALL Remaining products from original list or sorted - let's use original for variety)
-                // Or better, show ALL products in Daily Discover excluding the Flash Sale ones?
-                // Actually, Daily Discover usually acts as "All Products". 
-                // Let's just render ALL products (or slice from 6) in somewhat random or original order for variety.
-                // Resetting to original products for Daily Discover to avoid duplication if we slice, 
-                // OR just showing everything index 6+ from the sorted list to keep it clean.
-                // Let's stick to showing everything else from the sorted list to avoid duplicates.
-
-                let dailyProducts = [];
-                if (sortedProducts.length > 6) {
-                    // SLICE 6 ITEMS ONLY (Symbolic display as requested)
-                    dailyProducts = sortedProducts.slice(6, 12);
-                }
-
-                renderProductList(dailyProducts, 'dailyDiscoverList', false);
-
-                // If there are no remaining products (total <= 6), dailyProducts is empty.
-                // We display whatever is left. If empty, the render function will just clear the container 
-                // and show nothing (or we could show a message, but empty is cleaner).
-
-                renderProductList(dailyProducts, 'dailyDiscoverList', false);
-
-            } catch (error) {
-                console.error('Error loading products:', error);
-                document.getElementById('flashSaleList').innerHTML = '<div class="col-span-full text-center text-red-500 py-8">Error loading products. Please try again later.</div>';
-                document.getElementById('dailyDiscoverList').innerHTML = '<div class="col-span-full text-center text-red-500 py-8">Error loading products.</div>';
-            }
-        }
-
-        function renderProductList(products, containerId, isFlashSale) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-
-            products.forEach(product => {
-                // Determine Image
-                const imageUrl = (product.images && product.images.length > 0)
-                    ? product.images[0]
-                    : 'https://via.placeholder.com/400x400?text=No+Image';
-
-                // Determine Price
-                let priceDisplay = 'Contact'; // Default
-                if (product.variants && product.variants.length > 0) {
-                    const price = product.variants[0].price;
-                    priceDisplay = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
-                }
-
-                // Random Sold Count & Rating for demo effect (since backend might not have it populated fully yet)
-                const sold = Math.floor(Math.random() * 1000) + 10;
-                const rating = (Math.random() * (5.0 - 4.0) + 4.0).toFixed(1);
-
-                // Badge Logic
-                let badgeHtml = '';
-                if (isFlashSale) {
-                    badgeHtml = `<div class="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold">50%</div>`;
-                } else {
-                    // Random badge for Daily Discover
-                    const badges = ['NEW', 'HOT', 'SALE', 'BEST'];
-                    const randomBadge = badges[Math.floor(Math.random() * badges.length)];
-                    badgeHtml = `<div class="absolute top-2 left-2 bg-orange-600 text-white px-2 py-1 rounded text-xs font-bold">${randomBadge}</div>`;
-                }
-
-                // Progress Bar for Flash Sale
-                let progressBarHtml = '';
-                if (isFlashSale) {
-                    const progressPercent = Math.floor(Math.random() * 90) + 10;
-                    progressBarHtml = `
-                        <div class="w-full bg-orange-200 h-2 rounded-full mt-2">
-                            <div class="bg-orange-600 h-2 rounded-full" style="width: ${progressPercent}%"></div>
-                        </div>`;
-                } else {
-                    // Sold count for Daily Discover
-                    progressBarHtml = `
-                        <div class="flex items-center text-xs text-gray-500 mt-1">
-                            <i class="fas fa-star text-yellow-400"></i>
-                            <span class="ml-1">${rating}</span>
-                            <span class="ml-2">Sold ${sold}</span>
-                        </div>`;
-                }
-
-                const productCard = document.createElement('div');
-                productCard.className = 'bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer';
-
-                const pid = product.id || product._id;
-                productCard.onclick = () => {
-                    if (pid) {
-                        localStorage.setItem('lastClickedProductId', pid);
-                        window.location.href = `product-detail.html?id=${pid}`;
-                    } else {
-                        console.error("Product ID missing:", product);
-                    }
-                };
-
-                productCard.innerHTML = `
-                    <div class="relative">
-                        <img src="${imageUrl}" alt="${product.name}" class="w-full h-48 object-cover">
-                        ${badgeHtml}
-                    </div>
-                    <div class="p-3">
-                        <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2">${product.name}</p>
-                        <p class="text-orange-600 text-lg font-bold">${priceDisplay}</p>
-                        ${progressBarHtml}
-                    </div>
-                `;
-
-                container.appendChild(productCard);
-            });
-        }
-
-        function goToProduct(id) {
-            // Fallback for any old inline onclicks if missed
-            window.location.href = `product-detail.html?id=${id}`;
-        }
-    </script>
 
     <!-- Footer -->
     <footer class="bg-gray-800 text-white mt-16">
@@ -708,33 +721,20 @@
             updateCartBadge();
         });
 
-        async function updateCartBadge() {
+        function updateCartBadge() {
             // HIDE IF NOT LOGGED IN
-            const token = localStorage.getItem('accessToken');
-            if (!token) {
+            if (!localStorage.getItem('accessToken')) {
                 const badge = document.getElementById('cartBadge');
                 if (badge) badge.style.display = 'none';
                 return;
             }
 
-            try {
-                const response = await fetch('http://localhost:8080/api/cart', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (response.ok) {
-                    const cartData = await response.json();
-                    // Calculate total items from backend response
-                    const totalItems = cartData.items ? cartData.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
-                    
-                    const badge = document.getElementById('cartBadge');
-                    if (badge) {
-                        badge.textContent = totalItems;
-                        badge.style.display = totalItems > 0 ? 'inline-block' : 'none';
-                    }
-                }
-            } catch (error) {
-                console.error('Failed to update cart badge:', error);
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cartBadge');
+            if (badge) {
+                badge.textContent = totalItems;
+                badge.style.display = totalItems > 0 ? 'inline-block' : 'none';
             }
         }
 

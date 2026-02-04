@@ -9,6 +9,49 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <style>
+        /* ===== ShopeeClone Red + Beige (MATCH SKETCH) ===== */
+
+        /* TEXT */
+        .text-orange-500,
+        .text-orange-600 {
+            color: #AD3029 !important;
+        }
+
+        .text-red-500 {
+            color: #AD3029 !important;
+        }
+
+        /* BG */
+        .bg-orange-500,
+        .bg-orange-600 {
+            background-color: #AD3029 !important;
+            color: white !important;
+        }
+
+        .hover\:bg-orange-600:hover {
+            background-color: #8f2621 !important;
+        }
+
+        /* BEIGE SIDES */
+        .bg-orange-50 {
+            background-color: #FEEFCD !important;
+        }
+
+        /* Sidebar Active BG */
+        .bg-yellow-100 {
+            background-color: #F8E8D0 !important;
+        }
+
+        /* BORDER */
+        .border-orange-500 {
+            border-color: #AD3029 !important;
+        }
+
+        .focus\:ring-orange-500:focus {
+            --tw-ring-color: #AD3029 !important;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50 flex h-screen font-sans">
@@ -152,7 +195,7 @@
                     <form id="addProductForm" class="space-y-6">
                         <!-- Tên sản phẩm -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Product Name *</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
                             <input type="text" id="productName" required
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
                                 placeholder="e.g. iPhone 15 Pro Max">
@@ -168,7 +211,7 @@
 
                         <!-- Category (Moved here as requested) -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
                             <select id="productCategory" required
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none">
                                 <option value="">Select a category</option>
@@ -200,13 +243,13 @@
                             <!-- GLOBAL PRICE (Always Visible) -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Price (₫) *</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Price (₫)</label>
                                     <input type="number" id="productPrice" required min="0"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
                                         placeholder="100000">
                                 </div>
                                 <div id="stockSimpleContainer">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Total Stock *</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Total Stock</label>
                                     <input type="number" id="productStock" required min="0"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
                                         placeholder="50">
@@ -258,20 +301,41 @@
                         </div>
 
                         <!-- Upload hình ảnh -->
+                        <!-- Main Image (Single Upload) -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Product Images *</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Main Image</label>
                             <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                                <input type="file" id="productImage" accept="image/*" multiple class="hidden"
-                                    onchange="previewProductImages(event)">
-                                <button type="button" onclick="document.getElementById('productImage').click()"
+                                <input type="file" id="mainProductImage" accept="image/*" class="hidden"
+                                    onchange="previewMainImage(event)">
+                                <button type="button" onclick="document.getElementById('mainProductImage').click()"
                                     class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition">
-                                    <i class="fas fa-cloud-upload-alt mr-2"></i>Choose Images
+                                    <i class="fas fa-cloud-upload-alt mr-2"></i>Choose Main Image
+                                </button>
+                                <p class="text-xs text-gray-500 mt-2">Max 5MB (JPEG, PNG). This will be the primary
+                                    thumbnail.</p>
+
+                                <div id="mainImagePreviewContainer" class="hidden mt-4"></div>
+                                <div id="mainImageUploadStatus" class="mt-2 text-sm text-gray-500 hidden"></div>
+                            </div>
+                        </div>
+
+                        <!-- Secondary Images (Multiple Upload) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Secondary Images</label>
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                                <input type="file" id="secondaryProductImages" accept="image/*" multiple class="hidden"
+                                    onchange="previewSecondaryImages(event)">
+                                <button type="button"
+                                    onclick="document.getElementById('secondaryProductImages').click()"
+                                    class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition">
+                                    <i class="fas fa-cloud-upload-alt mr-2"></i>Choose Secondary Images
                                 </button>
                                 <p class="text-xs text-gray-500 mt-2">Max 5MB per image (JPEG, PNG). Select multiple
                                     files.</p>
 
-                                <div id="imagePreviewContainer" class="hidden mt-4 grid grid-cols-3 gap-4"></div>
-                                <div id="uploadStatus" class="mt-2 text-sm text-gray-500 hidden"></div>
+                                <div id="secondaryImagesPreviewContainer" class="hidden mt-4 grid grid-cols-3 gap-4">
+                                </div>
+                                <div id="secondaryImagesUploadStatus" class="mt-2 text-sm text-gray-500 hidden"></div>
                             </div>
                         </div>
 
@@ -466,7 +530,8 @@
         const token = localStorage.getItem('accessToken');
         const baseUrl = 'http://localhost:8080/api';
         let currentShop = null;
-        let uploadedImageUrls = [];
+        let mainImageUrl = null; // Store main image URL
+        let secondaryImageUrls = []; // Store secondary image URLs
         let currentView = 'dashboard';
         let editingProductId = null; // Track if we are editing
 
@@ -598,27 +663,109 @@
             });
         }
 
-        // 3. IMAGE UPLOAD
-        async function previewProductImages(event) {
-            const files = event.target.files;
-            if (!files || files.length === 0) return;
+        // 3. IMAGE UPLOAD - MAIN IMAGE
+        async function previewMainImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-            const previewContainer = document.getElementById('imagePreviewContainer');
-            const uploadStatus = document.getElementById('uploadStatus');
+            const previewContainer = document.getElementById('mainImagePreviewContainer');
+            const uploadStatus = document.getElementById('mainImageUploadStatus');
 
             previewContainer.innerHTML = '';
             previewContainer.classList.remove('hidden');
             uploadStatus.classList.remove('hidden');
-            uploadedImageUrls = [];
+            mainImageUrl = null;
 
             const submitBtn = document.querySelector('button[type="submit"]');
+            const originalDisabled = submitBtn.disabled;
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Uploading...';
+
+            uploadStatus.textContent = 'Uploading main image...';
+            uploadStatus.className = 'mt-2 text-sm text-gray-500';
+
+            // Create preview
+            const reader = new FileReader();
+            const imgDiv = document.createElement('div');
+            imgDiv.className = 'relative inline-block';
+            imgDiv.innerHTML = `<div class="w-32 h-32 bg-gray-100 rounded animate-pulse"></div>`;
+            previewContainer.appendChild(imgDiv);
+
+            reader.onload = function (e) {
+                imgDiv.innerHTML = `<img src="${e.target.result}" class="w-32 h-32 object-cover rounded border-2 border-orange-300">`;
+            };
+            reader.readAsDataURL(file);
+
+            try {
+                const url = await uploadImageToCloudinary(file);
+                if (url) {
+                    mainImageUrl = url;
+
+                    // Add success badge
+                    const badge = document.createElement('div');
+                    badge.className = 'absolute top-0 right-0 bg-green-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center -mt-2 -mr-2';
+                    badge.innerHTML = '<i class="fas fa-check"></i>';
+                    imgDiv.appendChild(badge);
+
+                    // Add remove button
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.className = 'absolute bottom-0 left-0 bg-red-500 hover:bg-red-600 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center -mb-2 -ml-2 transition';
+                    removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                    removeBtn.onclick = function () {
+                        removeMainImage();
+                    };
+                    imgDiv.appendChild(removeBtn);
+
+                    uploadStatus.textContent = 'Main image uploaded successfully!';
+                    uploadStatus.className = 'mt-2 text-sm text-green-600';
+                }
+            } catch (err) {
+                console.error('Main image upload failed', err);
+                const errorBadge = document.createElement('div');
+                errorBadge.className = 'absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center -mt-2 -mr-2';
+                errorBadge.innerHTML = '<i class="fas fa-times"></i>';
+                imgDiv.appendChild(errorBadge);
+                uploadStatus.textContent = `Upload failed: ${err.message}`;
+                uploadStatus.className = 'mt-2 text-sm text-red-600';
+                showToast(`Main image upload failed: ${err.message}`, 'error');
+            }
+
+            submitBtn.disabled = originalDisabled;
+        }
+
+        // Function to remove main image
+        function removeMainImage() {
+            mainImageUrl = null;
+            document.getElementById('mainImagePreviewContainer').innerHTML = '';
+            document.getElementById('mainImagePreviewContainer').classList.add('hidden');
+            document.getElementById('mainImageUploadStatus').classList.add('hidden');
+            document.getElementById('mainProductImage').value = ''; // Reset file input
+            showToast('Main image removed', 'info');
+        }
+
+        // 3B. IMAGE UPLOAD - SECONDARY IMAGES
+        async function previewSecondaryImages(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            const previewContainer = document.getElementById('secondaryImagesPreviewContainer');
+            const uploadStatus = document.getElementById('secondaryImagesUploadStatus');
+
+            // Don't clear existing images - just append new ones
+            // previewContainer.innerHTML = ''; // REMOVED
+            previewContainer.classList.remove('hidden');
+            uploadStatus.classList.remove('hidden');
+            // secondaryImageUrls = []; // REMOVED - keep existing images
+
+            const submitBtn = document.querySelector('button[type="submit"]');
+            const originalDisabled = submitBtn.disabled;
+            submitBtn.disabled = true;
 
             let uploadCount = 0;
             let successCount = 0;
             const totalFiles = files.length;
-            uploadStatus.textContent = `Uploading 0/${totalFiles} images...`;
+            const currentCount = secondaryImageUrls.length; // Track existing images
+            uploadStatus.textContent = `Uploading 0/${totalFiles} new images...`;
             uploadStatus.className = 'mt-2 text-sm text-gray-500';
 
             for (let i = 0; i < files.length; i++) {
@@ -627,7 +774,7 @@
                 const imgDiv = document.createElement('div');
                 imgDiv.className = 'relative';
                 imgDiv.innerHTML = `<div class="w-full h-24 bg-gray-100 rounded animate-pulse"></div>`;
-                previewContainer.appendChild(imgDiv);
+                previewContainer.appendChild(imgDiv); // Append, don't replace
 
                 reader.onload = function (e) {
                     imgDiv.innerHTML = `<img src="${e.target.result}" class="w-full h-24 object-cover rounded border border-gray-200">`;
@@ -637,12 +784,24 @@
                 try {
                     const url = await uploadImageToCloudinary(file);
                     if (url) {
-                        uploadedImageUrls.push(url);
+                        secondaryImageUrls.push(url); // Add to existing array
                         successCount++;
+
+                        // Add success badge
                         const badge = document.createElement('div');
                         badge.className = 'absolute top-0 right-0 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center -mt-1 -mr-1';
                         badge.innerHTML = '<i class="fas fa-check"></i>';
                         imgDiv.appendChild(badge);
+
+                        // Add remove button
+                        const removeBtn = document.createElement('button');
+                        removeBtn.type = 'button';
+                        removeBtn.className = 'absolute bottom-0 right-0 bg-red-500 hover:bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center -mb-1 -mr-1 transition';
+                        removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                        removeBtn.onclick = function () {
+                            removeSecondaryImage(url, imgDiv);
+                        };
+                        imgDiv.appendChild(removeBtn);
                     }
                 } catch (err) {
                     console.error('Upload failed for file ' + i, err);
@@ -654,19 +813,48 @@
                 }
 
                 uploadCount++;
-                uploadStatus.textContent = `Uploading ${uploadCount}/${totalFiles} images...`;
+                uploadStatus.textContent = `Uploading ${uploadCount}/${totalFiles} new images...`;
             }
 
+            // Reset file input to allow re-uploading
+            event.target.value = '';
+
             if (successCount === totalFiles) {
-                uploadStatus.textContent = `All ${totalFiles} images uploaded successfully.`;
+                uploadStatus.textContent = `All ${totalFiles} new images uploaded. Total: ${secondaryImageUrls.length} image(s).`;
                 uploadStatus.className = 'mt-2 text-sm text-green-600';
             } else {
-                uploadStatus.textContent = `Uploaded ${successCount}/${totalFiles} images. Check errors.`;
+                uploadStatus.textContent = `Uploaded ${successCount}/${totalFiles} new images. Total: ${secondaryImageUrls.length} image(s).`;
                 uploadStatus.className = 'mt-2 text-sm text-red-600';
             }
 
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Create Product';
+            submitBtn.disabled = originalDisabled;
+        }
+
+        // Function to remove a specific secondary image
+        function removeSecondaryImage(url, imgDiv) {
+            // Remove from array
+            const index = secondaryImageUrls.indexOf(url);
+            if (index > -1) {
+                secondaryImageUrls.splice(index, 1);
+            }
+
+            // Remove from DOM
+            imgDiv.remove();
+
+            // Update status message
+            const uploadStatus = document.getElementById('secondaryImagesUploadStatus');
+            const previewContainer = document.getElementById('secondaryImagesPreviewContainer');
+
+            if (secondaryImageUrls.length === 0) {
+                previewContainer.classList.add('hidden');
+                uploadStatus.classList.add('hidden');
+                document.getElementById('secondaryProductImages').value = ''; // Reset file input
+            } else {
+                uploadStatus.textContent = `${secondaryImageUrls.length} secondary image(s) uploaded.`;
+                uploadStatus.className = 'mt-2 text-sm text-green-600';
+            }
+
+            showToast('Secondary image removed', 'info');
         }
 
         async function uploadImageToCloudinary(file) {
@@ -707,10 +895,14 @@
         document.getElementById('addProductForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            if (uploadedImageUrls.length === 0) {
-                showToast('Please select and upload at least one image', 'warning');
+            // Validate main image is uploaded
+            if (!mainImageUrl) {
+                showToast('Please upload a main image', 'warning');
                 return;
             }
+
+            // Combine main and secondary images (main image first)
+            const allImageUrls = [mainImageUrl, ...secondaryImageUrls];
 
             const name = document.getElementById('productName').value;
             const description = document.getElementById('productDescription').value;
@@ -746,7 +938,7 @@
                         size: size || null,
                         price: globalPrice,
                         stock: parseInt(stock),
-                        imageUrl: uploadedImageUrls[0] // Set first image as default for variants
+                        imageUrl: mainImageUrl // Use main image for variants
                     });
                 });
 
@@ -765,7 +957,7 @@
                     size: null,
                     price: globalPrice,
                     stock: parseInt(stock),
-                    imageUrl: uploadedImageUrls[0]
+                    imageUrl: mainImageUrl
                 });
             }
 
@@ -774,7 +966,7 @@
                 name,
                 description,
                 categoryId,
-                images: uploadedImageUrls,
+                images: allImageUrls, // Send combined images with main first
                 variants: variants
             };
 
@@ -883,23 +1075,83 @@
                     }
                 }
 
-                // Handle Images
-                uploadedImageUrls = p.images || [];
-                const previewContainer = document.getElementById('imagePreviewContainer');
-                previewContainer.innerHTML = '';
-                previewContainer.classList.remove('hidden');
+                // Handle Images - Split into Main and Secondary
+                const images = p.images || [];
 
-                uploadedImageUrls.forEach(url => {
-                    const imgDiv = document.createElement('div');
-                    imgDiv.className = 'relative';
-                    imgDiv.innerHTML = `
-                        <img src="${url}" class="w-full h-24 object-cover rounded border border-gray-200">
-                        <div class="absolute top-0 right-0 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center -mt-1 -mr-1">
+                if (images.length > 0) {
+                    // First image is Main Image
+                    mainImageUrl = images[0];
+                    const mainPreviewContainer = document.getElementById('mainImagePreviewContainer');
+                    const mainUploadStatus = document.getElementById('mainImageUploadStatus');
+
+                    mainPreviewContainer.innerHTML = '';
+                    mainPreviewContainer.classList.remove('hidden');
+                    mainUploadStatus.classList.remove('hidden');
+
+                    const mainImgDiv = document.createElement('div');
+                    mainImgDiv.className = 'relative inline-block';
+                    mainImgDiv.innerHTML = `
+                        <img src="${mainImageUrl}" class="w-32 h-32 object-cover rounded border-2 border-orange-300">
+                        <div class="absolute top-0 right-0 bg-green-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center -mt-2 -mr-2">
                             <i class="fas fa-check"></i>
                         </div>
                     `;
-                    previewContainer.appendChild(imgDiv);
-                });
+
+                    // Add remove button for main image
+                    const mainRemoveBtn = document.createElement('button');
+                    mainRemoveBtn.type = 'button';
+                    mainRemoveBtn.className = 'absolute bottom-0 left-0 bg-red-500 hover:bg-red-600 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center -mb-2 -ml-2 transition';
+                    mainRemoveBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                    mainRemoveBtn.onclick = function () {
+                        removeMainImage();
+                    };
+                    mainImgDiv.appendChild(mainRemoveBtn);
+
+                    mainPreviewContainer.appendChild(mainImgDiv);
+                    mainUploadStatus.textContent = 'Main image loaded';
+                    mainUploadStatus.className = 'mt-2 text-sm text-green-600';
+
+                    // Rest are Secondary Images
+                    if (images.length > 1) {
+                        secondaryImageUrls = images.slice(1); // All except first
+                        const secondaryPreviewContainer = document.getElementById('secondaryImagesPreviewContainer');
+                        const secondaryUploadStatus = document.getElementById('secondaryImagesUploadStatus');
+
+                        secondaryPreviewContainer.innerHTML = '';
+                        secondaryPreviewContainer.classList.remove('hidden');
+                        secondaryUploadStatus.classList.remove('hidden');
+
+                        secondaryImageUrls.forEach(url => {
+                            const imgDiv = document.createElement('div');
+                            imgDiv.className = 'relative';
+                            imgDiv.innerHTML = `
+                                <img src="${url}" class="w-full h-24 object-cover rounded border border-gray-200">
+                                <div class="absolute top-0 right-0 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center -mt-1 -mr-1">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                            `;
+
+                            // Add remove button for secondary image
+                            const removeBtn = document.createElement('button');
+                            removeBtn.type = 'button';
+                            removeBtn.className = 'absolute bottom-0 right-0 bg-red-500 hover:bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center -mb-1 -mr-1 transition';
+                            removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                            removeBtn.onclick = function () {
+                                removeSecondaryImage(url, imgDiv);
+                            };
+                            imgDiv.appendChild(removeBtn);
+
+                            secondaryPreviewContainer.appendChild(imgDiv);
+                        });
+
+                        secondaryUploadStatus.textContent = `${secondaryImageUrls.length} secondary image(s) loaded`;
+                        secondaryUploadStatus.className = 'mt-2 text-sm text-green-600';
+                    }
+                } else {
+                    // No images
+                    mainImageUrl = null;
+                    secondaryImageUrls = [];
+                }
 
             } catch (err) {
                 console.error(err);
@@ -1052,12 +1304,29 @@
         });
 
         async function loadShopInfo() {
+            console.log('========================================');
+            console.log('🏪 DEBUG: loadShopInfo() called');
+            console.log('========================================');
+
             try {
-                const response = await fetch(`${baseUrl}/shop/my-shop`, {
+                const apiUrl = `${baseUrl}/shop/my-shop`;
+                console.log('🌐 Fetching:', apiUrl);
+                console.log('🔑 Token exists:', !!token);
+
+                const response = await fetch(apiUrl, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+
+                console.log('📡 Response Status:', response.status);
+                console.log('📡 Response OK:', response.ok);
+
                 if (response.ok) {
                     currentShop = await response.json();
+                    console.log('✅ Shop loaded successfully!');
+                    console.log('📋 Shop Data:', currentShop);
+                    console.log('🏷️ Shop ID:', currentShop.id);
+                    console.log('🏷️ Shop Name:', currentShop.name);
+
                     document.getElementById('shopName').textContent = currentShop.name;
                     document.getElementById('sellerName').textContent = `Hello, ${currentShop.name}`;
 
@@ -1070,17 +1339,32 @@
                     }
 
                     // Populate dashboard stats immediately
+                    console.log('📊 Loading product count for dashboard...');
                     loadTotalProductsCount();
 
                     // Re-trigger view-specific loads once shop is ready
                     if (currentView === 'products') {
+                        console.log('📦 Current view is products, loading products...');
                         loadProducts();
                     }
+
+                    console.log('✅ loadShopInfo() completed successfully');
                 } else if (response.status === 404) {
+                    console.error('❌ Shop not found (404)');
                     alert('You have not registered a shop yet!');
                     window.location.href = 'seller-register.html';
+                } else {
+                    const errText = await response.text();
+                    console.error('❌ Failed to load shop info');
+                    console.error('❌ Status:', response.status);
+                    console.error('❌ Error:', errText);
                 }
-            } catch (err) { console.error(err); }
+            } catch (err) {
+                console.error('❌ EXCEPTION in loadShopInfo():');
+                console.error('❌ Error:', err);
+                console.error('❌ Stack:', err.stack);
+            }
+            console.log('========================================');
         }
 
         async function loadTotalProductsCount() {
@@ -1102,8 +1386,21 @@
         }
 
         async function loadProducts() {
-            console.log('loadProducts called, currentShop:', currentShop);
-            if (!currentShop) return;
+            console.log('========================================');
+            console.log('🔍 DEBUG: loadProducts() called');
+            console.log('========================================');
+            console.log('📊 Current Shop:', currentShop);
+
+            if (!currentShop) {
+                console.error('❌ ERROR: currentShop is null or undefined!');
+                console.error('❌ This means loadShopInfo() has not completed or failed');
+                alert('⚠️ Shop information not loaded. Please refresh the page.');
+                return;
+            }
+
+            console.log('✅ Shop Name:', currentShop.name);
+            console.log('✅ Shop ID:', currentShop.id);
+            console.log('✅ Token exists:', !!token);
 
             const listContainer = document.getElementById('productList');
             listContainer.innerHTML = `
@@ -1113,27 +1410,109 @@
                 </div>`;
 
             try {
-                const response = await fetch(`${baseUrl}/products/shop/${currentShop.id}`, {
+                const apiUrl = `${baseUrl}/products/shop/${currentShop.id}`;
+                console.log('🌐 API URL:', apiUrl);
+                console.log('🔑 Authorization:', `Bearer ${token.substring(0, 20)}...`);
+
+                const response = await fetch(apiUrl, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                console.log('Products API response status:', response.status);
+
+                console.log('📡 Response Status:', response.status);
+                console.log('📡 Response OK:', response.ok);
+                console.log('📡 Response Headers:', Object.fromEntries(response.headers.entries()));
 
                 if (response.ok) {
                     const products = await response.json();
-                    console.log('Products loaded:', products);
+                    console.log('📦 Products Count:', products.length);
+                    console.log('📦 Products Data:', products);
+
+                    if (products.length === 0) {
+                        console.warn('⚠️ ZERO PRODUCTS RETURNED!');
+                        console.warn('⚠️ Possible reasons:');
+                        console.warn('   1. No products created yet');
+                        console.warn('   2. Products were created with DIFFERENT shop ID');
+                        console.warn('   3. Database query issue');
+                        console.warn('⚠️ Current Shop ID:', currentShop.id);
+                        console.warn('⚠️ Check if products in database have this shop_id');
+
+                        // Show helpful message to user
+                        listContainer.innerHTML = `
+                            <div class="p-10 text-center">
+                                <i class="fas fa-box-open text-4xl mb-3 text-gray-300"></i>
+                                <p class="text-gray-600 mb-4">No products found for this shop</p>
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 max-w-md mx-auto">
+                                    <p class="text-sm text-yellow-800 mb-2"><strong>⚠️ Debug Info:</strong></p>
+                                    <p class="text-xs text-yellow-700 mb-1">Shop ID: <code class="bg-yellow-100 px-2 py-1 rounded">${currentShop.id}</code></p>
+                                    <p class="text-xs text-yellow-700 mb-1">API returned 0 products</p>
+                                    <p class="text-xs text-yellow-700 mt-3">Open Console (F12) for more details</p>
+                                </div>
+                            </div>`;
+                    } else {
+                        console.log('✅ Products found! Rendering...');
+                        console.log('📋 First product:', products[0]);
+
+                        // Check shop IDs
+                        const mismatchedProducts = products.filter(p => p.shopId !== currentShop.id);
+                        if (mismatchedProducts.length > 0) {
+                            console.warn('⚠️ WARNING: Some products have different shop ID!');
+                            console.warn('Mismatched products:', mismatchedProducts);
+                        }
+                    }
+
                     renderProducts(products);
                 } else {
                     const errText = await response.text();
-                    console.error('Products load failed:', errText);
-                    listContainer.innerHTML = `<div class="p-6 text-center text-red-500">Failed to load products: ${errText}</div>`;
+                    console.error('❌ API Error Response:', errText);
+                    console.error('❌ Status Code:', response.status);
+
+                    let errorMessage = errText;
+                    if (response.status === 401) {
+                        errorMessage = 'Authentication failed. Please login again.';
+                        console.error('❌ Token might be expired or invalid');
+                    } else if (response.status === 403) {
+                        errorMessage = 'Access denied. You do not have permission.';
+                    } else if (response.status === 404) {
+                        errorMessage = 'API endpoint not found. Check backend is running.';
+                    }
+
+                    listContainer.innerHTML = `
+                        <div class="p-6 text-center text-red-500">
+                            <i class="fas fa-exclamation-triangle text-3xl mb-3"></i>
+                            <p class="font-bold mb-2">Failed to load products</p>
+                            <p class="text-sm">${errorMessage}</p>
+                            <div class="bg-red-50 border border-red-200 rounded p-3 mt-4 max-w-md mx-auto">
+                                <p class="text-xs text-red-700">Status: ${response.status}</p>
+                                <p class="text-xs text-red-700 mt-1">Check Console (F12) for details</p>
+                            </div>
+                        </div>`;
                 }
             } catch (err) {
-                console.error('Products load error:', err);
-                listContainer.innerHTML = `<div class="p-6 text-center text-red-500">Error: ${err.message}</div>`;
+                console.error('❌ EXCEPTION in loadProducts():');
+                console.error('❌ Error name:', err.name);
+                console.error('❌ Error message:', err.message);
+                console.error('❌ Error stack:', err.stack);
+
+                listContainer.innerHTML = `
+                    <div class="p-6 text-center text-red-500">
+                        <i class="fas fa-times-circle text-3xl mb-3"></i>
+                        <p class="font-bold mb-2">Error loading products</p>
+                        <p class="text-sm">${err.message}</p>
+                        <div class="bg-red-50 border border-red-200 rounded p-3 mt-4 max-w-md mx-auto">
+                            <p class="text-xs text-red-700">This might be a network error or CORS issue</p>
+                            <p class="text-xs text-red-700 mt-1">Check Console (F12) for details</p>
+                        </div>
+                    </div>`;
             }
+
+            console.log('========================================');
+            console.log('✅ loadProducts() completed');
+            console.log('========================================');
         }
 
+
         function renderProducts(products) {
+            console.log('📦 DEBUG: renderProducts called with:', products);
             const container = document.getElementById('productList');
             if (!products || products.length === 0) {
                 container.innerHTML = `
@@ -1184,10 +1563,13 @@
                                     <td class="px-6 py-4"><span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">${p.status || 'ACTIVE'}</span></td>
                                     <td class="px-6 py-4 text-right">
                                         <div class="flex justify-end gap-2">
-                                            <button onclick="editProduct('${p.id}')" class="text-blue-500 hover:text-blue-700 p-2" title="Edit">
+                                            <button onclick="localStorage.setItem('lastClickedProductId', '${p.id || p._id}'); window.open('product-detail.html?id=${p.id || p._id}', '_blank')" class="text-gray-500 hover:text-gray-700 p-2" title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button onclick="localStorage.setItem('lastClickedProductId', '${p.id || p._id}'); editProduct('${p.id || p._id}')" class="text-blue-500 hover:text-blue-700 p-2" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </button>
-                                            <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:text-red-700 p-2" title="Delete">
+                                            <button onclick="deleteProduct('${p.id || p._id}')" class="text-red-500 hover:text-red-700 p-2" title="Delete">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
@@ -1216,8 +1598,19 @@
 
         function resetProductForm() {
             document.getElementById('addProductForm').reset();
-            document.getElementById('imagePreviewContainer').classList.add('hidden');
-            uploadedImageUrls = [];
+
+            // Clear main image
+            document.getElementById('mainImagePreviewContainer').classList.add('hidden');
+            document.getElementById('mainImagePreviewContainer').innerHTML = '';
+            document.getElementById('mainImageUploadStatus').classList.add('hidden');
+            mainImageUrl = null;
+
+            // Clear secondary images
+            document.getElementById('secondaryImagesPreviewContainer').classList.add('hidden');
+            document.getElementById('secondaryImagesPreviewContainer').innerHTML = '';
+            document.getElementById('secondaryImagesUploadStatus').classList.add('hidden');
+            secondaryImageUrls = [];
+
             editingProductId = null;
             document.getElementById('submitProductBtn').innerHTML = '<i class="fas fa-check mr-2"></i>Create Product';
             document.getElementById('pageTitle').textContent = 'Add New Product';
@@ -1662,9 +2055,63 @@
                 document.getElementById('profileDistrictText').value = district;
                 document.getElementById('profileWardText').value = ward;
 
-                // Note: We're not auto-selecting dropdowns as that would require
-                // matching the text against API data, which is complex.
-                // Dropdowns will be empty in edit mode, user can re-select if needed.
+                // Try to pre-select dropdowns for edit mode
+                await trySelectAddressInDropdowns(province, district, ward);
+            }
+        }
+
+        async function trySelectAddressInDropdowns(provinceName, districtName, wardName) {
+            try {
+                // Select province by matching name
+                const provinceSelect = document.getElementById('profileProvince');
+                if (provinceName && provinceSelect.options.length > 1) {
+                    for (let i = 0; i < provinceSelect.options.length; i++) {
+                        const optionName = provinceSelect.options[i].dataset.name || provinceSelect.options[i].textContent;
+                        if (optionName.toLowerCase().includes(provinceName.toLowerCase()) ||
+                            provinceName.toLowerCase().includes(optionName.toLowerCase())) {
+                            provinceSelect.value = provinceSelect.options[i].value;
+
+                            // Load districts for this province
+                            await loadProfileDistricts();
+
+                            // Select district
+                            if (districtName) {
+                                const districtSelect = document.getElementById('profileDistrict');
+                                await new Promise(resolve => setTimeout(resolve, 300)); // Wait for districts to load
+
+                                for (let j = 0; j < districtSelect.options.length; j++) {
+                                    const distOptName = districtSelect.options[j].dataset.name || districtSelect.options[j].textContent;
+                                    if (distOptName.toLowerCase().includes(districtName.toLowerCase()) ||
+                                        districtName.toLowerCase().includes(distOptName.toLowerCase())) {
+                                        districtSelect.value = districtSelect.options[j].value;
+
+                                        // Load wards for this district
+                                        await loadProfileWards();
+
+                                        // Select ward
+                                        if (wardName) {
+                                            const wardSelect = document.getElementById('profileWard');
+                                            await new Promise(resolve => setTimeout(resolve, 300)); // Wait for wards to load
+
+                                            for (let k = 0; k < wardSelect.options.length; k++) {
+                                                const wardOptName = wardSelect.options[k].dataset.name || wardSelect.options[k].textContent;
+                                                if (wardOptName.toLowerCase().includes(wardName.toLowerCase()) ||
+                                                    wardName.toLowerCase().includes(wardOptName.toLowerCase())) {
+                                                    wardSelect.value = wardSelect.options[k].value;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error selecting address dropdowns:', error);
             }
         }
 
