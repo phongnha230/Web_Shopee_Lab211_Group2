@@ -34,7 +34,7 @@
         .thumbnail-active {
             border: 2px solid #F97316;
         }
-        
+
         /* Review Image Gallery */
         .review-images {
             display: grid;
@@ -42,6 +42,7 @@
             gap: 0.5rem;
             margin-top: 0.75rem;
         }
+
         .review-images img {
             width: 80px;
             height: 80px;
@@ -51,11 +52,12 @@
             transition: all 0.2s;
             border: 2px solid #e5e7eb;
         }
+
         .review-images img:hover {
             transform: scale(1.05);
             border-color: #f97316;
         }
-        
+
         /* Lightbox */
         .lightbox {
             display: none;
@@ -69,12 +71,17 @@
             align-items: center;
             justify-content: center;
         }
-        .lightbox.active { display: flex; }
+
+        .lightbox.active {
+            display: flex;
+        }
+
         .lightbox img {
             max-width: 90%;
             max-height: 90%;
             object-fit: contain;
         }
+
         .lightbox-close {
             position: absolute;
             top: 20px;
@@ -277,11 +284,12 @@
                             class="px-4 py-2 border-2 border-gray-300 rounded-lg font-medium hover:border-orange-500">4
                             Star (856)</button>
                         <button
-                            class="px-4 py-2 border-2 border-gray-300 rounded-lg font-medium hover:border-orange-500">With Photos</button>
+                            class="px-4 py-2 border-2 border-gray-300 rounded-lg font-medium hover:border-orange-500">With
+                            Photos</button>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Review with Images Example -->
             <div class="border-b border-gray-200 pb-6 mb-6">
                 <div class="flex items-start gap-4">
@@ -293,18 +301,22 @@
                         </div>
                         <div class="flex text-yellow-400 mb-2"><i class="fas fa-star"></i><i class="fas fa-star"></i><i
                                 class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                        <p class="text-gray-700 mb-2">Great product! Exactly as described. The quality is amazing and shipping was super fast. Highly recommend!</p>
-                        
+                        <p class="text-gray-700 mb-2">Great product! Exactly as described. The quality is amazing and
+                            shipping was super fast. Highly recommend!</p>
+
                         <!-- Review Images -->
                         <div class="review-images">
-                            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200" alt="Review" onclick="openLightbox(this.src)">
-                            <img src="https://images.unsplash.com/photo-1484704849700-f032a568e944?w=200" alt="Review" onclick="openLightbox(this.src)">
-                            <img src="https://images.unsplash.com/photo-1524678606372-571d751b8d57?w=200" alt="Review" onclick="openLightbox(this.src)">
+                            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200" alt="Review"
+                                onclick="openLightbox(this.src)">
+                            <img src="https://images.unsplash.com/photo-1484704849700-f032a568e944?w=200" alt="Review"
+                                onclick="openLightbox(this.src)">
+                            <img src="https://images.unsplash.com/photo-1524678606372-571d751b8d57?w=200" alt="Review"
+                                onclick="openLightbox(this.src)">
                         </div>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Review without Images -->
             <div class="border-b border-gray-200 pb-6">
                 <div class="flex items-start gap-4">
@@ -652,6 +664,22 @@
             const quantity = parseInt(document.getElementById('quantity').value);
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
 
+            // Determine variantId for backend (MUST be a real variant ID)
+            let variantIdToUse = id;
+            if (window.isCurrentReal && product.variants && product.variants.length > 0) {
+                const selectedVariant = product.variants.find(v =>
+                    (v.color === color || (!v.color && !color)) &&
+                    (v.size === size || (!v.size && !size))
+                );
+                if (selectedVariant) {
+                    variantIdToUse = selectedVariant.id;
+                } else {
+                    variantIdToUse = product.variants[0].id; // Default to first
+                }
+            }
+
+            // Unique ID based on product + variations for LOCAL STORAGE
+            const cartItemId = `${id || product.id}-${color || ''}-${size || ''}`;
             // Find specific variant ID based on selection
             let variantId = id || product.id; // Default to product ID
             
@@ -689,6 +717,7 @@
             } else {
                 cart.push({
                     id: id || product.id,
+                    variantId: variantIdToUse,
                     cartItemId: cartItemId,
                     name: product.name,
                     price: priceVal,
@@ -699,6 +728,11 @@
                     checked: true
                 });
             }
+
+            // Call backend API to add to cart (using URL params, not JSON body)
+            try {
+                const token = localStorage.getItem('accessToken');
+                const response = await fetch(`${API_BASE_URL}/cart/add?variantId=${variantIdToUse}&quantity=${quantity}`, {
             
             localStorage.setItem('cart', JSON.stringify(cart));
 
@@ -723,7 +757,7 @@
 
                 updateCartBadge();
                 showToast(`✅ Added ${quantity} item(s) to cart!`);
-                
+
             } catch (error) {
                 console.error('Add to cart error:', error);
                 alert('❌ Failed to add to cart. Please try again.');
@@ -757,6 +791,17 @@
 
             const quantity = parseInt(document.getElementById('quantity').value);
 
+            // Determine variantId for backend (MUST be a real variant ID)
+            let variantIdToUse = id;
+            if (window.isCurrentReal && product.variants && product.variants.length > 0) {
+                const selectedVariant = product.variants.find(v =>
+                    (v.color === color || (!v.color && !color)) &&
+                    (v.size === size || (!v.size && !size))
+                );
+                if (selectedVariant) {
+                    variantIdToUse = selectedVariant.id;
+                } else {
+                    variantIdToUse = product.variants[0].id; // Default to first
             // Find specific variant ID based on selection
             let variantId = id || product.id; // Default to product ID
             
@@ -786,6 +831,8 @@
 
             const cart = [{
                 id: id || product.id,
+                variantId: variantIdToUse,
+                cartItemId: `${id || product.id}-${color || ''}-${size || ''}`,
                 cartItemId: `${variantId}-${color || 'default'}-${size || 'default'}`,
                 name: product.name,
                 price: priceVal,
@@ -796,11 +843,14 @@
                 checked: true
             }];
 
+            localStorage.setItem('cart', JSON.stringify(cart));
+
             // IMPORTANT: For Buy Now, we need to add to backend cart first
             try {
                 const token = localStorage.getItem('accessToken');
-                
+
                 // Add this product to cart (using URL params, not JSON body)
+                const response = await fetch(`${API_BASE_URL}/cart/add?variantId=${variantIdToUse}&quantity=${quantity}`, {
                 console.log(`Buy Now fetching: VariantId=${variantId}`);
                 const response = await fetch(`http://localhost:8080/api/cart/add?variantId=${variantId}&quantity=${quantity}`, {
                     method: 'POST',
@@ -817,10 +867,10 @@
 
                 // Redirect to checkout
                 window.location.href = 'checkout-backend.html';
-                
+
             } catch (error) {
                 console.error('Buy Now error:', error);
-                
+
                 // More helpful error message
                 if (error.message.includes('404')) {
                     alert('❌ Product variant not found in database. This is a demo product.\n\nPlease use "Add to Cart" from a real product page or check the backend seeder.');
@@ -851,7 +901,7 @@
                     const cartData = await response.json();
                     // Calculate total items from backend response
                     const totalItems = cartData.items ? cartData.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
-                    
+
                     const badge = document.getElementById('cartBadge');
                     if (badge) {
                         badge.textContent = totalItems;
@@ -894,7 +944,7 @@
             localStorage.removeItem('userName');
             location.reload();
         }
-        
+
         // Lightbox Functions
         function openLightbox(src) {
             const lightbox = document.getElementById('lightbox');
@@ -902,11 +952,11 @@
             lightboxImage.src = src.replace('w=200', 'w=1200'); // Load higher resolution
             lightbox.classList.add('active');
         }
-        
+
         function closeLightbox() {
             document.getElementById('lightbox').classList.remove('active');
         }
-        
+
         // Close lightbox on ESC key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') closeLightbox();
