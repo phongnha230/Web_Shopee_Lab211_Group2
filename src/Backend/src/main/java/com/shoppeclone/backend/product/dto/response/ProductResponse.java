@@ -17,4 +17,11 @@ public class ProductResponse {
     private List<String> images; // Image URLs
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // Aggregated fields
+    private java.math.BigDecimal minPrice;
+    private java.math.BigDecimal maxPrice;
+    private Integer totalStock;
+    private Integer sold;
+    private Double rating;
 }

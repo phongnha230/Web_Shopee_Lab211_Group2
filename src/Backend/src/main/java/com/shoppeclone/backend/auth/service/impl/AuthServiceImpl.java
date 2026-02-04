@@ -17,15 +17,11 @@ import com.shoppeclone.backend.auth.service.AuthService;
 import com.shoppeclone.backend.auth.service.OtpService;
 import com.shoppeclone.backend.common.service.EmailService;
 import com.shoppeclone.backend.user.service.NotificationService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -133,32 +129,8 @@ public class AuthServiceImpl implements AuthService {
 
         System.out.println("========== LOGIN SUCCESS ==========");
 
-        // 🔥 NOTIFICATION Logic
-        try {
-            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
-                    .getRequestAttributes();
-            if (attributes != null) {
-                HttpServletRequest httpRequest = attributes.getRequest();
-                String ip = httpRequest.getHeader("X-Forwarded-For");
-                if (ip == null || ip.isEmpty())
-                    ip = httpRequest.getRemoteAddr();
-
-                String userAgent = httpRequest.getHeader("User-Agent");
-                String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy"));
-
-                // 1. Save Notification
-                notificationService.createNotification(
-                        user.getId(),
-                        "New Login Detected",
-                        "New login at " + time + " from IP: " + ip,
-                        "SECURITY");
-
-                // 2. Send Email
-                emailService.sendLoginAlert(user.getEmail(), time, ip, userAgent);
-            }
-        } catch (Exception e) {
-            System.err.println("❌ Failed to send login notification: " + e.getMessage());
-        }
+        // Login notifications removed as per user request - only show registration
+        // notifications
 
         return new AuthResponse(accessToken, refreshToken, "Bearer", mapToUserDto(user));
     }

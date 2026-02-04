@@ -18,6 +18,9 @@ public class Order {
     @Indexed
     private String userId;
 
+    @Indexed
+    private String shopId; // Shop that owns this order
+
     private BigDecimal totalPrice;
     private BigDecimal discount;
     private String voucherCode; // Applied product voucher code

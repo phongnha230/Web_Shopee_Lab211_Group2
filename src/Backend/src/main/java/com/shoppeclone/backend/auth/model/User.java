@@ -21,6 +21,7 @@ public class User {
     private String password;
     private String fullName;
     private String phone;
+    private String avatar;
     private boolean emailVerified = false;
     private boolean active = true;
 

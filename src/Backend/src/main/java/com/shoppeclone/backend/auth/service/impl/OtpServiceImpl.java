@@ -6,6 +6,7 @@ import com.shoppeclone.backend.auth.repository.OtpCodeRepository;
 import com.shoppeclone.backend.auth.repository.UserRepository;
 import com.shoppeclone.backend.auth.service.OtpService;
 import com.shoppeclone.backend.common.service.EmailService;
+import com.shoppeclone.backend.user.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ public class OtpServiceImpl implements OtpService {
     private final UserRepository userRepository;
     private final OtpCodeRepository otpCodeRepository;
     private final EmailService emailService;
+    private final NotificationService notificationService;
 
     @Value("${otp.expiration}")
     private Long otpExpiration;
@@ -95,6 +97,32 @@ public class OtpServiceImpl implements OtpService {
         userRepository.save(user);
 
         System.out.println("🎉 EMAIL VERIFIED SUCCESS: " + user.getEmail());
+
+        // 🔥 WELCOME LOGIC (Email + Notification)
+        try {
+            // 1. Send Welcome Email
+            emailService.sendWelcomeEmail(user.getEmail(), user.getFullName());
+
+            // 2. Create Welcome Notification
+            notificationService.createNotification(
+                    user.getId(),
+                    "Welcome to ShopeeClone! 🎉",
+                    "Welcome " + user.getFullName() + "! Your account has been successfully verified. Happy shopping!",
+                    "SYSTEM");
+
+            // 3. Notify Admins
+            java.util.List<User> admins = userRepository.findByRolesName("ROLE_ADMIN");
+            for (User admin : admins) {
+                notificationService.createNotification(
+                        admin.getId(),
+                        "New User Registered",
+                        "New user " + user.getFullName() + " (" + user.getEmail()
+                                + ") has registered and verified their account.",
+                        "ADMIN_ALERT");
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ Failed to send welcome message: " + e.getMessage());
+        }
     }
 
     private String generateOtpCode() {

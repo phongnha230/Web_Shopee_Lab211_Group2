@@ -13,6 +13,9 @@ public interface OrderService {
 
     List<Order> getUserOrders(String userId);
 
+    // Get orders by shop ID (for seller)
+    List<Order> getOrdersByShopId(String shopId, OrderStatus status);
+
     Order updateOrderStatus(String orderId, OrderStatus status);
 
     Order cancelOrder(String orderId);

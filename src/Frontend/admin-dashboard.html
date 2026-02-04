@@ -17,18 +17,18 @@
     <!-- Sidebar -->
     <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full z-10">
         <div class="p-6 flex items-center gap-3 border-b border-gray-100">
-            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
+            <div class="w-8 h-8 bg-[#AD3029] rounded-lg flex items-center justify-center text-white font-bold">
                 <i class="fas fa-chart-bar"></i>
             </div>
-            <span class="text-xl font-bold text-gray-800">AdminPanel</span>
+            <span class="text-xl font-bold text-[#AD3029]">AdminPanel</span>
         </div>
 
         <!-- User Profile Snippet in Sidebar -->
         <div class="p-6 flex items-center gap-3">
-            <img id="adminAvatar" src="https://ui-avatars.com/api/?name=Admin&background=random"
+            <img id="adminAvatar" src="https://ui-avatars.com/api/?name=Admin&background=AD3029&color=fff"
                 class="w-10 h-10 rounded-full">
             <div>
-                <p id="adminName" class="text-sm font-bold text-gray-800">Admin</p>
+                <p id="adminName" class="text-sm font-bold text-[#AD3029]">Admin</p>
                 <p class="text-xs text-gray-500">Administrator</p>
             </div>
         </div>
@@ -37,28 +37,28 @@
 
         <nav class="flex-1 px-4 space-y-1 overflow-y-auto">
             <a href="#" onclick="switchView('dashboard')" id="nav-dashboard"
-                class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-600 rounded-lg font-medium transition">
+                class="flex items-center gap-3 px-4 py-3 bg-[#FEEFCD] text-[#AD3029] rounded-lg font-medium transition">
                 <i class="fas fa-th-large w-5"></i> Dashboard
             </a>
             <a href="#" onclick="switchView('shops')" id="nav-shops"
-                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
+                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-[#FEEFCD]/50 rounded-lg font-medium transition">
                 <i class="fas fa-store w-5"></i> Shops
                 <span id="pendingCount"
-                    class="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+                    class="ml-auto bg-[#AD3029] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
             </a>
             <a href="#" onclick="switchView('disputes')" id="nav-disputes"
-                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
+                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-[#FEEFCD]/50 rounded-lg font-medium transition">
                 <i class="fas fa-exclamation-circle w-5"></i> Disputes
             </a>
             <a href="#" onclick="switchView('users')" id="nav-users"
-                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
+                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-[#FEEFCD]/50 rounded-lg font-medium transition">
                 <i class="fas fa-users w-5"></i> Users
             </a>
 
             <div class="my-4 border-b border-gray-100"></div>
 
             <a href="index.html"
-                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
+                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-[#FEEFCD]/50 rounded-lg font-medium transition">
                 <i class="fas fa-home w-5"></i> Back to Store
             </a>
             <a href="#" onclick="logout()"
@@ -77,42 +77,53 @@
             <div class="relative w-96">
                 <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                 <input type="text" placeholder="Search analytics, orders, or products..."
-                    class="w-full pl-10 pr-4 py-2 bg-gray-100 border-none rounded-lg text-sm focus:ring-2 focus:ring-blue-100 outline-none transition">
+                    class="w-full pl-10 pr-4 py-2 bg-gray-100 border-none rounded-lg text-sm focus:ring-2 focus:ring-[#AD3029]/20 outline-none transition">
             </div>
 
             <!-- Right Actions -->
             <div class="flex items-center gap-6">
                 <!-- Notification Wrapper -->
                 <div class="relative">
-                    <button id="notificationBtn" class="relative text-gray-500 hover:text-blue-600 transition">
+                    <button id="notificationBtn" class="relative text-gray-500 hover:text-[#AD3029] transition">
                         <i class="fas fa-bell text-lg"></i>
                         <span id="notificationBadge"
-                            class="hidden absolute -top-1 -right-0.5 w-2 h-2 bg-red-600 rounded-full ring-2 ring-white text-[8px] flex items-center justify-center text-white"></span>
+                            class="hidden absolute -top-1 -right-0.5 w-2 h-2 bg-[#AD3029] rounded-full ring-2 ring-white text-[8px] flex items-center justify-center text-white"></span>
                     </button>
 
                     <!-- Dropdown -->
                     <div id="notificationDropdown"
-                        class="hidden absolute top-10 right-0 w-80 bg-white shadow-xl rounded-lg border border-gray-100 z-50 overflow-hidden text-gray-800">
+                        class="hidden absolute top-10 right-0 w-80 bg-white shadow-xl rounded-lg border border-gray-100 z-[9999] overflow-hidden text-gray-800">
                         <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
                             <h3 class="font-semibold text-gray-700">Notifications</h3>
-                            <button id="markAllReadBtn"
-                                class="text-xs text-blue-600 hover:text-blue-800 font-medium">Mark all
+                            <h3 class="font-semibold text-gray-700">Notifications</h3>
+                            <button id="markAllReadBtn" class="text-xs text-[#AD3029] hover:opacity-80 font-medium">Mark
+                                all
                                 read</button>
                         </div>
-                        <div id="notificationList" class="max-h-80 overflow-y-auto">
+                        <div id="notificationList" class="max-h-60 overflow-y-auto">
                             <div class="p-4 text-center text-gray-500 text-sm">Loading...</div>
                         </div>
                         <div class="bg-gray-50 px-4 py-2 border-t border-gray-100 text-center">
-                            <a href="#" class="text-xs text-gray-500 hover:text-blue-600">View all</a>
+                            <button onclick="expandNotifications()"
+                                class="text-xs text-gray-500 hover:text-[#AD3029] font-medium">
+                                <span id="viewAllText">View all</span>
+                            </button>
                         </div>
                     </div>
                 </div>
                 <div
                     class="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 font-medium">
                     <i class="far fa-calendar-alt"></i>
-                    <span>Oct 24, 2023</span>
+                    <span id="currentDate">Oct 24, 2023</span>
                 </div>
             </div>
+
+            <script>
+                // Update Date
+                const dateElement = document.getElementById('currentDate');
+                const options = { year: 'numeric', month: 'short', day: 'numeric' };
+                dateElement.textContent = new Date().toLocaleDateString('en-US', options);
+            </script>
         </header>
 
         <!-- Main Scrollable Area -->
@@ -129,12 +140,13 @@
                     </div>
                     <div class="flex gap-2">
                         <div class="bg-white border border-gray-200 rounded-lg p-1 flex">
-                            <button
-                                class="px-4 py-1.5 text-sm font-medium bg-blue-600 text-white rounded shadow-sm">Today</button>
-                            <button
+                            <button id="btn-today" onclick="handleTimeFilter(1)"
+                                class="px-4 py-1.5 text-sm font-medium bg-[#AD3029] text-white rounded shadow-sm">Today</button>
+                            <button id="btn-yesterday" onclick="handleTimeFilter(0)"
                                 class="px-4 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded">Yesterday</button>
-                            <button class="px-4 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded">Last
-                                7 Days</button>
+                            <button id="btn-7days" onclick="handleTimeFilter(7)"
+                                class="px-4 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded">Last 7
+                                Days</button>
                         </div>
                         <button
                             class="bg-white border border-gray-200 text-gray-700 px-4 py-1.5 rounded-lg text-sm font-medium shadow-sm hover:bg-gray-50 flex items-center gap-2">
@@ -144,12 +156,12 @@
                 </div>
 
                 <!-- Stats Cards Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    <!-- Card 1 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Card 1: Total GMV -->
                     <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-4">
                             <div
-                                class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-lg">
+                                class="w-10 h-10 bg-[#FEEFCD] text-[#AD3029] rounded-lg flex items-center justify-center text-lg">
                                 <i class="fas fa-dollar-sign"></i>
                             </div>
                             <span class="bg-green-50 text-green-600 text-xs font-bold px-2 py-1 rounded-full">+5.2% <i
@@ -159,11 +171,11 @@
                         <h3 class="text-2xl font-bold text-gray-800 mt-1">$4.23M</h3>
                     </div>
 
-                    <!-- Card 2 -->
+                    <!-- Card 2: Total Orders -->
                     <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-4">
                             <div
-                                class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-lg">
+                                class="w-10 h-10 bg-[#FEEFCD] text-[#AD3029] rounded-lg flex items-center justify-center text-lg">
                                 <i class="fas fa-shopping-cart"></i>
                             </div>
                             <span class="bg-green-50 text-green-600 text-xs font-bold px-2 py-1 rounded-full">+12.4% <i
@@ -173,46 +185,44 @@
                         <h3 class="text-2xl font-bold text-gray-800 mt-1">12,450</h3>
                     </div>
 
-                    <!-- Card 3 -->
+                    <!-- Card 3: Active Users -->
                     <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-4">
                             <div
-                                class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-lg">
+                                class="w-10 h-10 bg-[#FEEFCD] text-[#AD3029] rounded-lg flex items-center justify-center text-lg">
                                 <i class="fas fa-users"></i>
                             </div>
                             <span class="bg-green-50 text-green-600 text-xs font-bold px-2 py-1 rounded-full">+8.1% <i
                                     class="fas fa-arrow-up text-[10px]"></i></span>
                         </div>
                         <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Active Users</p>
-                        <h3 class="text-2xl font-bold text-gray-800 mt-1">8,102</h3>
+                        <h3 id="totalUsersCount" class="text-2xl font-bold text-gray-800 mt-1">Loading...</h3>
                     </div>
 
-                    <!-- Card 4 -->
+                    <!-- Card 4: Active Shops -->
                     <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-4">
                             <div
-                                class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-lg">
+                                class="w-10 h-10 bg-[#FEEFCD] text-[#AD3029] rounded-lg flex items-center justify-center text-lg">
                                 <i class="fas fa-store"></i>
                             </div>
                             <span class="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-1 rounded-full">0.0% <i
                                     class="fas fa-minus text-[10px]"></i></span>
                         </div>
                         <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Active Shops</p>
-                        <h3 class="text-2xl font-bold text-gray-800 mt-1">1,205</h3>
+                        <h3 id="activeShopsCount" class="text-2xl font-bold text-gray-800 mt-1">Loading...</h3>
                     </div>
 
-                    <!-- Card 5 -->
+                    <!-- Card 5: Total Disputes -->
                     <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-4">
                             <div
-                                class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-lg">
-                                <i class="fas fa-bullseye"></i>
+                                class="w-10 h-10 bg-[#AD3029]/10 text-[#AD3029] rounded-lg flex items-center justify-center text-lg">
+                                <i class="fas fa-exclamation-triangle"></i>
                             </div>
-                            <span class="bg-red-50 text-red-600 text-xs font-bold px-2 py-1 rounded-full">-0.2% <i
-                                    class="fas fa-arrow-down text-[10px]"></i></span>
                         </div>
-                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Conversion</p>
-                        <h3 class="text-2xl font-bold text-gray-800 mt-1">3.2%</h3>
+                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Total Disputes</p>
+                        <h3 id="totalDisputesCount" class="text-2xl font-bold text-gray-800 mt-1">Loading...</h3>
                     </div>
                 </div>
 
@@ -222,8 +232,8 @@
                     <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                         <div class="flex justify-between items-center mb-6">
                             <div>
-                                <h3 class="text-lg font-bold text-gray-800">Sales Trend</h3>
-                                <p class="text-xs text-gray-500">Hourly order volume & GMV</p>
+                                <h3 class="text-lg font-bold text-gray-800">Registration Trend</h3>
+                                <p class="text-xs text-gray-500">Daily new users & shops (Last 7 days)</p>
                             </div>
                             <div class="bg-gray-100 rounded-lg p-1 flex text-xs font-medium">
                                 <button class="px-3 py-1 bg-white shadow-sm rounded">Volume</button>
@@ -235,30 +245,56 @@
                         </div>
                     </div>
 
-                    <!-- Flash Sale Card -->
+                    <!-- Operations Summary Card -->
                     <div
-                        class="bg-blue-600 text-white p-6 rounded-2xl shadow-lg flex flex-col justify-between relative overflow-hidden group">
+                        class="bg-[#AD3029] text-white p-6 rounded-2xl shadow-lg flex flex-col justify-between relative overflow-hidden group">
                         <div class="relative z-10">
+                            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                                <i class="fas fa-clipboard-list"></i> Operations Summary
+                            </h2>
+                            <div class="space-y-3">
+
+                                <!-- Open Disputes -->
+                                <div
+                                    class="flex justify-between items-center bg-white/10 p-3 rounded-lg backdrop-blur-sm hover:bg-white/20 transition cursor-pointer">
+                                    <div class="flex items-center gap-3">
+                                        <div class="bg-white/20 p-2 rounded">
+                                            <i class="fas fa-exclamation-circle text-orange-300"></i>
+                                        </div>
+                                        <div class="text-sm font-medium">New Disputes</div>
+                                    </div>
+                                    <div id="openDisputesCount" class="text-xl font-bold">0</div>
+                                </div>
+                                <!-- Pending Shops -->
+                                <div
+                                    class="flex justify-between items-center bg-white/10 p-3 rounded-lg backdrop-blur-sm hover:bg-white/20 transition cursor-pointer">
+                                    <div class="flex items-center gap-3">
+                                        <div class="bg-white/20 p-2 rounded">
+                                            <i class="fas fa-store text-blue-300"></i>
+                                        </div>
+                                        <div class="text-sm font-medium">Pending Shops</div>
+                                    </div>
+                                    <div id="pendingShopsCountSummary" class="text-xl font-bold">0</div>
                             <div
                                 class="flex items-center gap-2 mb-2 text-yellow-300 font-bold text-xs uppercase tracking-wider">
                                 <i class="fas fa-bolt"></i> Flash Sale Live
                             </div>
                             <h2 class="text-2xl font-bold mb-1">Mega Electronics</h2>
-                            <p class="text-blue-200 text-sm mb-6">High traffic event active now.</p>
+                            <p class="text-white/80 text-sm mb-6">High traffic event active now.</p>
 
                             <div class="mb-6">
                                 <div class="flex justify-between text-xs font-medium mb-1">
                                     <span>Inventory Sold</span>
                                     <span>85%</span>
                                 </div>
-                                <div class="w-full bg-blue-800 rounded-full h-2.5">
+                                <div class="w-full bg-red-800 rounded-full h-2.5">
                                     <div class="bg-yellow-400 h-2.5 rounded-full" style="width: 85%"></div>
                                 </div>
                             </div>
 
                             <div
-                                class="bg-blue-800/50 backdrop-blur rounded-lg p-3 flex justify-between items-center mb-4">
-                                <span class="text-xs font-medium uppercase text-blue-200">Ends In</span>
+                                class="bg-red-800/50 backdrop-blur rounded-lg p-3 flex justify-between items-center mb-4">
+                                <span class="text-xs font-medium uppercase text-red-200">Ends In</span>
                                 <div class="flex gap-1 font-mono text-lg font-bold">
                                     <span class="bg-white/10 px-1.5 rounded">02</span>:
                                     <span class="bg-white/10 px-1.5 rounded">14</span>:
@@ -267,60 +303,66 @@
                             </div>
                         </div>
 
+                        <!-- Decorative Circle -->
+                        <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/20 rounded-full blur-3xl opacity-50">
                         <button
-                            class="relative z-10 w-full bg-white text-blue-700 font-bold py-2.5 rounded-lg shadow hover:bg-blue-50 transition">
+                            class="relative z-10 w-full bg-white text-[#8B2520] font-bold py-2.5 rounded-lg shadow hover:bg-red-50 transition">
                             Manage Campaign
                         </button>
 
                         <!-- Decorative Circle -->
-                        <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-500 rounded-full blur-3xl opacity-50">
+                        <div class="absolute -right-10 -top-10 w-40 h-40 bg-red-500 rounded-full blur-3xl opacity-50">
                         </div>
                         <div
-                            class="absolute -left-10 bottom-10 w-32 h-32 bg-purple-500 rounded-full blur-3xl opacity-30">
+                            class="absolute -left-10 bottom-10 w-32 h-32 bg-yellow-400/20 rounded-full blur-3xl opacity-30">
                         </div>
                     </div>
                 </div>
 
                 <!-- Bottom Grid -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Revenue By Category -->
+                    <!-- User Distribution -->
                     <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-                        <h3 class="text-lg font-bold text-gray-800 mb-6">Revenue by Category</h3>
-                        <div class="space-y-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-6">User Distribution</h3>
+                        <div id="distributionContainer" class="space-y-6">
+                            <!-- Items will be loaded dynamically -->
                             <!-- Item 1 -->
                             <div>
                                 <div class="flex justify-between text-sm font-medium text-gray-700 mb-2">
                                     <div class="flex items-center gap-2">
-                                        <span class="w-3 h-3 rounded-full bg-blue-600"></span> Electronics
+                                        <span class="w-3 h-3 rounded-full bg-[#AD3029]"></span> Electronics
                                     </div>
                                     <span>$1.2M (35%)</span>
                                 </div>
                                 <div class="w-full bg-gray-100 rounded-full h-2">
-                                    <div class="bg-blue-600 h-2 rounded-full" style="width: 35%"></div>
+                                    <div class="bg-[#AD3029] h-2 rounded-full" style="width: 35%"></div>
                                 </div>
                             </div>
                             <!-- Item 2 -->
                             <div>
                                 <div class="flex justify-between text-sm font-medium text-gray-700 mb-2">
                                     <div class="flex items-center gap-2">
-                                        <span class="w-3 h-3 rounded-full bg-teal-500"></span> Fashion
+                                        <span class="w-3 h-3 rounded-full bg-orange-400"></span> Fashion
                                     </div>
                                     <span>$850K (25%)</span>
                                 </div>
                                 <div class="w-full bg-gray-100 rounded-full h-2">
-                                    <div class="bg-teal-500 h-2 rounded-full" style="width: 25%"></div>
+                                    <div class="bg-orange-400 h-2 rounded-full" style="width: 25%"></div>
                                 </div>
                             </div>
                             <!-- Item 3 -->
                             <div>
                                 <div class="flex justify-between text-sm font-medium text-gray-700 mb-2">
                                     <div class="flex items-center gap-2">
-                                        <span class="w-3 h-3 rounded-full bg-purple-500"></span> Home & Living
+                                        <span
+                                            class="w-3 h-3 rounded-full bg-[#FEEFCD] border border-[#AD3029]/20"></span>
+                                        Home & Living
                                     </div>
                                     <span>$500K (15%)</span>
                                 </div>
                                 <div class="w-full bg-gray-100 rounded-full h-2">
-                                    <div class="bg-purple-500 h-2 rounded-full" style="width: 15%"></div>
+                                    <div class="bg-[#FEEFCD] h-2 rounded-full border border-[#AD3029]/10"
+                                        style="width: 15%"></div>
                                 </div>
                             </div>
                         </div>
@@ -330,7 +372,8 @@
                     <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                         <div class="flex justify-between items-center mb-6">
                             <h3 class="text-lg font-bold text-gray-800">Top Selling Products</h3>
-                            <a href="#" class="text-sm font-bold text-blue-600 hover:underline">View All</a>
+                            <a href="#" onclick="switchView('products')"
+                                class="text-sm font-bold text-[#AD3029] hover:underline">View All</a>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm text-gray-600">
@@ -343,9 +386,9 @@
                                         <th class="px-4 py-3 rounded-r-lg">Status</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-100">
+                                <tbody id="topProductsTableBody" class="divide-y divide-gray-100">
                                     <tr class="hover:bg-gray-50 transition">
-                                        <td class="px-4 py-3 font-medium text-blue-600">01</td>
+                                        <td class="px-4 py-3 font-medium text-[#AD3029]">01</td>
                                         <td class="px-4 py-3 flex items-center gap-3">
                                             <div class="w-8 h-8 bg-gray-200 rounded flex-shrink-0"></div>
                                             <div>
@@ -360,7 +403,7 @@
                                                 STOCK</span></td>
                                     </tr>
                                     <tr class="hover:bg-gray-50 transition">
-                                        <td class="px-4 py-3 font-medium text-blue-600">02</td>
+                                        <td class="px-4 py-3 font-medium text-[#AD3029]">02</td>
                                         <td class="px-4 py-3 flex items-center gap-3">
                                             <div class="w-8 h-8 bg-gray-200 rounded flex-shrink-0"></div>
                                             <div>
@@ -381,23 +424,59 @@
                 </div>
             </div>
 
+            <!-- VIEW: PRODUCTS (New) -->
+            <div id="view-products" class="hidden space-y-8">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-3xl font-bold text-gray-800">All Products</h1>
+                    <div class="flex gap-2">
+                        <button onclick="loadProducts()"
+                            class="bg-[#AD3029] text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition"><i
+                                class="fas fa-sync-alt mr-2"></i> Refresh</button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr
+                                    class="bg-gray-50 border-b border-gray-100 text-xs uppercase text-gray-500 font-semibold">
+                                    <th class="px-6 py-4">#</th>
+                                    <th class="px-6 py-4">ID</th>
+                                    <th class="px-6 py-4">Product Name</th>
+                                    <th class="px-6 py-4">Price</th>
+                                    <th class="px-6 py-4">Description</th>
+                                    <th class="px-6 py-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productsList" class="divide-y divide-gray-50">
+                                <!-- Products loaded via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- VIEW: SHOPS (The original Pending Approval Logic) -->
             <div id="view-shops" class="hidden space-y-8">
                 <div class="flex justify-between items-center">
                     <h1 class="text-3xl font-bold text-gray-800">Shop Management</h1>
                     <div class="flex gap-2">
                         <button onclick="loadPendingShops()"
-                            class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition"><i
-                                class="fas fa-sync-alt mr-2"></i> Refresh</button>
+                            class="bg-[#AD3029] text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition">
+                            <i class="fas fa-sync-alt mr-2"></i> Refresh</button>
                     </div>
                 </div>
 
                 <!-- Tabs/Filters for Shops -->
                 <div class="flex border-b border-gray-200">
-                    <button class="px-6 py-3 border-b-2 border-blue-600 text-blue-600 font-bold">Pending
+                    <button onclick="loadPendingShops(); setActiveTab(this)"
+                        class="px-6 py-3 border-b-2 border-[#AD3029] text-[#AD3029] font-bold tab-btn">Pending
                         Approvals</button>
-                    <button class="px-6 py-3 text-gray-500 hover:text-gray-700">Active Shops</button>
-                    <button class="px-6 py-3 text-gray-500 hover:text-gray-700">Rejected</button>
+                    <button onclick="loadActiveShops(); setActiveTab(this)"
+                        class="px-6 py-3 text-gray-500 hover:text-gray-700 tab-btn">Active Shops</button>
+                    <button onclick="loadRejectedShops(); setActiveTab(this)"
+                        class="px-6 py-3 text-gray-500 hover:text-gray-700 tab-btn">Rejected</button>
                 </div>
 
                 <div id="shopList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -419,10 +498,38 @@
                 <h2 class="text-2xl font-bold">Products Management</h2>
                 <p>Module under development</p>
             </div>
-            <div id="view-disputes" class="hidden h-full flex flex-col items-center justify-center text-gray-400">
-                <i class="fas fa-exclamation-circle text-6xl mb-4"></i>
-                <h2 class="text-2xl font-bold">Disputes Management</h2>
-                <p>Module under development</p>
+            <!-- VIEW: DISPUTES -->
+            <div id="view-disputes" class="hidden space-y-8">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-3xl font-bold text-gray-800">Disputes Management</h1>
+                    <button onclick="loadDisputes()"
+                        class="bg-[#AD3029] text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition">
+                        <i class="fas fa-sync-alt mr-2"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-gray-600">
+                            <thead class="bg-gray-50 text-gray-500 font-semibold uppercase text-xs">
+                                <tr>
+                                    <th class="px-6 py-4">Dispute ID</th>
+                                    <th class="px-6 py-4">Order ID</th>
+                                    <th class="px-6 py-4">Buyer/Seller</th>
+                                    <th class="px-6 py-4">Reason</th>
+                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-6 py-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="disputeTableBody" class="divide-y divide-gray-100">
+                                <!-- Disputes Loaded JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="disputeLoading" class="text-center py-10 text-gray-500 hidden">
+                        <i class="fas fa-spinner fa-spin text-2xl"></i> Loading disputes...
+                    </div>
+                </div>
             </div>
             <!-- VIEW: USERS -->
             <div id="view-users" class="hidden space-y-8">
@@ -432,11 +539,12 @@
                         <div class="relative">
                             <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                             <input type="text" id="userListSearch" oninput="filterUsers()" placeholder="Search users..."
-                                class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 outline-none">
+                                class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FEEFCD] outline-none">
                         </div>
                         <button onclick="loadUsers()"
-                            class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition"><i
-                                class="fas fa-sync-alt"></i></button>
+                            class="bg-[#AD3029] text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -469,6 +577,57 @@
         </main>
     </div>
 
+    <!-- Rejection Reason Modal -->
+    <div id="rejectionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 m-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800">Select Rejection Reason</h3>
+                <button onclick="closeRejectionModal()" class="text-gray-400 hover:text-gray-600 transition">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Common Reasons</label>
+                    <select id="rejectionReasonSelect" onchange="handleReasonChange()"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#AD3029]/20 outline-none">
+                        <option value="">-- Select a reason --</option>
+                        <option value="Incomplete or invalid business documentation">Incomplete or invalid business
+                            documentation</option>
+                        <option value="Suspicious or fraudulent information provided">Suspicious or fraudulent
+                            information provided</option>
+                        <option value="Violation of platform policies or terms of service">Violation of platform
+                            policies or terms of service</option>
+                        <option value="Selling prohibited or restricted items">Selling prohibited or restricted items
+                        </option>
+                        <option value="Poor quality or misleading shop information">Poor quality or misleading shop
+                            information</option>
+                        <option value="Duplicate shop registration">Duplicate shop registration</option>
+                        <option value="custom">Other (Custom reason)</option>
+                    </select>
+                </div>
+
+                <div id="customReasonDiv" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Custom Reason</label>
+                    <textarea id="customReasonInput" rows="3" placeholder="Enter your custom rejection reason..."
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#AD3029]/20 outline-none resize-none"></textarea>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button onclick="closeRejectionModal()"
+                        class="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg font-bold hover:bg-gray-200 transition">
+                        Cancel
+                    </button>
+                    <button onclick="confirmRejection()"
+                        class="flex-1 bg-red-600 text-white py-2 rounded-lg font-bold hover:bg-red-700 transition">
+                        Confirm Rejection
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Edit User Modal -->
     <div id="editUserModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 m-4">
@@ -485,24 +644,24 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
                     <input type="text" id="editFullName" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#AD3029]/20 outline-none">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
                     <input type="email" id="editEmail" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#AD3029]/20 outline-none">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
                     <input type="tel" id="editPhone"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#AD3029]/20 outline-none">
                 </div>
 
                 <div class="flex gap-3 pt-4">
                     <button type="submit"
-                        class="flex-1 bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition">
+                        class="flex-1 bg-[#AD3029] text-white py-2 rounded-lg font-bold hover:opacity-90 transition">
                         Save Changes
                     </button>
                     <button type="button" onclick="closeEditModal()"
@@ -523,7 +682,7 @@
 
         // Update Sidebar Profile
         document.getElementById('adminName').textContent = user;
-        document.getElementById('adminAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user)}&background=random&color=fff`;
+        document.getElementById('adminAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user)}&background=AD3029&color=fff`;
 
         // --- NAVIGATION LOGIC ---
         function switchView(viewName) {
@@ -534,23 +693,85 @@
 
             // Update Sidebar Active State
             document.querySelectorAll('aside nav a').forEach(el => {
-                el.classList.remove('bg-blue-50', 'text-blue-600');
-                el.classList.add('text-gray-600', 'hover:bg-gray-50');
+                el.classList.remove('bg-[#FEEFCD]', 'text-[#AD3029]');
+                el.classList.add('text-gray-600', 'hover:bg-[#FEEFCD]/50');
             });
             const activeLink = document.getElementById(`nav-${viewName}`);
             if (activeLink) {
-                activeLink.classList.remove('text-gray-600', 'hover:bg-gray-50');
-                activeLink.classList.add('bg-blue-50', 'text-blue-600');
+                activeLink.classList.remove('text-gray-600', 'hover:bg-[#FEEFCD]/50');
+                activeLink.classList.add('bg-[#FEEFCD]', 'text-[#AD3029]');
             }
 
             // Load data when switching to specific views
             if (viewName === 'shops') {
                 loadPendingShops();
+            } else if (viewName === 'products') {
+                loadProducts();
             } else if (viewName === 'users') {
                 loadUsers();
+            } else if (viewName === 'disputes') {
+                loadDisputes();
+            } else if (viewName === 'dashboard') {
+                loadDashboardStats();
             }
         }
 
+        // --- DASHBOARD FILTER LOGIC ---
+        function handleTimeFilter(days) {
+            // Update button styles
+            const buttons = {
+                1: document.getElementById('btn-today'),
+                0: document.getElementById('btn-yesterday'),
+                7: document.getElementById('btn-7days')
+            };
+
+            Object.values(buttons).forEach(btn => {
+                btn.classList.remove('bg-[#AD3029]', 'text-white', 'shadow-sm');
+                btn.classList.add('text-gray-600', 'hover:bg-gray-50');
+            });
+
+            const activeBtn = buttons[days];
+            if (activeBtn) {
+                activeBtn.classList.remove('text-gray-600', 'hover:bg-gray-50');
+                activeBtn.classList.add('bg-[#AD3029]', 'text-white', 'shadow-sm');
+            }
+
+            // Reload stats
+            loadDashboardStats(days);
+        }
+
+        // --- CHART JS (REGISTRATION TREND) ---
+        let registrationChart;
+
+        function initRegistrationChart() {
+            const ctx = document.getElementById('salesChart').getContext('2d');
+
+            registrationChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'New Users',
+                            data: [],
+                            borderColor: '#AD3029', // Shopee red
+                            backgroundColor: 'rgba(173, 48, 41, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            fill: true
+                        },
+                        {
+                            label: 'New Shops',
+                            data: [],
+                            borderColor: '#F97316', // Orange
+                            backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            fill: true
+                        }
+                    ]
         // --- CHART JS (MOCK DATA) ---
         const ctx = document.getElementById('salesChart').getContext('2d');
         // Gradient fill
@@ -565,13 +786,13 @@
                 datasets: [{
                     label: 'Order Volume',
                     data: [12, 19, 15, 25, 22, 30, 28],
-                    borderColor: '#2563EB', // Blue-600
+                    borderColor: '#AD3029', // [#AD3029]
                     backgroundColor: gradient,
                     borderWidth: 3,
                     tension: 0.4, // Smooth curve
                     pointRadius: 4,
                     pointBackgroundColor: '#fff',
-                    pointBorderColor: '#2563EB',
+                    pointBorderColor: '#AD3029',
                     fill: true
                 }]
             },
@@ -581,18 +802,44 @@
                 plugins: {
                     legend: { display: false }
                 },
-                scales: {
-                    y: {
-                        display: false,
-                        beginAtZero: true
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: { boxWidth: 10, font: { size: 10 } }
+                        }
                     },
-                    x: {
-                        grid: { display: false, drawBorder: false },
-                        ticks: { color: '#9CA3AF', font: { size: 10 } }
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { font: { size: 10 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 10 } }
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
+
+        function updateRegistrationChart(userTrend, shopTrend) {
+            if (!registrationChart) return;
+
+            const labels = userTrend.map(t => t.date);
+            const userData = userTrend.map(t => t.count);
+            const shopData = shopTrend.map(t => t.count);
+
+            registrationChart.data.labels = labels;
+            registrationChart.data.datasets[0].data = userData;
+            registrationChart.data.datasets[1].data = shopData;
+            registrationChart.update();
+        }
+
+        initRegistrationChart();
 
         // --- SHOP APPROVAL LOGIC (EXISTING) ---
         async function loadPendingShops() {
@@ -638,7 +885,7 @@
                     <div class="p-5">
                         <div class="flex justify-between items-start mb-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
+                                <div class="w-10 h-10 rounded-full bg-[#FEEFCD] text-[#AD3029] font-bold text-lg flex items-center justify-center">
                                     ${shop.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div>
@@ -665,7 +912,7 @@
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
-                            <button onclick="processShop('${shop.id}', 'approve')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition text-sm">
+                            <button onclick="processShop('${shop.id}', 'approve')" class="bg-[#AD3029] hover:opacity-90 text-white font-bold py-2 rounded-lg transition text-sm">
                                 <i class="fas fa-check mr-1"></i> Approve
                             </button>
                             <button onclick="processShop('${shop.id}', 'reject')" class="bg-white border border-gray-200 text-red-500 hover:bg-red-50 font-bold py-2 rounded-lg transition text-sm">
@@ -680,12 +927,9 @@
         async function processShop(id, action) {
             let reason = '';
             if (action === 'reject') {
-                reason = prompt("Please enter the reason for rejection:");
-                if (reason === null) return; // User cancelled
-                if (!reason.trim()) {
-                    alert("Reason is required for rejection.");
-                    return;
-                }
+                // Show rejection reason modal
+                reason = await showRejectionModal();
+                if (!reason) return; // User cancelled or no reason provided
             } else {
                 if (!confirm(`Are you sure you want to ${action} this shop?`)) return;
             }
@@ -741,6 +985,198 @@
         // --- USER MANAGEMENT LOGIC (Re-injected) ---
         let allUsers = [];
 
+        // Rejection Modal Functions
+        let rejectionResolve = null;
+
+        function showRejectionModal() {
+            return new Promise((resolve) => {
+                rejectionResolve = resolve;
+                document.getElementById('rejectionModal').classList.remove('hidden');
+                document.getElementById('rejectionReasonSelect').value = '';
+                document.getElementById('customReasonDiv').classList.add('hidden');
+                document.getElementById('customReasonInput').value = '';
+            });
+        }
+
+        function closeRejectionModal() {
+            document.getElementById('rejectionModal').classList.add('hidden');
+            if (rejectionResolve) {
+                rejectionResolve(null);
+                rejectionResolve = null;
+            }
+        }
+
+        function handleReasonChange() {
+            const select = document.getElementById('rejectionReasonSelect');
+            const customDiv = document.getElementById('customReasonDiv');
+
+            if (select.value === 'custom') {
+                customDiv.classList.remove('hidden');
+            } else {
+                customDiv.classList.add('hidden');
+            }
+        }
+
+        function confirmRejection() {
+            const select = document.getElementById('rejectionReasonSelect');
+            let reason = '';
+
+            if (select.value === 'custom') {
+                reason = document.getElementById('customReasonInput').value.trim();
+            } else {
+                reason = select.value;
+            }
+
+            if (!reason) {
+                alert('Please select or enter a rejection reason.');
+                return;
+            }
+
+            document.getElementById('rejectionModal').classList.add('hidden');
+            if (rejectionResolve) {
+                rejectionResolve(reason);
+                rejectionResolve = null;
+            }
+        }
+
+        async function loadActiveShops() {
+            try {
+                const response = await fetch('http://localhost:8080/api/shop/admin/active', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const shops = await response.json();
+                    renderActiveShops(shops);
+                } else {
+                    document.getElementById('shopList').innerHTML = `<div class="text-red-500 w-full col-span-3 text-center">Failed to load active shops: ${response.status}</div>`;
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('shopList').innerHTML = `<div class="text-red-500 w-full col-span-3 text-center">Connection failed</div>`;
+            }
+        }
+
+        function renderActiveShops(shops) {
+            const container = document.getElementById('shopList');
+
+            if (shops.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-3 text-center py-20 bg-white rounded-lg shadow-sm border border-dashed border-gray-300">
+                        <i class="fas fa-store-slash text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500 text-sm">No active shops found</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = shops.map(shop => `
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition overflow-hidden">
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-[#FEEFCD] text-[#AD3029] font-bold text-lg flex items-center justify-center">
+                                    ${shop.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-bold text-gray-800">${shop.name}</h3>
+                                    <p class="text-xs text-gray-500">ID: ...${shop.id.substr(-6)}</p>
+                                </div>
+                            </div>
+                            <span class="bg-[#FEEFCD] text-[#AD3029] text-[10px] font-bold px-2 py-1 rounded border border-[#AD3029]/20 uppercase">Active</span>
+                        </div>
+                        
+                        <div class="space-y-3 mb-6 bg-gray-50 p-4 rounded-lg">
+                           <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <i class="fas fa-user-circle w-4 text-gray-400"></i>
+                                <span class="truncate">${shop.identityFullName || 'Unknown Owner'}</span>
+                           </div>
+                           <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <i class="fas fa-phone w-4 text-gray-400"></i>
+                                <span>${shop.phone}</span>
+                           </div>
+                           <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <i class="fas fa-map-marker-alt w-4 text-gray-400"></i>
+                                <span class="truncate w-full">${shop.address}</span>
+                           </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-3">
+                             <button class="bg-[#FEEFCD]/50 text-[#AD3029] font-bold py-2 rounded-lg text-sm cursor-not-allowed" disabled>
+                                <i class="fas fa-check-circle mr-1"></i> Running
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadRejectedShops() {
+            try {
+                const response = await fetch('http://localhost:8080/api/shop/admin/rejected', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const shops = await response.json();
+                    renderRejectedShops(shops);
+                } else {
+                    document.getElementById('shopList').innerHTML = `<div class="text-red-500 w-full col-span-3 text-center">Failed to load rejected shops: ${response.status}</div>`;
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('shopList').innerHTML = `<div class="text-red-500 w-full col-span-3 text-center">Connection failed</div>`;
+            }
+        }
+
+        function renderRejectedShops(shops) {
+            const container = document.getElementById('shopList');
+
+            if (shops.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-3 text-center py-20 bg-white rounded-lg shadow-sm border border-dashed border-gray-300">
+                        <i class="fas fa-store-slash text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500 text-sm">No rejected shops found</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = shops.map(shop => `
+                <div class="bg-white rounded-xl shadow-sm border border-red-100 hover:shadow-md transition overflow-hidden">
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold text-lg">
+                                    ${shop.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-bold text-gray-800">${shop.name}</h3>
+                                    <p class="text-xs text-gray-500">ID: ...${shop.id.substr(-6)}</p>
+                                </div>
+                            </div>
+                            <span class="bg-red-50 text-red-700 text-[10px] font-bold px-2 py-1 rounded border border-red-200 uppercase">Rejected</span>
+                        </div>
+                        
+                        <!-- Rejection Reason -->
+                        <div class="mb-4 bg-red-50 border-l-4 border-red-500 p-3 rounded-r text-sm">
+                            <p class="font-bold text-red-800 text-xs mb-1">REASON:</p>
+                            <p class="text-red-700 italic">"${shop.rejectionReason || 'No reason provided'}"</p>
+                        </div>
+
+                        <div class="space-y-3 mb-6 bg-gray-50 p-4 rounded-lg">
+                           <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <i class="fas fa-user-circle w-4 text-gray-400"></i>
+                                <span class="truncate">${shop.identityFullName || 'Unknown Owner'}</span>
+                           </div>
+                           <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <i class="fas fa-phone w-4 text-gray-400"></i>
+                                <span>${shop.phone}</span>
+                           </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         async function loadUsers() {
             const tableBody = document.getElementById('userTableBody');
             const loading = document.getElementById('userLoading');
@@ -787,7 +1223,7 @@
                 <tr class="hover:bg-gray-50 transition">
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-lg">
+                            <div class="w-10 h-10 rounded-full bg-[#FEEFCD] text-[#AD3029] font-bold text-lg flex items-center justify-center">
                                 ${user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
                             </div>
                             <div>
@@ -802,7 +1238,7 @@
                     <td class="px-6 py-4">
                         <div class="flex flex-wrap gap-1">
                             ${roles.map(role => {
-                    const color = role === 'ROLE_ADMIN' ? 'bg-red-100 text-red-700' : (role === 'ROLE_SELLER' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700');
+                    const color = role === 'ROLE_ADMIN' ? 'bg-[#AD3029] text-white' : (role === 'ROLE_SELLER' ? 'bg-[#FEEFCD] text-[#AD3029]' : 'bg-gray-100 text-gray-700');
                     return `<span class="${color} text-xs font-bold px-2 py-1 rounded border border-opacity-20">${role.replace('ROLE_', '')}</span>`;
                 }).join('')}
                         </div>
@@ -816,7 +1252,7 @@
                         <div class="flex items-center justify-end gap-2">
                             <!-- Edit Button -->
                             <button onclick="openEditModal('${user.id}')" 
-                                class="text-blue-500 hover:bg-blue-50 p-2 rounded-lg transition" 
+                                class="text-[#AD3029] hover:bg-[#FEEFCD]/50 p-2 rounded-lg transition"
                                 title="Edit User">
                                 <i class="fas fa-edit"></i>
                             </button>
@@ -934,6 +1370,280 @@
                 showToast('Connection error', 'error');
             }
         }
+
+        // Load Dashboard Statistics
+        async function loadDashboardStats(days = 1) {
+            try {
+                const response = await fetch(`http://localhost:8080/api/admin/dashboard/stats?days=${days}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const stats = await response.json();
+
+                    // Update UI with real data
+                    document.getElementById('totalUsersCount').textContent = stats.totalUsers.toLocaleString();
+                    document.getElementById('activeShopsCount').textContent = stats.activeShops.toLocaleString();
+                    document.getElementById('totalDisputesCount').textContent = stats.totalDisputes.toLocaleString();
+
+                    // Update Operations Summary
+                    if (document.getElementById('openDisputesCount')) {
+                        document.getElementById('openDisputesCount').textContent = (stats.openDisputes || 0).toLocaleString();
+                    }
+                    if (document.getElementById('pendingShopsCountSummary')) {
+                        document.getElementById('pendingShopsCountSummary').textContent = (stats.pendingShops || 0).toLocaleString();
+                    }
+
+                    // Update Chart with real trend data
+                    if (stats.userTrend && stats.shopTrend) {
+                        updateRegistrationChart(stats.userTrend, stats.shopTrend);
+                    }
+
+                    // Update User Distribution
+                    if (stats.distribution) {
+                        updateDistributionUI(stats.distribution);
+                    }
+                    updateTopProducts(stats.topProducts || []);
+                } else {
+                    console.error('Failed to load dashboard stats:', response.status);
+                    // Show error state
+                    document.getElementById('totalUsersCount').textContent = 'Error';
+                    document.getElementById('activeShopsCount').textContent = 'Error';
+                    document.getElementById('totalDisputesCount').textContent = 'Error';
+                }
+            } catch (err) {
+                console.error('Error loading dashboard stats:', err);
+                document.getElementById('totalUsersCount').textContent = 'Error';
+                document.getElementById('activeShopsCount').textContent = 'Error';
+                document.getElementById('totalDisputesCount').textContent = 'Error';
+            }
+        }
+
+
+
+        function updateDistributionUI(distribution) {
+            const container = document.getElementById('distributionContainer');
+            if (!container) return;
+
+            const colors = ['bg-[#AD3029]', 'bg-orange-400', 'bg-yellow-400'];
+            const dotColors = ['bg-[#AD3029]', 'bg-orange-400', 'bg-yellow-100 border border-orange-200'];
+
+            container.innerHTML = distribution.map((item, index) => {
+                const color = colors[index % colors.length];
+                const dotColor = dotColors[index % dotColors.length];
+
+                return `
+                    <div>
+                        <div class="flex justify-between text-sm font-medium text-gray-700 mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full ${dotColor}"></span> ${item.label}
+                            </div>
+                            <span>${item.value.toLocaleString()} (${item.percentage}%)</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-2">
+                            <div class="${color} h-2 rounded-full" style="width: ${item.percentage}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+
+
+        function updateTopProducts(products) {
+            const tableBody = document.getElementById('topProductsTableBody');
+            if (!tableBody) return;
+
+            if (products.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No sales data yet.</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = products.map((product, index) => `
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-4 py-3 font-medium text-[#AD3029]">${(index + 1).toString().padStart(2, '0')}</td>
+                    <td class="px-4 py-3 flex items-center gap-3">
+                        <div class="w-8 h-8 bg-gray-200 rounded flex-shrink-0 flex items-center justify-center text-gray-400">
+                             <i class="fas fa-box"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-gray-800 line-clamp-1">${product.name}</p>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 font-medium">$${product.price.toLocaleString()}</td>
+                    <td class="px-4 py-3 text-green-600 font-bold">${product.sold} sold</td>
+                    <td class="px-4 py-3">
+                        <span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded uppercase">
+                            ${product.status.replace('_', ' ')}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // --- DISPUTES LOGIC ---
+        async function loadDisputes() {
+            const tableBody = document.getElementById('disputeTableBody');
+            const loading = document.getElementById('disputeLoading');
+
+            tableBody.innerHTML = '';
+            loading.classList.remove('hidden');
+
+            try {
+                const response = await fetch('http://localhost:8080/api/admin/disputes', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const disputes = await response.json();
+                    renderDisputes(disputes);
+                } else {
+                    showToast('Failed to load disputes', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Connection error', 'error');
+            } finally {
+                loading.classList.add('hidden');
+            }
+        }
+
+        function renderDisputes(disputes) {
+            const tableBody = document.getElementById('disputeTableBody');
+            if (disputes.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-10 text-center text-gray-500">No disputes found.</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = disputes.map(dispute => `
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 font-mono text-xs text-gray-500">#${dispute.id.substring(0, 8)}</td>
+                    <td class="px-6 py-4 font-medium text-gray-800">${dispute.orderId}</td>
+                    <td class="px-6 py-4">
+                        <div class="text-xs text-gray-500">B: ${dispute.buyerId}</div>
+                        <div class="text-xs text-gray-500">S: ${dispute.sellerId}</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${dispute.reason}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusBadgeClass(dispute.status)}">
+                            ${dispute.status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="reviewDispute('${dispute.id}')" class="text-[#AD3029] hover:opacity-80 font-bold text-xs ring-1 ring-[#AD3029]/20 px-2 py-1 rounded">
+                            Review
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getStatusBadgeClass(status) {
+            switch (status) {
+                case 'OPEN': return 'bg-yellow-100 text-yellow-700';
+                case 'IN_REVIEW': return 'bg-[#FEEFCD] text-[#AD3029]';
+                case 'RESOLVED': return 'bg-green-100 text-green-700';
+                case 'REJECTED': return 'bg-red-100 text-red-700';
+                default: return 'bg-gray-100 text-gray-700';
+            }
+        }
+
+        async function reviewDispute(id) {
+            const status = prompt('Enter new status (OPEN, IN_REVIEW, RESOLVED, REJECTED):', 'IN_REVIEW');
+            if (!status) return;
+
+            const adminNote = prompt('Enter admin note:');
+
+            try {
+                const response = await fetch(`http://localhost:8080/api/admin/disputes/${id}/review`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status, adminNote })
+                });
+
+                if (response.ok) {
+                    showToast('Dispute updated successfully', 'success');
+                    loadDisputes();
+                } else {
+                    showToast('Failed to update dispute', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Connection error', 'error');
+            }
+        }
+
+        // Initialize Dashboard on load
+        loadDashboardStats();
+
+        // --- PRODUCTS LOGIC ---
+        async function loadProducts() {
+            const container = document.getElementById('productsList');
+            if (!container) return;
+
+            container.innerHTML = '<tr><td colspan="6" class="px-6 py-10 text-center text-gray-500"><i class="fas fa-spinner fa-spin text-2xl"></i> Loading products...</td></tr>';
+
+            try {
+                const response = await fetch('http://localhost:8080/api/products', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const products = await response.json();
+                    renderProducts(products);
+                } else {
+                    container.innerHTML = '<tr><td colspan="6" class="px-6 py-10 text-center text-red-500">Failed to load products.</td></tr>';
+                }
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = '<tr><td colspan="6" class="px-6 py-10 text-center text-red-500">Connection error.</td></tr>';
+            }
+        }
+
+        function renderProducts(products) {
+            const container = document.getElementById('productsList');
+            if (products.length === 0) {
+                container.innerHTML = '<tr><td colspan="6" class="px-6 py-10 text-center text-gray-500">No products found.</td></tr>';
+                return;
+            }
+
+            container.innerHTML = products.map((product, index) => `
+                <tr class="hover:bg-gray-50 transition border-b border-gray-100 last:border-0">
+                    <td class="px-6 py-4 font-medium text-gray-900">#${(index + 1)}</td>
+                    <td class="px-6 py-4 text-gray-600">${product.id.substring(0, 8)}...</td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                             <div class="w-10 h-10 bg-gray-100 rounded flex items-center justify-center text-gray-400">
+                                <i class="fas fa-box"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-800 line-clamp-1 max-w-[200px]" title="${product.name}">${product.name}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-gray-800 font-medium">$${(product.minPrice || 0).toLocaleString()}</td>
+                    <td class="px-6 py-4 text-gray-600 max-w-[200px] truncate" title="${product.description || ''}">${product.description || 'N/A'}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase 
+                            ${product.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}">
+                            ${product.status}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        function setActiveTab(btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('border-b-2', 'border-[#AD3029]', 'text-[#AD3029]', 'font-bold');
+                b.classList.add('text-gray-500');
+            });
+            btn.classList.add('border-b-2', 'border-[#AD3029]', 'text-[#AD3029]', 'font-bold');
+            btn.classList.remove('text-gray-500');
+        }
+
+
     </script>
     <script src="js/notification.js"></script>
 </body>

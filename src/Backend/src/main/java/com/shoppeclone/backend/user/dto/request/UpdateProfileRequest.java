@@ -12,4 +12,6 @@ public class UpdateProfileRequest {
 
     @Pattern(regexp = "^(0[0-9]{9})$", message = "Phone number must be 10 digits and start with 0")
     private String phone;
+    
+    private String avatar;
 }

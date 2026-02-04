@@ -16,6 +16,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import java.math.BigDecimal;
+import java.util.Comparator;
+
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
@@ -36,6 +39,65 @@ public class ProductServiceImpl implements ProductService {
         product.setUpdatedAt(LocalDateTime.now());
 
         Product savedProduct = productRepository.save(product);
+        boolean hasVariants = false;
+
+        // 1. Save Variants
+        if (request.getVariants() != null && !request.getVariants().isEmpty()) {
+            hasVariants = true;
+            for (CreateProductVariantRequest vReq : request.getVariants()) {
+                ProductVariant variant = new ProductVariant();
+                variant.setProductId(savedProduct.getId());
+                variant.setSize(vReq.getSize());
+                variant.setColor(vReq.getColor());
+                variant.setPrice(vReq.getPrice());
+                variant.setStock(vReq.getStock());
+                variant.setImageUrl(vReq.getImageUrl());
+                variant.setCreatedAt(LocalDateTime.now());
+                variant.setUpdatedAt(LocalDateTime.now());
+                variantRepository.save(variant);
+            }
+
+            // Calculate Min/Max Price and Total Stock for Product Display
+            List<CreateProductVariantRequest> variantList = request.getVariants();
+            BigDecimal minPrice = variantList.stream()
+                    .map(CreateProductVariantRequest::getPrice)
+                    .min(Comparator.naturalOrder())
+                    .orElse(BigDecimal.ZERO);
+            BigDecimal maxPrice = variantList.stream()
+                    .map(CreateProductVariantRequest::getPrice)
+                    .max(Comparator.naturalOrder())
+                    .orElse(BigDecimal.ZERO);
+            Integer totalStock = variantList.stream()
+                    .mapToInt(CreateProductVariantRequest::getStock)
+                    .sum();
+
+            savedProduct.setMinPrice(minPrice);
+            savedProduct.setMaxPrice(maxPrice);
+            savedProduct.setTotalStock(totalStock);
+            productRepository.save(savedProduct);
+        }
+
+        // 2. Save Images
+        if (request.getImages() != null && !request.getImages().isEmpty()) {
+            int order = 0;
+            for (String url : request.getImages()) {
+                ProductImage image = new ProductImage();
+                image.setProductId(savedProduct.getId());
+                image.setImageUrl(url);
+                image.setDisplayOrder(order++);
+                image.setCreatedAt(LocalDateTime.now());
+                imageRepository.save(image);
+            }
+        }
+
+        // 3. Save Category
+        if (request.getCategoryId() != null && !request.getCategoryId().isEmpty()) {
+            ProductCategory productCategory = new ProductCategory();
+            productCategory.setProductId(savedProduct.getId());
+            productCategory.setCategoryId(request.getCategoryId());
+            productCategoryRepository.save(productCategory);
+        }
+
         return mapToResponse(savedProduct);
     }
 
@@ -107,6 +169,7 @@ public class ProductServiceImpl implements ProductService {
         variant.setColor(request.getColor());
         variant.setPrice(request.getPrice());
         variant.setStock(request.getStock());
+        variant.setImageUrl(request.getImageUrl());
         variant.setCreatedAt(LocalDateTime.now());
         variant.setUpdatedAt(LocalDateTime.now());
 
@@ -171,6 +234,12 @@ public class ProductServiceImpl implements ProductService {
         response.setCreatedAt(product.getCreatedAt());
         response.setUpdatedAt(product.getUpdatedAt());
 
+        response.setMinPrice(product.getMinPrice());
+        response.setMaxPrice(product.getMaxPrice());
+        response.setTotalStock(product.getTotalStock());
+        response.setSold(product.getSold());
+        response.setRating(product.getRating());
+
         // Load variants
         List<ProductVariantResponse> variants = variantRepository.findByProductId(product.getId()).stream()
                 .map(this::mapVariantToResponse)
@@ -200,6 +269,7 @@ public class ProductServiceImpl implements ProductService {
         response.setColor(variant.getColor());
         response.setPrice(variant.getPrice());
         response.setStock(variant.getStock());
+        response.setImageUrl(variant.getImageUrl());
         response.setCreatedAt(variant.getCreatedAt());
         response.setUpdatedAt(variant.getUpdatedAt());
         return response;

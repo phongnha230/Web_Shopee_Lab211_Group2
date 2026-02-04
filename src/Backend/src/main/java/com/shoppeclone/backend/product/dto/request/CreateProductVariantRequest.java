@@ -18,4 +18,6 @@ public class CreateProductVariantRequest {
 
     @NotNull(message = "Số lượng không được để trống")
     private Integer stock;
+
+    private String imageUrl;
 }

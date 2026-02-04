@@ -10,6 +10,7 @@ import com.shoppeclone.backend.promotion.entity.Voucher;
 import com.shoppeclone.backend.order.repository.OrderRepository;
 import com.shoppeclone.backend.order.service.OrderService;
 import com.shoppeclone.backend.product.entity.ProductVariant;
+import com.shoppeclone.backend.product.repository.ProductRepository;
 import com.shoppeclone.backend.product.repository.ProductVariantRepository;
 import com.shoppeclone.backend.shipping.entity.ShippingProvider;
 import com.shoppeclone.backend.shipping.repository.ShippingProviderRepository;
@@ -34,7 +35,11 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final CartService cartService;
+<<<<<<< HEAD
     private final CartRepository cartRepository;
+=======
+    private final ProductRepository productRepository;
+>>>>>>> 7518d80b4b75ba767f98131898e96c9b5a32886c
     private final ProductVariantRepository productVariantRepository;
     private final ShippingProviderRepository shippingProviderRepository;
     private final ShippingService shippingService;
@@ -69,6 +74,7 @@ public class OrderServiceImpl implements OrderService {
         // 3. Create Order Items and Deduct Stock
         List<OrderItem> orderItems = new ArrayList<>();
         BigDecimal totalPrice = BigDecimal.ZERO;
+        String shopId = null; // Will be set from first variant
 
         for (CartItem cartItem : checkoutItems) {
             ProductVariant variant = productVariantRepository.findById(cartItem.getVariantId())
@@ -76,6 +82,14 @@ public class OrderServiceImpl implements OrderService {
 
             if (variant.getStock() < cartItem.getQuantity()) {
                 throw new RuntimeException("Not enough stock for variant: " + variant.getId());
+            }
+
+            // Get shopId from product (all items should be from same shop)
+            if (shopId == null) {
+                com.shoppeclone.backend.product.entity.Product product = productRepository
+                        .findById(variant.getProductId())
+                        .orElseThrow(() -> new RuntimeException("Product not found"));
+                shopId = product.getShopId();
             }
 
             // Deduct stock
@@ -129,6 +143,7 @@ public class OrderServiceImpl implements OrderService {
         // 7. Create Order
         Order order = new Order();
         order.setUserId(userId);
+        order.setShopId(shopId); // Set shopId
         order.setItems(orderItems);
         order.setTotalPrice(totalPrice.subtract(productDiscount).add(shippingFee).subtract(shippingDiscount)); // (Subtotal
                                                                                                                // -
@@ -248,6 +263,14 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<Order> getUserOrders(String userId) {
         return orderRepository.findByUserId(userId);
+    }
+
+    @Override
+    public List<Order> getOrdersByShopId(String shopId, OrderStatus status) {
+        if (status == null) {
+            return orderRepository.findByShopId(shopId);
+        }
+        return orderRepository.findByShopIdAndOrderStatus(shopId, status);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.shoppeclone.backend.shop.controller;
 
 import com.shoppeclone.backend.common.service.CloudinaryService;
 import com.shoppeclone.backend.shop.dto.ShopRegisterRequest;
+import com.shoppeclone.backend.shop.dto.UpdateShopRequest;
 import com.shoppeclone.backend.shop.entity.Shop;
 import com.shoppeclone.backend.shop.service.ShopService;
 import jakarta.validation.Valid;
@@ -79,7 +80,18 @@ public class ShopController {
 
     @GetMapping("/my-shop")
     public ResponseEntity<Shop> getMyShop(Authentication authentication) {
-        return ResponseEntity.ok(shopService.getMyShop(getEmail(authentication)));
+        Shop shop = shopService.getMyShop(getEmail(authentication));
+        if (shop == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(shop);
+    }
+
+    @PutMapping("/my-shop")
+    public ResponseEntity<Shop> updateShop(
+            @Valid @RequestBody UpdateShopRequest request,
+            Authentication authentication) {
+        return ResponseEntity.ok(shopService.updateShop(getEmail(authentication), request));
     }
 
     // ADMIN ONLY
@@ -87,6 +99,16 @@ public class ShopController {
     // @PreAuthorize("hasRole('ADMIN')") // Uncomment if using Method Security
     public ResponseEntity<List<Shop>> getPendingShops() {
         return ResponseEntity.ok(shopService.getPendingShops());
+    }
+
+    @GetMapping("/admin/active")
+    public ResponseEntity<List<Shop>> getActiveShops() {
+        return ResponseEntity.ok(shopService.getActiveShops());
+    }
+
+    @GetMapping("/admin/rejected")
+    public ResponseEntity<List<Shop>> getRejectedShops() {
+        return ResponseEntity.ok(shopService.getRejectedShops());
     }
 
     @PostMapping("/admin/approve/{shopId}")

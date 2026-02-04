@@ -5,6 +5,7 @@ import com.shoppeclone.backend.auth.model.User;
 import com.shoppeclone.backend.auth.repository.RoleRepository;
 import com.shoppeclone.backend.auth.repository.UserRepository;
 import com.shoppeclone.backend.shop.dto.ShopRegisterRequest;
+import com.shoppeclone.backend.shop.dto.UpdateShopRequest;
 import com.shoppeclone.backend.shop.entity.Shop;
 import com.shoppeclone.backend.shop.entity.ShopStatus;
 import com.shoppeclone.backend.shop.repository.ShopRepository;
@@ -24,6 +25,7 @@ public class ShopServiceImpl implements ShopService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final com.shoppeclone.backend.user.service.NotificationService notificationService;
+    private final com.shoppeclone.backend.common.service.EmailService emailService;
 
     @Override
     @Transactional
@@ -48,9 +50,8 @@ public class ShopServiceImpl implements ShopService {
         shop.setIdCardBack(request.getIdCardBack());
 
         // Map Step 2 Info
-        shop.setIdentityFullName(request.getIdentityFullName());
+        shop.setIdentityIdCard(request.getIdentityIdCard());
         shop.setBankName(request.getBankName());
-        shop.setBankBranch(request.getBankBranch());
         shop.setBankAccountNumber(request.getBankAccountNumber());
         shop.setBankAccountHolder(request.getBankAccountHolder());
 
@@ -70,6 +71,16 @@ public class ShopServiceImpl implements ShopService {
     @Override
     public List<Shop> getPendingShops() {
         return shopRepository.findByStatus(ShopStatus.PENDING);
+    }
+
+    @Override
+    public List<Shop> getActiveShops() {
+        return shopRepository.findByStatus(ShopStatus.ACTIVE);
+    }
+
+    @Override
+    public List<Shop> getRejectedShops() {
+        return shopRepository.findByStatus(ShopStatus.REJECTED);
     }
 
     @Override
@@ -106,6 +117,13 @@ public class ShopServiceImpl implements ShopService {
                 "Shop Approved 🎉",
                 "Congratulations! Your shop '" + shop.getName() + "' has been approved. You can now start selling.",
                 "SHOP_APPROVED");
+
+        // 4. Send Email
+        try {
+            emailService.sendShopApprovalEmail(user.getEmail(), shop.getName());
+        } catch (Exception e) {
+            System.err.println("Failed to send approval email: " + e.getMessage());
+        }
     }
 
     @Override
@@ -113,6 +131,10 @@ public class ShopServiceImpl implements ShopService {
     public void rejectShop(String shopId, String reason) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new RuntimeException("Shop not found"));
+
+        // Retrieve User to get Email
+        User user = userRepository.findById(shop.getOwnerId())
+                .orElseThrow(() -> new RuntimeException("Shop owner not found"));
 
         shop.setStatus(ShopStatus.REJECTED);
         shop.setRejectionReason(reason);
@@ -125,6 +147,38 @@ public class ShopServiceImpl implements ShopService {
                 "Shop Registration Rejected ❌",
                 "Your shop application for '" + shop.getName() + "' was rejected. Reason: " + reason,
                 "SHOP_REJECTED");
+
+        // Send Email
+        try {
+            emailService.sendShopRejectionEmail(user.getEmail(), shop.getName(), reason);
+        } catch (Exception e) {
+            System.err.println("Failed to send rejection email: " + e.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional
+    public Shop updateShop(String userEmail, UpdateShopRequest request) {
+        Shop shop = getMyShop(userEmail);
+        if (shop == null) {
+            throw new RuntimeException("Shop not found for user: " + userEmail);
+        }
+
+        if (request.getName() != null)
+            shop.setName(request.getName());
+        if (request.getDescription() != null)
+            shop.setDescription(request.getDescription());
+        if (request.getAddress() != null)
+            shop.setAddress(request.getAddress());
+        if (request.getPhone() != null)
+            shop.setPhone(request.getPhone());
+        if (request.getEmail() != null)
+            shop.setEmail(request.getEmail());
+        if (request.getLogo() != null)
+            shop.setLogo(request.getLogo());
+
+        shop.setUpdatedAt(LocalDateTime.now());
+        return shopRepository.save(shop);
     }
 
     private User getUserByEmail(String email) {

@@ -13,7 +13,13 @@ public interface ShopService {
     // Admin
     List<Shop> getPendingShops();
 
+    List<Shop> getActiveShops();
+
+    List<Shop> getRejectedShops();
+
     void approveShop(String shopId);
 
     void rejectShop(String shopId, String reason);
+
+    Shop updateShop(String userEmail, com.shoppeclone.backend.shop.dto.UpdateShopRequest request);
 }
