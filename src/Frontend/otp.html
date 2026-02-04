@@ -77,17 +77,17 @@
         <form id="otpForm">
             <!-- OTP Input Fields -->
             <div class="flex gap-3 justify-center mb-8">
-                <input id="otp1" maxlength="1" required type="text"
+                <input id="otp1" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
                     class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-gray-300 focus:border-[#AD3029] focus:outline-none shadow-lg">
-                <input id="otp2" maxlength="1" required type="text"
+                <input id="otp2" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
                     class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-gray-300 focus:border-[#AD3029] focus:outline-none shadow-lg">
-                <input id="otp3" maxlength="1" required type="text"
+                <input id="otp3" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
                     class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-gray-300 focus:border-[#AD3029] focus:outline-none shadow-lg">
-                <input id="otp4" maxlength="1" required type="text"
+                <input id="otp4" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
                     class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-gray-300 focus:border-[#AD3029] focus:outline-none shadow-lg">
-                <input id="otp5" maxlength="1" required type="text"
+                <input id="otp5" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
                     class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-gray-300 focus:border-[#AD3029] focus:outline-none shadow-lg">
-                <input id="otp6" maxlength="1" required type="text"
+                <input id="otp6" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
                     class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-gray-300 focus:border-[#AD3029] focus:outline-none shadow-lg">
             </div>
 
@@ -311,9 +311,18 @@
 
                 if (value.length >= 1) {
                     if (index < otpInputs.length - 1) {
-                        otpInputs[index + 1].focus();
+                        // Use setTimeout to avoid event conflict and smooth transition
+                        setTimeout(() => {
+                            otpInputs[index + 1].focus();
+                            otpInputs[index + 1].select();
+                        }, 0);
                     }
                 }
+            });
+
+            // Select text on focus for easier editing
+            input.addEventListener('focus', () => {
+                input.select();
             });
 
             // Handle Keydown (Backspace & Arrows)

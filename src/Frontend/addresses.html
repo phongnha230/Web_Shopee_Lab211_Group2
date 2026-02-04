@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 </head>
 
-<body class="bg-gradient-to-br from-purple-100 via-white to-purple-200 text-gray-800">
+<body class="bg-gradient-to-br from-red-50 via-white to-red-100 text-gray-800">
 
     <!-- TOAST NOTIFICATION -->
     <div id="toast"
@@ -19,15 +19,15 @@
     <div class="max-w-7xl mx-auto px-4 py-10 flex gap-8">
 
         <!-- SIDEBAR -->
-        <aside class="w-64 bg-gradient-to-b from-purple-700 to-purple-600 rounded-3xl p-6 text-white shadow-xl">
+        <aside class="w-64 bg-[#AD3029] rounded-3xl p-6 text-white shadow-xl">
             <div class="flex items-center gap-3 mb-10">
                 <div id="sidebarAvatar"
-                    class="w-12 h-12 rounded-full border-2 border-white bg-white text-purple-700 flex items-center justify-center font-bold text-xl">
+                    class="w-12 h-12 rounded-full border-2 border-white bg-white text-[#AD3029] flex items-center justify-center font-bold text-xl">
                     U
                 </div>
                 <div>
                     <p id="sidebarName" class="font-semibold">Loading...</p>
-                    <p class="text-sm text-purple-200">Silver Member</p>
+                    <p class="text-sm text-red-200">Silver Member</p>
                 </div>
             </div>
 
@@ -59,9 +59,9 @@
 
             <!-- HEADER -->
             <div class="flex justify-between items-center mb-8">
-                <h1 class="text-2xl font-bold text-purple-700">Shipping Addresses</h1>
+                <h1 class="text-2xl font-bold text-[#AD3029]">Shipping Addresses</h1>
                 <button onclick="showAddModal()"
-                    class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-semibold transition">
+                    class="bg-[#AD3029] hover:opacity-90 text-white px-6 py-2 rounded-full font-bold transition">
                     <i class="fas fa-plus mr-2"></i>Add New Address
                 </button>
             </div>
@@ -70,7 +70,7 @@
             <div id="addressList" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Addresses will be loaded here -->
                 <div class="text-center py-12 col-span-2">
-                    <i class="fas fa-spinner fa-spin text-4xl text-purple-500 mb-4"></i>
+                    <i class="fas fa-spinner fa-spin text-4xl text-[#AD3029] mb-4"></i>
                     <p class="text-gray-500">Loading addresses...</p>
                 </div>
             </div>
@@ -82,7 +82,7 @@
     <div id="addressModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             <div class="p-6 border-b flex justify-between items-center">
-                <h2 id="modalTitle" class="text-2xl font-bold text-purple-700">Add New Address</h2>
+                <h2 id="modalTitle" class="text-2xl font-bold text-[#AD3029]">Add New Address</h2>
                 <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
                     <i class="fas fa-times text-2xl"></i>
                 </button>
@@ -95,13 +95,13 @@
                     <div>
                         <label class="text-sm font-medium">Full Name <span class="text-red-500">*</span></label>
                         <input type="text" id="fullName" required
-                            class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-purple-500 focus:outline-none"
+                            class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-[#AD3029] focus:outline-none"
                             placeholder="Nguyen Van A">
                     </div>
                     <div>
                         <label class="text-sm font-medium">Phone Number <span class="text-red-500">*</span></label>
                         <input type="tel" id="phone" required pattern="^0[0-9]{9}$"
-                            class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-purple-500 focus:outline-none"
+                            class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-[#AD3029] focus:outline-none"
                             placeholder="0123456789">
                     </div>
                 </div>
@@ -109,7 +109,7 @@
                 <div>
                     <label class="text-sm font-medium">Detailed Address <span class="text-red-500">*</span></label>
                     <input type="text" id="address" required
-                        class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-purple-500 focus:outline-none"
+                        class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-[#AD3029] focus:outline-none"
                         placeholder="House number, street name...">
                 </div>
 
@@ -117,31 +117,31 @@
                     <div>
                         <label class="text-sm font-medium">City/Province <span class="text-red-500">*</span></label>
                         <input type="text" id="city" required
-                            class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-purple-500 focus:outline-none"
+                            class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-[#AD3029] focus:outline-none"
                             placeholder="Hanoi">
                     </div>
                     <div>
                         <label class="text-sm font-medium">District <span class="text-red-500">*</span></label>
                         <input type="text" id="district" required
-                            class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-purple-500 focus:outline-none"
+                            class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-[#AD3029] focus:outline-none"
                             placeholder="Cau Giay">
                     </div>
                     <div>
                         <label class="text-sm font-medium">Ward <span class="text-red-500">*</span></label>
                         <input type="text" id="ward" required
-                            class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-purple-500 focus:outline-none"
+                            class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-[#AD3029] focus:outline-none"
                             placeholder="Dich Vong">
                     </div>
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <input type="checkbox" id="isDefault" class="w-5 h-5 text-purple-600 rounded focus:ring-purple-500">
+                    <input type="checkbox" id="isDefault" class="w-5 h-5 text-[#AD3029] rounded focus:ring-[#AD3029]">
                     <label for="isDefault" class="text-sm font-medium">Set as default address</label>
                 </div>
 
                 <div class="flex gap-4 pt-4">
                     <button type="submit"
-                        class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl font-semibold transition">
+                        class="flex-1 bg-[#AD3029] hover:opacity-90 text-white py-3 rounded-xl font-bold transition">
                         <i class="fas fa-save mr-2"></i>Save Address
                     </button>
                     <button type="button" onclick="closeModal()"
@@ -216,7 +216,7 @@
                         <i class="fas fa-map-marker-alt text-4xl text-gray-300 mb-4"></i>
                         <p class="text-gray-500">No addresses yet</p>
                         <button onclick="showAddModal()" 
-                                class="mt-4 bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-semibold transition">
+                                class="mt-4 bg-[#AD3029] hover:opacity-90 text-white px-6 py-2 rounded-full font-bold transition">
                             Add your first address
                         </button>
                     </div>
@@ -225,22 +225,22 @@
             }
 
             container.innerHTML = addresses.map(addr => `
-                <div class="bg-gradient-to-br from-purple-50 to-white p-6 rounded-2xl shadow-lg border-2 ${addr.default ? 'border-purple-500' : 'border-gray-200'} hover:shadow-xl transition">
-                    ${addr.default ? '<div class="inline-block bg-purple-500 text-white text-xs px-3 py-1 rounded-full mb-3">Default</div>' : ''}
+                <div class="bg-gradient-to-br from-red-50 to-white p-6 rounded-2xl shadow-lg border-2 ${addr.default ? 'border-[#AD3029]' : 'border-gray-200'} hover:shadow-xl transition">
+                    ${addr.default ? '<div class="inline-block bg-[#AD3029] text-white text-xs px-3 py-1 rounded-full mb-3">Default</div>' : ''}
                     
                     <div class="mb-4">
                         <div class="flex items-center gap-2 mb-2">
-                            <i class="fas fa-user text-purple-600"></i>
+                            <i class="fas fa-user text-[#AD3029]"></i>
                             <span class="font-bold text-lg">${addr.fullName}</span>
                         </div>
                         <div class="flex items-center gap-2 text-gray-600">
-                            <i class="fas fa-phone text-purple-600"></i>
+                            <i class="fas fa-phone text-[#AD3029]"></i>
                             <span>${addr.phone}</span>
                         </div>
                     </div>
 
                     <div class="flex items-start gap-2 text-gray-700 mb-4">
-                        <i class="fas fa-map-marker-alt text-purple-600 mt-1"></i>
+                        <i class="fas fa-map-marker-alt text-[#AD3029] mt-1"></i>
                         <div>
                             <p>${addr.address}</p>
                             <p class="text-sm text-gray-500">${addr.ward}, ${addr.district}, ${addr.city}</p>
