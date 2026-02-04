@@ -123,10 +123,25 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<ProductResponse> getProductsByCategory(String categoryId) {
+        // 1. Get all product IDs linked to this category
+        List<String> productIds = productCategoryRepository.findByCategoryId(categoryId).stream()
+                .map(ProductCategory::getProductId)
+                .collect(Collectors.toList());
+
+        // 2. Fetch products details
+        return productRepository.findAllById(productIds).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
     public ProductResponse updateProduct(String id, UpdateProductRequest request) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
+        // Update basic fields
         if (request.getName() != null) {
             product.setName(request.getName());
         }
@@ -136,8 +151,74 @@ public class ProductServiceImpl implements ProductService {
         if (request.getStatus() != null) {
             product.setStatus(request.getStatus());
         }
-        product.setUpdatedAt(LocalDateTime.now());
 
+        // Update Category
+        if (request.getCategoryId() != null) {
+            // Remove old categories
+            productCategoryRepository.deleteByProductId(id);
+
+            // Add new category
+            ProductCategory productCategory = new ProductCategory();
+            productCategory.setProductId(id);
+            productCategory.setCategoryId(request.getCategoryId());
+            productCategoryRepository.save(productCategory);
+        }
+
+        // Update Images
+        if (request.getImages() != null) {
+            // Remove old images
+            imageRepository.deleteByProductId(id);
+
+            // Add new images
+            int order = 0;
+            for (String url : request.getImages()) {
+                ProductImage image = new ProductImage();
+                image.setProductId(id);
+                image.setImageUrl(url);
+                image.setDisplayOrder(order++);
+                image.setCreatedAt(LocalDateTime.now());
+                imageRepository.save(image);
+            }
+        }
+
+        // Update Variants
+        if (request.getVariants() != null && !request.getVariants().isEmpty()) {
+            // Remove old variants
+            variantRepository.deleteByProductId(id);
+
+            // Add new variants
+            for (CreateProductVariantRequest vReq : request.getVariants()) {
+                ProductVariant variant = new ProductVariant();
+                variant.setProductId(id);
+                variant.setSize(vReq.getSize());
+                variant.setColor(vReq.getColor());
+                variant.setPrice(vReq.getPrice());
+                variant.setStock(vReq.getStock());
+                variant.setImageUrl(vReq.getImageUrl());
+                variant.setCreatedAt(LocalDateTime.now());
+                variant.setUpdatedAt(LocalDateTime.now());
+                variantRepository.save(variant);
+            }
+
+            // Recalculate Min/Max Price and Total Stock
+            BigDecimal minPrice = request.getVariants().stream()
+                    .map(CreateProductVariantRequest::getPrice)
+                    .min(Comparator.naturalOrder())
+                    .orElse(BigDecimal.ZERO);
+            BigDecimal maxPrice = request.getVariants().stream()
+                    .map(CreateProductVariantRequest::getPrice)
+                    .max(Comparator.naturalOrder())
+                    .orElse(BigDecimal.ZERO);
+            Integer totalStock = request.getVariants().stream()
+                    .mapToInt(CreateProductVariantRequest::getStock)
+                    .sum();
+
+            product.setMinPrice(minPrice);
+            product.setMaxPrice(maxPrice);
+            product.setTotalStock(totalStock);
+        }
+
+        product.setUpdatedAt(LocalDateTime.now());
         Product updatedProduct = productRepository.save(product);
         return mapToResponse(updatedProduct);
     }

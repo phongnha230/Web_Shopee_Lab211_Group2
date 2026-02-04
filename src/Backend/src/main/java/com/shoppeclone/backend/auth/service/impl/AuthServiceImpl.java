@@ -1,4 +1,5 @@
 package com.shoppeclone.backend.auth.service.impl;
+// Triggering re-compilation
 
 import com.shoppeclone.backend.auth.dto.request.LoginRequest;
 import com.shoppeclone.backend.auth.dto.request.RegisterRequest;

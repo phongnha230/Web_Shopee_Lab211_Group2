@@ -21,5 +21,7 @@ public interface ShopService {
 
     void rejectShop(String shopId, String reason);
 
+    Shop getShopById(String shopId);
+
     Shop updateShop(String userEmail, com.shoppeclone.backend.shop.dto.UpdateShopRequest request);
 }

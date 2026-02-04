@@ -1,4 +1,5 @@
 package com.shoppeclone.backend.auth.model;
+// Triggering re-compilation
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;

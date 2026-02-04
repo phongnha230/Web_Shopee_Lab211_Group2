@@ -1,0 +1,88 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------< com.shoppeclone:backend >-----------------------
+[INFO] Building backend 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ backend ---
+[INFO] Deleting D:\chuyên ngành 3\lap211\Du_an_Web_Shoppe\src\Backend\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ backend ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 5 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ backend ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 182 source files with javac [debug release 21] to target\classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/shipper/service/impl/ShipperServiceImpl.java:[1,1] class, interface, enum, or record expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/shipper/service/impl/ShipperServiceImpl.java:[4,1] class, interface, enum, or record expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/shipper/service/impl/ShipperServiceImpl.java:[5,1] class, interface, enum, or record expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/shipper/service/impl/ShipperServiceImpl.java:[6,1] class, interface, enum, or record expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/shipper/service/impl/ShipperServiceImpl.java:[7,1] class, interface, enum, or record expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/shipper/service/impl/ShipperServiceImpl.java:[8,1] class, interface, enum, or record expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/shipper/service/impl/ShipperServiceImpl.java:[9,1] class, interface, enum, or record expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/shipper/service/impl/ShipperServiceImpl.java:[10,1] class, interface, enum, or record expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/shipper/service/impl/ShipperServiceImpl.java:[11,1] class, interface, enum, or record expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/shipper/service/impl/ShipperServiceImpl.java:[13,1] class, interface, enum, or record expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/shipper/service/impl/ShipperServiceImpl.java:[14,1] class, interface, enum, or record expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[65,1] illegal start of type
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[65,16] > expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[65,25] <identifier> expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[66,5] '(' expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[98,1] illegal start of expression
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[98,3] illegal start of expression
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[98,5] illegal start of expression
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[98,7] illegal start of expression
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[99,5] illegal start of expression
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[113,1] illegal start of expression
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[113,4] illegal start of expression
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[113,7] illegal start of expression
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[113,16] ';' expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[113,17] not a statement
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[113,24] ';' expected
+[INFO] 26 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  2.683 s
+[INFO] Finished at: 2026-02-03T21:55:13+07:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project backend: Compilation failure: Compilation failure: 
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/shipper/service/impl/ShipperServiceImpl.java:[1,1] class, interface, enum, or record expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/shipper/service/impl/ShipperServiceImpl.java:[4,1] class, interface, enum, or record expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/shipper/service/impl/ShipperServiceImpl.java:[5,1] class, interface, enum, or record expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/shipper/service/impl/ShipperServiceImpl.java:[6,1] class, interface, enum, or record expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/shipper/service/impl/ShipperServiceImpl.java:[7,1] class, interface, enum, or record expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/shipper/service/impl/ShipperServiceImpl.java:[8,1] class, interface, enum, or record expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/shipper/service/impl/ShipperServiceImpl.java:[9,1] class, interface, enum, or record expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/shipper/service/impl/ShipperServiceImpl.java:[10,1] class, interface, enum, or record expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/shipper/service/impl/ShipperServiceImpl.java:[11,1] class, interface, enum, or record expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/shipper/service/impl/ShipperServiceImpl.java:[13,1] class, interface, enum, or record expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/shipper/service/impl/ShipperServiceImpl.java:[14,1] class, interface, enum, or record expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[65,1] illegal start of type
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[65,16] > expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[65,25] <identifier> expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[66,5] '(' expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[98,1] illegal start of expression
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[98,3] illegal start of expression
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[98,5] illegal start of expression
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[98,7] illegal start of expression
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[99,5] illegal start of expression
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[113,1] illegal start of expression
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[113,4] illegal start of expression
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[113,7] illegal start of expression
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[113,16] ';' expected
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[113,17] not a statement
+[ERROR] /D:/chuyên ngành 3/lap211/Du_an_Web_Shoppe/src/Backend/src/main/java/com/shoppeclone/backend/common/service/EmailService.java:[113,24] ';' expected
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

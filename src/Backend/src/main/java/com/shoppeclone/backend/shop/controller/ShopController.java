@@ -87,6 +87,15 @@ public class ShopController {
         return ResponseEntity.ok(shop);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Shop> getShopById(@PathVariable String id) {
+        Shop shop = shopService.getShopById(id);
+        if (shop == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(shop);
+    }
+
     @PutMapping("/my-shop")
     public ResponseEntity<Shop> updateShop(
             @Valid @RequestBody UpdateShopRequest request,

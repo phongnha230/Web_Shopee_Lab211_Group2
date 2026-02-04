@@ -6,9 +6,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -19,27 +26,65 @@ public class CloudinaryService {
 
     /**
      * Upload image to Cloudinary and return secure URL
-     * 
+     * If Cloudinary fails, fallback to local storage
+     *
      * @param file   MultipartFile to upload
      * @param folder Target folder in Cloudinary (e.g., "shop_id_cards")
-     * @return Secure HTTPS URL of uploaded image
+     * @return Secure HTTPS URL of uploaded image or Local URL
      * @throws IOException if upload fails
      */
     public String uploadImage(MultipartFile file, String folder) throws IOException {
         // Validate file
         validateImage(file);
 
-        // Upload to Cloudinary
-        Map<String, Object> uploadParams = ObjectUtils.asMap(
-                "folder", folder,
-                "resource_type", "image");
+        try {
+            // Upload to Cloudinary
+            Map<String, Object> uploadParams = ObjectUtils.asMap(
+                    "folder", folder,
+                    "resource_type", "image");
 
-        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), uploadParams);
+            Map uploadResult = cloudinary.uploader().upload(file.getBytes(), uploadParams);
 
-        String secureUrl = (String) uploadResult.get("secure_url");
-        log.info("Image uploaded successfully to Cloudinary: {}", secureUrl);
+            String secureUrl = (String) uploadResult.get("secure_url");
+            log.info("Image uploaded successfully to Cloudinary: {}", secureUrl);
 
-        return secureUrl;
+            return secureUrl;
+        } catch (Exception e) {
+            log.warn(
+                    "Cloudinary upload failed (likely due to missing config). Falling back to local storage. Error: {}",
+                    e.getMessage());
+            return saveFileLocally(file);
+        }
+    }
+
+    private String saveFileLocally(MultipartFile file) throws IOException {
+        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+
+        // Define paths
+        Path uploadDir = Paths.get("src", "main", "resources", "static", "uploads");
+        Path targetDir = Paths.get("target", "classes", "static", "uploads");
+
+        // Ensure directories exist
+        if (!Files.exists(uploadDir))
+            Files.createDirectories(uploadDir);
+        if (!Files.exists(targetDir))
+            Files.createDirectories(targetDir);
+
+        // Save to target (for immediate serving)
+        try (InputStream inputStream = file.getInputStream()) {
+            Path filePath = targetDir.resolve(fileName);
+            Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+        }
+
+        // Save to src (for persistence)
+        try (InputStream inputStream = file.getInputStream()) {
+            Path filePath = uploadDir.resolve(fileName);
+            Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+        }
+
+        // Construct URL
+        String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+        return baseUrl + "/uploads/" + fileName;
     }
 
     /**
@@ -81,7 +126,11 @@ public class CloudinaryService {
      * Delete image from Cloudinary by public ID
      */
     public void deleteImage(String publicId) throws IOException {
-        cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
-        log.info("Image deleted from Cloudinary: {}", publicId);
+        try {
+            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+            log.info("Image deleted from Cloudinary: {}", publicId);
+        } catch (Exception e) {
+            log.warn("Failed to delete image from Cloudinary (local file?): {}", e.getMessage());
+        }
     }
 }

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Animated Sign Up | ShoppeClone</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @keyframes blob {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            33% {
+                transform: translate(30px, -40px) scale(1.1);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) scale(0.9);
+            }
+
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body
+    class="h-screen flex items-center justify-center bg-gradient-to-br from-[#FEEFCD] via-[#F8E8D0] to-[#AD3029]/20 overflow-hidden">
+
+    <!-- Animated blobs -->
+    <div
+        class="absolute w-96 h-96 bg-[#AD3029]/25 rounded-full blur-3xl top-[-100px] left-[-100px] animate-[blob_20s_infinite]">
+    </div>
+    <div
+        class="absolute w-96 h-96 bg-[#AD3029]/20 rounded-full blur-3xl bottom-[-100px] right-[-100px] animate-[blob_25s_infinite]">
+    </div>
+
+    <div
+        class="relative z-10 w-full max-w-5xl bg-white/60 backdrop-blur-xl rounded-3xl shadow-2xl flex overflow-hidden">
+
+        <!-- LEFT FORM -->
+        <div class="w-1/2 p-12">
+            <h2 class="text-3xl font-extrabold text-[#AD3029]">
+                ShopeeClone
+            </h2>
+
+            <h3 class="text-xl font-semibold text-gray-800 mt-6">
+                Create your account
+            </h3>
+            <p class="text-gray-600 mb-8">
+                Sign up to start shopping with us
+            </p>
+
+            <!-- FORM INPUTS -->
+            <input id="fullName" placeholder="Full Name"
+                class="w-full mb-5 bg-transparent border-b-2 border-gray-400 focus:border-[#AD3029] outline-none py-2">
+
+            <input id="email" placeholder="Email" type="email"
+                class="w-full mb-5 bg-transparent border-b-2 border-gray-400 focus:border-[#AD3029] outline-none py-2">
+
+            <input id="phone" placeholder="Phone"
+                class="w-full mb-5 bg-transparent border-b-2 border-gray-400 focus:border-[#AD3029] outline-none py-2">
+
+            <input id="password" placeholder="Password" type="password"
+                class="w-full mb-6 bg-transparent border-b-2 border-gray-400 focus:border-[#AD3029] outline-none py-2">
+
+            <!-- SIGN UP BUTTON -->
+            <button onclick="goToOTP()"
+                class="w-full py-3 rounded-full bg-gradient-to-r from-[#AD3029] to-[#CD5252] text-white font-semibold shadow-lg hover:opacity-90 transition-all duration-200">
+                Sign Up & Verify OTP
+            </button>
+
+            <div class="flex items-center my-6">
+                <div class="flex-1 h-px bg-gray-300"></div>
+                <span class="mx-4 text-sm text-gray-600">or</span>
+                <div class="flex-1 h-px bg-gray-300"></div>
+            </div>
+
+            <!-- GOOGLE BUTTON -->
+            <a id="googleBtn" href="#" onclick="googleLogin(event)">
+                <button class="w-full flex items-center justify-center gap-3 py-3 rounded-full 
+                     bg-[#FEEFCD] border-2 border-[#AD3029] 
+                     shadow hover:bg-[#F8E8D0] hover:shadow-md transition">
+                    <svg class="w-5 h-5" viewBox="0 0 48 48">
+                        <path fill="#EA4335"
+                            d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.73 17.74 9.5 24 9.5z" />
+                        <path fill="#4285F4"
+                            d="M46.14 24.56c0-1.64-.15-3.21-.43-4.72H24v9.02h12.45c-.54 2.91-2.18 5.38-4.64 7.04l7.49 5.82c4.38-4.04 6.84-9.99 6.84-17.16z" />
+                        <path fill="#FBBC05"
+                            d="M10.53 28.77A14.5 14.5 0 0 1 9.76 24c0-1.66.29-3.27.77-4.77l-7.99-6.19A23.99 23.99 0 0 0 0 24c0 3.88.93 7.56 2.54 10.96l7.99-6.19z" />
+                        <path fill="#34A853"
+                            d="M24 48c6.48 0 11.93-2.13 15.9-5.81l-7.49-5.82c-2.08 1.4-4.73 2.23-8.41 2.23-6.26 0-11.57-4.23-13.46-9.94l-7.99 6.19C6.51 42.62 14.62 48 24 48z" />
+                    </svg>
+                    <span class="text-gray-700 font-medium">
+                        Continue with Google
+                    </span>
+                </button>
+            </a>
+
+            <p class="text-center text-sm text-gray-700 mt-6">
+                Already have an account?
+                <a href="/login.html" class="text-[#AD3029] font-semibold hover:underline">
+                    Sign in
+                </a>
+            </p>
+        </div>
+
+        <!-- RIGHT IMAGE SLIDER (KEEP AS IS) -->
+        <div class="w-1/2 relative overflow-hidden rounded-r-3xl">
+            <div id="slider" class="w-full h-full relative">
+                <img src="https://i.pinimg.com/736x/5d/40/3c/5d403cda692e3422b807fb9a9855ad55.jpg"
+                    class="slide absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-100">
+                <img src="https://i.pinimg.com/1200x/07/61/f7/0761f7ad31e2ec6027b99f35cc7919ba.jpg"
+                    class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
+                <img src="https://i.pinimg.com/736x/86/af/cb/86afcbb28b56c87859eec07afbc77716.jpg"
+                    class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
+                <img src="https://i.pinimg.com/736x/37/90/25/37902567ece8d87fb5b645310b5bb5da.jpg"
+                    class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
+                <img src="https://i.pinimg.com/1200x/eb/dd/0d/ebdd0dd42b05704fa97984bc26543ae5.jpg"
+                    class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
+                <img src="https://i.pinimg.com/736x/90/fb/9c/90fb9c4f3f246c0b10fb11fc46514528.jpg"
+                    class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
+                <img src="https://i.pinimg.com/736x/e5/a5/c8/e5a5c81f052347378df0f04dfeba1074.jpg"
+                    class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
+                <img src="https://i.pinimg.com/736x/5e/42/d2/5e42d29e245f4892b10d20620cdf9d8b.jpg"
+                    class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
+                <img src="https://i.pinimg.com/736x/1c/35/c7/1c35c72bc20b12501cf30e6656d7754c.jpg"
+                    class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
+                <img src="https://i.pinimg.com/736x/30/97/77/3097779da71ff587e99915c9945becd2.jpg"
+                    class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
+            </div>
+
+            <script>
+                const images = document.querySelectorAll("#slider img");
+                let current = 0;
+                setInterval(() => {
+                    images[current].style.opacity = 0;
+                    current = (current + 1) % images.length;
+                    images[current].style.opacity = 1;
+                }, 3000);
+            </script>
+
+            <div class="absolute inset-0 bg-[#AD3029]/10"></div>
+        </div>
+    </div>
+
+
+    <script>
+        async function goToOTP() {
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const password = document.getElementById('password').value;
+
+            if (!fullName || !email || !password || !phone) {
+                alert('⚠️ Please fill in all required fields!');
+                return;
+            }
+
+            // Validate Phone (VN format: 10 digits, starts with 0)
+            const phoneRegex = /^0\d{9}$/;
+            if (!phoneRegex.test(phone)) {
+                alert('❌ Phone number must be 10 digits and start with 0 (e.g., 0912345678)!');
+                return;
+            }
+
+            // Validate Password Regex
+            const strongPasswordRegex = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+            if (!strongPasswordRegex.test(password)) {
+                alert('❌ Password must be at least 8 characters, include uppercase, lowercase, and number!');
+                return;
+            }
+
+            // Save to localStorage for OTP step
+            localStorage.setItem('pendingEmail', email);
+            localStorage.setItem('pendingPassword', password);
+            localStorage.setItem('pendingName', fullName);
+            localStorage.setItem('pendingPhone', phone);
+
+            try {
+                // Call Register API (Backend will send OTP automatically)
+                const res = await fetch('http://localhost:8080/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fullName: fullName,
+                        email: email,
+                        phone: phone,
+                        password: password
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert('✅ Registration successful! OTP sent to your email.');
+                    window.location.href = 'otp.html';
+                } else {
+                    // FALLBACK: If email already exists, try to resend OTP (user might have failed verification previously)
+                    if (data.message && (data.message.includes('Email already exists') || data.message.includes('Email đã tồn tại'))) {
+                        const confirmResend = confirm('⚠️ Email already registered. Do you want to receive a new OTP to verify this account?');
+                        if (confirmResend) {
+                            try {
+                                const otpRes = await fetch('http://localhost:8080/api/auth/send-otp', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ email })
+                                });
+                                if (otpRes.ok) {
+                                    alert('✅ New OTP sent! Redirecting to verification...');
+                                    window.location.href = 'otp.html';
+                                    return;
+                                }
+                            } catch (e) {
+                                console.error(e);
+                            }
+                        }
+                    }
+
+                    alert('❌ ' + (data.message || 'Registration failed'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('❌ Server connection error');
+            }
+        }
+
+        async function googleLogin(event) {
+            event.preventDefault();
+
+            try {
+                const res = await fetch(
+                    'http://localhost:8080/api/auth/oauth/google/url?redirect_uri=http://localhost:3000/auth/callback/google.html'
+                );
+
+                const data = await res.json();
+
+                if (data.authUrl) {
+                    // 🔥 SWITCH TO GOOGLE
+                    window.location.href = data.authUrl;
+                } else {
+                    alert('❌ Could not get Google URL');
+                }
+            } catch (err) {
+                alert('❌ Google Login Error');
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,761 @@
+﻿[
+    {
+        "id":  "1",
+        "shopId":  "demo-shop-1",
+        "name":  "Wireless Headphones - Premium Bass",
+        "description":  "Experience sound like never before with these premium wireless headphones. Noise cancellation included.",
+        "status":  "ACTIVE",
+        "categories":  [
+
+                       ],
+        "variants":  [
+                         {
+                             "id":  "1",
+                             "productId":  "1",
+                             "size":  null,
+                             "color":  "Black",
+                             "price":  99.00,
+                             "stock":  156,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:54.295",
+                             "updatedAt":  "2026-02-01T23:55:54.295"
+                         },
+                         {
+                             "id":  "697f859af0b25a7340906812",
+                             "productId":  "1",
+                             "size":  null,
+                             "color":  "Silver",
+                             "price":  99.00,
+                             "stock":  89,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:54.345",
+                             "updatedAt":  "2026-02-01T23:55:54.345"
+                         },
+                         {
+                             "id":  "697f859af0b25a7340906813",
+                             "productId":  "1",
+                             "size":  null,
+                             "color":  "Red",
+                             "price":  99.00,
+                             "stock":  45,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:54.39",
+                             "updatedAt":  "2026-02-01T23:55:54.39"
+                         }
+                     ],
+        "images":  [
+                       "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800\u0026h=800\u0026fit=crop",
+                       "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=800\u0026h=800\u0026fit=crop",
+                       "https://images.unsplash.com/photo-1524678606372-571d751b8d57?w=800\u0026h=800\u0026fit=crop"
+                   ],
+        "createdAt":  "2026-02-01T23:55:54.129",
+        "updatedAt":  "2026-02-01T23:55:54.129"
+    },
+    {
+        "id":  "2",
+        "shopId":  "demo-shop-1",
+        "name":  "Urban Sneakers - High Comfort",
+        "description":  "Top urban design sneakers. Perfect for running and casual wear.",
+        "status":  "ACTIVE",
+        "categories":  [
+
+                       ],
+        "variants":  [
+                         {
+                             "id":  "2",
+                             "productId":  "2",
+                             "size":  "40",
+                             "color":  "White/Red",
+                             "price":  102.00,
+                             "stock":  89,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:54.545",
+                             "updatedAt":  "2026-02-01T23:55:54.545"
+                         },
+                         {
+                             "id":  "697f859af0b25a7340906816",
+                             "productId":  "2",
+                             "size":  "41",
+                             "color":  "White/Red",
+                             "price":  102.00,
+                             "stock":  89,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:54.585",
+                             "updatedAt":  "2026-02-01T23:55:54.585"
+                         },
+                         {
+                             "id":  "697f859af0b25a7340906817",
+                             "productId":  "2",
+                             "size":  "42",
+                             "color":  "White/Red",
+                             "price":  102.00,
+                             "stock":  89,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:54.624",
+                             "updatedAt":  "2026-02-01T23:55:54.624"
+                         },
+                         {
+                             "id":  "697f859af0b25a7340906818",
+                             "productId":  "2",
+                             "size":  "43",
+                             "color":  "White/Red",
+                             "price":  102.00,
+                             "stock":  89,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:54.663",
+                             "updatedAt":  "2026-02-01T23:55:54.663"
+                         },
+                         {
+                             "id":  "697f859af0b25a7340906819",
+                             "productId":  "2",
+                             "size":  "40",
+                             "color":  "Black",
+                             "price":  102.00,
+                             "stock":  89,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:54.703",
+                             "updatedAt":  "2026-02-01T23:55:54.703"
+                         },
+                         {
+                             "id":  "697f859af0b25a734090681a",
+                             "productId":  "2",
+                             "size":  "41",
+                             "color":  "Black",
+                             "price":  102.00,
+                             "stock":  89,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:54.74",
+                             "updatedAt":  "2026-02-01T23:55:54.74"
+                         },
+                         {
+                             "id":  "697f859af0b25a734090681b",
+                             "productId":  "2",
+                             "size":  "42",
+                             "color":  "Black",
+                             "price":  102.00,
+                             "stock":  89,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:54.78",
+                             "updatedAt":  "2026-02-01T23:55:54.78"
+                         },
+                         {
+                             "id":  "697f859af0b25a734090681c",
+                             "productId":  "2",
+                             "size":  "43",
+                             "color":  "Black",
+                             "price":  102.00,
+                             "stock":  89,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:54.819",
+                             "updatedAt":  "2026-02-01T23:55:54.819"
+                         }
+                     ],
+        "images":  [
+                       "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=800\u0026h=800\u0026fit=crop",
+                       "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?w=800\u0026h=800\u0026fit=crop"
+                   ],
+        "createdAt":  "2026-02-01T23:55:54.43",
+        "updatedAt":  "2026-02-01T23:55:54.43"
+    },
+    {
+        "id":  "3",
+        "shopId":  "demo-shop-1",
+        "name":  "Classic Wrist Watch",
+        "description":  "Timeless elegance on your wrist.",
+        "status":  "ACTIVE",
+        "categories":  [
+
+                       ],
+        "variants":  [
+                         {
+                             "id":  "3",
+                             "productId":  "3",
+                             "size":  null,
+                             "color":  "Gold",
+                             "price":  15.00,
+                             "stock":  44,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:54.937",
+                             "updatedAt":  "2026-02-01T23:55:54.937"
+                         },
+                         {
+                             "id":  "697f859af0b25a734090681e",
+                             "productId":  "3",
+                             "size":  null,
+                             "color":  "Silver",
+                             "price":  15.00,
+                             "stock":  44,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:54.977",
+                             "updatedAt":  "2026-02-01T23:55:54.977"
+                         }
+                     ],
+        "images":  [
+                       "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800\u0026h=800\u0026fit=crop"
+                   ],
+        "createdAt":  "2026-02-01T23:55:54.859",
+        "updatedAt":  "2026-02-01T23:55:54.859"
+    },
+    {
+        "id":  "4",
+        "shopId":  "demo-shop-1",
+        "name":  "Running Sport Shoes",
+        "description":  "Professional grade running shoes.",
+        "status":  "ACTIVE",
+        "categories":  [
+
+                       ],
+        "variants":  [
+                         {
+                             "id":  "4",
+                             "productId":  "4",
+                             "size":  "38",
+                             "color":  "Red",
+                             "price":  120.00,
+                             "stock":  200,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:55.097",
+                             "updatedAt":  "2026-02-01T23:55:55.097"
+                         },
+                         {
+                             "id":  "697f859bf0b25a7340906820",
+                             "productId":  "4",
+                             "size":  "39",
+                             "color":  "Red",
+                             "price":  120.00,
+                             "stock":  200,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:55.136",
+                             "updatedAt":  "2026-02-01T23:55:55.136"
+                         },
+                         {
+                             "id":  "697f859bf0b25a7340906821",
+                             "productId":  "4",
+                             "size":  "40",
+                             "color":  "Red",
+                             "price":  120.00,
+                             "stock":  200,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:55.174",
+                             "updatedAt":  "2026-02-01T23:55:55.174"
+                         },
+                         {
+                             "id":  "697f859bf0b25a7340906822",
+                             "productId":  "4",
+                             "size":  "41",
+                             "color":  "Red",
+                             "price":  120.00,
+                             "stock":  200,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:55.214",
+                             "updatedAt":  "2026-02-01T23:55:55.214"
+                         },
+                         {
+                             "id":  "697f859bf0b25a7340906823",
+                             "productId":  "4",
+                             "size":  "38",
+                             "color":  "Blue",
+                             "price":  120.00,
+                             "stock":  200,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:55.262",
+                             "updatedAt":  "2026-02-01T23:55:55.262"
+                         },
+                         {
+                             "id":  "697f859bf0b25a7340906824",
+                             "productId":  "4",
+                             "size":  "39",
+                             "color":  "Blue",
+                             "price":  120.00,
+                             "stock":  200,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:55.302",
+                             "updatedAt":  "2026-02-01T23:55:55.302"
+                         },
+                         {
+                             "id":  "697f859bf0b25a7340906825",
+                             "productId":  "4",
+                             "size":  "40",
+                             "color":  "Blue",
+                             "price":  120.00,
+                             "stock":  200,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:55.342",
+                             "updatedAt":  "2026-02-01T23:55:55.342"
+                         },
+                         {
+                             "id":  "697f859bf0b25a7340906826",
+                             "productId":  "4",
+                             "size":  "41",
+                             "color":  "Blue",
+                             "price":  120.00,
+                             "stock":  200,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:55.382",
+                             "updatedAt":  "2026-02-01T23:55:55.382"
+                         }
+                     ],
+        "images":  [
+                       "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800\u0026h=800\u0026fit=crop"
+                   ],
+        "createdAt":  "2026-02-01T23:55:55.017",
+        "updatedAt":  "2026-02-01T23:55:55.017"
+    },
+    {
+        "id":  "5",
+        "shopId":  "demo-shop-1",
+        "name":  "Smart Phone 12 Pro",
+        "description":  "Latest smartphone technology.",
+        "status":  "ACTIVE",
+        "categories":  [
+
+                       ],
+        "variants":  [
+                         {
+                             "id":  "5",
+                             "productId":  "5",
+                             "size":  "128GB",
+                             "color":  "Graphite",
+                             "price":  199.00,
+                             "stock":  12,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:55.503",
+                             "updatedAt":  "2026-02-01T23:55:55.503"
+                         },
+                         {
+                             "id":  "697f859bf0b25a7340906828",
+                             "productId":  "5",
+                             "size":  "256GB",
+                             "color":  "Graphite",
+                             "price":  199.00,
+                             "stock":  12,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:55.542",
+                             "updatedAt":  "2026-02-01T23:55:55.542"
+                         },
+                         {
+                             "id":  "697f859bf0b25a7340906829",
+                             "productId":  "5",
+                             "size":  "128GB",
+                             "color":  "Silver",
+                             "price":  199.00,
+                             "stock":  12,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:55.581",
+                             "updatedAt":  "2026-02-01T23:55:55.581"
+                         },
+                         {
+                             "id":  "697f859bf0b25a734090682a",
+                             "productId":  "5",
+                             "size":  "256GB",
+                             "color":  "Silver",
+                             "price":  199.00,
+                             "stock":  12,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:55.618",
+                             "updatedAt":  "2026-02-01T23:55:55.618"
+                         }
+                     ],
+        "images":  [
+                       "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800\u0026h=800\u0026fit=crop"
+                   ],
+        "createdAt":  "2026-02-01T23:55:55.422",
+        "updatedAt":  "2026-02-01T23:55:55.422"
+    },
+    {
+        "id":  "6",
+        "shopId":  "demo-shop-1",
+        "name":  "Compact Headphones",
+        "description":  "Compact and powerful.",
+        "status":  "ACTIVE",
+        "categories":  [
+
+                       ],
+        "variants":  [
+                         {
+                             "id":  "6",
+                             "productId":  "6",
+                             "size":  null,
+                             "color":  "Black",
+                             "price":  45.00,
+                             "stock":  330,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:55.742",
+                             "updatedAt":  "2026-02-01T23:55:55.742"
+                         }
+                     ],
+        "images":  [
+                       "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800\u0026h=800\u0026fit=crop"
+                   ],
+        "createdAt":  "2026-02-01T23:55:55.66",
+        "updatedAt":  "2026-02-01T23:55:55.66"
+    },
+    {
+        "id":  "101",
+        "shopId":  "demo-shop-1",
+        "name":  "Nikon D3500 DSLR Camera",
+        "description":  "Capture moments with stunning clarity using the Nikon D3500.",
+        "status":  "ACTIVE",
+        "categories":  [
+
+                       ],
+        "variants":  [
+                         {
+                             "id":  "101",
+                             "productId":  "101",
+                             "size":  null,
+                             "color":  "Black",
+                             "price":  36.00,
+                             "stock":  5,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:55.898",
+                             "updatedAt":  "2026-02-01T23:55:55.898"
+                         }
+                     ],
+        "images":  [
+                       "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800\u0026h=800\u0026fit=crop",
+                       "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800\u0026h=800\u0026fit=crop"
+                   ],
+        "createdAt":  "2026-02-01T23:55:55.781",
+        "updatedAt":  "2026-02-01T23:55:55.781"
+    },
+    {
+        "id":  "102",
+        "shopId":  "demo-shop-1",
+        "name":  "Nike Air Max Classic Red Shoes Original",
+        "description":  "Classic Nike Air Max running shoes. Lightweight and comfortable for everyday wear.",
+        "status":  "ACTIVE",
+        "categories":  [
+
+                       ],
+        "variants":  [
+                         {
+                             "id":  "102",
+                             "productId":  "102",
+                             "size":  "38",
+                             "color":  "Red",
+                             "price":  210.00,
+                             "stock":  540,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:56.066",
+                             "updatedAt":  "2026-02-01T23:55:56.066"
+                         },
+                         {
+                             "id":  "697f859cf0b25a7340906830",
+                             "productId":  "102",
+                             "size":  "39",
+                             "color":  "Red",
+                             "price":  210.00,
+                             "stock":  540,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:56.124",
+                             "updatedAt":  "2026-02-01T23:55:56.124"
+                         },
+                         {
+                             "id":  "697f859cf0b25a7340906831",
+                             "productId":  "102",
+                             "size":  "40",
+                             "color":  "Red",
+                             "price":  210.00,
+                             "stock":  540,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:56.161",
+                             "updatedAt":  "2026-02-01T23:55:56.161"
+                         },
+                         {
+                             "id":  "697f859cf0b25a7340906832",
+                             "productId":  "102",
+                             "size":  "41",
+                             "color":  "Red",
+                             "price":  210.00,
+                             "stock":  540,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:56.199",
+                             "updatedAt":  "2026-02-01T23:55:56.199"
+                         },
+                         {
+                             "id":  "697f859cf0b25a7340906833",
+                             "productId":  "102",
+                             "size":  "42",
+                             "color":  "Red",
+                             "price":  210.00,
+                             "stock":  540,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:56.238",
+                             "updatedAt":  "2026-02-01T23:55:56.238"
+                         },
+                         {
+                             "id":  "697f859cf0b25a7340906834",
+                             "productId":  "102",
+                             "size":  "43",
+                             "color":  "Red",
+                             "price":  210.00,
+                             "stock":  540,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:56.28",
+                             "updatedAt":  "2026-02-01T23:55:56.28"
+                         },
+                         {
+                             "id":  "697f859cf0b25a7340906835",
+                             "productId":  "102",
+                             "size":  "38",
+                             "color":  "Black",
+                             "price":  210.00,
+                             "stock":  540,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:56.319",
+                             "updatedAt":  "2026-02-01T23:55:56.319"
+                         },
+                         {
+                             "id":  "697f859cf0b25a7340906836",
+                             "productId":  "102",
+                             "size":  "39",
+                             "color":  "Black",
+                             "price":  210.00,
+                             "stock":  540,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:56.359",
+                             "updatedAt":  "2026-02-01T23:55:56.359"
+                         },
+                         {
+                             "id":  "697f859cf0b25a7340906837",
+                             "productId":  "102",
+                             "size":  "40",
+                             "color":  "Black",
+                             "price":  210.00,
+                             "stock":  540,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:56.397",
+                             "updatedAt":  "2026-02-01T23:55:56.397"
+                         },
+                         {
+                             "id":  "697f859cf0b25a7340906838",
+                             "productId":  "102",
+                             "size":  "41",
+                             "color":  "Black",
+                             "price":  210.00,
+                             "stock":  540,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:56.436",
+                             "updatedAt":  "2026-02-01T23:55:56.436"
+                         },
+                         {
+                             "id":  "697f859cf0b25a7340906839",
+                             "productId":  "102",
+                             "size":  "42",
+                             "color":  "Black",
+                             "price":  210.00,
+                             "stock":  540,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:56.474",
+                             "updatedAt":  "2026-02-01T23:55:56.474"
+                         },
+                         {
+                             "id":  "697f859cf0b25a734090683a",
+                             "productId":  "102",
+                             "size":  "43",
+                             "color":  "Black",
+                             "price":  210.00,
+                             "stock":  540,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:56.518",
+                             "updatedAt":  "2026-02-01T23:55:56.518"
+                         },
+                         {
+                             "id":  "697f859cf0b25a734090683b",
+                             "productId":  "102",
+                             "size":  "38",
+                             "color":  "White",
+                             "price":  210.00,
+                             "stock":  540,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:56.556",
+                             "updatedAt":  "2026-02-01T23:55:56.556"
+                         },
+                         {
+                             "id":  "697f859cf0b25a734090683c",
+                             "productId":  "102",
+                             "size":  "39",
+                             "color":  "White",
+                             "price":  210.00,
+                             "stock":  540,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:56.594",
+                             "updatedAt":  "2026-02-01T23:55:56.594"
+                         },
+                         {
+                             "id":  "697f859cf0b25a734090683d",
+                             "productId":  "102",
+                             "size":  "40",
+                             "color":  "White",
+                             "price":  210.00,
+                             "stock":  540,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:56.634",
+                             "updatedAt":  "2026-02-01T23:55:56.634"
+                         },
+                         {
+                             "id":  "697f859cf0b25a734090683e",
+                             "productId":  "102",
+                             "size":  "41",
+                             "color":  "White",
+                             "price":  210.00,
+                             "stock":  540,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:56.673",
+                             "updatedAt":  "2026-02-01T23:55:56.673"
+                         },
+                         {
+                             "id":  "697f859cf0b25a734090683f",
+                             "productId":  "102",
+                             "size":  "42",
+                             "color":  "White",
+                             "price":  210.00,
+                             "stock":  540,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:56.711",
+                             "updatedAt":  "2026-02-01T23:55:56.711"
+                         },
+                         {
+                             "id":  "697f859cf0b25a7340906840",
+                             "productId":  "102",
+                             "size":  "43",
+                             "color":  "White",
+                             "price":  210.00,
+                             "stock":  540,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:56.749",
+                             "updatedAt":  "2026-02-01T23:55:56.749"
+                         }
+                     ],
+        "images":  [
+                       "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800\u0026h=800\u0026fit=crop",
+                       "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?w=800\u0026h=800\u0026fit=crop"
+                   ],
+        "createdAt":  "2026-02-01T23:55:55.937",
+        "updatedAt":  "2026-02-01T23:55:55.937"
+    },
+    {
+        "id":  "103",
+        "shopId":  "demo-shop-1",
+        "name":  "Sport Water Bottle 1L",
+        "description":  "Stay hydrated.",
+        "status":  "ACTIVE",
+        "categories":  [
+
+                       ],
+        "variants":  [
+                         {
+                             "id":  "103",
+                             "productId":  "103",
+                             "size":  "1L",
+                             "color":  "Silver",
+                             "price":  15.69,
+                             "stock":  980,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:56.875",
+                             "updatedAt":  "2026-02-01T23:55:56.875"
+                         }
+                     ],
+        "images":  [
+                       "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400\u0026h=400\u0026fit=crop"
+                   ],
+        "createdAt":  "2026-02-01T23:55:56.79",
+        "updatedAt":  "2026-02-01T23:55:56.79"
+    },
+    {
+        "id":  "104",
+        "shopId":  "demo-shop-1",
+        "name":  "Blue Water Bottle",
+        "description":  "Premium quality.",
+        "status":  "ACTIVE",
+        "categories":  [
+
+                       ],
+        "variants":  [
+                         {
+                             "id":  "104",
+                             "productId":  "104",
+                             "size":  "500ml",
+                             "color":  "Blue",
+                             "price":  14.50,
+                             "stock":  760,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:56.988",
+                             "updatedAt":  "2026-02-01T23:55:56.988"
+                         }
+                     ],
+        "images":  [
+                       "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400\u0026h=400\u0026fit=crop"
+                   ],
+        "createdAt":  "2026-02-01T23:55:56.913",
+        "updatedAt":  "2026-02-01T23:55:56.913"
+    },
+    {
+        "id":  "105",
+        "shopId":  "demo-shop-1",
+        "name":  "Modern Chair",
+        "description":  "Comfortable modern chair.",
+        "status":  "ACTIVE",
+        "categories":  [
+
+                       ],
+        "variants":  [
+                         {
+                             "id":  "105",
+                             "productId":  "105",
+                             "size":  null,
+                             "color":  "Brown",
+                             "price":  25.00,
+                             "stock":  120,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:57.11",
+                             "updatedAt":  "2026-02-01T23:55:57.11"
+                         }
+                     ],
+        "images":  [
+                       "https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?w=800\u0026h=800\u0026fit=crop"
+                   ],
+        "createdAt":  "2026-02-01T23:55:57.031",
+        "updatedAt":  "2026-02-01T23:55:57.031"
+    },
+    {
+        "id":  "106",
+        "shopId":  "demo-shop-1",
+        "name":  "Canvas Sneakers",
+        "description":  "Casual everyday wear.",
+        "status":  "ACTIVE",
+        "categories":  [
+
+                       ],
+        "variants":  [
+                         {
+                             "id":  "106",
+                             "productId":  "106",
+                             "size":  "38",
+                             "color":  "White",
+                             "price":  18.00,
+                             "stock":  230,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:57.228",
+                             "updatedAt":  "2026-02-01T23:55:57.228"
+                         },
+                         {
+                             "id":  "697f859df0b25a7340906845",
+                             "productId":  "106",
+                             "size":  "39",
+                             "color":  "White",
+                             "price":  18.00,
+                             "stock":  230,
+                             "imageUrl":  null,
+                             "createdAt":  "2026-02-01T23:55:57.268",
+                             "updatedAt":  "2026-02-01T23:55:57.268"
+                         }
+                     ],
+        "images":  [
+                       "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=800\u0026h=800\u0026fit=crop"
+                   ],
+        "createdAt":  "2026-02-01T23:55:57.15",
+        "updatedAt":  "2026-02-01T23:55:57.15"
+    }
+]
