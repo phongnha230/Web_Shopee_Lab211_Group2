@@ -1,8 +1,12 @@
 package com.shoppeclone.backend.shipper.service.impl;
 
 import com.shoppeclone.backend.order.entity.Order;
+import com.shoppeclone.backend.order.entity.OrderItem;
 import com.shoppeclone.backend.order.entity.OrderStatus;
+import com.shoppeclone.backend.order.entity.PaymentStatus;
 import com.shoppeclone.backend.order.repository.OrderRepository;
+import com.shoppeclone.backend.product.entity.ProductVariant;
+import com.shoppeclone.backend.product.repository.ProductVariantRepository;
 import com.shoppeclone.backend.shipper.dto.DeliveryUpdateRequest;
 import com.shoppeclone.backend.shipper.service.ShipperService;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +21,7 @@ import java.util.List;
 public class ShipperServiceImpl implements ShipperService {
 
     private final OrderRepository orderRepository;
+    private final ProductVariantRepository productVariantRepository;
 
     @Override
     public List<Order> getAssignedOrders(String shipperId) {
@@ -55,10 +60,21 @@ public class ShipperServiceImpl implements ShipperService {
     public Order completeDelivery(String shipperId, String orderId, DeliveryUpdateRequest request) {
         Order order = validateShipperOwnsOrder(shipperId, orderId);
 
+        // Validate order status - must be SHIPPED before completion
+        if (order.getOrderStatus() != OrderStatus.SHIPPED) {
+            throw new RuntimeException(
+                    "Order must be SHIPPED before completion. Current status: " + order.getOrderStatus());
+        }
+
         // Mark as completed
         order.setOrderStatus(OrderStatus.COMPLETED);
         order.setCompletedAt(LocalDateTime.now());
         order.setUpdatedAt(LocalDateTime.now());
+
+        // Auto-update payment status for COD (Cash on Delivery)
+        if (order.getPaymentStatus() == PaymentStatus.UNPAID) {
+            order.setPaymentStatus(PaymentStatus.PAID); // Shipper collected cash
+        }
 
         // Save delivery note and proof
         if (request != null) {
@@ -77,6 +93,15 @@ public class ShipperServiceImpl implements ShipperService {
     @Transactional
     public Order failDelivery(String shipperId, String orderId, DeliveryUpdateRequest request) {
         Order order = validateShipperOwnsOrder(shipperId, orderId);
+
+        // Restore stock when delivery fails
+        for (OrderItem item : order.getItems()) {
+            ProductVariant variant = productVariantRepository.findById(item.getVariantId()).orElse(null);
+            if (variant != null) {
+                variant.setStock(variant.getStock() + item.getQuantity());
+                productVariantRepository.save(variant);
+            }
+        }
 
         // Mark as failed
         order.setOrderStatus(OrderStatus.CANCELLED);

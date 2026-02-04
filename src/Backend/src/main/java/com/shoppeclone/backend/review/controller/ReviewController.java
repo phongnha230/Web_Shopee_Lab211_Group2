@@ -1,5 +1,8 @@
 package com.shoppeclone.backend.review.controller;
 
+import com.shoppeclone.backend.auth.model.User;
+import com.shoppeclone.backend.auth.repository.UserRepository;
+import com.shoppeclone.backend.common.service.CloudinaryService;
 import com.shoppeclone.backend.review.dto.request.CreateReviewRequest;
 import com.shoppeclone.backend.review.dto.request.UpdateReviewRequest;
 import com.shoppeclone.backend.review.dto.response.ReviewResponse;
@@ -8,7 +11,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 import java.util.List;
 import java.util.Map;
@@ -19,15 +27,38 @@ import java.util.Map;
 public class ReviewController {
 
     private final ReviewService reviewService;
+    private final UserRepository userRepository;
+    private final CloudinaryService cloudinaryService;
+
+    private String getUserId(UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getId();
+    }
 
     /**
      * Create a new review
      * POST /api/reviews
      */
     @PostMapping
-    public ResponseEntity<ReviewResponse> createReview(@Valid @RequestBody CreateReviewRequest request) {
+    public ResponseEntity<ReviewResponse> createReview(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody CreateReviewRequest request) {
+        String userId = getUserId(userDetails);
+        request.setUserId(userId); // Override userId with authenticated user
         ReviewResponse response = reviewService.createReview(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * Upload review image
+     * POST /api/reviews/upload-image
+     */
+    @PostMapping("/upload-image")
+    public ResponseEntity<Map<String, String>> uploadReviewImage(
+            @RequestParam("file") MultipartFile file) throws IOException {
+        String imageUrl = cloudinaryService.uploadImage(file, "reviews");
+        return ResponseEntity.ok(Map.of("imageUrl", imageUrl));
     }
 
     /**
@@ -90,5 +121,31 @@ public class ReviewController {
     public ResponseEntity<Map<String, Double>> getAverageRating(@PathVariable String productId) {
         Double averageRating = reviewService.getAverageRating(productId);
         return ResponseEntity.ok(Map.of("averageRating", averageRating));
+    }
+
+    /**
+     * Check if user can review a specific product from an order
+     * GET /api/reviews/can-review?orderId={orderId}&productId={productId}
+     */
+    @GetMapping("/can-review")
+    public ResponseEntity<Map<String, Boolean>> canReview(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam String orderId,
+            @RequestParam String productId) {
+        String userId = getUserId(userDetails);
+        boolean canReview = reviewService.canUserReviewOrder(userId, orderId, productId);
+        return ResponseEntity.ok(Map.of("canReview", canReview));
+    }
+
+    /**
+     * Get all reviewable orders for the authenticated user
+     * GET /api/reviews/reviewable-orders
+     */
+    @GetMapping("/reviewable-orders")
+    public ResponseEntity<Map<String, List<String>>> getReviewableOrders(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        String userId = getUserId(userDetails);
+        List<String> orderIds = reviewService.getReviewableOrderIds(userId);
+        return ResponseEntity.ok(Map.of("orderIds", orderIds));
     }
 }

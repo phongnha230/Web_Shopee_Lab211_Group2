@@ -80,7 +80,8 @@ public class PaymentPromotionIntegrationTest {
     public void testCreateVoucher() throws Exception {
         Voucher voucher = new Voucher();
         voucher.setCode("TEST10");
-        voucher.setDiscount(new BigDecimal("10000"));
+        voucher.setDiscountValue(new BigDecimal("10000"));
+        voucher.setDiscountType(Voucher.DiscountType.FIXED_AMOUNT);
         voucher.setQuantity(100);
 
         when(voucherRepository.save(any(Voucher.class))).thenReturn(voucher);

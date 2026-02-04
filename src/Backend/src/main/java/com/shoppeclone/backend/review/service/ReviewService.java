@@ -42,4 +42,14 @@ public interface ReviewService {
      * Get average rating for a product
      */
     Double getAverageRating(String productId);
+
+    /**
+     * Check if a user can review a specific product from an order
+     */
+    boolean canUserReviewOrder(String userId, String orderId, String productId);
+
+    /**
+     * Get all orders that the user can review
+     */
+    List<String> getReviewableOrderIds(String userId);
 }

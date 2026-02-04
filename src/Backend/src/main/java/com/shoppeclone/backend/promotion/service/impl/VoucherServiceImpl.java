@@ -23,4 +23,10 @@ public class VoucherServiceImpl implements VoucherService {
     public Voucher createVoucher(Voucher voucher) {
         return voucherRepository.save(voucher);
     }
+
+    @Override
+    public Voucher getVoucherByCode(String code) {
+        return voucherRepository.findByCode(code)
+                .orElseThrow(() -> new RuntimeException("Voucher not found: " + code));
+    }
 }
