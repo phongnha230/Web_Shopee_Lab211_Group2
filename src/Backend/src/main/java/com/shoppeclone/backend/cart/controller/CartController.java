@@ -2,7 +2,7 @@ package com.shoppeclone.backend.cart.controller;
 
 import com.shoppeclone.backend.auth.model.User;
 import com.shoppeclone.backend.auth.repository.UserRepository;
-import com.shoppeclone.backend.cart.entity.Cart;
+import com.shoppeclone.backend.cart.dto.CartResponse;
 import com.shoppeclone.backend.cart.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,13 +25,13 @@ public class CartController {
     }
 
     @GetMapping
-    public ResponseEntity<Cart> getCart(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<CartResponse> getCart(@AuthenticationPrincipal UserDetails userDetails) {
         String userId = getUserId(userDetails);
         return ResponseEntity.ok(cartService.getCart(userId));
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Cart> addToCart(
+    public ResponseEntity<CartResponse> addToCart(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam String variantId,
             @RequestParam int quantity) {
@@ -40,7 +40,7 @@ public class CartController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<Cart> updateCartItem(
+    public ResponseEntity<CartResponse> updateCartItem(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam String variantId,
             @RequestParam int quantity) {
@@ -49,7 +49,7 @@ public class CartController {
     }
 
     @DeleteMapping("/remove")
-    public ResponseEntity<Cart> removeCartItem(
+    public ResponseEntity<CartResponse> removeCartItem(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam String variantId) {
         String userId = getUserId(userDetails);

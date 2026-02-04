@@ -89,14 +89,14 @@
     <div class="bg-white border-b sticky top-16 z-40">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex space-x-8">
-                <button class="py-4 px-2 border-b-2 border-orange-500 text-orange-600 font-semibold">
+                <button id="tab-product" onclick="switchTab('product')" class="py-4 px-2 border-b-2 border-orange-500 text-orange-600 font-semibold transition-colors">
                     Product Discounts
                 </button>
-                <button class="py-4 px-2 text-gray-600 hover:text-orange-500">
+                <button id="tab-shipping" onclick="switchTab('shipping')" class="py-4 px-2 text-gray-600 hover:text-orange-500 transition-colors">
                     Free Shipping
                 </button>
-                <button class="py-4 px-2 text-gray-600 hover:text-orange-500">
-                    Collected (3)
+                <button id="tab-collected" onclick="switchTab('collected')" class="py-4 px-2 text-gray-600 hover:text-orange-500 transition-colors">
+                    Collected (<span id="collectedCount">3</span>)
                 </button>
             </div>
         </div>
@@ -128,6 +128,7 @@
         const VOUCHERS = [
             {
                 id: 'PD001',
+                code: 'ELECTRO10',
                 type: 'product',
                 title: '10% OFF Electronics',
                 discount: '10% OFF',
@@ -140,6 +141,7 @@
             },
             {
                 id: 'PD002',
+                code: 'FASHION20',
                 type: 'product',
                 title: '20% OFF Fashion Items',
                 discount: '20% OFF',
@@ -152,6 +154,7 @@
             },
             {
                 id: 'PD003',
+                code: 'WELCOME50',
                 type: 'product',
                 title: '50% OFF First Order',
                 discount: '50% OFF',
@@ -164,6 +167,7 @@
             },
             {
                 id: 'PD004',
+                code: 'MOBILE15',
                 type: 'product',
                 title: '15% OFF Mobile Phones',
                 discount: '15% OFF',
@@ -176,6 +180,7 @@
             },
             {
                 id: 'PD005',
+                code: 'SPORT30',
                 type: 'product',
                 title: '₫30 OFF Sports Items',
                 discount: '₫30 OFF',
@@ -188,6 +193,7 @@
             },
             {
                 id: 'PD006',
+                code: 'HOME25',
                 type: 'product',
                 title: '25% OFF Home & Living',
                 discount: '25% OFF',
@@ -197,13 +203,90 @@
                 icon: '🏠',
                 collected: false,
                 stock: 234
+            },
+            {
+                id: 'FS001',
+                code: 'FREESHIP15',
+                type: 'shipping',
+                title: 'Free Shipping Voucher',
+                discount: '₫15k OFF',
+                minOrder: '₫50',
+                expiry: '31 Jan 2026',
+                color: 'voucher-green',
+                icon: '🚚',
+                collected: false,
+                stock: 234
+            },
+            {
+                id: 'FS002',
+                code: 'SUPER30',
+                type: 'shipping',
+                title: 'Super Freeship Voucher',
+                discount: '₫30k OFF',
+                minOrder: '₫100',
+                expiry: '15 Feb 2026',
+                color: 'voucher-blue',
+                icon: '🚀',
+                collected: false,
+                stock: 89
+            },
+            {
+                id: 'FS003',
+                code: 'EXPRESS25',
+                type: 'shipping',
+                title: 'Express Delivery Free',
+                discount: '₫25k OFF',
+                minOrder: '₫75',
+                expiry: '28 Feb 2026',
+                color: 'voucher-orange',
+                icon: '⚡',
+                collected: false,
+                stock: 156
             }
         ];
 
+        let currentTab = 'product';
+
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Update Tab UI
+            document.querySelectorAll('button[id^="tab-"]').forEach(btn => {
+                btn.className = 'py-4 px-2 text-gray-600 hover:text-orange-500 transition-colors border-b-2 border-transparent';
+            });
+            
+            const activeBtn = document.getElementById(`tab-${tab}`);
+            activeBtn.className = 'py-4 px-2 border-b-2 border-orange-500 text-orange-600 font-semibold transition-colors';
+            
+            renderVouchers();
+        }
+
         function renderVouchers() {
             const container = document.getElementById('vouchersContainer');
+            
+            // Filter Logic
+            let filteredVouchers = [];
+            if (currentTab === 'collected') {
+                filteredVouchers = VOUCHERS.filter(v => v.collected);
+            } else {
+                filteredVouchers = VOUCHERS.filter(v => v.type === currentTab);
+            }
 
-            container.innerHTML = VOUCHERS.map(v => `
+            // Update Collected Count
+            const collectedCount = VOUCHERS.filter(v => v.collected).length;
+            document.getElementById('collectedCount').textContent = collectedCount;
+
+            if (filteredVouchers.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-400">
+                        <div class="text-5xl mb-4">🏷️</div>
+                        <p>No vouchers found in this category.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredVouchers.map(v => `
                 <div class="voucher-card ${v.color} rounded-lg p-3 text-white shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-1 relative">
                     <div class="relative z-10">
                         <div class="flex items-start justify-between mb-2">
@@ -213,7 +296,10 @@
                             </div>
                         </div>
                         
-                        <h3 class="text-sm font-bold mb-2 line-clamp-2">${v.title}</h3>
+                        <h3 class="text-sm font-bold mb-1 line-clamp-2">${v.title}</h3>
+                        <div class="text-xs font-mono bg-black/20 inline-block px-1.5 rounded mb-2" title="Voucher Code">
+                            <i class="fas fa-key mr-1"></i>${v.code}
+                        </div>
                         
                         <div class="flex items-center gap-1 mb-2">
                             <div class="text-xl font-bold">${v.discount}</div>
@@ -229,37 +315,42 @@
                             </div>
                         </div>
                         
-                        <button 
-                            onclick="collectVoucher('${v.id}')" 
-                            id="btn-${v.id}"
-                            class="${v.collected ? 'bg-gray-400 cursor-not-allowed' : 'bg-white text-orange-600 hover:bg-orange-50'} 
-                                   w-full mt-2 py-2 rounded-lg text-sm font-bold transition-all transform active:scale-95">
-                            ${v.collected ? '✓ Collected' : 'Collect Now'}
-                        </button>
+                        <div class="mt-2">
+                            ${v.collected ? 
+                                `<button onclick="useVoucher('${v.code}')" 
+                                    class="bg-white text-orange-600 hover:bg-orange-50 w-full py-2 rounded-lg text-sm font-bold transition-all transform active:scale-95 shadow-sm">
+                                    Use Now
+                                </button>` 
+                                : 
+                                `<button onclick="collectVoucher('${v.id}')" 
+                                    class="bg-white/90 text-orange-600 hover:bg-white w-full py-2 rounded-lg text-sm font-bold transition-all transform active:scale-95 shadow-sm">
+                                    Collect Now
+                                </button>`
+                            }
+                        </div>
                     </div>
                 </div>
             `).join('');
         }
 
+        function useVoucher(code) {
+            const voucher = VOUCHERS.find(v => v.code === code);
+            const type = voucher && voucher.type === 'product' ? 'PRODUCT' : 'SHIPPING';
+            
+            // Save to localStorage for robust transfer
+            localStorage.setItem('autoApplyVoucher', JSON.stringify({ code, type }));
+            
+            // Redirect to checkout
+            window.location.href = 'checkout-backend.html';
+        }
+
         function collectVoucher(id) {
             const voucher = VOUCHERS.find(v => v.id === id);
             if (!voucher || voucher.collected) return;
-
+            
             voucher.collected = true;
-
-            // Update button
-            const btn = document.getElementById(`btn-${id}`);
-            btn.innerHTML = '✓ Collected';
-            btn.className = 'bg-gray-400 cursor-not-allowed w-full mt-4 py-3 rounded-lg font-bold';
-
-            // Show success animation
-            const card = btn.closest('.voucher-card');
-            card.style.transform = 'scale(1.05)';
-            setTimeout(() => {
-                card.style.transform = 'scale(1)';
-            }, 200);
-
-            // Success notification
+            renderVouchers(); // Re-render to update UI (and move to Collected tab if needed)
+            
             showToast('🎉 Voucher collected! Check "Collected" tab to use it.');
         }
 

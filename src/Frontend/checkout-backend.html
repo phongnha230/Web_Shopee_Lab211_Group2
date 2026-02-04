@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout (Backend Integrated) - Shopee Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<script>
+    // AUTH GUARD
+    if (!localStorage.getItem('accessToken')) {
+        alert('⚠️ You must login to checkout!');
+        window.location.href = 'login.html';
+    }
+</script>
+
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-orange-500 to-orange-600 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center py-4">
+                <i class="fas fa-shopping-bag text-3xl text-white mr-3"></i>
+                <span class="text-2xl font-bold text-white">Shopee Clone</span>
+                <span class="mx-4 text-white">|</span>
+                <span class="text-xl text-white">Checkout (Backend)</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Loading State -->
+    <div id="loadingCheckout" class="max-w-7xl mx-auto px-4 py-12 text-center">
+        <i class="fas fa-spinner fa-spin text-4xl text-orange-500 mb-4"></i>
+        <p class="text-gray-600">Loading checkout...</p>
+    </div>
+
+    <!-- Empty Cart State -->
+    <div id="emptyCart" class="hidden max-w-7xl mx-auto px-4 py-12 text-center">
+        <img src="https://deo.shopeemobile.com/shopee/shopee-pcmall-live-sg/cart/9bdd8040b334d31946f4.png" 
+             alt="Empty Cart" class="w-32 mx-auto mb-4">
+        <p class="text-gray-500 text-lg mb-6">Your cart is empty!</p>
+        <a href="index.html" class="bg-orange-500 text-white px-10 py-2.5 rounded hover:bg-orange-600">
+            Go Shopping
+        </a>
+    </div>
+
+    <!-- Main Checkout Content -->
+    <main id="checkoutContent" class="hidden max-w-7xl mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Checkout Form -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Delivery Address -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold flex items-center">
+                            <i class="fas fa-map-marker-alt text-orange-500 mr-2"></i>
+                            Delivery Address
+                        </h2>
+                    </div>
+
+                    <!-- Address Form -->
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input id="inputName" type="text" placeholder="Full Name*" required
+                                class="border rounded px-4 py-2 focus:outline-none focus:border-orange-500">
+                            <input id="inputPhone" type="tel" placeholder="Phone Number*" required
+                                class="border rounded px-4 py-2 focus:outline-none focus:border-orange-500">
+                        </div>
+                        <input id="inputStreet" type="text" placeholder="Street Address*" required
+                            class="w-full border rounded px-4 py-2 focus:outline-none focus:border-orange-500">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <input id="inputCity" type="text" placeholder="City*" required
+                                class="border rounded px-4 py-2 focus:outline-none focus:border-orange-500">
+                            <input id="inputState" type="text" placeholder="State/Province*" required
+                                class="border rounded px-4 py-2 focus:outline-none focus:border-orange-500">
+                            <input id="inputZip" type="text" placeholder="Postal Code*" required
+                                class="border rounded px-4 py-2 focus:outline-none focus:border-orange-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Ordered -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-box text-orange-500 mr-2"></i>
+                        Products Ordered
+                    </h2>
+                    <div id="checkoutItems" class="space-y-4">
+                        <!-- Items rendered via JS -->
+                    </div>
+                </div>
+
+                <!-- Shipping Options -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-shipping-fast text-orange-500 mr-2"></i>
+                        Shipping Options
+                    </h2>
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 p-3 border rounded hover:bg-orange-50 cursor-pointer">
+                            <input type="radio" name="shipping" value="standard" checked class="text-orange-500">
+                            <div class="flex-1">
+                                <div class="font-semibold">Standard Shipping</div>
+                                <div class="text-sm text-gray-500">Delivery in 3-5 business days</div>
+                            </div>
+                            <div class="font-bold text-orange-500">₫15</div>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border rounded hover:bg-orange-50 cursor-pointer">
+                            <input type="radio" name="shipping" value="express" class="text-orange-500">
+                            <div class="flex-1">
+                                <div class="font-semibold">Express Shipping</div>
+                                <div class="text-sm text-gray-500">Delivery in 1-2 business days</div>
+                            </div>
+                            <div class="font-bold text-orange-500">₫30</div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Vouchers Section -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-ticket-alt text-orange-500 mr-2"></i>
+                        Vouchers
+                    </h2>
+                    
+                    <!-- Shop Voucher -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-tag text-orange-500 mr-1"></i> Shop Voucher
+                        </label>
+                        <div class="flex gap-2">
+                            <button onclick="openVoucherPicker('PRODUCT')" 
+                                class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-all border border-gray-300"
+                                title="Select from collected vouchers">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <input type="text" id="inputProductVoucher" 
+                                class="flex-1 bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-orange-500 transition-colors uppercase"
+                                placeholder="Enter Shop Voucher Code">
+                            <button onclick="applyProductVoucher()" 
+                                class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg text-sm font-bold transition-all shadow-md active:scale-95">
+                                Apply
+                            </button>
+                        </div>
+                        <div id="productVoucherMessage" class="h-5 mt-1 text-xs"></div>
+                    </div>
+
+                    <!-- Shipping Voucher -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-shipping-fast text-green-500 mr-1"></i> Free Shipping Voucher
+                        </label>
+                        <div class="flex gap-2">
+                            <button onclick="openVoucherPicker('SHIPPING')" 
+                                class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-all border border-gray-300"
+                                title="Select from collected vouchers">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <input type="text" id="inputShippingVoucher" 
+                                class="flex-1 bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors uppercase"
+                                placeholder="Enter Free Shipping Code">
+                            <button onclick="applyShippingVoucher()" 
+                                class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-bold transition-all shadow-md active:scale-95">
+                                Apply
+                            </button>
+                        </div>
+                        <div id="shippingVoucherMessage" class="h-5 mt-1 text-xs"></div>
+                    </div>
+
+                    <!-- Apply Both Button -->
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <button onclick="applyBothVouchers()" 
+                            class="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-3 rounded-lg font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2">
+                            <i class="fas fa-bolt"></i>
+                            Apply Both Vouchers
+                        </button>
+                        <p class="text-xs text-gray-500 text-center mt-2">Apply both Shop & Shipping vouchers at once</p>
+                    </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-credit-card text-orange-500 mr-2"></i>
+                        Payment Method
+                    </h2>
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 p-3 border rounded hover:bg-orange-50 cursor-pointer">
+                            <input type="radio" name="payment" value="COD" checked class="text-orange-500">
+                            <i class="fas fa-money-bill-wave text-green-500 text-xl"></i>
+                            <div class="flex-1">
+                                <div class="font-semibold">Cash on Delivery (COD)</div>
+                                <div class="text-sm text-gray-500">Pay when you receive</div>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border rounded hover:bg-orange-50 cursor-pointer">
+                            <input type="radio" name="payment" value="CREDIT_CARD" class="text-orange-500">
+                            <i class="fas fa-credit-card text-blue-500 text-xl"></i>
+                            <div class="flex-1">
+                                <div class="font-semibold">Credit/Debit Card</div>
+                                <div class="text-sm text-gray-500">Visa, Mastercard, etc.</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary (Sticky Sidebar) -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow p-6 sticky top-6">
+                    <h2 class="text-xl font-bold mb-4">Order Summary</h2>
+                    
+                    <div class="space-y-3 text-sm mb-4 pb-4 border-b">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Subtotal (<span id="itemCount">0</span> items)</span>
+                            <span id="subtotal" class="font-medium">₫0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Shipping Fee</span>
+                            <span id="shippingFee" class="font-medium">₫15</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center mb-6 pb-4 border-b">
+                        <span class="text-lg font-semibold">Total</span>
+                        <span id="total" class="text-2xl font-bold text-orange-500">₫0</span>
+                    </div>
+
+                    <button onclick="placeOrder()" id="placeOrderBtn"
+                        class="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded font-bold uppercase shadow-lg transition">
+                        Place Order
+                    </button>
+
+                    <p class="text-xs text-gray-400 text-center mt-3">
+                        By placing order, you agree to our Terms & Conditions
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Load API Service -->
+    <script src="js/services/api.js"></script>
+
+    <script>
+        let backendCart = null;
+        let shippingFee = 15;
+
+        // Load cart from backend
+        async function loadCart() {
+            try {
+                document.getElementById('loadingCheckout').classList.remove('hidden');
+                document.getElementById('emptyCart').classList.add('hidden');
+                document.getElementById('checkoutContent').classList.add('hidden');
+
+                backendCart = await CartAPI.getCart();
+                console.log('Cart loaded:', backendCart);
+
+                if (!backendCart || !backendCart.items || backendCart.items.length === 0) {
+                    showEmptyCart();
+                    return;
+                }
+
+                renderCheckout();
+            } catch (error) {
+                console.error('Error loading cart:', error);
+                alert('Failed to load cart: ' + error.message);
+                showEmptyCart();
+            } finally {
+                document.getElementById('loadingCheckout').classList.add('hidden');
+            }
+        }
+
+        function showEmptyCart() {
+            document.getElementById('emptyCart').classList.remove('hidden');
+            document.getElementById('checkoutContent').classList.add('hidden');
+        }
+
+        function renderCheckout() {
+            document.getElementById('checkoutContent').classList.remove('hidden');
+            
+            const container = document.getElementById('checkoutItems');
+            container.innerHTML = backendCart.items.map(item => `
+                <div class="flex gap-4 pb-4 border-b last:border-0">
+                    <img src="${item.productImage || 'https://via.placeholder.com/80'}" 
+                         alt="${item.productName}" 
+                         class="w-20 h-20 object-cover rounded border">
+                    <div class="flex-1">
+                        <h3 class="font-medium text-gray-800 mb-1">${item.productName}</h3>
+                        ${item.variantName ? `<p class="text-sm text-gray-500">Variant: ${item.variantName}</p>` : ''}
+                        <p class="text-sm text-gray-500">Quantity: ${item.quantity}</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold text-orange-500">₫${(item.price * item.quantity).toFixed(2)}</div>
+                        <div class="text-xs text-gray-400">₫${item.price} each</div>
+                    </div>
+                </div>
+            `).join('');
+
+            updateSummary();
+            prefillAddress();
+        }
+
+        function updateSummary() {
+            const subtotal = backendCart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const itemCount = backendCart.items.reduce((sum, item) => sum + item.quantity, 0);
+            
+            // Calculate effective shipping fee
+            let effectiveShipping = Math.max(0, shippingFee - shippingDiscountAmount);
+
+            // Total calculation
+            const total = Math.max(0, subtotal + effectiveShipping - discountAmount);
+
+            document.getElementById('itemCount').textContent = itemCount;
+            document.getElementById('subtotal').textContent = `₫${subtotal.toFixed(2)}`;
+            document.getElementById('shippingFee').textContent = `₫${shippingFee.toFixed(2)}`;
+            
+            // Update Discount Rows in DOM
+            updateDiscountRows();
+
+            document.getElementById('total').textContent = `₫${total.toFixed(2)}`;
+        }
+
+        function updateDiscountRows() {
+             // Clear existing discount rows
+             document.querySelectorAll('.discount-row').forEach(row => row.remove());
+             
+             const totalRow = document.getElementById('total').parentElement;
+             const summaryContainer = totalRow.parentElement;
+
+             // 1. Product Discount Row
+             if (discountAmount > 0) {
+                 const row = document.createElement('div');
+                 row.className = 'flex justify-between text-orange-600 mb-2 discount-row';
+                 row.innerHTML = `<span class="flex items-center"><i class="fas fa-ticket-alt mr-2"></i>Shop Voucher</span><span class="font-medium">-₫${discountAmount.toFixed(2)}</span>`;
+                 summaryContainer.insertBefore(row, totalRow);
+             }
+
+             // 2. Shipping Discount Row
+             if (shippingDiscountAmount > 0) {
+                 const row = document.createElement('div');
+                 row.className = 'flex justify-between text-green-600 mb-2 discount-row';
+                 row.innerHTML = `<span class="flex items-center"><i class="fas fa-shipping-fast mr-2"></i>Shipping Discount</span><span class="font-medium">-₫${shippingDiscountAmount.toFixed(2)}</span>`;
+                 summaryContainer.insertBefore(row, totalRow);
+             }
+        }
+
+        function prefillAddress() {
+            const userName = localStorage.getItem('userName') || '';
+            document.getElementById('inputName').value = userName;
+        }
+
+        // Place Order
+        async function placeOrder() {
+            // Validate address
+            const name = document.getElementById('inputName').value.trim();
+            const phone = document.getElementById('inputPhone').value.trim();
+            const street = document.getElementById('inputStreet').value.trim();
+            const city = document.getElementById('inputCity').value.trim();
+            const state = document.getElementById('inputState').value.trim();
+            const zip = document.getElementById('inputZip').value.trim();
+
+            if (!name || !phone || !street || !city || !state) {
+                alert('⚠️ Please fill in all required address fields!');
+                return;
+            }
+
+            // Get payment method
+            const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+
+            // Prepare order data
+            const orderData = {
+                items: backendCart.items.map(item => ({
+                    variantId: item.variantId,
+                    quantity: item.quantity,
+                    price: item.price
+                })),
+                shippingAddress: {
+                    fullName: name,
+                    phone: phone,
+                    street: street,
+                    city: city,
+                    state: state,
+                    postalCode: zip
+                },
+                paymentMethod: paymentMethod,
+                shippingFee: shippingFee,
+                shippingProviderId: document.querySelector('input[name="shipping"]:checked').value,
+                voucherCode: appliedProductVoucherCode,
+                shippingVoucherCode: appliedShippingVoucherCode
+            };
+
+            console.log('Creating order:', orderData);
+
+            // Disable button
+            const btn = document.getElementById('placeOrderBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+
+            try {
+                // Create order via backend
+                const order = await OrderAPI.createOrder(orderData);
+                console.log('Order created:', order);
+
+                // Process payment if not COD
+                if (paymentMethod !== 'COD') {
+                    const payment = await PaymentAPI.createPayment(order.id, paymentMethod);
+                    console.log('Payment created:', payment);
+                    
+                    // If payment gateway redirect needed
+                    if (payment.redirectUrl) {
+                        window.location.href = payment.redirectUrl;
+                        return;
+                    }
+                }
+
+                // Clear cart after successful order
+                await CartAPI.clearCart();
+                console.log('Cart cleared');
+
+                // Redirect to success page
+                window.location.href = `order-success-backend.html?orderId=${order.id}`;
+
+            } catch (error) {
+                console.error('Order placement failed:', error);
+                alert('❌ Failed to place order: ' + error.message);
+                
+                // Re-enable button
+                btn.disabled = false;
+                btn.innerHTML = 'Place Order';
+            }
+        }
+
+        // Voucher Logic
+        let appliedProductVoucherCode = null;
+        let discountAmount = 0;
+        let appliedShippingVoucherCode = null;
+        let shippingDiscountAmount = 0;
+
+        async function applyProductVoucher() {
+            applyVoucherLogic('inputProductVoucher', 'productVoucherMessage', 'PRODUCT');
+        }
+
+        async function applyShippingVoucher() {
+            applyVoucherLogic('inputShippingVoucher', 'shippingVoucherMessage', 'SHIPPING');
+        }
+
+        async function applyBothVouchers() {
+            const productCode = document.getElementById('inputProductVoucher').value.trim();
+            const shippingCode = document.getElementById('inputShippingVoucher').value.trim();
+
+            if (!productCode && !shippingCode) {
+                alert('⚠️ Please enter at least one voucher code');
+                return;
+            }
+
+            // Apply both in parallel
+            const promises = [];
+            if (productCode) promises.push(applyVoucherLogic('inputProductVoucher', 'productVoucherMessage', 'PRODUCT'));
+            if (shippingCode) promises.push(applyVoucherLogic('inputShippingVoucher', 'shippingVoucherMessage', 'SHIPPING'));
+
+            await Promise.all(promises);
+        }
+
+        async function applyVoucherLogic(inputId, messageId, type) {
+            const codeInput = document.getElementById(inputId);
+            const messageEl = document.getElementById(messageId);
+            const code = codeInput.value.trim().toUpperCase();
+
+            if (!code) {
+                alert('Please enter a code');
+                return;
+            }
+
+            try {
+                const voucher = await VoucherAPI.getByCode(code);
+                
+                // --- Validation ---
+                // Type Check
+                if (type === 'PRODUCT' && voucher.type && voucher.type !== 'PRODUCT') throw new Error('Not a Shop Voucher');
+                if (type === 'SHIPPING' && voucher.type && voucher.type !== 'SHIPPING') throw new Error('Not a Shipping Voucher');
+
+                // Active & Expiry
+                if (!voucher.active) throw new Error('Voucher is inactive');
+                const now = new Date();
+                if (voucher.endDate && new Date(voucher.endDate) < now) throw new Error('Voucher has expired');
+                if (voucher.quantity <= 0) throw new Error('Out of stock');
+
+                const subtotal = backendCart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                if (voucher.minSpend && subtotal < voucher.minSpend) throw new Error(`Min spend ₫${voucher.minSpend}`);
+
+                // --- Calculation ---
+                let calculatedDiscount = 0;
+                let baseAmount = (type === 'SHIPPING') ? shippingFee : subtotal;
+
+                if (type === 'SHIPPING' && shippingFee === 0) throw new Error('No shipping fee to apply discount');
+
+                if (voucher.discountType === 'PERCENTAGE') {
+                    calculatedDiscount = (baseAmount * voucher.discountValue) / 100;
+                    if (voucher.maxDiscount && calculatedDiscount > voucher.maxDiscount) {
+                        calculatedDiscount = voucher.maxDiscount;
+                    }
+                } else {
+                    calculatedDiscount = voucher.discountValue;
+                }
+
+                if (calculatedDiscount > baseAmount) calculatedDiscount = baseAmount;
+
+                // --- Update State ---
+                if (type === 'PRODUCT') {
+                    discountAmount = calculatedDiscount;
+                    appliedProductVoucherCode = code;
+                    messageEl.className = "h-5 mt-1 text-xs text-green-600 font-bold";
+                    messageEl.textContent = `✅ -₫${calculatedDiscount.toFixed(2)}`;
+                } else {
+                    shippingDiscountAmount = calculatedDiscount;
+                    appliedShippingVoucherCode = code;
+                    messageEl.className = "h-5 mt-1 text-xs text-green-600 font-bold";
+                    messageEl.textContent = `✅ -₫${calculatedDiscount.toFixed(2)}`;
+                }
+                
+                codeInput.disabled = true; // Lock
+                updateSummary();
+
+            } catch (error) {
+                console.error(error);
+                let msg = error.message;
+                if (msg.includes('404')) msg = 'Voucher not found';
+                messageEl.textContent = `❌ ${msg}`;
+                messageEl.className = "h-5 mt-1 text-xs text-red-500 font-bold";
+                
+                // Clear state on error? For now, keep previous valid if any, or reset?
+                // Let's reset the specific slot
+                if (type === 'PRODUCT' && appliedProductVoucherCode === code) {
+                     discountAmount = 0;
+                     appliedProductVoucherCode = null;
+                     updateSummary();
+                } else if (type === 'SHIPPING' && appliedShippingVoucherCode === code) {
+                     shippingDiscountAmount = 0;
+                     appliedShippingVoucherCode = null;
+                     updateSummary();
+                }
+            }
+        }
+
+        // Update shipping fee when option changes
+        document.addEventListener('change', (e) => {
+            if (e.target.name === 'shipping') {
+                shippingFee = e.target.value === 'express' ? 30 : 15;
+                updateSummary();
+            }
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('Page loaded, initializing...');
+            await loadCart();
+            
+            // Check for voucher in LocalStorage (set by vouchers.html)
+            const storedVoucher = localStorage.getItem('autoApplyVoucher');
+            let voucherCode, voucherType;
+
+            if (storedVoucher) {
+                try {
+                    const parsed = JSON.parse(storedVoucher);
+                    voucherCode = parsed.code;
+                    voucherType = parsed.type;
+                    console.log('Found stored voucher:', parsed);
+                    // Clear immediately to prevent re-apply on refresh
+                    localStorage.removeItem('autoApplyVoucher'); 
+                } catch (e) {
+                    console.error('Error parsing stored voucher', e);
+                }
+            } else {
+                 // Fallback to URL params
+                const urlParams = new URLSearchParams(window.location.search);
+                voucherCode = urlParams.get('voucherCode');
+                voucherType = urlParams.get('voucherType');
+            }
+
+            console.log('Processing Voucher:', { voucherCode, voucherType });
+
+            if (voucherCode && voucherType) {
+                if (voucherType === 'PRODUCT') {
+                    const input = document.getElementById('inputProductVoucher');
+                    if (input) {
+                        input.value = voucherCode;
+                        console.log('Auto-applying Product Voucher:', voucherCode);
+                        await applyProductVoucher(); 
+                    }
+                } else if (voucherType === 'SHIPPING') {
+                    const input = document.getElementById('inputShippingVoucher');
+                    if (input) {
+                        input.value = voucherCode;
+                        console.log('Auto-applying Shipping Voucher:', voucherCode);
+                        await applyShippingVoucher();
+                    }
+                }
+                
+                // Clean up URL if matched via URL
+                if (!storedVoucher) {
+                     window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            }
+        });
+    </script>
+
+    <!-- Voucher Picker Modal -->
+    <div id="voucherPickerModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[85vh] overflow-hidden">
+            <!-- Header -->
+            <div class="flex items-center justify-between p-6 border-b bg-gradient-to-r from-orange-500 to-orange-600">
+                <h3 class="text-xl font-bold flex items-center text-white">
+                    <i class="fas fa-ticket-alt mr-2"></i>
+                    Select <span id="modalVoucherType" class="ml-1"></span> Voucher
+                </h3>
+                <button onclick="closeVoucherPicker()" class="text-white hover:text-orange-200 text-2xl transition">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Voucher Grid -->
+            <div id="voucherList" class="p-6 overflow-y-auto max-h-[calc(85vh-80px)]">
+                <div class="text-center py-12">
+                    <i class="fas fa-spinner fa-spin text-4xl text-orange-500 mb-3"></i>
+                    <p class="text-gray-600">Loading vouchers...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .voucher-orange {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
+        }
+        .voucher-green {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+        }
+        .voucher-blue {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .voucher-purple {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+
+    <script>
+        // Voucher Picker Logic
+        let currentVoucherType = null;
+
+        async function openVoucherPicker(type) {
+            currentVoucherType = type;
+            const modal = document.getElementById('voucherPickerModal');
+            const typeLabel = type === 'PRODUCT' ? 'Shop' : 'Free Shipping';
+            document.getElementById('modalVoucherType').textContent = typeLabel;
+            
+            modal.classList.remove('hidden');
+
+            // Load vouchers
+            try {
+                const vouchers = await VoucherAPI.getAllVouchers();
+                const filtered = vouchers.filter(v => v.type === type && v.status === 'ACTIVE');
+                
+                renderVoucherCards(filtered);
+            } catch (error) {
+                console.error('Error loading vouchers:', error);
+                document.getElementById('voucherList').innerHTML = `
+                    <div class="text-center py-12">
+                        <i class="fas fa-exclamation-circle text-4xl text-red-500 mb-3"></i>
+                        <p class="text-gray-600 font-semibold">Failed to load vouchers</p>
+                        <p class="text-sm text-gray-500 mt-2">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function closeVoucherPicker() {
+            document.getElementById('voucherPickerModal').classList.add('hidden');
+        }
+
+        function renderVoucherCards(vouchers) {
+            const container = document.getElementById('voucherList');
+            
+            if (vouchers.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="text-6xl mb-4">🏷️</div>
+                        <p class="text-gray-500 text-lg font-semibold mb-2">No vouchers available</p>
+                        <p class="text-sm text-gray-400 mb-4">Check back later for new vouchers</p>
+                        <a href="vouchers.html" class="inline-block bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg font-bold transition">
+                            <i class="fas fa-arrow-right mr-2"></i>Browse All Vouchers
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            const getColorClass = (type, index) => {
+                if (type === 'PRODUCT') {
+                    const colors = ['voucher-orange', 'voucher-purple', 'voucher-blue'];
+                    return colors[index % colors.length];
+                } else {
+                    const colors = ['voucher-green', 'voucher-blue'];
+                    return colors[index % colors.length];
+                }
+            };
+
+            const getIcon = (type) => type === 'PRODUCT' ? '🎫' : '🚚';
+
+            container.innerHTML = `
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    ${vouchers.map((v, index) => {
+                        const isExpired = new Date(v.endDate) < new Date();
+                        const discountText = v.discountType === 'PERCENTAGE' 
+                            ? `${v.discountValue}% OFF` 
+                            : `₫${v.discountValue} OFF`;
+                        const colorClass = getColorClass(v.type, index);
+                        const icon = getIcon(v.type);
+
+                        return `
+                        <div class="voucher-card ${colorClass} rounded-lg p-4 text-white shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-1 relative ${isExpired ? 'opacity-50' : ''}">
+                            <div class="relative z-10">
+                                <!-- Icon and Stock -->
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="text-3xl">${icon}</div>
+                                    <div class="bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-semibold">
+                                        999 left
+                                    </div>
+                                </div>
+                                
+                                <!-- Code -->
+                                <div class="text-xs font-mono bg-black/20 inline-block px-2 py-1 rounded mb-2" title="Voucher Code">
+                                    <i class="fas fa-key mr-1"></i>${v.code}
+                                </div>
+                                
+                                <!-- Discount -->
+                                <div class="text-2xl font-bold mb-2">${discountText}</div>
+                                
+                                <!-- Min Spend -->
+                                ${v.minSpend ? `
+                                    <div class="bg-white/20 px-2 py-1 rounded text-xs inline-block mb-2">
+                                        Min. ₫${v.minSpend}
+                                    </div>
+                                ` : ''}
+                                
+                                <!-- Expiry -->
+                                <div class="text-xs opacity-90 mb-3">
+                                    <i class="far fa-clock mr-1"></i>
+                                    ${new Date(v.endDate).toLocaleDateString()}
+                                </div>
+                                
+                                <!-- Use Button -->
+                                <button onclick="selectVoucher('${v.code}')" 
+                                    ${isExpired ? 'disabled' : ''}
+                                    class="w-full ${isExpired ? 'bg-gray-400 cursor-not-allowed' : 'bg-white/90 hover:bg-white'} ${isExpired ? 'text-gray-600' : 'text-orange-600'} py-2 rounded-lg font-bold text-sm transition shadow-md">
+                                    ${isExpired ? 'Expired' : 'Use Now'}
+                                </button>
+                            </div>
+                        </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function selectVoucher(code) {
+            // Auto-fill the input based on type
+            const inputId = currentVoucherType === 'PRODUCT' ? 'inputProductVoucher' : 'inputShippingVoucher';
+            document.getElementById(inputId).value = code;
+            
+            // Close modal
+            closeVoucherPicker();
+            
+            // Show success message
+            const typeLabel = currentVoucherType === 'PRODUCT' ? 'Shop' : 'Shipping';
+            const successIcon = currentVoucherType === 'PRODUCT' ? '🎫' : '🚚';
+            alert(`${successIcon} ${typeLabel} voucher "${code}" selected!\n\nClick the Apply button to use it.`);
+        }
+
+        // Close modal on background click
+        document.getElementById('voucherPickerModal').addEventListener('click', (e) => {
+            if (e.target.id === 'voucherPickerModal') {
+                closeVoucherPicker();
+            }
+        });
+    </script>
+</body>
+
+</html>

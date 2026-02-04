@@ -1,16 +1,27 @@
 package com.shoppeclone.backend.cart.service.impl;
 
+import com.shoppeclone.backend.cart.dto.CartItemResponse;
+import com.shoppeclone.backend.cart.dto.CartResponse;
 import com.shoppeclone.backend.cart.entity.Cart;
 import com.shoppeclone.backend.cart.entity.CartItem;
 import com.shoppeclone.backend.cart.repository.CartRepository;
 import com.shoppeclone.backend.cart.service.CartService;
+import com.shoppeclone.backend.product.entity.Product;
+import com.shoppeclone.backend.product.entity.ProductImage;
+import com.shoppeclone.backend.product.entity.ProductVariant;
+import com.shoppeclone.backend.product.repository.ProductImageRepository;
+import com.shoppeclone.backend.product.repository.ProductRepository;
 import com.shoppeclone.backend.product.repository.ProductVariantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -18,26 +29,35 @@ public class CartServiceImpl implements CartService {
 
     private final CartRepository cartRepository;
     private final ProductVariantRepository productVariantRepository;
+    private final ProductRepository productRepository;
+    private final ProductImageRepository productImageRepository;
 
     @Override
-    public Cart getCart(String userId) {
-        return cartRepository.findByUserId(userId)
+    public CartResponse getCart(String userId) {
+        Cart cart = cartRepository.findByUserId(userId)
                 .orElseGet(() -> {
-                    Cart cart = new Cart();
-                    cart.setUserId(userId);
-                    return cartRepository.save(cart);
+                    Cart newCart = new Cart();
+                    newCart.setUserId(userId);
+                    return cartRepository.save(newCart);
                 });
+        return mapToCartResponse(cart);
     }
 
     @Override
     @Transactional
-    public Cart addToCart(String userId, String variantId, int quantity) {
+    public CartResponse addToCart(String userId, String variantId, int quantity) {
         // Verify variant exists
         if (!productVariantRepository.existsById(variantId)) {
             throw new RuntimeException("Product variant not found: " + variantId);
         }
 
-        Cart cart = getCart(userId);
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseGet(() -> {
+                    Cart newCart = new Cart();
+                    newCart.setUserId(userId);
+                    return cartRepository.save(newCart);
+                });
+
         Optional<CartItem> existingItem = cart.getItems().stream()
                 .filter(item -> item.getVariantId().equals(variantId))
                 .findFirst();
@@ -53,13 +73,15 @@ public class CartServiceImpl implements CartService {
         }
 
         cart.setUpdatedAt(LocalDateTime.now());
-        return cartRepository.save(cart);
+        Cart savedCart = cartRepository.save(cart);
+        return mapToCartResponse(savedCart);
     }
 
     @Override
     @Transactional
-    public Cart updateCartItem(String userId, String variantId, int quantity) {
-        Cart cart = getCart(userId);
+    public CartResponse updateCartItem(String userId, String variantId, int quantity) {
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
 
         if (quantity <= 0) {
             return removeCartItem(userId, variantId);
@@ -71,16 +93,20 @@ public class CartServiceImpl implements CartService {
                 .ifPresent(item -> item.setQuantity(quantity));
 
         cart.setUpdatedAt(LocalDateTime.now());
-        return cartRepository.save(cart);
+        Cart savedCart = cartRepository.save(cart);
+        return mapToCartResponse(savedCart);
     }
 
     @Override
     @Transactional
-    public Cart removeCartItem(String userId, String variantId) {
-        Cart cart = getCart(userId);
+    public CartResponse removeCartItem(String userId, String variantId) {
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+
         cart.getItems().removeIf(item -> item.getVariantId().equals(variantId));
         cart.setUpdatedAt(LocalDateTime.now());
-        return cartRepository.save(cart);
+        Cart savedCart = cartRepository.save(cart);
+        return mapToCartResponse(savedCart);
     }
 
     @Override
@@ -91,5 +117,62 @@ public class CartServiceImpl implements CartService {
             cart.setUpdatedAt(LocalDateTime.now());
             cartRepository.save(cart);
         });
+    }
+
+    private CartResponse mapToCartResponse(Cart cart) {
+        List<CartItemResponse> itemResponses = cart.getItems().stream()
+                .map(item -> {
+                    Optional<ProductVariant> variantOpt = productVariantRepository.findById(item.getVariantId());
+                    if (variantOpt.isEmpty()) {
+                        // Variant might be deleted
+                        return null;
+                    }
+
+                    ProductVariant variant = variantOpt.get();
+                    Optional<Product> productOpt = productRepository.findById(variant.getProductId());
+
+                    if (productOpt.isEmpty()) {
+                        return null; // Product might be deleted
+                    }
+
+                    Product product = productOpt.get();
+
+                    // Get main image
+                    List<ProductImage> images = productImageRepository
+                            .findByProductIdOrderByDisplayOrderAsc(product.getId());
+                    String imageUrl = images.isEmpty() ? "" : images.get(0).getImageUrl();
+
+                    String variantName = (variant.getColor() != null ? variant.getColor() : "")
+                            + (variant.getSize() != null ? " - " + variant.getSize() : "");
+                    variantName = variantName.trim();
+                    if (variantName.startsWith("- "))
+                        variantName = variantName.substring(2);
+
+                    return CartItemResponse.builder()
+                            .variantId(item.getVariantId())
+                            .productId(product.getId())
+                            .productName(product.getName())
+                            .productImage(imageUrl)
+                            .variantName(variantName.isEmpty() ? "Default" : variantName)
+                            .price(variant.getPrice())
+                            .quantity(item.getQuantity())
+                            .stock(variant.getStock())
+                            .totalPrice(variant.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                            .build();
+
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        BigDecimal totalPrice = itemResponses.stream()
+                .map(CartItemResponse::getTotalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return CartResponse.builder()
+                .id(cart.getId())
+                .userId(cart.getUserId())
+                .items(itemResponses)
+                .totalPrice(totalPrice)
+                .build();
     }
 }
