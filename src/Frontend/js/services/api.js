@@ -52,7 +52,7 @@ const CartAPI = {
 
     // Remove item from cart
     removeItem: async (variantId) => {
-        const response = await fetch(`${API_BASE_URL}/cart/remove/${variantId}`, {
+        const response = await fetch(`${API_BASE_URL}/cart/remove?variantId=${variantId}`, {
             method: 'DELETE',
             headers: getAuthHeaders()
         });
