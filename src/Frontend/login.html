@@ -143,11 +143,18 @@
         async function signIn() {
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value.trim();
+            const btn = document.querySelector('button[onclick="signIn()"]');
+            const originalText = btn.innerText;
 
             if (!email || !password) {
                 alert('⚠️ Please enter email and password!');
                 return;
             }
+
+            // Disable button
+            btn.disabled = true;
+            btn.innerText = 'Signing in...';
+            btn.classList.add('opacity-70', 'cursor-not-allowed');
 
             try {
                 const response = await fetch('http://localhost:8080/api/auth/login', {
@@ -162,8 +169,6 @@
                     localStorage.setItem('accessToken', data.accessToken);
                     localStorage.setItem('userName', data.user?.fullName || email.split('@')[0]);
 
-                    // Store roles if available in response, or just check immediately
-                    // Assuming data.user.roles is a Set/List of strings or objects
                     const roles = data.user?.roles || [];
                     const isAdmin = roles.some(r => (typeof r === 'string' ? r : r.name) === 'ROLE_ADMIN');
 
@@ -174,10 +179,18 @@
                     }
                 } else {
                     alert('❌ ' + (data.message || 'Login failed'));
+                    // Re-enable button on error
+                    btn.disabled = false;
+                    btn.innerText = originalText;
+                    btn.classList.remove('opacity-70', 'cursor-not-allowed');
                 }
             } catch (error) {
                 console.error(error);
                 alert('❌ Server connection error');
+                // Re-enable button on error
+                btn.disabled = false;
+                btn.innerText = originalText;
+                btn.classList.remove('opacity-70', 'cursor-not-allowed');
             }
         }
 
@@ -202,6 +215,19 @@
                 console.error(err);
             }
         }
+
+        // === ENTER KEY SUPPORT ===
+        document.addEventListener('DOMContentLoaded', function () {
+            const inputs = document.querySelectorAll('#loginEmail, #loginPassword');
+            inputs.forEach(input => {
+                input.addEventListener('keydown', function (event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        signIn(); // Call function directly
+                    }
+                });
+            });
+        });
     </script>
 </body>
 

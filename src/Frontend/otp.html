@@ -353,6 +353,18 @@
 
         // Auto start timer
         // startTimer() called in DOMContentLoaded above
+
+        // === ENTER KEY SUPPORT ===
+        const allOtpInputs = document.querySelectorAll('.otp-input');
+        allOtpInputs.forEach(input => {
+            input.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    const form = document.getElementById('otpForm');
+                    if (form) form.submit(); // Direct submit
+                }
+            });
+        });
     </script>
 
 

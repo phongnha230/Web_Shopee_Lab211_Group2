@@ -180,3 +180,27 @@ function formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleString();
 }
+
+// === EXPAND/COLLAPSE NOTIFICATIONS ===
+let isExpanded = false;
+
+function expandNotifications() {
+    const listContainer = document.getElementById('notificationList');
+    const viewAllText = document.getElementById('viewAllText');
+
+    if (!listContainer || !viewAllText) return;
+
+    isExpanded = !isExpanded;
+
+    if (isExpanded) {
+        // Expand: Remove max-height limit
+        listContainer.classList.remove('max-h-60', 'max-h-80');
+        listContainer.classList.add('max-h-96');
+        viewAllText.textContent = 'Show less';
+    } else {
+        // Collapse: Restore original max-height
+        listContainer.classList.remove('max-h-96');
+        listContainer.classList.add('max-h-60');
+        viewAllText.textContent = 'View all';
+    }
+}

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -25,11 +25,11 @@
             <div class="flex items-center justify-between py-4 gap-8">
                 <!-- Left: Logo & Title -->
                 <div class="flex items-center gap-4 min-w-fit">
-                    <a href="index.html" class="flex items-center gap-2 text-orange-500 hover:opacity-90">
+                    <a href="index.html" class="flex items-center gap-2 text-[#AD3029] hover:opacity-90">
                         <i class="fas fa-shopping-bag text-3xl"></i>
                         <span class="text-2xl font-bold">Shopee Clone</span>
                     </a>
-                    <div class="h-8 w-[1px] bg-orange-500 hidden sm:block"></div>
+                    <div class="h-8 w-[1px] bg-[#AD3029] hidden sm:block"></div>
                     <span class="text-xl text-gray-700 hidden sm:block">Shopping Cart</span>
                 </div>
 
@@ -37,9 +37,9 @@
                 <div class="flex-1 max-w-2xl hidden md:block">
                     <div class="relative flex items-center">
                         <input type="text" placeholder="Search for products, brands and shops"
-                            class="w-full bg-gray-100 text-gray-700 border border-transparent focus:bg-white focus:border-orange-500 rounded-sm py-2 px-4 outline-none transition-all placeholder-gray-400">
+                            class="w-full bg-gray-100 text-gray-700 border border-transparent focus:bg-white focus:border-[#AD3029] rounded-sm py-2 px-4 outline-none transition-all placeholder-gray-400">
                         <button
-                            class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-sm absolute right-0 top-0 bottom-0 flex items-center justify-center transition">
+                            class="bg-[#AD3029] hover:bg-[#8B2520] text-white px-6 py-2 rounded-sm absolute right-0 top-0 bottom-0 flex items-center justify-center transition">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
@@ -47,17 +47,17 @@
 
                 <!-- Right: Icons & User -->
                 <div class="flex items-center gap-5 text-gray-600 min-w-fit">
-                    <button class="relative hover:text-orange-500 transition">
+                    <button class="relative hover:text-[#AD3029] transition">
                         <i class="fas fa-bell text-xl"></i>
                         <span
                             class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
                     </button>
-                    <button class="hover:text-orange-500 transition">
+                    <button class="hover:text-[#AD3029] transition">
                         <i class="fas fa-question-circle text-xl"></i>
                     </button>
 
                     <!-- Dynamic User -->
-                    <div id="userNav" class="flex items-center gap-2 cursor-pointer hover:text-orange-500 transition">
+                    <div id="userNav" class="flex items-center gap-2 cursor-pointer hover:text-[#AD3029] transition">
                         <img id="userAvatar" src="" alt="User" class="w-8 h-8 rounded-full border border-gray-200">
                         <span id="userName" class="font-medium text-sm hidden lg:block">Loading...</span>
                         <button onclick="logout()" class="ml-2 text-sm text-red-500 hover:text-red-700">Logout</button>
@@ -69,8 +69,8 @@
             <div class="md:hidden pb-3">
                 <div class="relative flex items-center">
                     <input type="text" placeholder="Search..."
-                        class="w-full bg-gray-100 border border-transparent focus:border-orange-500 rounded px-3 py-1.5 outline-none">
-                    <button class="absolute right-0 top-0 bottom-0 px-3 text-orange-500"><i
+                        class="w-full bg-gray-100 border border-transparent focus:border-[#AD3029] rounded px-3 py-1.5 outline-none">
+                    <button class="absolute right-0 top-0 bottom-0 px-3 text-[#AD3029]"><i
                             class="fas fa-search"></i></button>
                 </div>
             </div>
@@ -80,7 +80,7 @@
     <!-- Breadcrumb -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div class="text-sm text-gray-500">
-            <a href="index.html" class="hover:text-orange-500">Home</a>
+            <a href="index.html" class="hover:text-[#AD3029]">Home</a>
             <span class="mx-2">/</span>
             <span class="text-gray-800">Shopping Cart</span>
         </div>
@@ -95,7 +95,7 @@
                 alt="Empty Cart" class="w-32 mb-4">
             <p class="text-gray-500 text-lg mb-6">Your shopping cart is empty</p>
             <a href="index.html"
-                class="bg-orange-500 text-white px-10 py-2.5 rounded hover:bg-orange-600 transition uppercase font-medium">Go
+                class="bg-[#AD3029] text-white px-10 py-2.5 rounded hover:bg-[#8B2520] transition uppercase font-medium">Go
                 Shopping Now</a>
         </div>
 
@@ -107,7 +107,7 @@
                 <div class="bg-white rounded shadow-sm p-4 grid grid-cols-12 gap-4 items-center text-gray-500 text-sm">
                     <div class="col-span-6 flex items-center">
                         <input type="checkbox" id="selectAllTop" onchange="toggleSelectAll(this)"
-                            class="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500 mr-4 cursor-pointer">
+                            class="w-4 h-4 text-[#AD3029] border-gray-300 rounded focus:ring-[#AD3029] mr-4 cursor-pointer">
                         <span>Product</span>
                     </div>
                     <div class="col-span-2 text-center">Unit Price</div>
@@ -121,11 +121,11 @@
                     <!-- Shop Header -->
                     <div class="p-4 border-b border-gray-100 flex items-center gap-3">
                         <input type="checkbox" id="selectShop" onchange="toggleSelectAll(this)"
-                            class="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500 cursor-pointer">
+                            class="w-4 h-4 text-[#AD3029] border-gray-300 rounded focus:ring-[#AD3029] cursor-pointer">
                         <i class="fas fa-store text-gray-700"></i>
                         <span class="font-bold text-gray-800">TechZone Official</span>
-                        <span class="bg-orange-500 text-white text-[10px] px-1 rounded font-bold">MALL</span>
-                        <button class="ml-auto text-orange-500 text-sm flex items-center gap-1 hover:text-orange-600">
+                        <span class="bg-[#AD3029] text-white text-[10px] px-1 rounded font-bold">MALL</span>
+                        <button class="ml-auto text-[#AD3029] text-sm flex items-center gap-1 hover:text-[#8B2520]">
                             <i class="far fa-comment-dots"></i> Chat
                         </button>
                     </div>
@@ -137,8 +137,8 @@
 
                     <!-- Shop Voucher Row -->
                     <div
-                        class="px-4 py-3 bg-orange-50 flex items-center justify-between border-t border-dashed border-orange-200">
-                        <div class="flex items-center gap-2 text-sm text-orange-600">
+                        class="px-4 py-3 bg-red-50 flex items-center justify-between border-t border-dashed border-red-200">
+                        <div class="flex items-center gap-2 text-sm text-[#8B2520]">
                             <i class="fas fa-ticket-alt"></i>
                             <span>Shop Voucher: $5 off min. spend $50</span>
                         </div>
@@ -154,7 +154,7 @@
                 <div class="bg-white rounded shadow-sm p-4">
                     <div class="flex justify-between items-center mb-3">
                         <div class="flex items-center gap-2 text-sm font-medium text-gray-700">
-                            <i class="fas fa-ticket-alt text-orange-500"></i> Platform Voucher
+                            <i class="fas fa-ticket-alt text-[#AD3029]"></i> Platform Voucher
                         </div>
                         <button class="text-blue-500 text-sm hover:underline">Select Code</button>
                     </div>
@@ -180,7 +180,7 @@
                             <span>Shipping Discount</span>
                             <span id="shippingDiscount">-₫0</span>
                         </div>
-                        <div class="flex justify-between text-orange-500">
+                        <div class="flex justify-between text-[#AD3029]">
                             <span>Shop Vouchers</span>
                             <span id="voucherDiscount">-₫0</span>
                         </div>
@@ -189,13 +189,13 @@
                     <div class="flex justify-between items-end mb-6">
                         <span class="text-gray-600">Total</span>
                         <div class="text-right">
-                            <div id="total" class="text-2xl font-bold text-orange-500">₫0</div>
+                            <div id="total" class="text-2xl font-bold text-[#AD3029]">₫0</div>
                             <div class="text-[10px] text-gray-400">VAT included, where applicable</div>
                         </div>
                     </div>
 
                     <button onclick="goCheckout()"
-                        class="w-full bg-orange-500 hover:bg-orange-600 text-white py-3.5 rounded font-bold uppercase tracking-wide shadow-lg shadow-orange-200 transition transform hover:-translate-y-0.5">
+                        class="w-full bg-[#AD3029] hover:bg-[#8B2520] text-white py-3.5 rounded font-bold uppercase tracking-wide shadow-lg shadow-red-200 transition transform hover:-translate-y-0.5">
                         Check Out
                     </button>
 
@@ -255,7 +255,7 @@
                     <!-- Product Info (Col 1-6) -->
                     <div class="col-span-6 flex items-start gap-3">
                         <input type="checkbox" onchange="toggleItem(${index})" ${item.checked ? 'checked' : ''} 
-                            class="mt-8 w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500 cursor-pointer flex-shrink-0">
+                            class="mt-8 w-4 h-4 text-[#AD3029] border-gray-300 rounded focus:ring-[#AD3029] cursor-pointer flex-shrink-0">
                         
                         <img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-cover rounded border border-gray-200">
                         
@@ -289,7 +289,7 @@
                     </div>
 
                     <!-- Total Price (Col 11) -->
-                    <div class="col-span-1 text-center font-bold text-orange-500 text-sm">
+                    <div class="col-span-1 text-center font-bold text-[#AD3029] text-sm">
                         ₫${(item.price * item.quantity).toFixed(2)}
                     </div>
 
@@ -309,14 +309,14 @@
         function renderRecommended() {
             const grid = document.getElementById('recommendedGrid');
             grid.innerHTML = RECOMMENDED_PRODUCTS.map(p => `
-                <div class="bg-white rounded hover:shadow-md transition cursor-pointer border border-transparent hover:border-orange-500 p-2">
+                <div class="bg-white rounded hover:shadow-md transition cursor-pointer border border-transparent hover:border-[#AD3029] p-2">
                     <div class="relative mb-2">
                         <img src="${p.image}" class="w-full h-40 object-cover rounded-sm">
                         <div class="absolute bottom-0 left-0 bg-yellow-400 text-xs px-1 font-bold">Find Similar</div>
                     </div>
                     <div class="text-sm font-medium text-gray-800 line-clamp-2 mb-2 h-10">${p.name}</div>
                     <div class="flex justify-between items-end">
-                        <div class="text-orange-500 font-bold">$${p.price}</div>
+                        <div class="text-[#AD3029] font-bold">$${p.price}</div>
                         <div class="text-xs text-gray-500">${p.sold} sold</div>
                     </div>
                 </div>
@@ -369,11 +369,11 @@
             const checkoutBtn = document.querySelector('button[onclick="goCheckout()"]');
             if (itemCount === 0) {
                 checkoutBtn.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-400');
-                checkoutBtn.classList.remove('bg-orange-500', 'hover:bg-orange-600', 'shadow-lg');
+                checkoutBtn.classList.remove('bg-[#AD3029]', 'hover:bg-[#8B2520]', 'shadow-lg');
                 checkoutBtn.disabled = true;
             } else {
                 checkoutBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-400');
-                checkoutBtn.classList.add('bg-orange-500', 'hover:bg-orange-600', 'shadow-lg');
+                checkoutBtn.classList.add('bg-[#AD3029]', 'hover:bg-[#8B2520]', 'shadow-lg');
                 checkoutBtn.disabled = false;
             }
 
@@ -422,7 +422,7 @@
         function updateNavbar() {
             const userName = localStorage.getItem('userName') || 'User';
             document.getElementById('userName').textContent = userName;
-            document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=ffedd5&color=f97316`;
+            document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=FEE2E2&color=AD3029`;
         }
 
         function logout() {

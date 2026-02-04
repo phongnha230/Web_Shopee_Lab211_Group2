@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 </head>
 
-<body class="bg-gradient-to-br from-purple-100 via-white to-purple-200 text-gray-800">
+<body class="bg-gradient-to-br from-red-100 via-white to-red-200 text-gray-800">
 
     <!-- TOAST NOTIFICATION -->
     <div id="toast"
@@ -19,15 +19,15 @@
     <div class="max-w-7xl mx-auto px-4 py-10 flex gap-8">
 
         <!-- SIDEBAR -->
-        <aside class="w-64 bg-gradient-to-b from-purple-700 to-purple-600 rounded-3xl p-6 text-white shadow-xl">
+        <aside class="w-64 bg-gradient-to-b from-[#AD3029] to-[#8B2520] rounded-3xl p-6 text-white shadow-xl">
             <div class="flex items-center gap-3 mb-10">
                 <div id="sidebarAvatar"
-                    class="w-12 h-12 rounded-full border-2 border-white bg-white text-purple-700 flex items-center justify-center font-bold text-xl">
+                    class="w-12 h-12 rounded-full border-2 border-white bg-white text-[#AD3029] flex items-center justify-center font-bold text-xl">
                     U
                 </div>
                 <div>
                     <p id="sidebarName" class="font-semibold">Loading...</p>
-                    <p class="text-sm text-purple-200">Silver Member</p>
+                    <p class="text-sm text-red-200">Silver Member</p>
                 </div>
             </div>
 
@@ -60,9 +60,9 @@
 
             <!-- HEADER -->
             <div class="flex justify-between items-center mb-8">
-                <h1 class="text-2xl font-bold text-purple-700">Personal Information</h1>
+                <h1 class="text-2xl font-bold text-[#AD3029]">Personal Information</h1>
                 <button onclick="saveProfile()"
-                    class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-semibold transition">
+                    class="bg-[#8B2520] hover:bg-[#AD3029] text-white px-6 py-2 rounded-full font-semibold transition">
                     💾 Save Changes
                 </button>
             </div>
@@ -72,11 +72,24 @@
 
                 <!-- AVATAR -->
                 <div class="flex flex-col items-center">
-                    <div id="mainAvatar"
-                        class="w-32 h-32 rounded-full border-4 border-purple-200 mb-4 bg-purple-100 flex items-center justify-center text-purple-700 font-bold text-5xl">
-                        U
+                    <div id="mainAvatarContainer" class="relative group cursor-pointer"
+                        onclick="document.getElementById('avatarInput').click()">
+                        <div id="mainAvatar"
+                            class="w-32 h-32 rounded-full border-4 border-red-200 mb-4 bg-red-100 flex items-center justify-center text-[#AD3029] font-bold text-5xl overflow-hidden">
+                            U
+                        </div>
+                        <img id="avatarPreview" src=""
+                            class="w-32 h-32 rounded-full border-4 border-red-200 mb-4 object-cover hidden">
+
+                        <!-- Overlay on hover -->
+                        <div
+                            class="absolute top-0 left-0 w-32 h-32 rounded-full bg-black bg-opacity-30 hidden group-hover:flex items-center justify-center text-white transition">
+                            <i class="fas fa-camera"></i>
+                        </div>
                     </div>
-                    <button class="text-purple-600 font-semibold text-sm hover:underline">Change Avatar</button>
+                    <button type="button" onclick="document.getElementById('avatarInput').click()"
+                        class="text-[#8B2520] font-semibold text-sm hover:underline">Change Avatar</button>
+                    <input type="file" id="avatarInput" hidden accept="image/*" onchange="handleAvatarSelect(this)">
                 </div>
 
                 <!-- FORM -->
@@ -87,13 +100,13 @@
                             <div>
                                 <label class="text-sm font-medium">Last Name</label>
                                 <input type="text" id="lastName"
-                                    class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-purple-500 focus:outline-none"
+                                    class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-red-500 focus:outline-none"
                                     placeholder="Nguyen" required />
                             </div>
                             <div>
                                 <label class="text-sm font-medium">First Name</label>
                                 <input type="text" id="firstName"
-                                    class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-purple-500 focus:outline-none"
+                                    class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-red-500 focus:outline-none"
                                     placeholder="Van A" required />
                             </div>
                         </div>
@@ -108,23 +121,23 @@
                         <div>
                             <label class="text-sm font-medium">Phone Number</label>
                             <input type="text" id="phone"
-                                class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-purple-500 focus:outline-none"
+                                class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-red-500 focus:outline-none"
                                 placeholder="+84 123 456 789" />
                         </div>
 
-                        <h2 class="text-lg font-semibold text-purple-700 pt-4">Shipping Address</h2>
+                        <h2 class="text-lg font-semibold text-[#AD3029] pt-4">Shipping Address</h2>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="text-sm font-medium">City / Province</label>
                                 <input type="text" id="city"
-                                    class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-purple-500 focus:outline-none"
+                                    class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-red-500 focus:outline-none"
                                     placeholder="Hanoi" />
                             </div>
                             <div>
                                 <label class="text-sm font-medium">District</label>
                                 <input type="text" id="district"
-                                    class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-purple-500 focus:outline-none"
+                                    class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-red-500 focus:outline-none"
                                     placeholder="Cau Giay" />
                             </div>
                         </div>
@@ -132,7 +145,7 @@
                         <div>
                             <label class="text-sm font-medium">Detailed Address</label>
                             <input type="text" id="address"
-                                class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-purple-500 focus:outline-none"
+                                class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-red-500 focus:outline-none"
                                 placeholder="House number, street name..." />
                         </div>
 
@@ -148,7 +161,7 @@
         class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl">
             <div class="p-6 border-b flex justify-between items-center">
-                <h2 class="text-2xl font-bold text-purple-700">Change Password</h2>
+                <h2 class="text-2xl font-bold text-[#AD3029]">Change Password</h2>
                 <button onclick="closeChangePasswordModal()" class="text-gray-500 hover:text-gray-700">
                     <i class="fas fa-times text-2xl"></i>
                 </button>
@@ -158,7 +171,7 @@
                 <div class="relative">
                     <label class="text-sm font-medium">Current Password</label>
                     <input type="password" id="currentPasswordModal" required
-                        class="w-full mt-1 px-4 py-2 pr-12 rounded-xl border focus:border-purple-500 focus:outline-none">
+                        class="w-full mt-1 px-4 py-2 pr-12 rounded-xl border focus:border-red-500 focus:outline-none">
                     <button type="button" onclick="togglePasswordField('currentPasswordModal')"
                         class="absolute right-4 bottom-2 text-gray-500 hover:text-gray-700">
                         <i class="fas fa-eye"></i>
@@ -168,7 +181,7 @@
                 <div class="relative">
                     <label class="text-sm font-medium">New Password</label>
                     <input type="password" id="newPasswordModal" required minlength="6"
-                        class="w-full mt-1 px-4 py-2 pr-12 rounded-xl border focus:border-purple-500 focus:outline-none">
+                        class="w-full mt-1 px-4 py-2 pr-12 rounded-xl border focus:border-red-500 focus:outline-none">
                     <button type="button" onclick="togglePasswordField('newPasswordModal')"
                         class="absolute right-4 bottom-2 text-gray-500 hover:text-gray-700">
                         <i class="fas fa-eye"></i>
@@ -189,7 +202,7 @@
                 <div class="relative">
                     <label class="text-sm font-medium">Confirm New Password</label>
                     <input type="password" id="confirmPasswordModal" required
-                        class="w-full mt-1 px-4 py-2 pr-12 rounded-xl border focus:border-purple-500 focus:outline-none">
+                        class="w-full mt-1 px-4 py-2 pr-12 rounded-xl border focus:border-red-500 focus:outline-none">
                     <button type="button" onclick="togglePasswordField('confirmPasswordModal')"
                         class="absolute right-4 bottom-2 text-gray-500 hover:text-gray-700">
                         <i class="fas fa-eye"></i>
@@ -198,7 +211,7 @@
 
                 <div class="flex gap-4 pt-4">
                     <button type="submit"
-                        class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl font-semibold transition">
+                        class="flex-1 bg-[#8B2520] hover:bg-[#AD3029] text-white py-3 rounded-xl font-semibold transition">
                         <i class="fas fa-key mr-2"></i>Change Password
                     </button>
                     <button type="button" onclick="closeChangePasswordModal()"
@@ -213,6 +226,7 @@
     <script>
         const API_URL = 'http://localhost:8080/api';
         let accessToken = localStorage.getItem('accessToken');
+        let currentAvatarUrl = null;
 
         // LOGIN NOT REQUIRED - just warning
         if (!accessToken) {
@@ -256,7 +270,24 @@
                 document.getElementById('lastName').value = lastName;
                 document.getElementById('firstName').value = firstName;
                 document.getElementById('email').value = data.email || '';
+                document.getElementById('email').value = data.email || '';
                 document.getElementById('phone').value = data.phone || '';
+
+                // Handle Avatar
+                if (data.avatar) {
+                    currentAvatarUrl = data.avatar;
+                    // Update main avatar
+                    document.getElementById('mainAvatar').classList.add('hidden');
+                    const preview = document.getElementById('avatarPreview');
+                    preview.src = data.avatar;
+                    preview.classList.remove('hidden');
+
+                    // Update sidebar avatar
+                    const sideAvatar = document.getElementById('sidebarAvatar');
+                    sideAvatar.innerHTML = `<img src="${data.avatar}" class="w-full h-full rounded-full object-cover">`;
+                    sideAvatar.classList.remove('bg-white', 'text-[#AD3029]', 'border-2', 'border-white');
+                    sideAvatar.classList.add('border-2', 'border-white');
+                }
 
                 // Load default address
                 loadAddress();
@@ -329,7 +360,8 @@
                     },
                     body: JSON.stringify({
                         fullName: fullName,
-                        phone: phone || null // Gửi null nếu rỗng để tránh lỗi regex Backend
+                        phone: phone || null,
+                        avatar: currentAvatarUrl
                     })
                 });
 
@@ -497,6 +529,62 @@
                 showToast('❌ ' + error.message, 'error');
             }
         });
+
+        // === AVATAR UPLOAD LOGIC ===
+        async function handleAvatarSelect(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            // Validate info size/type if needed
+            if (file.size > 5 * 1024 * 1024) { // 5MB
+                showToast('❌ Image too large (max 5MB)', 'error');
+                return;
+            }
+
+            // Show loading state
+            const btn = input.previousElementSibling;
+            const originalText = btn.innerText;
+            btn.innerText = 'Uploading...';
+            btn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('folder', 'avatars');
+
+            try {
+                const response = await fetch(`${API_URL}/upload`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentAvatarUrl = data.url;
+
+                    // Update UI immediately for preview
+                    const preview = document.getElementById('avatarPreview');
+                    preview.src = currentAvatarUrl;
+                    preview.classList.remove('hidden');
+                    document.getElementById('mainAvatar').classList.add('hidden');
+
+                    showToast('✅ Avatar uploaded! Click Save to apply.', 'success');
+                } else {
+                    const err = await response.json();
+                    throw new Error(err.error || 'Upload failed');
+                }
+            } catch (error) {
+                console.error(error);
+                showToast('❌ Upload failed: ' + error.message, 'error');
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+                // Reset input
+                input.value = '';
+            }
+        }
 
         // Logout
         function logout() {
