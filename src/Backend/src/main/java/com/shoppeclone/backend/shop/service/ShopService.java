@@ -2,6 +2,7 @@ package com.shoppeclone.backend.shop.service;
 
 import com.shoppeclone.backend.shop.dto.ShopRegisterRequest;
 import com.shoppeclone.backend.shop.entity.Shop;
+import com.shoppeclone.backend.shop.dto.response.ShopAdminResponse;
 
 import java.util.List;
 
@@ -11,11 +12,11 @@ public interface ShopService {
     Shop getMyShop(String userEmail);
 
     // Admin
-    List<Shop> getPendingShops();
+    List<ShopAdminResponse> getPendingShops();
 
-    List<Shop> getActiveShops();
+    List<ShopAdminResponse> getActiveShops();
 
-    List<Shop> getRejectedShops();
+    List<ShopAdminResponse> getRejectedShops();
 
     void approveShop(String shopId);
 
