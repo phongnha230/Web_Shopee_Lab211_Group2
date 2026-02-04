@@ -50,10 +50,10 @@ public class CloudinaryService {
             throw new IllegalArgumentException("File is empty");
         }
 
-        // Check file size (max 5MB for ID cards)
-        long maxSize = 5 * 1024 * 1024; // 5MB in bytes
+        // Check file size (max 3MB for review images - e-commerce standard)
+        long maxSize = 3 * 1024 * 1024; // 3MB in bytes
         if (file.getSize() > maxSize) {
-            throw new IllegalArgumentException("File size exceeds maximum limit of 5MB");
+            throw new IllegalArgumentException("File size exceeds maximum limit of 3MB");
         }
 
         // Check file type

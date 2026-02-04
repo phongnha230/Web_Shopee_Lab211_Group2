@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details - Shopee Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @keyframes bounceShopee {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        .bounce-shopee { animation: bounceShopee 2s infinite; }
+        
+        /* Star Rating Styles */
+        .star-rating { display: flex; gap: 0.5rem; }
+        .star-rating i {
+            font-size: 2rem;
+            color: #d1d5db;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .star-rating i.active,
+        .star-rating i:hover {
+            color: #fbbf24;
+            transform: scale(1.1);
+        }
+        
+        /* Image Preview Styles */
+        .image-preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+        .image-preview {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            border: 2px solid #e5e7eb;
+        }
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .image-preview .remove-btn {
+            position: absolute;
+            top: 0.25rem;
+            right: 0.25rem;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+        .image-preview .remove-btn:hover {
+            background: rgba(220, 38, 38, 1);
+        }
+        
+        /* Upload Button */
+        .upload-btn {
+            width: 120px;
+            height: 120px;
+            border: 2px dashed #d1d5db;
+            border-radius: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center ;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .upload-btn:hover {
+            border-color: #f97316;
+            background: #fff7ed;
+        }
+        .upload-btn i {
+            font-size: 2rem;
+            color: #9ca3af;
+            margin-bottom: 0.5rem;
+        }
+        .upload-btn span {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+        .modal.active { display: flex; align-items: center; justify-content: center; }
+        .modal-content {
+            background: white;
+            border-radius: 1rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-orange-500 to-orange-600 shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-shopping-bag text-3xl text-white bounce-shopee"></i>
+                    <a href="index.html" class="text-2xl font-bold text-white">Shopee Clone</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div id="userNav" class="flex items-center space-x-3">
+                        <div class="flex items-center space-x-2">
+                            <img id="userAvatar" src="" alt="User" class="w-8 h-8 rounded-full border-2 border-white">
+                            <span id="userName" class="font-semibold text-white"></span>
+                        </div>
+                        <button onclick="logout()" class="text-white hover:text-red-200">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Breadcrumb -->
+        <nav class="flex text-sm text-gray-600 mb-6">
+            <a href="index.html" class="hover:text-orange-500">Home</a>
+            <span class="mx-2">/</span>
+            <a href="order-success-backend.html" class="hover:text-orange-500">My Orders</a>
+            <span class="mx-2">/</span>
+            <span class="text-gray-800 font-semibold">Order Details</span>
+        </nav>
+
+        <!-- Order Info Card -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800 mb-2">Order #<span id="orderId">ORD123456</span></h1>
+                    <p class="text-gray-600">Placed on <span id="orderDate">Feb 1, 2026</span></p>
+                </div>
+                <div class="text-right">
+                    <span id="orderStatus" class="inline-block px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+                        COMPLETED
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Order Timeline -->
+            <div class="border-t border-gray-200 pt-4 mt-4">
+                <div class="flex items-center justify-between text-sm">
+                    <div class="flex-1 text-center">
+                        <div class="w-10 h-10 bg-green-500 rounded-full mx-auto mb-2 flex items-center justify-center">
+                            <i class="fas fa-check text-white"></i>
+                        </div>
+                        <p class="font-semibold text-gray-800">Order Placed</p>
+                        <p class="text-gray-500 text-xs">Feb 1, 10:00</p>
+                    </div>
+                    <div class="flex-1 border-t-2 border-green-500 -mt-5"></div>
+                    <div class="flex-1 text-center">
+                        <div class="w-10 h-10 bg-green-500 rounded-full mx-auto mb-2 flex items-center justify-center">
+                            <i class="fas fa-box text-white"></i>
+                        </div>
+                        <p class="font-semibold text-gray-800">Shipped</p>
+                        <p class="text-gray-500 text-xs">Feb 1, 14:00</p>
+                    </div>
+                    <div class="flex-1 border-t-2 border-green-500 -mt-5"></div>
+                    <div class="flex-1 text-center">
+                        <div class="w-10 h-10 bg-green-500 rounded-full mx-auto mb-2 flex items-center justify-center">
+                            <i class="fas fa-truck text-white"></i>
+                        </div>
+                        <p class="font-semibold text-gray-800">Delivered</p>
+                        <p class="text-gray-500 text-xs">Feb 1, 18:00</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products List -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Order Items</h2>
+            <div id="productsList" class="space-y-4">
+                <!-- Products will be populated by JS -->
+            </div>
+        </div>
+
+        <!-- Shipping Address -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Shipping Address</h2>
+            <div class="text-gray-700">
+                <p class="font-semibold">John Doe</p>
+                <p>123 Main Street, Hanoi, Vietnam</p>
+                <p>Phone: +84 123 456 789</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Review Modal -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Write a Review</h2>
+                    <button onclick="closeReviewModal()" class="text-gray-400 hover:text-gray-600 text-2xl">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Product Info in Modal -->
+                <div class="flex items-center gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                    <img id="modalProductImage" src="" alt="Product" class="w-20 h-20 object-cover rounded">
+                    <div class="flex-1">
+                        <h3 id="modalProductName" class="font-semibold text-gray-800"></h3>
+                        <p id="modalProductVariant" class="text-sm text-gray-600"></p>
+                    </div>
+                </div>
+
+                <!-- Rating -->
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-semibold mb-3">Product Quality</label>
+                    <div class="star-rating" id="starRating">
+                        <i class="fas fa-star" data-rating="1" onclick="setRating(1)"></i>
+                        <i class="fas fa-star" data-rating="2" onclick="setRating(2)"></i>
+                        <i class="fas fa-star" data-rating="3" onclick="setRating(3)"></i>
+                        <i class="fas fa-star" data-rating="4" onclick="setRating(4)"></i>
+                        <i class="fas fa-star" data-rating="5" onclick="setRating(5)"></i>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-2" id="ratingText">Click to rate</p>
+                </div>
+
+                <!-- Comment -->
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-semibold mb-2">Your Review</label>
+                    <textarea id="reviewComment" rows="4" 
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
+                        placeholder="Share your experience with this product..."></textarea>
+                    <p class="text-sm text-gray-500 mt-1">Minimum 10 characters</p>
+                </div>
+
+                <!-- Image Upload -->
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-semibold mb-3">
+                        Add Photos (Optional)
+                        <span class="text-sm font-normal text-gray-500">- Max 5 images, 3MB each</span>
+                    </label>
+                    
+                    <div class="image-preview-container mb-4" id="imagePreviewContainer">
+                        <!-- Image previews will be added here -->
+                    </div>
+                    
+                    <div class="upload-btn" onclick="document.getElementById('imageInput').click()">
+                        <i class="fas fa-camera"></i>
+                        <span>Add Photo</span>
+                    </div>
+                    <input type="file" id="imageInput" accept="image/*" multiple class="hidden" onchange="handleImageSelect(event)">
+                    <p class="text-xs text-gray-500 mt-2">Supported formats: JPG, PNG, WEBP</p>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex gap-3">
+                    <button onclick="closeReviewModal()" 
+                        class="flex-1 px-6 py-3 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition">
+                        Cancel
+                    </button>
+                    <button onclick="submitReview()" 
+                        class="flex-1 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition">
+                        Submit Review
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock Data
+        const MOCK_ORDER = {
+            id: 'ORD123456',
+            date: 'Feb 1, 2026',
+            status: 'COMPLETED',
+            products: [
+                {
+                    id: '1',
+                    name: 'Wireless Headphones - Premium Bass',
+                    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400',
+                    price: 99,
+                    quantity: 1,
+                    color: 'Black',
+                    size: null
+                },
+                {
+                    id: '2',
+                    name: 'Urban Sneakers - High Comfort',
+                    image: 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400',
+                    price: 102,
+                    quantity: 2,
+                    color: 'White/Red',
+                    size: '42'
+                }
+            ]
+        };
+
+        let currentReviewProduct = null;
+        let selectedRating = 0;
+        let uploadedImages = [];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            updateNavbar();
+            loadOrderDetails();
+        });
+
+        function loadOrderDetails() {
+            document.getElementById('orderId').textContent = MOCK_ORDER.id;
+            document.getElementById('orderDate').textContent = MOCK_ORDER.date;
+            
+            const productsList = document.getElementById('productsList');
+            productsList.innerHTML = MOCK_ORDER.products.map(product => `
+                <div class="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition">
+                    <img src="${product.image}" alt="${product.name}" class="w-24 h-24 object-cover rounded">
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-gray-800 mb-1">${product.name}</h3>
+                        <p class="text-sm text-gray-600">
+                            ${product.color ? `Color: ${product.color}` : ''}
+                            ${product.size ? ` | Size: ${product.size}` : ''}
+                        </p>
+                        <p class="text-sm text-gray-600">Quantity: ${product.quantity}</p>
+                        <p class="text-orange-600 font-bold mt-1">₫${product.price}</p>
+                    </div>
+                    <button onclick="openReviewModal('${product.id}')" 
+                        class="px-6 py-2 border-2 border-orange-500 text-orange-500 rounded-lg font-semibold hover:bg-orange-50 transition">
+                        <i class="fas fa-star mr-2"></i>Write Review
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function openReviewModal(productId) {
+            const product = MOCK_ORDER.products.find(p => p.id === productId);
+            if (!product) return;
+
+            currentReviewProduct = product;
+            selectedRating = 0;
+            uploadedImages = [];
+
+            // Update modal content
+            document.getElementById('modalProductImage').src = product.image;
+            document.getElementById('modalProductName').textContent = product.name;
+            document.getElementById('modalProductVariant').textContent = 
+                `${product.color ? `Color: ${product.color}` : ''}${product.size ? ` | Size: ${product.size}` : ''}`;
+            
+            // Reset form
+            document.getElementById('reviewComment').value = '';
+            document.getElementById('imagePreviewContainer').innerHTML = '';
+            resetStars();
+
+            // Show modal
+            document.getElementById('reviewModal').classList.add('active');
+        }
+
+        function closeReviewModal() {
+            document.getElementById('reviewModal').classList.remove('active');
+            currentReviewProduct = null;
+        }
+
+        function setRating(rating) {
+            selectedRating = rating;
+            const stars = document.querySelectorAll('#starRating i');
+            const ratingTexts = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+            
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+
+            document.getElementById('ratingText').textContent = ratingTexts[rating];
+        }
+
+        function resetStars() {
+            document.querySelectorAll('#starRating i').forEach(star => {
+                star.classList.remove('active');
+            });
+            document.getElementById('ratingText').textContent = 'Click to rate';
+        }
+
+        function handleImageSelect(event) {
+            const files = Array.from(event.target.files);
+            
+            // Check total images limit
+            if (uploadedImages.length + files.length > 5) {
+                alert('⚠️ Maximum 5 images allowed!');
+                return;
+            }
+
+            files.forEach(file => {
+                // Check file size (3MB)
+                if (file.size > 3 * 1024 * 1024) {
+                    alert(`⚠️ ${file.name} exceeds 3MB limit!`);
+                    return;
+                }
+
+                // Check file type
+                if (!file.type.startsWith('image/')) {
+                    alert(`⚠️ ${file.name} is not an image!`);
+                    return;
+                }
+
+                // Create preview
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    uploadedImages.push({
+                        file: file,
+                        url: e.target.result
+                    });
+                    renderImagePreviews();
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Reset input
+            event.target.value = '';
+        }
+
+        function renderImagePreviews() {
+            const container = document.getElementById('imagePreviewContainer');
+            container.innerHTML = uploadedImages.map((img, index) => `
+                <div class="image-preview">
+                    <img src="${img.url}" alt="Preview ${index + 1}">
+                    <div class="remove-btn" onclick="removeImage(${index})">
+                        <i class="fas fa-times"></i>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function removeImage(index) {
+            uploadedImages.splice(index, 1);
+            renderImagePreviews();
+        }
+
+        function submitReview() {
+            // Validation
+            if (selectedRating === 0) {
+                alert('⚠️ Please select a rating!');
+                return;
+            }
+
+            const comment = document.getElementById('reviewComment').value.trim();
+            if (comment.length < 10) {
+                alert('⚠️ Review must be at least 10 characters!');
+                return;
+            }
+
+            // Prepare review data
+            const reviewData = {
+                productId: currentReviewProduct.id,
+                productName: currentReviewProduct.name,
+                rating: selectedRating,
+                comment: comment,
+                images: uploadedImages.map(img => img.url), // In real app, upload to server first
+                date: new Date().toISOString()
+            };
+
+            console.log('Review submitted:', reviewData);
+
+            // Show success message
+            showToast('✅ Review submitted successfully!');
+            
+            // Close modal
+            closeReviewModal();
+
+            // TODO: Send to backend API
+            // await fetch('/api/reviews', { method: 'POST', body: JSON.stringify(reviewData) });
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-24 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function updateNavbar() {
+            const token = localStorage.getItem('accessToken');
+            const userName = localStorage.getItem('userName') || 'User';
+            if (token) {
+                document.getElementById('userName').textContent = userName;
+                document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=fff&color=f97316`;
+            } else {
+                window.location.href = 'login.html';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('userName');
+            window.location.href = 'index.html';
+        }
+
+        // Close modal on outside click
+        document.getElementById('reviewModal').addEventListener('click', (e) => {
+            if (e.target.id === 'reviewModal') {
+                closeReviewModal();
+            }
+        });
+    </script>
+</body>
+
+</html>

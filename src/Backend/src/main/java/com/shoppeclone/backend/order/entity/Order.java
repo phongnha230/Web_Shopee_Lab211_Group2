@@ -23,7 +23,9 @@ public class Order {
 
     private BigDecimal totalPrice;
     private BigDecimal discount;
-    private String voucherCode; // Applied voucher code
+    private String voucherCode; // Applied product voucher code
+    private String shippingVoucherCode; // Applied shipping voucher code
+    private BigDecimal shippingDiscount; // Discount amount for shipping
 
     private OrderStatus orderStatus = OrderStatus.PENDING;
     private PaymentStatus paymentStatus = PaymentStatus.UNPAID;

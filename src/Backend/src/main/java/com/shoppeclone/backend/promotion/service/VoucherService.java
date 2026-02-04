@@ -8,5 +8,6 @@ public interface VoucherService {
     List<Voucher> getAllVouchers();
 
     Voucher createVoucher(Voucher voucher);
-    // method to redeem/apply voucher would go here
+
+    Voucher getVoucherByCode(String code);
 }

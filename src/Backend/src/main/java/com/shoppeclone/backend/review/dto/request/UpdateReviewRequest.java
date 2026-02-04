@@ -2,7 +2,10 @@ package com.shoppeclone.backend.review.dto.request;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class UpdateReviewRequest {
@@ -12,4 +15,7 @@ public class UpdateReviewRequest {
     private Integer rating;
 
     private String comment;
+
+    @Size(max = 5, message = "Maximum 5 images allowed per review")
+    private List<String> imageUrls; // Optional: URLs of uploaded images (max 5)
 }

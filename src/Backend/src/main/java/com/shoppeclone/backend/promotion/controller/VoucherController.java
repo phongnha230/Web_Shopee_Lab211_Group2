@@ -24,4 +24,9 @@ public class VoucherController {
     public ResponseEntity<Voucher> createVoucher(@RequestBody Voucher voucher) {
         return ResponseEntity.ok(voucherService.createVoucher(voucher));
     }
+
+    @GetMapping("/code/{code}")
+    public ResponseEntity<Voucher> getVoucherByCode(@PathVariable String code) {
+        return ResponseEntity.ok(voucherService.getVoucherByCode(code));
+    }
 }

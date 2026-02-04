@@ -14,10 +14,31 @@ public class Voucher {
     private String id;
 
     private String code;
-    private BigDecimal discount; // Amount or Percentage? Assuming Amount based on simple context, but could be
-                                 // either. Schema just says discount.
+    private String description; // e.g., "10% OFF Electronics"
+
+    // Discount Logic
+    private DiscountType discountType; // PERCENTAGE, FIXED_AMOUNT
+    private BigDecimal discountValue; // 10 (for 10%) or 30 (for ₫30)
+    private BigDecimal minSpend; // Minimum order value to apply
+    private BigDecimal maxDiscount; // Max discount amount (for percentage)
+
     private Integer quantity;
+    private Integer usedCount = 0; // Track usage
 
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+
+    private boolean isActive = true;
+
+    private VoucherType type = VoucherType.PRODUCT; // Default to PRODUCT
+
+    public enum VoucherType {
+        PRODUCT,
+        SHIPPING
+    }
+
+    public enum DiscountType {
+        PERCENTAGE,
+        FIXED_AMOUNT
+    }
 }
