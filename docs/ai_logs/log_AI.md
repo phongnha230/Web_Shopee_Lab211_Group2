@@ -15318,3 +15318,26 @@ Review Changes
 ✅ Operations Summary (Disputes/Shops) Active
 ✅ Logo & UI Rebranded to Shopee Palette
 ✅ Shop Status persistence fixed
+
+---
+# LOG UPDATE: 2026-02-04 - Shop Approval Persistence Fix
+
+## 1. Shop Approval Fail-safe
+- **Logic Refinement**: Modified `ShopServiceImpl.approveShop` to prevent transaction rollbacks when a shop's owner is missing. The system now approves the shop status even if user promotion/notification fails due to an orphaned record.
+- **DTO Enhancement**: Created `ShopAdminResponse` to include `ownerFullName` and `ownerEmail`, ensuring the Admin view has complete context.
+- **Controller Update**: Updated `ShopController` to return the new DTO for all admin-facing endpoints.
+
+## 2. UI Improvement
+- **Dynamic Owner Display**: Updated the Admin Dashboard frontend to use the real owner name from the backend, resolving the recurring "Unknown Owner" placeholder for valid shops.
+- **Operational Clarity**: Improved error visibility in the shop management tab.
+
+### Status
+✅ Shop Approval Bug Resolved (Persistence Fixed)
+✅ Owner Names visible in Shop List
+✅ System resilient to orphaned shop records
+
+#### Files Modified:
+- `ShopAdminResponse.java`: New DTO for admin shop management.
+- `ShopService.java` & `ShopServiceImpl.java`: Updated signatures and logic for graceful owner handling.
+- `ShopController.java`: Updated admin endpoints to return the new DTO.
+- `admin-dashboard.html`: Updated frontend to display `ownerFullName`.

@@ -3,6 +3,7 @@ package com.shoppeclone.backend.shop.controller;
 import com.shoppeclone.backend.common.service.CloudinaryService;
 import com.shoppeclone.backend.shop.dto.ShopRegisterRequest;
 import com.shoppeclone.backend.shop.dto.UpdateShopRequest;
+import com.shoppeclone.backend.shop.dto.response.ShopAdminResponse;
 import com.shoppeclone.backend.shop.entity.Shop;
 import com.shoppeclone.backend.shop.service.ShopService;
 import jakarta.validation.Valid;
@@ -106,17 +107,17 @@ public class ShopController {
     // ADMIN ONLY
     @GetMapping("/admin/pending")
     // @PreAuthorize("hasRole('ADMIN')") // Uncomment if using Method Security
-    public ResponseEntity<List<Shop>> getPendingShops() {
+    public ResponseEntity<List<ShopAdminResponse>> getPendingShops() {
         return ResponseEntity.ok(shopService.getPendingShops());
     }
 
     @GetMapping("/admin/active")
-    public ResponseEntity<List<Shop>> getActiveShops() {
+    public ResponseEntity<List<ShopAdminResponse>> getActiveShops() {
         return ResponseEntity.ok(shopService.getActiveShops());
     }
 
     @GetMapping("/admin/rejected")
-    public ResponseEntity<List<Shop>> getRejectedShops() {
+    public ResponseEntity<List<ShopAdminResponse>> getRejectedShops() {
         return ResponseEntity.ok(shopService.getRejectedShops());
     }
 

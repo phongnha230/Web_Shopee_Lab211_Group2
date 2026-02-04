@@ -6,6 +6,7 @@ import com.shoppeclone.backend.auth.repository.RoleRepository;
 import com.shoppeclone.backend.auth.repository.UserRepository;
 import com.shoppeclone.backend.shop.dto.ShopRegisterRequest;
 import com.shoppeclone.backend.shop.dto.UpdateShopRequest;
+import com.shoppeclone.backend.shop.dto.response.ShopAdminResponse;
 import com.shoppeclone.backend.shop.entity.Shop;
 import com.shoppeclone.backend.shop.entity.ShopStatus;
 import com.shoppeclone.backend.shop.repository.ShopRepository;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -69,18 +71,24 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    public List<Shop> getPendingShops() {
-        return shopRepository.findByStatus(ShopStatus.PENDING);
+    public List<ShopAdminResponse> getPendingShops() {
+        return shopRepository.findByStatus(ShopStatus.PENDING).stream()
+                .map(this::mapToAdminResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Shop> getActiveShops() {
-        return shopRepository.findByStatus(ShopStatus.ACTIVE);
+    public List<ShopAdminResponse> getActiveShops() {
+        return shopRepository.findByStatus(ShopStatus.ACTIVE).stream()
+                .map(this::mapToAdminResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Shop> getRejectedShops() {
-        return shopRepository.findByStatus(ShopStatus.REJECTED);
+    public List<ShopAdminResponse> getRejectedShops() {
+        return shopRepository.findByStatus(ShopStatus.REJECTED).stream()
+                .map(this::mapToAdminResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -98,32 +106,54 @@ public class ShopServiceImpl implements ShopService {
         shop.setUpdatedAt(LocalDateTime.now());
         shopRepository.save(shop);
 
-        // 2. Promote User to SELLER
-        User user = userRepository.findById(shop.getOwnerId())
-                .orElseThrow(() -> new RuntimeException("Shop owner not found"));
+        // 2. Promote User to SELLER (If owner exists)
+        userRepository.findById(shop.getOwnerId()).ifPresent(user -> {
+            Role sellerRole = roleRepository.findByName("ROLE_SELLER")
+                    .orElseThrow(() -> new RuntimeException("Role ROLE_SELLER not found"));
 
-        Role sellerRole = roleRepository.findByName("ROLE_SELLER")
-                .orElseThrow(() -> new RuntimeException("Role ROLE_SELLER not found"));
+            boolean hasRole = user.getRoles().stream().anyMatch(r -> r.getName().equals("ROLE_SELLER"));
+            if (!hasRole) {
+                user.getRoles().add(sellerRole);
+                userRepository.save(user);
+            }
 
-        boolean hasRole = user.getRoles().stream().anyMatch(r -> r.getName().equals("ROLE_SELLER"));
-        if (!hasRole) {
-            user.getRoles().add(sellerRole);
-            userRepository.save(user);
-        }
+            // 3. Send Notification
+            notificationService.createNotification(
+                    user.getId(),
+                    "Shop Approved 🎉",
+                    "Congratulations! Your shop '" + shop.getName() + "' has been approved. You can now start selling.",
+                    "SHOP_APPROVED");
 
-        // 3. Send Notification
-        notificationService.createNotification(
-                user.getId(),
-                "Shop Approved 🎉",
-                "Congratulations! Your shop '" + shop.getName() + "' has been approved. You can now start selling.",
-                "SHOP_APPROVED");
+            // 4. Send Email
+            try {
+                emailService.sendShopApprovalEmail(user.getEmail(), shop.getName());
+            } catch (Exception e) {
+                System.err.println("Failed to send approval email: " + e.getMessage());
+            }
+        });
+    }
 
-        // 4. Send Email
-        try {
-            emailService.sendShopApprovalEmail(user.getEmail(), shop.getName());
-        } catch (Exception e) {
-            System.err.println("Failed to send approval email: " + e.getMessage());
-        }
+    private ShopAdminResponse mapToAdminResponse(Shop shop) {
+        ShopAdminResponse response = new ShopAdminResponse();
+        response.setId(shop.getId());
+        response.setOwnerId(shop.getOwnerId());
+        response.setName(shop.getName());
+        response.setDescription(shop.getDescription());
+        response.setAddress(shop.getAddress());
+        response.setPhone(shop.getPhone());
+        response.setEmail(shop.getEmail());
+        response.setStatus(shop.getStatus());
+        response.setRejectionReason(shop.getRejectionReason());
+        response.setCreatedAt(shop.getCreatedAt());
+        response.setUpdatedAt(shop.getUpdatedAt());
+
+        // Fetch owner details if available
+        userRepository.findById(shop.getOwnerId()).ifPresent(user -> {
+            response.setOwnerFullName(user.getFullName());
+            response.setOwnerEmail(user.getEmail());
+        });
+
+        return response;
     }
 
     @Override
