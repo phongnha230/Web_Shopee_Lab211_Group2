@@ -15,7 +15,7 @@ public class AdminDashboardController {
     private final AdminDashboardService dashboardService;
 
     @GetMapping("/stats")
-    public ResponseEntity<DashboardStatsResponse> getDashboardStats() {
-        return ResponseEntity.ok(dashboardService.getDashboardStats());
+    public ResponseEntity<DashboardStatsResponse> getDashboardStats(@RequestParam(defaultValue = "7") int days) {
+        return ResponseEntity.ok(dashboardService.getDashboardStats(days));
     }
 }
