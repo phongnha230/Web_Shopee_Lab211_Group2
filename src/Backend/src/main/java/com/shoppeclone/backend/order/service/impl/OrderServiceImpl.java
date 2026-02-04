@@ -35,11 +35,8 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final CartService cartService;
-<<<<<<< HEAD
     private final CartRepository cartRepository;
-=======
     private final ProductRepository productRepository;
->>>>>>> 7518d80b4b75ba767f98131898e96c9b5a32886c
     private final ProductVariantRepository productVariantRepository;
     private final ShippingProviderRepository shippingProviderRepository;
     private final ShippingService shippingService;

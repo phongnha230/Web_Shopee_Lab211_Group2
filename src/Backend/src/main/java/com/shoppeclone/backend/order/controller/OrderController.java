@@ -25,11 +25,8 @@ public class OrderController {
 
     private final OrderService orderService;
     private final UserRepository userRepository;
-<<<<<<< HEAD
     private final OrderResponseService orderResponseService;
-=======
     private final ShopService shopService;
->>>>>>> 7518d80b4b75ba767f98131898e96c9b5a32886c
 
     private String getUserId(UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername())
