@@ -42,7 +42,7 @@
                     </div>
 
                     <!-- Cart Button -->
-                    <button onclick="window.location.href='cart.html'"
+                    <button onclick="window.location.href='cart-backend.html'"
                         class="relative p-2 hover:bg-orange-700 rounded-full transition mr-2">
                         <i class="fas fa-shopping-cart text-xl text-white"></i>
                         <span id="cartBadge"
@@ -354,20 +354,33 @@
             }
         }
 
-        function updateCartBadge() {
+        async function updateCartBadge() {
             // HIDE IF NOT LOGGED IN
-            if (!localStorage.getItem('accessToken')) {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
                 const badge = document.getElementById('cartBadge');
                 if (badge) badge.style.display = 'none';
                 return;
             }
 
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-            const badge = document.getElementById('cartBadge');
-            if (badge) {
-                badge.textContent = totalItems;
-                badge.style.display = totalItems > 0 ? 'flex' : 'none';
+            try {
+                const response = await fetch('http://localhost:8080/api/cart', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const cartData = await response.json();
+                    // Calculate total items from backend response
+                    const totalItems = cartData.items ? cartData.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
+                    
+                    const badge = document.getElementById('cartBadge');
+                    if (badge) {
+                        badge.textContent = totalItems;
+                        badge.style.display = totalItems > 0 ? 'inline-block' : 'none';
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to update cart badge:', error);
             }
         }
 

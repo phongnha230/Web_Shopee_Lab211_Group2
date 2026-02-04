@@ -1,15 +1,15 @@
 package com.shoppeclone.backend.cart.service;
 
-import com.shoppeclone.backend.cart.entity.Cart;
+import com.shoppeclone.backend.cart.dto.CartResponse;
 
 public interface CartService {
-    Cart getCart(String userId);
+    CartResponse getCart(String userId);
 
-    Cart addToCart(String userId, String variantId, int quantity);
+    CartResponse addToCart(String userId, String variantId, int quantity);
 
-    Cart updateCartItem(String userId, String variantId, int quantity); // update quantity specific item
+    CartResponse updateCartItem(String userId, String variantId, int quantity);
 
-    Cart removeCartItem(String userId, String variantId);
+    CartResponse removeCartItem(String userId, String variantId);
 
     void clearCart(String userId);
 }

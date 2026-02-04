@@ -2,9 +2,11 @@ package com.shoppeclone.backend.order.service.impl;
 
 import com.shoppeclone.backend.cart.entity.Cart;
 import com.shoppeclone.backend.cart.entity.CartItem;
+import com.shoppeclone.backend.cart.repository.CartRepository;
 import com.shoppeclone.backend.cart.service.CartService;
 import com.shoppeclone.backend.order.dto.OrderRequest;
 import com.shoppeclone.backend.order.entity.*;
+import com.shoppeclone.backend.promotion.entity.Voucher;
 import com.shoppeclone.backend.order.repository.OrderRepository;
 import com.shoppeclone.backend.order.service.OrderService;
 import com.shoppeclone.backend.product.entity.ProductVariant;
@@ -33,18 +35,21 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final CartService cartService;
+    private final CartRepository cartRepository;
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
     private final ShippingProviderRepository shippingProviderRepository;
     private final ShippingService shippingService;
     private final PaymentService paymentService;
     private final PaymentMethodRepository paymentMethodRepository;
+    private final com.shoppeclone.backend.promotion.repository.VoucherRepository voucherRepository;
 
     @Override
     @Transactional
     public Order createOrder(String userId, OrderRequest request) {
         // 1. Get Cart
-        Cart cart = cartService.getCart(userId);
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
         if (cart.getItems().isEmpty()) {
             throw new RuntimeException("Cart is empty");
         }
@@ -98,48 +103,81 @@ public class OrderServiceImpl implements OrderService {
             totalPrice = totalPrice.add(variant.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
         }
 
-        // 4. Create Order
+        // 4. Calculate Discount (Product Voucher)
+        BigDecimal productDiscount = BigDecimal.ZERO;
+        String appliedProductVoucherCode = null;
+
+        if (request.getVoucherCode() != null && !request.getVoucherCode().trim().isEmpty()) {
+            appliedProductVoucherCode = processVoucher(request.getVoucherCode(), totalPrice,
+                    Voucher.VoucherType.PRODUCT);
+            productDiscount = calculateDiscount(appliedProductVoucherCode, totalPrice);
+        }
+
+        // 5. Shipping Calculation (moved before shipping voucher processing)
+        BigDecimal shippingFee = BigDecimal.ZERO;
+        ShippingProvider provider = null;
+        if (request.getShippingProviderId() != null) {
+            provider = shippingProviderRepository.findById(request.getShippingProviderId())
+                    .orElseThrow(() -> new RuntimeException("Shipping Provider not found"));
+            shippingFee = shippingService.calculateShippingFee(provider.getId(), request.getAddress(), totalPrice);
+        }
+
+        // 6. Calculate Shipping Discount (Shipping Voucher)
+        BigDecimal shippingDiscount = BigDecimal.ZERO;
+        String appliedShippingVoucherCode = null;
+
+        if (request.getShippingVoucherCode() != null && !request.getShippingVoucherCode().trim().isEmpty()) {
+            if (shippingFee.compareTo(BigDecimal.ZERO) > 0) {
+                appliedShippingVoucherCode = processVoucher(request.getShippingVoucherCode(), totalPrice,
+                        Voucher.VoucherType.SHIPPING);
+                shippingDiscount = calculateDiscount(appliedShippingVoucherCode, shippingFee); // Apply against Shipping
+                                                                                               // Fee, but minSpend
+                                                                                               // checks Subtotal
+                                                                                               // (totalPrice)
+            }
+        }
+
+        // 7. Create Order
         Order order = new Order();
         order.setUserId(userId);
         order.setShopId(shopId); // Set shopId
         order.setItems(orderItems);
-        order.setTotalPrice(totalPrice);
-        order.setDiscount(BigDecimal.ZERO); // TODO: Implement Voucher logic
+        order.setTotalPrice(totalPrice.subtract(productDiscount).add(shippingFee).subtract(shippingDiscount)); // (Subtotal
+                                                                                                               // -
+                                                                                                               // ProdDisc)
+                                                                                                               // +
+                                                                                                               // (ShipFee
+                                                                                                               // -
+                                                                                                               // ShipDisc)
+        order.setDiscount(productDiscount);
+        order.setVoucherCode(appliedProductVoucherCode);
+        order.setShippingDiscount(shippingDiscount);
+        order.setShippingVoucherCode(appliedShippingVoucherCode);
+
         order.setOrderStatus(OrderStatus.PENDING);
-        order.setPaymentStatus(PaymentStatus.UNPAID); // TODO: Implement Payment logic
+        order.setPaymentStatus(PaymentStatus.UNPAID);
         order.setCreatedAt(LocalDateTime.now());
         order.setUpdatedAt(LocalDateTime.now());
 
-        // 5. Shipping
-        if (request.getShippingProviderId() != null) {
-            ShippingProvider provider = shippingProviderRepository.findById(request.getShippingProviderId())
-                    .orElseThrow(() -> new RuntimeException("Shipping Provider not found"));
-
-            // Calculate Shipping Fee
-            BigDecimal shippingFee = shippingService.calculateShippingFee(provider.getId(), request.getAddress(),
-                    totalPrice);
-
+        // 8. Shipping Info
+        if (provider != null) {
             OrderShipping shipping = new OrderShipping();
             shipping.setProviderId(provider.getId());
             shipping.setAddress(request.getAddress());
             shipping.setStatus("WAITING");
             shipping.setShippingFee(shippingFee);
             order.setShipping(shipping);
-
-            totalPrice = totalPrice.add(shippingFee);
         }
 
-        order.setTotalPrice(totalPrice);
-
-        // 6. Save Order
+        // 9. Save Order
         Order savedOrder = orderRepository.save(order);
 
-        // 7. Remove ordered items from Cart
+        // 10. Remove ordered items from Cart
         for (CartItem item : checkoutItems) {
             cartService.removeCartItem(userId, item.getVariantId());
         }
 
-        // 8. Create Payment
+        // 11. Create Payment
         if (request.getPaymentMethod() != null) {
             PaymentMethod paymentMethod = paymentMethodRepository.findByCode(request.getPaymentMethod())
                     .orElseThrow(() -> new RuntimeException("Payment method not found: " + request.getPaymentMethod()));
@@ -148,6 +186,69 @@ public class OrderServiceImpl implements OrderService {
         }
 
         return savedOrder;
+    }
+
+    // Helper to validate voucher and return code if valid
+    private String processVoucher(String code, BigDecimal orderValue, Voucher.VoucherType expectedType) {
+        Voucher voucher = voucherRepository.findByCode(code)
+                .orElseThrow(() -> new RuntimeException("Voucher not found: " + code));
+
+        // Validate Type
+        if (voucher.getType() != null && voucher.getType() != expectedType) {
+            throw new RuntimeException(
+                    "Invalid voucher type. Expected " + expectedType + " but got " + voucher.getType());
+        }
+
+        // Validate Status
+        LocalDateTime now = LocalDateTime.now();
+        if (!voucher.isActive()
+                || (voucher.getStartDate() != null && now.isBefore(voucher.getStartDate()))
+                || (voucher.getEndDate() != null && now.isAfter(voucher.getEndDate()))) {
+            throw new RuntimeException("Voucher is expired or inactive");
+        }
+
+        if (voucher.getQuantity() <= 0) {
+            throw new RuntimeException("Voucher is out of stock");
+        }
+
+        // Min Spend Check (Always checks against Subtotal/OrderValue)
+        if (voucher.getMinSpend() != null && orderValue.compareTo(voucher.getMinSpend()) < 0) {
+            throw new RuntimeException(
+                    "Order total does not meet minimum spend for voucher: " + voucher.getMinSpend());
+        }
+
+        // Update Usage (Optimistic)
+        voucher.setQuantity(voucher.getQuantity() - 1);
+        voucher.setUsedCount(voucher.getUsedCount() == null ? 1 : voucher.getUsedCount() + 1);
+        voucherRepository.save(voucher);
+
+        return code;
+    }
+
+    private BigDecimal calculateDiscount(String code, BigDecimal baseAmount) {
+        if (code == null)
+            return BigDecimal.ZERO;
+
+        Voucher voucher = voucherRepository.findByCode(code)
+                .orElseThrow(() -> new RuntimeException("Voucher not found during calc: " + code));
+
+        BigDecimal discount = BigDecimal.ZERO;
+
+        if (voucher.getDiscountType() == Voucher.DiscountType.PERCENTAGE) {
+            discount = baseAmount.multiply(voucher.getDiscountValue()).divide(BigDecimal.valueOf(100));
+            if (voucher.getMaxDiscount() != null && discount.compareTo(voucher.getMaxDiscount()) > 0) {
+                discount = voucher.getMaxDiscount();
+            }
+        } else {
+            discount = voucher.getDiscountValue();
+        }
+
+        // Cap discount at baseAmount
+        if (discount.compareTo(baseAmount) > 0) {
+            discount = baseAmount;
+        }
+
+        return discount;
     }
 
     @Override

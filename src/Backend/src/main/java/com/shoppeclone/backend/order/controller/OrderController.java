@@ -3,8 +3,10 @@ package com.shoppeclone.backend.order.controller;
 import com.shoppeclone.backend.auth.model.User;
 import com.shoppeclone.backend.auth.repository.UserRepository;
 import com.shoppeclone.backend.order.dto.OrderRequest;
+import com.shoppeclone.backend.order.dto.OrderResponse;
 import com.shoppeclone.backend.order.entity.Order;
 import com.shoppeclone.backend.order.entity.OrderStatus;
+import com.shoppeclone.backend.order.service.OrderResponseService;
 import com.shoppeclone.backend.order.service.OrderService;
 import com.shoppeclone.backend.shop.entity.Shop;
 import com.shoppeclone.backend.shop.service.ShopService;
@@ -23,6 +25,7 @@ public class OrderController {
 
     private final OrderService orderService;
     private final UserRepository userRepository;
+    private final OrderResponseService orderResponseService;
     private final ShopService shopService;
 
     private String getUserId(UserDetails userDetails) {
@@ -32,46 +35,68 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<Order> createOrder(
+    public ResponseEntity<OrderResponse> createOrder(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody OrderRequest request) {
         String userId = getUserId(userDetails);
-        return ResponseEntity.ok(orderService.createOrder(userId, request));
+        Order order = orderService.createOrder(userId, request);
+        OrderResponse response = orderResponseService.enrichWithReviewInfo(order, userId);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public ResponseEntity<List<Order>> getUserOrders(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<List<OrderResponse>> getUserOrders(@AuthenticationPrincipal UserDetails userDetails) {
         String userId = getUserId(userDetails);
-        return ResponseEntity.ok(orderService.getUserOrders(userId));
+        List<Order> orders = orderService.getUserOrders(userId);
+        List<OrderResponse> responses = orderResponseService.enrichWithReviewInfo(orders, userId);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<Order> getOrder(@PathVariable String orderId) {
+    public ResponseEntity<OrderResponse> getOrder(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String orderId) {
+        String userId = getUserId(userDetails);
+        Order order = orderService.getOrder(orderId);
         // TODO: Validate user owns order or is admin
-        return ResponseEntity.ok(orderService.getOrder(orderId));
+        OrderResponse response = orderResponseService.enrichWithReviewInfo(order, userId);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{orderId}/status")
-    public ResponseEntity<Order> updateOrderStatus(
+    public ResponseEntity<OrderResponse> updateOrderStatus(
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String orderId,
             @RequestParam OrderStatus status) {
+        String userId = getUserId(userDetails);
         // TODO: Check if admin/seller
-        return ResponseEntity.ok(orderService.updateOrderStatus(orderId, status));
+        Order order = orderService.updateOrderStatus(orderId, status);
+        OrderResponse response = orderResponseService.enrichWithReviewInfo(order, userId);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{orderId}/cancel")
-    public ResponseEntity<Order> cancelOrder(@PathVariable String orderId) {
+    public ResponseEntity<OrderResponse> cancelOrder(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String orderId) {
+        String userId = getUserId(userDetails);
         // TODO: Check if user owns order
-        return ResponseEntity.ok(orderService.cancelOrder(orderId));
+        Order order = orderService.cancelOrder(orderId);
+        OrderResponse response = orderResponseService.enrichWithReviewInfo(order, userId);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{orderId}/shipping")
-    public ResponseEntity<Order> updateShipment(
+    public ResponseEntity<OrderResponse> updateShipment(
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String orderId,
             @RequestParam(required = false) String trackingCode,
             @RequestParam(required = false) String providerId) {
+        String userId = getUserId(userDetails);
         // TODO: Check if admin/seller
-        return ResponseEntity.ok(orderService.updateShipment(orderId, trackingCode, providerId));
+        Order order = orderService.updateShipment(orderId, trackingCode, providerId);
+        OrderResponse response = orderResponseService.enrichWithReviewInfo(order, userId);
+        return ResponseEntity.ok(response);
     }
 
     // Seller endpoint: Get orders for their shop
@@ -93,10 +118,14 @@ public class OrderController {
     }
 
     @PutMapping("/{orderId}/assign-shipper")
-    public ResponseEntity<Order> assignShipper(
+    public ResponseEntity<OrderResponse> assignShipper(
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String orderId,
             @RequestParam String shipperId) {
+        String userId = getUserId(userDetails);
         // TODO: Check if admin/seller
-        return ResponseEntity.ok(orderService.assignShipper(orderId, shipperId));
+        Order order = orderService.assignShipper(orderId, shipperId);
+        OrderResponse response = orderResponseService.enrichWithReviewInfo(order, userId);
+        return ResponseEntity.ok(response);
     }
 }

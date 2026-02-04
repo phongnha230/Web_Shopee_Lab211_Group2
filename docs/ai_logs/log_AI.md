@@ -15261,3 +15261,60 @@ Review Changes
 ✅ Color Sync with Shopee Theme
 ✅ Disputes Management LIVE
 ✅ Git Synced with Main Branch
+
+---
+# LOG UPDATE: 2026-02-01 - Post-Sync Bug Fixes
+
+## 1. Syntax Errors Resolved
+- **OrderController.java**: Fixed a missing closing brace `}` in the `getShopOrders` method that was preventing compilation.
+- **ShipperServiceImpl.java**: Removed garbage characters `][` from the top of the file introduced during the sync.
+
+### Status
+✅ Compilation errors resolved
+✅ Project builds successfully
+
+## 2. UI Polishing & Chart Rebranding
+- **Chart.js**: Updated `salesChart` stroke and gradient fill to Shopee red (#AD3029).
+- **Revenue Section**: Rebranded category indicators and progress bars to a harmonious brand palette.
+- **Flash Sale Card**: Switched blue background accents to white/red transparency.
+- **Buttons & UI**: Applied final Shopee specific colors to remaining "Volume/Value" buttons and tab indicators.
+
+### Status
+✅ Dashboard 100% Shopee-themed
+✅ All UI components polished
+
+## 3. Dashboard Time Filters Integrated
+- **Backend**: Updated `AdminDashboardController` and `Service` to support dynamic time periods (`days` param).
+- **Hourly Data**: Added logic to show hourly registration trends for "Today" and "Yesterday" views.
+- **Frontend**: Activated filter buttons (Today, Yesterday, Last 7 Days) with dynamic fetching and active UI state.
+
+### Status
+✅ Real-time time filtering active
+✅ Hourly and Daily trends supported
+
+---
+# LOG UPDATE: 2026-02-03 - Dashboard Stats & Branding Refinement
+
+## 1. Top Selling Products (Real-time)
+- **Backend Data**: Added `findTop5ByOrderBySoldDesc` to `ProductRepository` to fetch products ranked by sales.
+- **Service Integration**: Updated `AdminDashboardService` to map product data (Name, Price, Sold count, Status) into the dashboard response.
+- **Frontend Tables**: Replaced mock data in the "Top Selling Products" section with dynamic data fetched from the backend.
+- **View All functionality**: Implemented an "All Products" view accessible via the "View All" link, allowing Admins to oversee the entire catalog.
+- **UI Renaming**: Renamed view header to "All Products" (instead of management) to clarify the Admin's role in product oversight rather than direct editing.
+
+## 2. Operations Summary & Real Stats
+- **Dispute/Shop Metrics**: Replaced mock "Flash Sale" area with an "Operations Summary" card showing live counts for **New Disputes** and **Pending Shop Approvals**.
+- **Bug Fix (Shop Status)**: Removed `ShopStatusFixer.java` which was causing approved shops to revert to pending status incorrectly.
+- **User Distribution**: Finished the conversion of mock "Revenue" card into a real-time "User Distribution" tracker (Buyers vs Sellers vs Admins).
+
+## 3. Brand Identity (Branding Refinement)
+- **Primary Logo**: Updated **AdminPanel** text and icon colors to match Shopee signature red (`#AD3029`).
+- **User Profiles**: Synchronized the Admin's avatar background and name text color to the brand palette for a premium, unified feel.
+- **Sidebar Cleanup**: Removed redundant "Products" link from the main sidebar to keep the interface focused on operational tasks.
+
+### Status
+✅ Top Selling Products LIVE
+✅ All Products View Functional
+✅ Operations Summary (Disputes/Shops) Active
+✅ Logo & UI Rebranded to Shopee Palette
+✅ Shop Status persistence fixed

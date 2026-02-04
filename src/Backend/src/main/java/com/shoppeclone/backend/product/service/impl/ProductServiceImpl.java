@@ -315,6 +315,12 @@ public class ProductServiceImpl implements ProductService {
         response.setCreatedAt(product.getCreatedAt());
         response.setUpdatedAt(product.getUpdatedAt());
 
+        response.setMinPrice(product.getMinPrice());
+        response.setMaxPrice(product.getMaxPrice());
+        response.setTotalStock(product.getTotalStock());
+        response.setSold(product.getSold());
+        response.setRating(product.getRating());
+
         // Load variants
         List<ProductVariantResponse> variants = variantRepository.findByProductId(product.getId()).stream()
                 .map(this::mapVariantToResponse)
