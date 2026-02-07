@@ -4,6 +4,7 @@ import com.shoppeclone.backend.product.dto.request.CreateProductRequest;
 import com.shoppeclone.backend.product.dto.request.CreateProductVariantRequest;
 import com.shoppeclone.backend.product.dto.request.UpdateProductRequest;
 import com.shoppeclone.backend.product.dto.response.ProductResponse;
+import com.shoppeclone.backend.product.dto.response.ProductVariantResponse;
 import java.util.List;
 
 public interface ProductService {
@@ -21,10 +22,16 @@ public interface ProductService {
 
     void deleteProduct(String id);
 
+    List<ProductResponse> getFlashSaleProducts();
+
     // Product variant management
     void addVariant(String productId, CreateProductVariantRequest request);
 
     void removeVariant(String variantId);
+
+    ProductVariantResponse getVariantById(String variantId);
+
+    void updateVariantStock(String variantId, Integer stock);
 
     // Category management
     void addCategory(String productId, String categoryId);
@@ -35,4 +42,6 @@ public interface ProductService {
     void addImage(String productId, String imageUrl);
 
     void removeImage(String imageId);
+
+    void updateProductFlashSaleStatus(String id, boolean isFlashSale);
 }

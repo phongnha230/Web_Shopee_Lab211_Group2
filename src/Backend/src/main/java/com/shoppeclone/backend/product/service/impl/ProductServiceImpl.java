@@ -37,6 +37,9 @@ public class ProductServiceImpl implements ProductService {
         product.setDescription(request.getDescription());
         product.setCreatedAt(LocalDateTime.now());
         product.setUpdatedAt(LocalDateTime.now());
+        product.setIsFlashSale(request.getIsFlashSale() != null ? request.getIsFlashSale() : false);
+        product.setFlashSalePrice(request.getFlashSalePrice());
+        product.setFlashSaleStock(request.getFlashSaleStock());
 
         Product savedProduct = productRepository.save(product);
         boolean hasVariants = false;
@@ -150,6 +153,18 @@ public class ProductServiceImpl implements ProductService {
         }
         if (request.getStatus() != null) {
             product.setStatus(request.getStatus());
+        }
+        if (request.getIsFlashSale() != null) {
+            product.setIsFlashSale(request.getIsFlashSale());
+        }
+        if (request.getFlashSalePrice() != null) {
+            product.setFlashSalePrice(request.getFlashSalePrice());
+        }
+        if (request.getFlashSaleStock() != null) {
+            product.setFlashSaleStock(request.getFlashSaleStock());
+        }
+        if (request.getShopId() != null) {
+            product.setShopId(request.getShopId());
         }
 
         // Update Category
@@ -266,6 +281,41 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public ProductVariantResponse getVariantById(String variantId) {
+        ProductVariant variant = variantRepository.findById(variantId)
+                .orElseThrow(() -> new RuntimeException("Variant not found"));
+        return mapVariantToResponse(variant);
+    }
+
+    @Override
+    @Transactional
+    public void updateVariantStock(String variantId, Integer stock) {
+        ProductVariant variant = variantRepository.findById(variantId)
+                .orElseThrow(() -> new RuntimeException("Variant not found"));
+
+        variant.setStock(stock);
+        variant.setUpdatedAt(LocalDateTime.now());
+        variantRepository.save(variant);
+
+        // Update Total Stock in Product
+        updateProductTotalStock(variant.getProductId());
+    }
+
+    private void updateProductTotalStock(String productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        List<ProductVariant> variants = variantRepository.findByProductId(productId);
+        Integer totalStock = variants.stream()
+                .mapToInt(ProductVariant::getStock)
+                .sum();
+
+        product.setTotalStock(totalStock);
+        product.setUpdatedAt(LocalDateTime.now());
+        productRepository.save(product);
+    }
+
+    @Override
     public void addCategory(String productId, String categoryId) {
         if (!productRepository.existsById(productId)) {
             throw new RuntimeException("Product not found");
@@ -305,6 +355,13 @@ public class ProductServiceImpl implements ProductService {
         imageRepository.deleteById(imageId);
     }
 
+    @Override
+    public List<ProductResponse> getFlashSaleProducts() {
+        return productRepository.findByIsFlashSaleTrue().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
     private ProductResponse mapToResponse(Product product) {
         ProductResponse response = new ProductResponse();
         response.setId(product.getId());
@@ -320,6 +377,9 @@ public class ProductServiceImpl implements ProductService {
         response.setTotalStock(product.getTotalStock());
         response.setSold(product.getSold());
         response.setRating(product.getRating());
+        response.setIsFlashSale(product.getIsFlashSale());
+        response.setFlashSalePrice(product.getFlashSalePrice());
+        response.setFlashSaleStock(product.getFlashSaleStock());
 
         // Load variants
         List<ProductVariantResponse> variants = variantRepository.findByProductId(product.getId()).stream()
@@ -354,5 +414,24 @@ public class ProductServiceImpl implements ProductService {
         response.setCreatedAt(variant.getCreatedAt());
         response.setUpdatedAt(variant.getUpdatedAt());
         return response;
+    }
+
+    @Override
+    @Transactional
+    public void updateProductFlashSaleStatus(String id, boolean isFlashSale) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        product.setIsFlashSale(isFlashSale);
+        if (!isFlashSale) {
+            product.setFlashSalePrice(null);
+            product.setFlashSaleStock(null);
+        }
+        // If isFlashSale is true, we assume the user will update price/stock via other
+        // means or it's already set.
+        // But the requirement here is mainly for "Delete" which sets it to false.
+
+        product.setUpdatedAt(LocalDateTime.now());
+        productRepository.save(product);
     }
 }

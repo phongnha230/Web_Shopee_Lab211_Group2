@@ -14,4 +14,6 @@ public interface ProductRepository extends MongoRepository<Product, String> {
 
     // Fetch top 5 items by sold count descending
     List<Product> findTop5ByOrderBySoldDesc();
+
+    List<Product> findByIsFlashSaleTrue();
 }

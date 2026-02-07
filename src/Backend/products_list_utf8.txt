@@ -1,0 +1,4 @@
+﻿Found 18 products in total.
+--------------------------------------------------------------------------------
+Error: Cannot bind parameter 'ForegroundColor'. Cannot convert value "Product Name,Product ID,Shop ID" to type "System.ConsoleColor". Error: "Unable to match the identifier name Product Name,Product ID,Shop ID to a valid enumerator name. Specify one of the following enumerator names and try again:
+Black, DarkBlue, DarkGreen, DarkCyan, DarkRed, DarkMagenta, DarkYellow, Gray, DarkGray, Blue, Green, Cyan, Red, Magenta, Yellow, White"

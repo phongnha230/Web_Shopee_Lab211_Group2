@@ -419,14 +419,19 @@
                 };
 
                 categories.forEach(category => {
+                    // DEBUG: Log raw category object
+                    console.log('🔍 Raw category object:', category);
+
                     // Map "House" or "Furniture" to "Home" if needed for consistency with User's UI
                     let displayName = category.name;
                     if (displayName && displayName.toLowerCase() === 'house') displayName = 'Home';
 
                     // Safe ID Resolution
                     const catId = category.id || category._id;
+                    console.log(`🔍 Category "${displayName}" - ID: ${catId}`);
+
                     if (!catId) {
-                        console.error('Missing ID for category:', category);
+                        console.error('❌ Missing ID for category:', category);
                         return;
                     }
 
@@ -437,13 +442,31 @@
                     div.className = 'flex flex-col items-center cursor-pointer hover:text-orange-500 transition group';
 
                     div.onclick = function () {
-                        if (!catId) {
-                            console.error('Category ID missing for:', displayName);
+                        // CRITICAL: Validate catId before navigation
+                        console.log('🔥 CATEGORY CLICKED!');
+                        console.log('🔥 catId:', catId);
+                        console.log('🔥 displayName:', displayName);
+                        console.log('🔥 category object:', category);
+
+                        if (!catId || catId === 'undefined' || catId === 'null' || catId.trim() === '') {
+                            console.error('❌ Invalid Category ID for:', displayName);
+                            console.error('❌ catId value:', catId);
+                            console.error('❌ Full category object:', category);
+                            alert(`Error: Cannot navigate - Category ID is invalid for "${displayName}"`);
                             return;
                         }
 
-                        // Clean navigation without debug noise
-                        window.location.href = `category.html?id=${catId}&name=${encodeURIComponent(displayName || 'Category')}`;
+                        // DEBUG: Log navigation details
+                        // Use hash-based navigation to bypass server routing issues
+                        const targetUrl = `category.html#id=${catId}&name=${encodeURIComponent(displayName || 'Category')}`;
+                        const absoluteUrl = `${window.location.origin}/${targetUrl}`;
+                        console.log(`🔗 TARGET URL (HASH): ${targetUrl}`);
+                        console.log(`🔗 ABSOLUTE URL: ${absoluteUrl}`);
+                        console.log(`   Category: ${displayName}`);
+                        console.log(`   ID: ${catId}`);
+
+                        // Use hash-based URL to bypass server routing
+                        window.location.href = absoluteUrl;
                     };
 
                     div.innerHTML = `
@@ -466,53 +489,38 @@
 
         async function loadHomepageProducts() {
             try {
+                // 1. Load Flash Sale Products
+                const fsResponse = await fetch(`${API_BASE_URL}/products/flash-sale`);
+                if (fsResponse.ok) {
+                    const fsProducts = await fsResponse.json();
+                    if (fsProducts.length > 0) {
+                        renderProductList(fsProducts.slice(0, 6), 'flashSaleList', true);
+                    } else {
+                        document.getElementById('flashSaleList').innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">No flash sale active.</div>';
+                    }
+                }
+
+                // 2. Load All Products for Daily Discover
                 const response = await fetch(`${API_BASE_URL}/products`);
                 if (!response.ok) throw new Error('Failed to fetch products');
 
                 const products = await response.json();
 
                 if (products.length === 0) {
-                    document.getElementById('flashSaleList').innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">No products available yet.</div>';
                     document.getElementById('dailyDiscoverList').innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">No products available yet.</div>';
                     return;
                 }
 
-                // SORT LOGIC: Show NEWEST products in Flash Sale
-                // Clone array to avoid affecting original order if needed elsewhere (though here it's fine)
+                // SORT LOGIC: Show NEWEST 6 products in Daily Discover
                 const sortedProducts = [...products].sort((a, b) => {
                     return new Date(b.createdAt) - new Date(a.createdAt);
                 });
 
-                // Render Flash Sale (Newest 6 products)
-                // This ensures newly created products appear here immediately
-                const flashSaleProducts = sortedProducts.slice(0, 6);
-                renderProductList(flashSaleProducts, 'flashSaleList', true);
-
-                // Render Daily Discover (ALL Remaining products from original list or sorted - let's use original for variety)
-                // Or better, show ALL products in Daily Discover excluding the Flash Sale ones?
-                // Actually, Daily Discover usually acts as "All Products". 
-                // Let's just render ALL products (or slice from 6) in somewhat random or original order for variety.
-                // Resetting to original products for Daily Discover to avoid duplication if we slice, 
-                // OR just showing everything index 6+ from the sorted list to keep it clean.
-                // Let's stick to showing everything else from the sorted list to avoid duplicates.
-
-                let dailyProducts = [];
-                if (sortedProducts.length > 6) {
-                    // SLICE 6 ITEMS ONLY (Symbolic display as requested)
-                    dailyProducts = sortedProducts.slice(6, 12);
-                }
-
-                renderProductList(dailyProducts, 'dailyDiscoverList', false);
-
-                // If there are no remaining products (total <= 6), dailyProducts is empty.
-                // We display whatever is left. If empty, the render function will just clear the container 
-                // and show nothing (or we could show a message, but empty is cleaner).
-
-                renderProductList(dailyProducts, 'dailyDiscoverList', false);
+                renderProductList(sortedProducts.slice(0, 6), 'dailyDiscoverList', false);
 
             } catch (error) {
                 console.error('Error loading products:', error);
-                document.getElementById('flashSaleList').innerHTML = '<div class="col-span-full text-center text-red-500 py-8">Error loading products. Please try again later.</div>';
+                document.getElementById('flashSaleList').innerHTML = '<div class="col-span-full text-center text-red-500 py-8">Error loading products.</div>';
                 document.getElementById('dailyDiscoverList').innerHTML = '<div class="col-span-full text-center text-red-500 py-8">Error loading products.</div>';
             }
         }
@@ -529,19 +537,21 @@
 
                 // Determine Price
                 let priceDisplay = 'Contact'; // Default
-                if (product.variants && product.variants.length > 0) {
+                if (isFlashSale && product.flashSalePrice) {
+                    priceDisplay = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.flashSalePrice);
+                } else if (product.variants && product.variants.length > 0) {
                     const price = product.variants[0].price;
                     priceDisplay = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
                 }
 
                 // Random Sold Count & Rating for demo effect (since backend might not have it populated fully yet)
-                const sold = Math.floor(Math.random() * 1000) + 10;
-                const rating = (Math.random() * (5.0 - 4.0) + 4.0).toFixed(1);
+                const sold = product.sold || Math.floor(Math.random() * 100) + 5;
+                const rating = product.rating ? product.rating.toFixed(1) : (Math.random() * (5.0 - 4.5) + 4.5).toFixed(1);
 
                 // Badge Logic
                 let badgeHtml = '';
                 if (isFlashSale) {
-                    badgeHtml = `<div class="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold">50%</div>`;
+                    badgeHtml = `<div class="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold"><i class="fas fa-bolt mr-1"></i>SALE</div>`;
                 } else {
                     // Random badge for Daily Discover
                     const badges = ['NEW', 'HOT', 'SALE', 'BEST'];
@@ -552,10 +562,13 @@
                 // Progress Bar for Flash Sale
                 let progressBarHtml = '';
                 if (isFlashSale) {
-                    const progressPercent = Math.floor(Math.random() * 90) + 10;
+                    // Symbolic progress based on flashSaleStock
+                    const stock = product.flashSaleStock || 10;
+                    const progressPercent = Math.min(95, Math.floor((sold / (sold + stock)) * 100));
                     progressBarHtml = `
-                        <div class="w-full bg-orange-200 h-2 rounded-full mt-2">
-                            <div class="bg-orange-600 h-2 rounded-full" style="width: ${progressPercent}%"></div>
+                        <div class="w-full bg-orange-200 h-4 rounded-full mt-2 relative overflow-hidden">
+                            <div class="bg-gradient-to-r from-orange-500 to-red-600 h-full rounded-full transition-all duration-1000" style="width: ${progressPercent}%"></div>
+                            <span class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white uppercase">SẮP HẾT HÀNG</span>
                         </div>`;
                 } else {
                     // Sold count for Daily Discover
@@ -563,7 +576,7 @@
                         <div class="flex items-center text-xs text-gray-500 mt-1">
                             <i class="fas fa-star text-yellow-400"></i>
                             <span class="ml-1">${rating}</span>
-                            <span class="ml-2">Sold ${sold}</span>
+                            <span class="ml-2 border-l border-gray-300 pl-2">Đã bán ${sold}</span>
                         </div>`;
                 }
 
@@ -574,7 +587,8 @@
                 productCard.onclick = () => {
                     if (pid) {
                         localStorage.setItem('lastClickedProductId', pid);
-                        window.location.href = `product-detail.html?id=${pid}`;
+                        // Use hash-based navigation to bypass server routing issues
+                        window.location.href = `product-detail.html#id=${pid}`;
                     } else {
                         console.error("Product ID missing:", product);
                     }
@@ -726,7 +740,7 @@
                     const cartData = await response.json();
                     // Calculate total items from backend response
                     const totalItems = cartData.items ? cartData.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
-                    
+
                     const badge = document.getElementById('cartBadge');
                     if (badge) {
                         badge.textContent = totalItems;

@@ -1,0 +1,35 @@
+﻿Fetching Shops...
+Fetching Products...
+
+=== SHOP AUDIT REPORT ===
+Found 5 unique shops.
+------------------------------------------------
+SHOP: Cá»-a HA ng Ä?iá»?n Tá»- ABC (ID: 69797eb8c8a10c06fe7d3de7)
+STATUS: ACTIVE
+PRODUCTS: 0
+  (No products)
+------------------------------------------------
+SHOP: Shop CA'ng Nghá»? Sá»? 1 (ID: 69785193e54d760f00ecb62a)
+STATUS: ACTIVE
+PRODUCTS: 2
+  - Abbott Ensure Gold Vanilla Flavored Powdered Milk 800g (Stock: , Price: )
+  - The book "The Rainbow Rabbit and Those Who Think It's Their Friend" by Huynh Thai Ngoc - Wonders (Stock: , Price: )
+------------------------------------------------
+SHOP: Baribanai (ID: 697dadea2c4624e9a1b1508a)
+STATUS: ACTIVE
+PRODUCTS: 0
+  (No products)
+------------------------------------------------
+SHOP: Arina (ID: 697d92b28929569335e85fe5)
+STATUS: ACTIVE
+PRODUCTS: 2
+  - Sony WH Wireless on-ear headphones - CH520 (Stock: , Price: )
+  - LA ROCHE POSAY Thermal Spring Water cleanses and softens the skin (150ml bottle) (Stock: , Price: )
+------------------------------------------------
+SHOP: Ngoc Nga Shop (ID: 697dba32a9b96dd9639f8aaf)
+STATUS: ACTIVE
+PRODUCTS: 2
+  - Apple iPhone 15 128GB (Stock: , Price: )
+  - Book - My Sweet Orange Tree (Stock: , Price: )
+
+==========================

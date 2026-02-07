@@ -1,0 +1,23 @@
+﻿Found 18 products in total.
+--------------------------------------------------------------------------------
+Product Name                             | Product ID                | Shop ID                       
+--------------------------------------------------------------------------------
+Wireless Headphones - Premium Bass       | 1                         | demo-shop-1                   
+Urban Sneakers - High Comfort            | 2                         | demo-shop-1                   
+Classic Wrist Watch                      | 3                         | demo-shop-1                   
+Running Sport Shoes                      | 4                         | demo-shop-1                   
+Smart Phone 12 Pro                       | 5                         | demo-shop-1                   
+Compact Headphones                       | 6                         | demo-shop-1                   
+Nikon D3500 DSLR Camera                  | 101                       | demo-shop-1                   
+Nike Air Max Classic Red Shoes Orig...   | 102                       | demo-shop-1                   
+Sport Water Bottle 1L                    | 103                       | demo-shop-1                   
+Blue Water Bottle                        | 104                       | demo-shop-1                   
+Modern Chair                             | 105                       | demo-shop-1                   
+Canvas Sneakers                          | 106                       | demo-shop-1                   
+Abbott Ensure Gold Vanilla Flavored...   | 6986f1683d133823d9e13c4e  | 69785193e54d760f00ecb62a      
+The book "The Rainbow Rabbit and Th...   | 6986f1fe3d133823d9e13c57  | 69785193e54d760f00ecb62a      
+Apple iPhone 15 128GB                    | 6986f4933d133823d9e13c68  | 697dba32a9b96dd9639f8aaf      
+Book - My Sweet Orange Tree              | 6986f56d3d133823d9e13c73  | 697dba32a9b96dd9639f8aaf      
+Sony WH Wireless on-ear headphones ...   | 6986faed3d133823d9e13c7d  | 697d92b28929569335e85fe5      
+LA ROCHE POSAY Thermal Spring Water...   | 6986fbf13d133823d9e13c8b  | 697d92b28929569335e85fe5      
+--------------------------------------------------------------------------------

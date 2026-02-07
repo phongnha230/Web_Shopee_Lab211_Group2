@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Test Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6 text-orange-600">🔍 Category Navigation Test</h1>
+
+        <!-- Test Results -->
+        <div id="testResults" class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4">Test Results</h2>
+            <div id="results" class="space-y-2">
+                <p class="text-gray-500">Running tests...</p>
+            </div>
+        </div>
+
+        <!-- Categories Display -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-bold mb-4">Categories (Click to Test)</h2>
+            <div id="categoryList" class="grid grid-cols-3 md:grid-cols-9 gap-4 text-center">
+                <p class="col-span-full text-gray-500">Loading...</p>
+            </div>
+        </div>
+
+        <!-- Console Output -->
+        <div class="bg-gray-900 text-green-400 rounded-lg shadow p-6 mt-6 font-mono text-sm">
+            <h2 class="text-xl font-bold mb-4 text-white">Console Output</h2>
+            <div id="console" class="space-y-1 max-h-96 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8080/api';
+        const consoleDiv = document.getElementById('console');
+
+        // Custom console logging
+        function log(message, type = 'info') {
+            const colors = {
+                info: 'text-green-400',
+                error: 'text-red-400',
+                warn: 'text-yellow-400',
+                success: 'text-blue-400'
+            };
+            const line = document.createElement('div');
+            line.className = colors[type] || 'text-green-400';
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            consoleDiv.appendChild(line);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+            console.log(message);
+        }
+
+        // Icon mapping
+        const getIcon = (name) => {
+            const lowerName = name.toLowerCase();
+            if (lowerName.includes('fashion') || lowerName.includes('shirt') || lowerName.includes('cloth')) return 'fa-tshirt';
+            if (lowerName.includes('electronic') || lowerName.includes('laptop') || lowerName.includes('tech')) return 'fa-laptop';
+            if (lowerName.includes('mobile') || lowerName.includes('phone')) return 'fa-mobile-alt';
+            if (lowerName.includes('home') || lowerName.includes('house')) return 'fa-home';
+            if (lowerName.includes('beauty') || lowerName.includes('skin') || lowerName.includes('face')) return 'fa-heart';
+            if (lowerName.includes('baby') || lowerName.includes('toy') || lowerName.includes('kid')) return 'fa-baby';
+            if (lowerName.includes('sport') || lowerName.includes('gym')) return 'fa-dumbbell';
+            if (lowerName.includes('food') || lowerName.includes('cook')) return 'fa-utensils';
+            if (lowerName.includes('book') || lowerName.includes('read')) return 'fa-book';
+            return 'fa-tags';
+        };
+
+        async function runTests() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+
+            try {
+                log('🚀 Starting API test...', 'info');
+
+                // Test 1: Fetch categories
+                log('📡 Fetching categories from API...', 'info');
+                const response = await fetch(`${API_BASE_URL}/categories`);
+
+                if (!response.ok) {
+                    throw new Error(`API returned ${response.status}`);
+                }
+
+                const categories = await response.json();
+                log(`✅ Success! Received ${categories.length} categories`, 'success');
+
+                // Display results
+                let html = `<p class="text-green-600 font-bold">✅ API Test Passed</p>`;
+                html += `<p>Total Categories: ${categories.length}</p>`;
+
+                // Check each category
+                categories.forEach((cat, index) => {
+                    const hasId = cat.id ? '✅' : '❌';
+                    const idValue = cat.id || 'MISSING';
+                    html += `<p class="text-sm">${index + 1}. ${cat.name}: ${hasId} ID: ${idValue.substring(0, 12)}...</p>`;
+
+                    log(`Category: ${cat.name} | ID: ${cat.id || 'MISSING'}`, cat.id ? 'success' : 'error');
+                });
+
+                resultsDiv.innerHTML = html;
+
+                // Load categories for display
+                loadCategories(categories);
+
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+                resultsDiv.innerHTML = `<p class="text-red-600 font-bold">❌ Test Failed: ${error.message}</p>`;
+            }
+        }
+
+        function loadCategories(categories) {
+            const container = document.getElementById('categoryList');
+            container.innerHTML = '';
+
+            categories.forEach(category => {
+                let displayName = category.name;
+                if (displayName && displayName.toLowerCase() === 'house') displayName = 'Home';
+
+                const catId = category.id || category._id;
+                const iconClass = getIcon(displayName || 'Category');
+
+                const div = document.createElement('div');
+                div.className = 'flex flex-col items-center cursor-pointer hover:text-orange-500 transition group';
+
+                div.onclick = function () {
+                    if (!catId) {
+                        log(`❌ Category ID missing for: ${displayName}`, 'error');
+                        alert(`Error: Category ID is missing for ${displayName}`);
+                        return;
+                    }
+
+                    const targetUrl = `category.html?id=${catId}&name=${encodeURIComponent(displayName || 'Category')}`;
+                    log(`🔗 Navigating to: ${targetUrl}`, 'success');
+                    log(`   Category: ${displayName}`, 'info');
+                    log(`   ID: ${catId}`, 'info');
+
+                    // Show confirmation before navigating
+                    if (confirm(`Navigate to:\n${targetUrl}\n\nCategory: ${displayName}\nID: ${catId}`)) {
+                        window.location.href = targetUrl;
+                    }
+                };
+
+                div.innerHTML = `
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-orange-100 transition">
+                        <i class="fas ${iconClass} text-2xl text-orange-500"></i>
+                    </div>
+                    <p class="text-xs font-medium text-center line-clamp-2 px-1">${displayName || 'Category'}</p>
+                `;
+                container.appendChild(div);
+            });
+
+            log(`✅ Loaded ${categories.length} categories to UI`, 'success');
+        }
+
+        // Run tests on load
+        window.onload = runTests;
+    </script>
+</body>
+
+</html>

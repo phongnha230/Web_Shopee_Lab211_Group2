@@ -24,4 +24,9 @@ public class ProductResponse {
     private Integer totalStock;
     private Integer sold;
     private Double rating;
+
+    // Flash Sale fields
+    private Boolean isFlashSale;
+    private java.math.BigDecimal flashSalePrice;
+    private Integer flashSaleStock;
 }

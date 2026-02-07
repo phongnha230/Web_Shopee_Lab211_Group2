@@ -11,7 +11,13 @@ public class UpdateProductRequest {
     private String description;
     private ProductStatus status;
     private String categoryId;
+    private String shopId; // Added for admin re-assignment
     private List<String> images;
 
     private List<CreateProductVariantRequest> variants;
+
+    // Flash Sale fields
+    private Boolean isFlashSale;
+    private java.math.BigDecimal flashSalePrice;
+    private Integer flashSaleStock;
 }

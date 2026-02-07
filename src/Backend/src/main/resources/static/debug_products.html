@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Products</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded shadow">
+        <h1 class="text-2xl font-bold mb-4">Debug Products</h1>
+
+        <div class="mb-6">
+            <h2 class="text-xl font-bold text-gray-700">1. Current Shop Info</h2>
+            <div id="shopInfo" class="bg-gray-50 p-4 rounded border mt-2 text-sm font-mono whitespace-pre-wrap">
+                Loading...</div>
+        </div>
+
+        <div class="mb-6">
+            <h2 class="text-xl font-bold text-gray-700">2. Products for Current Shop</h2>
+            <div id="shopProducts" class="bg-gray-50 p-4 rounded border mt-2 text-sm font-mono whitespace-pre-wrap">
+                Loading...</div>
+        </div>
+
+        <div class="mb-6">
+            <h2 class="text-xl font-bold text-gray-700">3. Check ALL Products (First 20)</h2>
+            <p class="text-sm text-gray-500 mb-2">This checks if products exist with DIFFERENT Shop IDs.</p>
+            <div id="allProducts" class="bg-gray-50 p-4 rounded border mt-2 text-sm font-mono whitespace-pre-wrap">
+                Loading...</div>
+        </div>
+    </div>
+
+    <script>
+        const baseUrl = 'http://localhost:8080/api';
+        const token = localStorage.getItem('accessToken');
+
+        async function debug() {
+            if (!token) {
+                document.getElementById('shopInfo').textContent = 'No access token found. Please login first.';
+                return;
+            }
+
+            // 1. Get Shop Info
+            let currentShopId = null;
+            try {
+                const res = await fetch(`${baseUrl}/shop/my-shop`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const shop = await res.json();
+                    currentShopId = shop.id;
+                    document.getElementById('shopInfo').textContent = JSON.stringify(shop, null, 2);
+                } else {
+                    document.getElementById('shopInfo').textContent = `Error: ${res.status} ${await res.text()}`;
+                }
+            } catch (e) {
+                document.getElementById('shopInfo').textContent = `Exception: ${e.message}`;
+            }
+
+            // 2. Get Products by Shop
+            if (currentShopId) {
+                try {
+                    const res = await fetch(`${baseUrl}/products/shop/${currentShopId}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const products = await res.json();
+                        document.getElementById('shopProducts').textContent = `Count: ${products.length}\n` + JSON.stringify(products, null, 2);
+                    } else {
+                        document.getElementById('shopProducts').textContent = `Error: ${res.status} ${await res.text()}`;
+                    }
+                } catch (e) {
+                    document.getElementById('shopProducts').textContent = `Exception: ${e.message}`;
+                }
+            } else {
+                document.getElementById('shopProducts').textContent = 'Skipped (No Shop ID)';
+            }
+
+            // 3. Get All Products
+            try {
+                const res = await fetch(`${baseUrl}/products`);
+                if (res.ok) {
+                    const products = await res.json();
+                    const summary = products.slice(0, 20).map(p => ({
+                        id: p.id,
+                        name: p.name,
+                        shopId: p.shopId,
+                        isMatch: p.shopId === currentShopId ? 'YES' : 'NO'
+                    }));
+
+                    let text = `Total Found: ${products.length}\n`;
+                    if (products.length > 0) {
+                        text += `Showing first 20:\n` + JSON.stringify(summary, null, 2);
+
+                        // Analysis
+                        const mismatchCount = products.filter(p => p.shopId !== currentShopId).length;
+                        const matchCount = products.filter(p => p.shopId === currentShopId).length;
+                        text += `\n\nANALYSIS:\n- Matches Current Shop ID: ${matchCount}\n- Mismatches: ${mismatchCount}`;
+                    } else {
+                        text += "No products found in database at all.";
+                    }
+
+                    document.getElementById('allProducts').textContent = text;
+                } else {
+                    document.getElementById('allProducts').textContent = `Error: ${res.status} ${await res.text()}`;
+                }
+            } catch (e) {
+                document.getElementById('allProducts').textContent = `Exception: ${e.message}`;
+            }
+        }
+
+        debug();
+    </script>
+</body>
+
+</html>

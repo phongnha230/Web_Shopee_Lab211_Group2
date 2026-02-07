@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Category API</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #fff;
+        }
+
+        pre {
+            background: #2d2d2d;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        h2 {
+            color: #4ec9b0;
+        }
+
+        .error {
+            color: #f48771;
+        }
+
+        .success {
+            color: #4ec9b0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔍 Category API Debug Tool</h1>
+    <button onclick="testAPI()" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">Test API</button>
+    <div id="output"></div>
+
+    <script>
+        async function testAPI() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<h2>Testing...</h2>';
+
+            try {
+                // Test 1: Fetch categories
+                const response = await fetch('http://localhost:8080/api/categories');
+                const categories = await response.json();
+
+                let html = '<h2 class="success">✓ API Response Successful</h2>';
+                html += `<p>Total categories: ${categories.length}</p>`;
+                html += '<h2>Category Data Structure:</h2>';
+
+                categories.forEach((cat, index) => {
+                    html += `<h3>Category ${index + 1}: ${cat.name}</h3>`;
+                    html += '<pre>' + JSON.stringify(cat, null, 2) + '</pre>';
+
+                    // Check ID field
+                    const hasId = cat.id ? '✓' : '✗';
+                    const has_id = cat._id ? '✓' : '✗';
+                    html += `<p>Has "id" field: ${hasId} ${cat.id || 'MISSING'}</p>`;
+                    html += `<p>Has "_id" field: ${has_id} ${cat._id || 'MISSING'}</p>`;
+
+                    // Test the click URL
+                    const catId = cat.id || cat._id;
+                    const displayName = cat.name;
+                    const url = `category.html?id=${catId}&name=${encodeURIComponent(displayName)}`;
+                    html += `<p><strong>Generated URL:</strong> <a href="${url}" style="color: #4ec9b0;">${url}</a></p>`;
+                    html += '<hr>';
+                });
+
+                output.innerHTML = html;
+
+            } catch (error) {
+                output.innerHTML = `<h2 class="error">✗ Error</h2><pre>${error.message}</pre>`;
+            }
+        }
+
+        // Auto-run on load
+        window.onload = testAPI;
+    </script>
+</body>
+
+</html>
