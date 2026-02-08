@@ -10,7 +10,7 @@ public interface ProductRepository extends MongoRepository<Product, String> {
 
     List<Product> findByStatus(ProductStatus status);
 
-    List<Product> findByShopIdAndStatus(String shopId, ProductStatus status);
+    long countByShopId(String shopId);
 
     // Fetch top 5 items by sold count descending
     List<Product> findTop5ByOrderBySoldDesc();

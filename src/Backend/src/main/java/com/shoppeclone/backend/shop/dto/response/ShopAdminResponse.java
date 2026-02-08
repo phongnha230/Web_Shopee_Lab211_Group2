@@ -16,6 +16,7 @@ public class ShopAdminResponse {
     private String phone;
     private String email;
     private ShopStatus status;
+    private Long productCount;
     private String rejectionReason;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

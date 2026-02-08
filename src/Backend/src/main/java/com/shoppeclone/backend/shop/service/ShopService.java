@@ -25,4 +25,6 @@ public interface ShopService {
     Shop getShopById(String shopId);
 
     Shop updateShop(String userEmail, com.shoppeclone.backend.shop.dto.UpdateShopRequest request);
+
+    void deleteShop(String shopId);
 }

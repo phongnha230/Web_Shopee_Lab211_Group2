@@ -149,36 +149,11 @@
                 if (response.ok) {
                     // alert('✅ Email verified successfully!'); // Optional: Skip alert for smoother flow
 
-                    // Auto Login
-                    if (password) {
-                        const loginRes = await fetch('http://localhost:8080/api/auth/login', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ email, password })
-                        });
-
-                        const loginData = await loginRes.json();
-
-                        if (loginRes.ok) {
-                            localStorage.setItem('accessToken', loginData.accessToken);
-                            localStorage.setItem(
-                                'userName',
-                                loginData.user.fullName || email.split('@')[0]
-                            );
-                            localStorage.removeItem('pendingPassword'); // Clear sensitive data
-                            localStorage.removeItem('pendingEmail'); // Clear sensitive data
-                            window.location.href = 'index.html';
-                        } else {
-                            alert('✅ Verified! Please login manually.');
-                            localStorage.removeItem('pendingEmail'); // Clear sensitive data
-                            localStorage.removeItem('pendingPassword'); // Clear sensitive data
-                            window.location.href = 'login.html';
-                        }
-                    } else {
-                        localStorage.removeItem('pendingEmail'); // Clear sensitive data
-                        localStorage.removeItem('pendingPassword'); // Clear sensitive data
-                        window.location.href = 'login.html';
-                    }
+                    // Manual Login Required
+                    alert('✅ Email verified! Please login to continue.');
+                    localStorage.removeItem('pendingEmail'); // Clear sensitive data
+                    localStorage.removeItem('pendingPassword'); // Clear sensitive data
+                    window.location.href = 'login.html';
                 } else {
                     alert('❌ ' + (data.message || 'Verification failed'));
                     // Re-enable button on error
@@ -245,6 +220,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             console.log('🚀 OTP Page Loaded - Starting Timer');
             startTimer();
+            // Auto focus first input
+            document.getElementById('otp1').focus();
         });
 
         // Resend OTP
@@ -369,8 +346,9 @@
             input.addEventListener('keydown', function (event) {
                 if (event.key === 'Enter') {
                     event.preventDefault();
-                    const form = document.getElementById('otpForm');
-                    if (form) form.submit(); // Direct submit
+                    // Trigger the submit button click to handle the async logic
+                    const submitBtn = document.querySelector('button[type="submit"]');
+                    if (submitBtn) submitBtn.click();
                 }
             });
         });
