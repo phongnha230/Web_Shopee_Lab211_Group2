@@ -29,6 +29,11 @@ public class Product {
     private Double rating = 0.0;
     private Integer sold = 0;
 
+    // Flash Sale fields
+    private Boolean isFlashSale = false;
+    private BigDecimal flashSalePrice;
+    private Integer flashSaleStock;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

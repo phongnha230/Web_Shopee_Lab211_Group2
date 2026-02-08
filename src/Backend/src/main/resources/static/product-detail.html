@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Detail - Shopee Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @keyframes bounceShopee {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-10px);
+            }
+
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .bounce-shopee {
+            animation: bounceShopee 2s infinite;
+        }
+
+        .thumbnail-active {
+            border: 2px solid #F97316;
+        }
+
+        /* Review Image Gallery */
+        .review-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .review-images img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid #e5e7eb;
+        }
+
+        .review-images img:hover {
+            transform: scale(1.05);
+            border-color: #f97316;
+        }
+
+        /* Lightbox */
+        .lightbox {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-orange-500 to-orange-600 shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-shopping-bag text-3xl text-white bounce-shopee"></i>
+                    <a href="index.html" class="text-2xl font-bold text-white">Shopee Clone</a>
+                </div>
+
+                <div class="flex-1 max-w-2xl mx-8">
+                    <div class="relative">
+                        <input type="text" placeholder="Search for millions of products..."
+                            class="w-full p-3 pl-12 pr-16 rounded-sm border-2 border-white focus:border-orange-300 focus:outline-none">
+                        <i
+                            class="fas fa-search absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl"></i>
+                        <button
+                            class="absolute right-3 top-1/2 transform -translate-y-1/2 bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-sm font-semibold">
+                            Search
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <!-- Notification & Help (Addons) -->
+                    <div class="flex items-center gap-4 text-white mr-2 hidden md:flex">
+                        <button class="relative hover:opacity-80 transition">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span
+                                class="absolute -top-1 -right-0.5 w-2 h-2 bg-red-600 rounded-full border border-orange-500"></span>
+                        </button>
+                        <button class="hover:opacity-80 transition">
+                            <i class="fas fa-question-circle text-xl"></i>
+                        </button>
+                    </div>
+
+                    <div id="guestNav" class="flex items-center space-x-3">
+                        <a href="/login.html" class="text-white font-semibold hover:text-orange-200 transition">Sign
+                            in</a>
+                        <a href="/register.html"
+                            class="bg-white text-orange-600 hover:bg-orange-50 px-4 py-2 rounded-full font-semibold transition">Sign
+                            up</a>
+                    </div>
+                    <div id="userNav" class="hidden flex items-center space-x-3">
+                        <div class="flex items-center space-x-2 cursor-pointer">
+                            <img id="userAvatar" src="" alt="User" class="w-6 h-6 rounded-full border border-white">
+                            <span id="userName" class="font-semibold text-white"></span>
+                        </div>
+                        <button onclick="logout()" class="text-white hover:text-red-200 ml-2"><i
+                                class="fas fa-sign-out-alt"></i></button>
+                    </div>
+                    <button onclick="window.location.href='cart-backend.html'"
+                        class="relative p-2 hover:bg-orange-400 rounded-full transition">
+                        <i class="fas fa-shopping-cart text-xl text-white"></i>
+                        <span id="cartBadge"
+                            class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
+                            style="display: none;">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <div class="bg-white py-3 mb-4">
+        <div class="max-w-7xl mx-auto px-4">
+            <nav class="flex text-sm text-gray-600">
+                <a href="index.html" class="hover:text-orange-500">Home</a>
+                <span class="mx-2">/</span>
+                <span id="breadcrumbCategory">Category</span>
+                <span class="mx-2">/</span>
+                <span class="text-gray-800 font-semibold" id="breadcrumbProduct">Product Name</span>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 pb-12">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Product Gallery -->
+            <div class="bg-white p-6 rounded-lg">
+                <div class="mb-4">
+                    <img id="mainImage" src="" alt="Product" class="w-full h-96 object-cover rounded-lg">
+                </div>
+                <div class="grid grid-cols-5 gap-2" id="imageGallery">
+                    <!-- Thumbnails will be populated by JS -->
+                </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="bg-white p-6 rounded-lg">
+                <h1 id="productTitle" class="text-2xl font-bold text-gray-800 mb-3">Loading Product...</h1>
+
+                <div class="flex items-center mb-4">
+                    <div class="flex items-center">
+                        <span class="text-orange-500 text-lg font-bold mr-1" id="ratingValue">4.8</span>
+                        <div class="flex text-orange-400">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                        </div>
+                    </div>
+                    <span class="mx-3 text-gray-400">|</span>
+                    <span class="text-gray-600" id="reviewCount">2.4k Ratings</span>
+                    <span class="mx-3 text-gray-400">|</span>
+                    <span class="text-gray-600" id="soldCount">5.3k Sold</span>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                    <div class="flex items-center" id="priceContainer">
+                        <!-- Price will be populated by JS -->
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <p class="text-gray-700 font-semibold mb-3">Color</p>
+                    <div class="flex gap-2" id="colorContainer">
+                        <!-- Colors populated by JS -->
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <p class="text-gray-700 font-semibold mb-3">Size</p>
+                    <div class="flex gap-2" id="sizeContainer">
+                        <!-- Sizes populated by JS -->
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <p class="text-gray-700 font-semibold mb-3">Quantity</p>
+                    <div class="flex items-center gap-3">
+                        <button onclick="decreaseQty()"
+                            class="w-10 h-10 border-2 border-gray-300 rounded hover:border-orange-500 transition"><i
+                                class="fas fa-minus text-gray-600"></i></button>
+                        <input type="number" id="quantity" value="1" min="1"
+                            class="w-20 h-10 text-center border-2 border-gray-300 rounded focus:border-orange-500 focus:outline-none">
+                        <button onclick="increaseQty()"
+                            class="w-10 h-10 border-2 border-gray-300 rounded hover:border-orange-500 transition"><i
+                                class="fas fa-plus text-gray-600"></i></button>
+                        <span class="text-gray-600 ml-2" id="stockCount">Checking stock...</span>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 mb-4">
+                    <button onclick="addToCart()"
+                        class="flex-1 border-2 border-orange-500 text-orange-500 py-3 px-6 rounded-lg font-semibold hover:bg-orange-50 transition flex items-center justify-center">
+                        <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
+                    </button>
+                    <button onclick="buyNow()"
+                        class="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-lg font-semibold transition">Buy
+                        Now</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Details & Reviews Sections -->
+        <div class="bg-white p-6 rounded-lg mb-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Product Specifications</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="specsContainer">
+                <!-- Specs populated by JS -->
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg mb-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Product Description</h2>
+            <div class="text-gray-700 space-y-3" id="descContainer">
+                <!-- Description populated by JS -->
+            </div>
+        </div>
+
+        <!-- Reviews Section -->
+        <div id="reviews" class="bg-white p-6 rounded-lg mb-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Product Ratings & Reviews</h2>
+            <div class="flex items-center gap-8 mb-6 bg-orange-50 p-6 rounded-lg">
+                <div class="text-center">
+                    <div class="text-5xl font-bold text-orange-600 mb-2">4.8</div>
+                    <div class="flex text-orange-400 mb-2 justify-center"><i class="fas fa-star"></i><i
+                            class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                            class="fas fa-star-half-alt"></i></div>
+                    <div class="text-gray-600 text-sm">out of 5</div>
+                </div>
+                <div class="flex-1">
+                    <div class="flex gap-2 flex-wrap">
+                        <button
+                            class="px-4 py-2 border-2 border-orange-500 bg-orange-500 text-white rounded-lg font-medium">All</button>
+                        <button
+                            class="px-4 py-2 border-2 border-gray-300 rounded-lg font-medium hover:border-orange-500">5
+                            Star (1.2k)</button>
+                        <button
+                            class="px-4 py-2 border-2 border-gray-300 rounded-lg font-medium hover:border-orange-500">4
+                            Star (856)</button>
+                        <button
+                            class="px-4 py-2 border-2 border-gray-300 rounded-lg font-medium hover:border-orange-500">With
+                            Photos</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Review with Images Example -->
+            <div class="border-b border-gray-200 pb-6 mb-6">
+                <div class="flex items-start gap-4">
+                    <img src="https://i.pravatar.cc/60?img=12" alt="User" class="w-12 h-12 rounded-full">
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-semibold text-gray-800">John Doe</h4>
+                            <span class="text-sm text-gray-500">2 days ago</span>
+                        </div>
+                        <div class="flex text-yellow-400 mb-2"><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                        <p class="text-gray-700 mb-2">Great product! Exactly as described. The quality is amazing and
+                            shipping was super fast. Highly recommend!</p>
+
+                        <!-- Review Images -->
+                        <div class="review-images">
+                            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200" alt="Review"
+                                onclick="openLightbox(this.src)">
+                            <img src="https://images.unsplash.com/photo-1484704849700-f032a568e944?w=200" alt="Review"
+                                onclick="openLightbox(this.src)">
+                            <img src="https://images.unsplash.com/photo-1524678606372-571d751b8d57?w=200" alt="Review"
+                                onclick="openLightbox(this.src)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Review without Images -->
+            <div class="border-b border-gray-200 pb-6">
+                <div class="flex items-start gap-4">
+                    <img src="https://i.pravatar.cc/60?img=8" alt="User" class="w-12 h-12 rounded-full">
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-semibold text-gray-800">Jane Smith</h4>
+                            <span class="text-sm text-gray-500">5 days ago</span>
+                        </div>
+                        <div class="flex text-yellow-400 mb-2"><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i></div>
+                        <p class="text-gray-700">Good value for money. Works as expected.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+        <span class="lightbox-close">&times;</span>
+        <img id="lightboxImage" src="" alt="Full size">
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="max-w-7xl mx-auto px-4 py-12">
+            <p class="text-center text-gray-400">&copy; 2026 Shopee Clone. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- MOCK DATA FOR FRONTEND TESTING ---
+        const MOCK_PRODUCTS = {
+            // Flash Sale Items
+            '1': {
+                name: "Wireless Headphones - Premium Bass",
+                cat: "Electronics > Audio",
+                price: 99, oldPrice: 198, discount: "50%",
+                stock: 156,
+                image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=800&fit=crop",
+                thumbnails: ["https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200", "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=200", "https://images.unsplash.com/photo-1524678606372-571d751b8d57?w=200"],
+                colors: ["Black", "Silver", "Red"],
+                sizes: [],
+                desc: "Experience sound like never before with these premium wireless headphones. Noise cancellation included."
+            },
+            '2': {
+                name: "Urban Sneakers - High Comfort",
+                cat: "Fashion > Shoes",
+                price: 102, oldPrice: 204, discount: "50%",
+                stock: 89,
+                image: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=800&h=800&fit=crop",
+                thumbnails: ["https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=200", "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?w=200"],
+                colors: ["White/Red", "Black"],
+                sizes: ["40", "41", "42", "43"],
+                desc: "Top urban design sneakers. Perfect for running and casual wear."
+            },
+            '3': { name: "Classic Wrist Watch", cat: "Accessories > Watches", price: 15, oldPrice: 30, discount: "50%", stock: 44, image: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800&h=800&fit=crop", thumbnails: [], colors: ["Gold", "Silver"], sizes: [], desc: "Timeless elegance on your wrist." },
+            '4': { name: "Running Sport Shoes", cat: "Fashion > Shoes", price: 120, oldPrice: 240, discount: "50%", stock: 200, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&h=800&fit=crop", thumbnails: [], colors: ["Red", "Blue"], sizes: ["38", "39", "40", "41"], desc: "Professional grade running shoes." },
+            '5': { name: "Smart Phone 12 Pro", cat: "Electronics > Mobile", price: 199, oldPrice: 398, discount: "50%", stock: 12, image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=800&fit=crop", thumbnails: [], colors: ["Graphite", "Silver"], sizes: ["128GB", "256GB"], desc: "Latest smartphone technology." },
+            '6': { name: "Compact Headphones", cat: "Electronics > Audio", price: 45, oldPrice: 90, discount: "50%", stock: 330, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=800&fit=crop", thumbnails: [], colors: ["Black"], sizes: [], desc: "Compact and powerful." },
+
+            // Daily Discover Items
+            '101': {
+                name: "Nikon D3500 DSLR Camera",
+                cat: "Electronics > Cameras",
+                price: 36.00, oldPrice: 48.00, discount: "25%",
+                stock: 5,
+                image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=800&fit=crop",
+                thumbnails: ["https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200", "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=200"],
+                colors: ["Black"],
+                sizes: [],
+                desc: "Capture moments with stunning clarity using the Nikon D3500."
+            },
+            '102': { name: "Nike Air Max Classic Red Shoes Original", cat: "Fashion > Shoes", price: 210, oldPrice: 420, discount: "50%", stock: 540, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&h=800&fit=crop", thumbnails: ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200", "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?w=200"], colors: ["Red", "Black", "White"], sizes: ["38", "39", "40", "41", "42", "43"], desc: "Classic Nike Air Max running shoes. Lightweight and comfortable for everyday wear." },
+            '103': { name: "Sport Water Bottle 1L", cat: "Sports > Accessories", price: 15.69, oldPrice: 20, discount: "20%", stock: 980, image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop", thumbnails: [], colors: ["Silver"], sizes: ["1L"], desc: "Stay hydrated." }, // Using placeholder image for bottle
+            '104': { name: "Blue Water Bottle", cat: "Sports > Accessories", price: 14.50, oldPrice: 18, discount: "15%", stock: 760, image: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&h=400&fit=crop", thumbnails: [], colors: ["Blue"], sizes: ["500ml"], desc: "Premium quality." }, // Helper image
+            '105': { name: "Modern Chair", cat: "Home > Furniture", price: 25.00, oldPrice: 50.00, discount: "50%", stock: 120, image: "https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?w=800&h=800&fit=crop", thumbnails: [], colors: ["Brown"], sizes: [], desc: "Comfortable modern chair." },
+            '106': { name: "Canvas Sneakers", cat: "Fashion > Shoes", price: 18.00, oldPrice: 25.00, discount: "28%", stock: 230, image: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=800&h=800&fit=crop", thumbnails: [], colors: ["White"], sizes: ["38", "39"], desc: "Casual everyday wear." }
+        };
+
+        // API Base URL
+        const API_BASE_URL = 'http://localhost:8080/api';
+
+        // --- DYNAMIC LOADING LOGIC ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                let id = params.get('id');
+
+                // Fallback: Check localStorage if ID is missing from URL
+                if (!id) {
+                    id = localStorage.getItem('lastClickedProductId');
+                }
+
+                let product = null;
+                let isReal = false;
+
+                // Try Fetch from Backend first
+                if (id) {
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/products/${id}`);
+                        if (response.ok) {
+                            product = await response.json();
+                            isReal = true;
+                        }
+                    } catch (err) { console.error("API error:", err); }
+                }
+
+                // Fallback to MOCK
+                if (!product) {
+                    product = MOCK_PRODUCTS[id];
+                }
+
+                if (product) {
+                    // Populate Data
+                    document.title = product.name + " - Shopee Clone";
+                    document.getElementById('productTitle').textContent = product.name;
+                    document.getElementById('breadcrumbProduct').textContent = product.name;
+
+                    // Breadcrumbs & Category Name Resolution
+                    let catDisplay = "Other";
+                    let shopAddress = "Hanoi, Vietnam"; // Default fallback
+
+                    if (isReal) {
+                        // 1. Resolve Category
+                        if (product.categories && product.categories.length > 0) {
+                            try {
+                                const catRes = await fetch(`${API_BASE_URL}/categories/${product.categories[0]}`);
+                                if (catRes.ok) {
+                                    const catData = await catRes.json();
+                                    catDisplay = catData.name;
+                                } else {
+                                    catDisplay = "Products";
+                                }
+                            } catch (e) {
+                                console.error("Error fetching category:", e);
+                                catDisplay = "Products";
+                            }
+                        }
+
+                        // 2. Resolve Shop Address (Ships From)
+                        if (product.shopId) {
+                            try {
+                                const shopRes = await fetch(`${API_BASE_URL}/shop/${product.shopId}`);
+                                if (shopRes.ok) {
+                                    const shopData = await shopRes.json();
+                                    if (shopData.address) {
+                                        shopAddress = shopData.address;
+                                    }
+                                }
+                            } catch (e) {
+                                console.error("Error fetching shop address:", e);
+                            }
+                        }
+                    } else if (product.cat) {
+                        catDisplay = product.cat.split(' > ')[0];
+                    }
+                    document.getElementById('breadcrumbCategory').textContent = catDisplay;
+
+                    // Normalize Images
+                    let mainImg = "";
+                    let thumbs = [];
+                    if (isReal) {
+                        mainImg = (product.images && product.images.length > 0) ? product.images[0] : 'https://via.placeholder.com/800';
+                        thumbs = product.images || [];
+                    } else {
+                        mainImg = product.image;
+                        thumbs = product.thumbnails && product.thumbnails.length ? product.thumbnails : [product.image];
+                    }
+                    document.getElementById('mainImage').src = mainImg;
+
+                    // Normalize Price & Discount
+                    let priceVal = 0;
+                    let oldPriceVal = 0;
+                    let discountText = "";
+
+                    if (isReal) {
+                        if (product.variants && product.variants.length > 0) {
+                            priceVal = product.variants[0].price;
+                            oldPriceVal = priceVal * 1.2; // Simulated
+                            discountText = "20% OFF";
+                        }
+                    } else {
+                        priceVal = product.price;
+                        oldPriceVal = product.oldPrice || priceVal * 1.5;
+                        discountText = product.discount || "50% OFF";
+                    }
+
+                    document.getElementById('priceContainer').innerHTML = `
+                    <span class="text-gray-400 line-through text-lg mr-3">₫${new Intl.NumberFormat('vi-VN').format(oldPriceVal)}</span>
+                    <span class="text-orange-600 text-3xl font-bold mr-3">₫${new Intl.NumberFormat('vi-VN').format(priceVal)}</span>
+                    <span class="bg-orange-500 text-white px-2 py-1 rounded text-sm font-semibold">${discountText}</span>
+                `;
+
+                    // Stats
+                    const rating = isReal ? (Math.random() * (5.0 - 4.5) + 4.5).toFixed(1) : (product.rating || 4.8);
+                    const sold = isReal ? (Math.floor(Math.random() * 1000) + 10) : (product.sold || "1.2k");
+                    document.getElementById('ratingValue').textContent = rating;
+                    document.getElementById('soldCount').textContent = `${sold} Sold`;
+
+                    // Stock
+                    let stock = isReal ? (product.variants ? product.variants.reduce((s, v) => s + v.stock, 0) : 0) : (product.stock || 100);
+                    document.getElementById('stockCount').textContent = `${stock} pieces available`;
+
+                    // Colors & Sizes
+                    const colorContainer = document.getElementById('colorContainer');
+                    const sizeContainer = document.getElementById('sizeContainer');
+
+                    let colors = [];
+                    let sizes = [];
+
+                    if (isReal && product.variants) {
+                        colors = [...new Set(product.variants.map(v => v.color).filter(v => v))];
+                        sizes = [...new Set(product.variants.map(v => v.size).filter(v => v))];
+                    } else {
+                        colors = product.colors || [];
+                        sizes = product.sizes || [];
+                    }
+
+                    if (colors.length > 0) {
+                        colorContainer.innerHTML = colors.map((c, i) =>
+                            `<button onclick="selectOption(this, 'color')" class="color-btn px-4 py-2 border-2 ${i === 0 ? 'border-orange-500 bg-orange-50' : 'border-gray-300'} rounded-lg font-medium hover:border-orange-500 transition">${c}</button>`
+                        ).join('');
+                    } else {
+                        colorContainer.parentElement.style.display = 'none';
+                    }
+
+                    if (sizes.length > 0) {
+                        sizeContainer.innerHTML = sizes.map((s, i) =>
+                            `<button onclick="selectOption(this, 'size')" class="size-btn px-6 py-2 border-2 border-gray-300 rounded-lg font-medium hover:border-orange-500 transition">${s}</button>`
+                        ).join('');
+                    } else {
+                        sizeContainer.parentElement.style.display = 'none';
+                    }
+
+                    // Description & Specs
+                    const description = isReal ? (product.description || "No description available.") : product.desc;
+                    document.getElementById('descContainer').innerHTML = `<p>${description}</p>`;
+
+                    document.getElementById('specsContainer').innerHTML = `
+                    <div class="flex border-b border-gray-200 py-3"><span class="text-gray-600 w-1/3">Category</span><span class="text-gray-800 font-medium">${catDisplay}</span></div>
+                    <div class="flex border-b border-gray-200 py-3"><span class="text-gray-600 w-1/3">Stock</span><span class="text-gray-800 font-medium">${stock}</span></div>
+                    <div class="flex border-b border-gray-200 py-3"><span class="text-gray-600 w-1/3">Ships From</span><span class="text-gray-800 font-medium">${shopAddress}</span></div>
+                `;
+
+                    // Thumbnails
+                    const gallery = document.getElementById('imageGallery');
+                    if (thumbs.length > 0) {
+                        gallery.innerHTML = thumbs.map((img, i) => `
+                        <img onclick="changeImage(this)" src="${img}" class="w-full h-20 object-cover rounded cursor-pointer border-2 ${i === 0 ? 'thumbnail-active' : 'border-gray-200'} hover:border-orange-500 transition">
+                    `).join('');
+                    }
+
+                    // Update Globals for addToCart
+                    window.currentProduct = product;
+                    window.isCurrentReal = isReal;
+
+                } else {
+                    document.getElementById('productTitle').textContent = "Product Not Found";
+                    document.getElementById('priceContainer').innerHTML = "<span class='text-red-500'>Item unavailable</span>";
+
+                    // DEBUG INFO
+                    const debugDiv = document.createElement('div');
+                    debugDiv.className = "bg-red-100 p-4 rounded mt-4 text-red-700 text-xs";
+                    debugDiv.innerHTML = `
+                    <p class="font-bold text-sm mb-1">🔍 DIAGNOSTIC INFO:</p>
+                    <p><strong>Full URL:</strong> ${window.location.href}</p>
+                    <p><strong>URL ID Param:</strong> ${params.get('id')}</p>
+                    <p><strong>LocalStorage ID:</strong> ${localStorage.getItem('lastClickedProductId')}</p>
+                    <p><strong>Final ID Used:</strong> ${id}</p>
+                    <p><strong>API Check:</strong> ${API_BASE_URL}/products/${id}</p>
+                    <p class="mt-2 text-blue-700 italic">Please screenshot this entire box.</p>
+                `;
+                    document.getElementById('descContainer').appendChild(debugDiv);
+                }
+
+            } catch (err) {
+                console.error("Critical Error in Product Detail Init:", err);
+                document.getElementById('productTitle').textContent = "Error Loading Product";
+                document.getElementById('descContainer').innerHTML = `<div class="p-4 bg-red-100 text-red-700 rounded">Error: ${err.message}. Please check console.</div>`;
+            } finally {
+                updateNavbar();
+                updateCartBadge();
+            }
+        });
+
+        // UI Functions
+        function changeImage(el) {
+            document.getElementById('mainImage').src = el.src.replace('w=200', 'w=800');
+            document.querySelectorAll('#imageGallery img').forEach(img => {
+                img.classList.remove('thumbnail-active');
+                img.classList.add('border-gray-200');
+            });
+            el.classList.add('thumbnail-active');
+            el.classList.remove('border-gray-200');
+        }
+
+        function selectOption(el, type) {
+            const container = type === 'color' ? document.getElementById('colorContainer') : document.getElementById('sizeContainer');
+            container.querySelectorAll('button').forEach(b => {
+                b.classList.remove('border-orange-500', 'bg-orange-50');
+                b.classList.add('border-gray-300');
+            });
+            el.classList.add('border-orange-500', 'bg-orange-50');
+            el.classList.remove('border-gray-300');
+        }
+
+        function increaseQty() {
+            const q = document.getElementById('quantity');
+            q.value = parseInt(q.value) + 1;
+        }
+        function decreaseQty() {
+            const q = document.getElementById('quantity');
+            if (parseInt(q.value) > 1) q.value = parseInt(q.value) - 1;
+        }
+
+
+
+        async function addToCart() {
+            // AUTH GUARD
+            if (!localStorage.getItem('accessToken')) {
+                if (confirm('⚠️ You must login to add items to cart! Go to login?')) {
+                    window.location.href = 'login.html';
+                }
+                return;
+            }
+
+            const product = window.currentProduct;
+            if (!product) {
+                alert('Product data not loaded yet!');
+                return;
+            }
+
+            const params = new URLSearchParams(window.location.search);
+            let id = params.get('id') || localStorage.getItem('lastClickedProductId');
+
+            // Get selected options
+            const selectedColorBtn = document.querySelector('#colorContainer button.border-orange-500');
+            const selectedSizeBtn = document.querySelector('#sizeContainer button.border-orange-500');
+
+            const color = selectedColorBtn ? selectedColorBtn.textContent : null;
+            const size = selectedSizeBtn ? selectedSizeBtn.textContent : null;
+
+            const quantity = parseInt(document.getElementById('quantity').value);
+
+            // Find specific variant ID based on selection
+            let variantId = id || product.id; // Default to product ID
+
+            if (window.isCurrentReal && product.variants && product.variants.length > 0) {
+                // Find variant matching color and size
+                const matchedVariant = product.variants.find(v => {
+                    const colorMatch = !color || v.color === color;
+                    const sizeMatch = !size || v.size === size;
+                    return colorMatch && sizeMatch;
+                });
+
+                if (matchedVariant) {
+                    variantId = matchedVariant.id;
+                    console.log("Selected Variant ID:", variantId);
+                } else {
+                    variantId = product.variants[0].id; // Fallback to first
+                    console.warn("No matching variant found for selection, utilizing first variant.");
+                }
+            }
+
+            // Unique ID based on product + variations for LOCAL STORAGE
+            const cartItemId = `${variantId}-${color || 'default'}-${size || 'default'}`;
+
+            // Backend Sync
+            try {
+                const token = localStorage.getItem('accessToken');
+                console.log(`Adding to cart: VariantId=${variantId}, Qty=${quantity}`);
+
+                const response = await fetch(`${API_BASE_URL}/cart/add?variantId=${variantId}&quantity=${quantity}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.text();
+                    console.error('Add to cart API error:', response.status, errorData);
+                    throw new Error(`API returned ${response.status}`);
+                }
+
+                // Update local storage cart (for visual feedback)
+                const cart = JSON.parse(localStorage.getItem('cart')) || [];
+                const existing = cart.find(item => item.cartItemId === cartItemId);
+
+                let priceVal = 0;
+                if (window.isCurrentReal && product.variants && product.variants.length > 0) {
+                    const v = product.variants.find(v => v.id === variantId) || product.variants[0];
+                    priceVal = v.price;
+                } else {
+                    priceVal = product.price || 0;
+                }
+
+                if (existing) {
+                    existing.quantity += quantity;
+                } else {
+                    cart.push({
+                        id: product.id,
+                        variantId: variantId,
+                        cartItemId: cartItemId,
+                        name: product.name,
+                        price: priceVal,
+                        image: (product.images && product.images.length > 0) ? product.images[0] : (product.image || 'https://via.placeholder.com/200'),
+                        quantity: quantity,
+                        color: color,
+                        size: size,
+                        checked: true
+                    });
+                }
+                localStorage.setItem('cart', JSON.stringify(cart));
+
+                updateCartBadge();
+                showToast(`✅ Added ${quantity} item(s) to cart!`);
+
+            } catch (error) {
+                console.error('Add to cart error:', error);
+                alert('❌ Failed to add to cart. Please try again.');
+            }
+        }
+
+        async function buyNow() {
+            // AUTH GUARD
+            if (!localStorage.getItem('accessToken')) {
+                if (confirm('⚠️ You must login to buy items! Go to login?')) {
+                    window.location.href = 'login.html';
+                }
+                return;
+            }
+
+            const product = window.currentProduct;
+            if (!product) {
+                alert('Product data not loaded yet!');
+                return;
+            }
+
+            const params = new URLSearchParams(window.location.search);
+            let id = params.get('id') || localStorage.getItem('lastClickedProductId');
+
+            // Get selected options
+            const selectedColorBtn = document.querySelector('#colorContainer button.border-orange-500');
+            const selectedSizeBtn = document.querySelector('#sizeContainer button.border-orange-500');
+
+            const color = selectedColorBtn ? selectedColorBtn.textContent : null;
+            const size = selectedSizeBtn ? selectedSizeBtn.textContent : null;
+
+            const quantity = parseInt(document.getElementById('quantity').value);
+
+            // Find specific variant ID based on selection
+            let variantId = id || product.id; // Default to product ID
+
+            if (window.isCurrentReal && product.variants && product.variants.length > 0) {
+                // Find variant matching color and size
+                const matchedVariant = product.variants.find(v => {
+                    const colorMatch = !color || v.color === color;
+                    const sizeMatch = !size || v.size === size;
+                    return colorMatch && sizeMatch;
+                });
+
+                if (matchedVariant) {
+                    variantId = matchedVariant.id;
+                    console.log("Buy Now - Selected Variant ID:", variantId);
+                } else {
+                    variantId = product.variants[0].id;
+                    console.warn("Buy Now - No matching variant, utilizing first.");
+                }
+            }
+
+            // IMPORTANT: For Buy Now, we need to add to backend cart first
+            try {
+                const token = localStorage.getItem('accessToken');
+                console.log(`Buy Now fetching: VariantId=${variantId}`);
+
+                const response = await fetch(`${API_BASE_URL}/cart/add?variantId=${variantId}&quantity=${quantity}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.text();
+                    console.error('API Error:', response.status, errorData);
+                    throw new Error(`API returned ${response.status}: ${errorData}`);
+                }
+
+                // Update local storage cart (clear it and add only this item for buy now experience)
+                let priceVal = 0;
+                if (window.isCurrentReal && product.variants && product.variants.length > 0) {
+                    const v = product.variants.find(v => v.id === variantId) || product.variants[0];
+                    priceVal = v.price;
+                } else {
+                    priceVal = product.price || 0;
+                }
+
+                const buyNowItem = {
+                    id: product.id,
+                    variantId: variantId,
+                    cartItemId: `${variantId}-${color || 'default'}-${size || 'default'}`,
+                    name: product.name,
+                    price: priceVal,
+                    image: (product.images && product.images.length > 0) ? product.images[0] : (product.image || 'https://via.placeholder.com/200'),
+                    quantity: quantity,
+                    color: color,
+                    size: size,
+                    checked: true
+                };
+
+                // Set only this item in cart for checkout
+                localStorage.setItem('cart', JSON.stringify([buyNowItem]));
+
+                // Redirect to checkout
+                window.location.href = 'checkout-backend.html';
+
+            } catch (error) {
+                console.error('Buy Now error:', error);
+                if (error.message.includes('404')) {
+                    alert('❌ Product variant not found in database.');
+                } else if (error.message.includes('401')) {
+                    alert('❌ Session expired. Please login again.');
+                    window.location.href = 'login.html';
+                } else {
+                    alert('❌ Failed to process Buy Now. Error: ' + error.message);
+                }
+            }
+        }
+
+        async function updateCartBadge() {
+            // HIDE IF NOT LOGGED IN
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                const badge = document.getElementById('cartBadge');
+                if (badge) badge.style.display = 'none';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:8080/api/cart', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const cartData = await response.json();
+                    // Calculate total items from backend response
+                    const totalItems = cartData.items ? cartData.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
+
+                    const badge = document.getElementById('cartBadge');
+                    if (badge) {
+                        badge.textContent = totalItems;
+                        badge.style.display = totalItems > 0 ? 'inline-block' : 'none';
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to update cart badge:', error);
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-24 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 2000);
+        }
+
+
+        // Auth
+        function updateNavbar() {
+            const token = localStorage.getItem('accessToken');
+            const userName = localStorage.getItem('userName') || 'User';
+            if (token) {
+                document.getElementById('guestNav').classList.add('hidden');
+                document.getElementById('userNav').classList.remove('hidden');
+                document.getElementById('userName').textContent = userName;
+                document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=fff&color=f97316`;
+            } else {
+                document.getElementById('guestNav').classList.remove('hidden');
+                document.getElementById('userNav').classList.add('hidden');
+            }
+        }
+        function logout() {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('userName');
+            location.reload();
+        }
+
+        // Lightbox Functions
+        function openLightbox(src) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImage = document.getElementById('lightboxImage');
+            lightboxImage.src = src.replace('w=200', 'w=1200'); // Load higher resolution
+            lightbox.classList.add('active');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+        }
+
+        // Close lightbox on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeLightbox();
+        });
+    </script>
+</body>
+
+</html>

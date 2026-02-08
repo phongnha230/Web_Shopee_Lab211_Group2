@@ -257,7 +257,7 @@
 
         <div class="bg-white p-6 rounded-lg mb-8">
             <h2 class="text-xl font-bold text-gray-800 mb-4">Product Description</h2>
-            <div class="text-gray-700 space-y-3" id="descContainer">
+            <div class="text-gray-700 space-y-3 whitespace-pre-wrap" id="descContainer">
                 <!-- Description populated by JS -->
             </div>
         </div>
@@ -404,185 +404,193 @@
         // --- DYNAMIC LOADING LOGIC ---
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-            const params = new URLSearchParams(window.location.search);
-            let id = params.get('id');
+                // Support Hash-based navigation
+                let id;
+                if (window.location.hash && window.location.hash.length > 1) {
+                    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+                    id = hashParams.get('id');
+                    console.log(`📍 Loaded Product ID from Hash: ${id}`);
+                } else {
+                    const params = new URLSearchParams(window.location.search);
+                    id = params.get('id');
+                }
 
-            // Fallback: Check localStorage if ID is missing from URL
-            if (!id) {
-                id = localStorage.getItem('lastClickedProductId');
-            }
+                // Fallback: Check localStorage if ID is missing from URL
+                if (!id) {
+                    id = localStorage.getItem('lastClickedProductId');
+                }
 
-            let product = null;
-            let isReal = false;
+                let product = null;
+                let isReal = false;
 
-            // Try Fetch from Backend first
-            if (id) {
-                try {
-                    const response = await fetch(`${API_BASE_URL}/products/${id}`);
-                    if (response.ok) {
-                        product = await response.json();
-                        isReal = true;
-                    }
-                } catch (err) { console.error("API error:", err); }
-            }
+                // Try Fetch from Backend first
+                if (id) {
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/products/${id}`);
+                        if (response.ok) {
+                            product = await response.json();
+                            isReal = true;
+                        }
+                    } catch (err) { console.error("API error:", err); }
+                }
 
-            // Fallback to MOCK
-            if (!product) {
-                product = MOCK_PRODUCTS[id];
-            }
+                // Fallback to MOCK
+                if (!product) {
+                    product = MOCK_PRODUCTS[id];
+                }
 
-            if (product) {
-                // Populate Data
-                document.title = product.name + " - Shopee Clone";
-                document.getElementById('productTitle').textContent = product.name;
-                document.getElementById('breadcrumbProduct').textContent = product.name;
+                if (product) {
+                    // Populate Data
+                    document.title = product.name + " - Shopee Clone";
+                    document.getElementById('productTitle').textContent = product.name;
+                    document.getElementById('breadcrumbProduct').textContent = product.name;
 
-                // Breadcrumbs & Category Name Resolution
-                let catDisplay = "Other";
-                let shopAddress = "Hanoi, Vietnam"; // Default fallback
+                    // Breadcrumbs & Category Name Resolution
+                    let catDisplay = "Other";
+                    let shopAddress = "Hanoi, Vietnam"; // Default fallback
 
-                if (isReal) {
-                    // 1. Resolve Category
-                    if (product.categories && product.categories.length > 0) {
-                        try {
-                            const catRes = await fetch(`${API_BASE_URL}/categories/${product.categories[0]}`);
-                            if (catRes.ok) {
-                                const catData = await catRes.json();
-                                catDisplay = catData.name;
-                            } else {
+                    if (isReal) {
+                        // 1. Resolve Category
+                        if (product.categories && product.categories.length > 0) {
+                            try {
+                                const catRes = await fetch(`${API_BASE_URL}/categories/${product.categories[0]}`);
+                                if (catRes.ok) {
+                                    const catData = await catRes.json();
+                                    catDisplay = catData.name;
+                                } else {
+                                    catDisplay = "Products";
+                                }
+                            } catch (e) {
+                                console.error("Error fetching category:", e);
                                 catDisplay = "Products";
                             }
-                        } catch (e) {
-                            console.error("Error fetching category:", e);
-                            catDisplay = "Products";
                         }
-                    }
 
-                    // 2. Resolve Shop Address (Ships From)
-                    if (product.shopId) {
-                        try {
-                            const shopRes = await fetch(`${API_BASE_URL}/shop/${product.shopId}`);
-                            if (shopRes.ok) {
-                                const shopData = await shopRes.json();
-                                if (shopData.address) {
-                                    shopAddress = shopData.address;
+                        // 2. Resolve Shop Address (Ships From)
+                        if (product.shopId) {
+                            try {
+                                const shopRes = await fetch(`${API_BASE_URL}/shop/${product.shopId}`);
+                                if (shopRes.ok) {
+                                    const shopData = await shopRes.json();
+                                    if (shopData.address) {
+                                        shopAddress = shopData.address;
+                                    }
                                 }
+                            } catch (e) {
+                                console.error("Error fetching shop address:", e);
                             }
-                        } catch (e) {
-                            console.error("Error fetching shop address:", e);
                         }
+                    } else if (product.cat) {
+                        catDisplay = product.cat.split(' > ')[0];
                     }
-                } else if (product.cat) {
-                    catDisplay = product.cat.split(' > ')[0];
-                }
-                document.getElementById('breadcrumbCategory').textContent = catDisplay;
+                    document.getElementById('breadcrumbCategory').textContent = catDisplay;
 
-                // Normalize Images
-                let mainImg = "";
-                let thumbs = [];
-                if (isReal) {
-                    mainImg = (product.images && product.images.length > 0) ? product.images[0] : 'https://via.placeholder.com/800';
-                    thumbs = product.images || [];
-                } else {
-                    mainImg = product.image;
-                    thumbs = product.thumbnails && product.thumbnails.length ? product.thumbnails : [product.image];
-                }
-                document.getElementById('mainImage').src = mainImg;
-
-                // Normalize Price & Discount
-                let priceVal = 0;
-                let oldPriceVal = 0;
-                let discountText = "";
-
-                if (isReal) {
-                    if (product.variants && product.variants.length > 0) {
-                        priceVal = product.variants[0].price;
-                        oldPriceVal = priceVal * 1.2; // Simulated
-                        discountText = "20% OFF";
+                    // Normalize Images
+                    let mainImg = "";
+                    let thumbs = [];
+                    if (isReal) {
+                        mainImg = (product.images && product.images.length > 0) ? product.images[0] : 'https://via.placeholder.com/800';
+                        thumbs = product.images || [];
+                    } else {
+                        mainImg = product.image;
+                        thumbs = product.thumbnails && product.thumbnails.length ? product.thumbnails : [product.image];
                     }
-                } else {
-                    priceVal = product.price;
-                    oldPriceVal = product.oldPrice || priceVal * 1.5;
-                    discountText = product.discount || "50% OFF";
-                }
+                    document.getElementById('mainImage').src = mainImg;
 
-                document.getElementById('priceContainer').innerHTML = `
+                    // Normalize Price & Discount
+                    let priceVal = 0;
+                    let oldPriceVal = 0;
+                    let discountText = "";
+
+                    if (isReal) {
+                        if (product.variants && product.variants.length > 0) {
+                            priceVal = product.variants[0].price;
+                            oldPriceVal = priceVal * 1.2; // Simulated
+                            discountText = "20% OFF";
+                        }
+                    } else {
+                        priceVal = product.price;
+                        oldPriceVal = product.oldPrice || priceVal * 1.5;
+                        discountText = product.discount || "50% OFF";
+                    }
+
+                    document.getElementById('priceContainer').innerHTML = `
                     <span class="text-gray-400 line-through text-lg mr-3">₫${new Intl.NumberFormat('vi-VN').format(oldPriceVal)}</span>
                     <span class="text-orange-600 text-3xl font-bold mr-3">₫${new Intl.NumberFormat('vi-VN').format(priceVal)}</span>
                     <span class="bg-orange-500 text-white px-2 py-1 rounded text-sm font-semibold">${discountText}</span>
                 `;
 
-                // Stats
-                const rating = isReal ? (Math.random() * (5.0 - 4.5) + 4.5).toFixed(1) : (product.rating || 4.8);
-                const sold = isReal ? (Math.floor(Math.random() * 1000) + 10) : (product.sold || "1.2k");
-                document.getElementById('ratingValue').textContent = rating;
-                document.getElementById('soldCount').textContent = `${sold} Sold`;
+                    // Stats
+                    const rating = isReal ? (Math.random() * (5.0 - 4.5) + 4.5).toFixed(1) : (product.rating || 4.8);
+                    const sold = isReal ? (Math.floor(Math.random() * 1000) + 10) : (product.sold || "1.2k");
+                    document.getElementById('ratingValue').textContent = rating;
+                    document.getElementById('soldCount').textContent = `${sold} Sold`;
 
-                // Stock
-                let stock = isReal ? (product.variants ? product.variants.reduce((s, v) => s + v.stock, 0) : 0) : (product.stock || 100);
-                document.getElementById('stockCount').textContent = `${stock} pieces available`;
+                    // Stock
+                    let stock = isReal ? (product.variants ? product.variants.reduce((s, v) => s + v.stock, 0) : 0) : (product.stock || 100);
+                    document.getElementById('stockCount').textContent = `${stock} pieces available`;
 
-                // Colors & Sizes
-                const colorContainer = document.getElementById('colorContainer');
-                const sizeContainer = document.getElementById('sizeContainer');
+                    // Colors & Sizes
+                    const colorContainer = document.getElementById('colorContainer');
+                    const sizeContainer = document.getElementById('sizeContainer');
 
-                let colors = [];
-                let sizes = [];
+                    let colors = [];
+                    let sizes = [];
 
-                if (isReal && product.variants) {
-                    colors = [...new Set(product.variants.map(v => v.color).filter(v => v))];
-                    sizes = [...new Set(product.variants.map(v => v.size).filter(v => v))];
-                } else {
-                    colors = product.colors || [];
-                    sizes = product.sizes || [];
-                }
+                    if (isReal && product.variants) {
+                        colors = [...new Set(product.variants.map(v => v.color).filter(v => v))];
+                        sizes = [...new Set(product.variants.map(v => v.size).filter(v => v))];
+                    } else {
+                        colors = product.colors || [];
+                        sizes = product.sizes || [];
+                    }
 
-                if (colors.length > 0) {
-                    colorContainer.innerHTML = colors.map((c, i) =>
-                        `<button onclick="selectOption(this, 'color')" class="color-btn px-4 py-2 border-2 ${i === 0 ? 'border-orange-500 bg-orange-50' : 'border-gray-300'} rounded-lg font-medium hover:border-orange-500 transition">${c}</button>`
-                    ).join('');
-                } else {
-                    colorContainer.parentElement.style.display = 'none';
-                }
+                    if (colors.length > 0) {
+                        colorContainer.innerHTML = colors.map((c, i) =>
+                            `<button onclick="selectOption(this, 'color')" class="color-btn px-4 py-2 border-2 ${i === 0 ? 'border-orange-500 bg-orange-50' : 'border-gray-300'} rounded-lg font-medium hover:border-orange-500 transition">${c}</button>`
+                        ).join('');
+                    } else {
+                        colorContainer.parentElement.style.display = 'none';
+                    }
 
-                if (sizes.length > 0) {
-                    sizeContainer.innerHTML = sizes.map((s, i) =>
-                        `<button onclick="selectOption(this, 'size')" class="size-btn px-6 py-2 border-2 border-gray-300 rounded-lg font-medium hover:border-orange-500 transition">${s}</button>`
-                    ).join('');
-                } else {
-                    sizeContainer.parentElement.style.display = 'none';
-                }
+                    if (sizes.length > 0) {
+                        sizeContainer.innerHTML = sizes.map((s, i) =>
+                            `<button onclick="selectOption(this, 'size')" class="size-btn px-6 py-2 border-2 border-gray-300 rounded-lg font-medium hover:border-orange-500 transition">${s}</button>`
+                        ).join('');
+                    } else {
+                        sizeContainer.parentElement.style.display = 'none';
+                    }
 
-                // Description & Specs
-                const description = isReal ? (product.description || "No description available.") : product.desc;
-                document.getElementById('descContainer').innerHTML = `<p>${description}</p>`;
+                    // Description & Specs
+                    const description = isReal ? (product.description || "No description available.") : product.desc;
+                    document.getElementById('descContainer').innerHTML = `<p>${description}</p>`;
 
-                document.getElementById('specsContainer').innerHTML = `
+                    document.getElementById('specsContainer').innerHTML = `
                     <div class="flex border-b border-gray-200 py-3"><span class="text-gray-600 w-1/3">Category</span><span class="text-gray-800 font-medium">${catDisplay}</span></div>
                     <div class="flex border-b border-gray-200 py-3"><span class="text-gray-600 w-1/3">Stock</span><span class="text-gray-800 font-medium">${stock}</span></div>
                     <div class="flex border-b border-gray-200 py-3"><span class="text-gray-600 w-1/3">Ships From</span><span class="text-gray-800 font-medium">${shopAddress}</span></div>
                 `;
 
-                // Thumbnails
-                const gallery = document.getElementById('imageGallery');
-                if (thumbs.length > 0) {
-                    gallery.innerHTML = thumbs.map((img, i) => `
+                    // Thumbnails
+                    const gallery = document.getElementById('imageGallery');
+                    if (thumbs.length > 0) {
+                        gallery.innerHTML = thumbs.map((img, i) => `
                         <img onclick="changeImage(this)" src="${img}" class="w-full h-20 object-cover rounded cursor-pointer border-2 ${i === 0 ? 'thumbnail-active' : 'border-gray-200'} hover:border-orange-500 transition">
                     `).join('');
-                }
+                    }
 
-                // Update Globals for addToCart
-                window.currentProduct = product;
-                window.isCurrentReal = isReal;
+                    // Update Globals for addToCart
+                    window.currentProduct = product;
+                    window.isCurrentReal = isReal;
 
-            } else {
-                document.getElementById('productTitle').textContent = "Product Not Found";
-                document.getElementById('priceContainer').innerHTML = "<span class='text-red-500'>Item unavailable</span>";
+                } else {
+                    document.getElementById('productTitle').textContent = "Product Not Found";
+                    document.getElementById('priceContainer').innerHTML = "<span class='text-red-500'>Item unavailable</span>";
 
-                // DEBUG INFO
-                const debugDiv = document.createElement('div');
-                debugDiv.className = "bg-red-100 p-4 rounded mt-4 text-red-700 text-xs";
-                debugDiv.innerHTML = `
+                    // DEBUG INFO
+                    const debugDiv = document.createElement('div');
+                    debugDiv.className = "bg-red-100 p-4 rounded mt-4 text-red-700 text-xs";
+                    debugDiv.innerHTML = `
                     <p class="font-bold text-sm mb-1">🔍 DIAGNOSTIC INFO:</p>
                     <p><strong>Full URL:</strong> ${window.location.href}</p>
                     <p><strong>URL ID Param:</strong> ${params.get('id')}</p>
@@ -591,8 +599,8 @@
                     <p><strong>API Check:</strong> ${API_BASE_URL}/products/${id}</p>
                     <p class="mt-2 text-blue-700 italic">Please screenshot this entire box.</p>
                 `;
-                document.getElementById('descContainer').appendChild(debugDiv);
-            }
+                    document.getElementById('descContainer').appendChild(debugDiv);
+                }
 
             } catch (err) {
                 console.error("Critical Error in Product Detail Init:", err);
@@ -651,8 +659,14 @@
                 return;
             }
 
-            const params = new URLSearchParams(window.location.search);
-            let id = params.get('id') || localStorage.getItem('lastClickedProductId');
+            // Get ID from Hash or Query or LocalStorage
+            let id;
+            if (window.location.hash && window.location.hash.length > 1) {
+                id = new URLSearchParams(window.location.hash.substring(1)).get('id');
+            } else {
+                id = new URLSearchParams(window.location.search).get('id');
+            }
+            if (!id) id = localStorage.getItem('lastClickedProductId');
 
             // Get selected options
             const selectedColorBtn = document.querySelector('#colorContainer button.border-orange-500');
@@ -662,27 +676,10 @@
             const size = selectedSizeBtn ? selectedSizeBtn.textContent : null;
 
             const quantity = parseInt(document.getElementById('quantity').value);
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-            // Determine variantId for backend (MUST be a real variant ID)
-            let variantIdToUse = id;
-            if (window.isCurrentReal && product.variants && product.variants.length > 0) {
-                const selectedVariant = product.variants.find(v =>
-                    (v.color === color || (!v.color && !color)) &&
-                    (v.size === size || (!v.size && !size))
-                );
-                if (selectedVariant) {
-                    variantIdToUse = selectedVariant.id;
-                } else {
-                    variantIdToUse = product.variants[0].id; // Default to first
-                }
-            }
-
-            // Unique ID based on product + variations for LOCAL STORAGE
-            const cartItemId = `${id || product.id}-${color || ''}-${size || ''}`;
             // Find specific variant ID based on selection
             let variantId = id || product.id; // Default to product ID
-            
+
             if (window.isCurrentReal && product.variants && product.variants.length > 0) {
                 // Find variant matching color and size
                 const matchedVariant = product.variants.find(v => {
@@ -690,59 +687,25 @@
                     const sizeMatch = !size || v.size === size;
                     return colorMatch && sizeMatch;
                 });
-                
+
                 if (matchedVariant) {
                     variantId = matchedVariant.id;
                     console.log("Selected Variant ID:", variantId);
                 } else {
-                    console.warn("No matching variant found for selection, utilizing default ProductID.");
+                    variantId = product.variants[0].id; // Fallback to first
+                    console.warn("No matching variant found for selection, utilizing first variant.");
                 }
             }
-            
-            // Unique ID based on product + variations
+
+            // Unique ID based on product + variations for LOCAL STORAGE
             const cartItemId = `${variantId}-${color || 'default'}-${size || 'default'}`;
-
-            const existing = cart.find(item => item.cartItemId === cartItemId);
-
-            // Determine Price for Cart
-            let priceVal = 0;
-            if (window.isCurrentReal) {
-                if (product.variants && product.variants.length > 0) priceVal = product.variants[0].price;
-            } else {
-                priceVal = product.price;
-            }
-
-            if (existing) {
-                existing.quantity += quantity;
-            } else {
-                cart.push({
-                    id: id || product.id,
-                    variantId: variantIdToUse,
-                    cartItemId: cartItemId,
-                    name: product.name,
-                    price: priceVal,
-                    image: (product.images && product.images.length > 0) ? product.images[0] : (product.image || 'https://via.placeholder.com/200'),
-                    quantity: quantity,
-                    color: color,
-                    size: size,
-                    checked: true
-                });
-            }
-
-            // Call backend API to add to cart (using URL params, not JSON body)
-            try {
-                const token = localStorage.getItem('accessToken');
-                const response = await fetch(`${API_BASE_URL}/cart/add?variantId=${variantIdToUse}&quantity=${quantity}`, {
-            
-            localStorage.setItem('cart', JSON.stringify(cart));
 
             // Backend Sync
             try {
                 const token = localStorage.getItem('accessToken');
-                // Use the resolved variantId
                 console.log(`Adding to cart: VariantId=${variantId}, Qty=${quantity}`);
-                
-                const response = await fetch(`http://localhost:8080/api/cart/add?variantId=${variantId}&quantity=${quantity}`, {
+
+                const response = await fetch(`${API_BASE_URL}/cart/add?variantId=${variantId}&quantity=${quantity}`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -755,12 +718,42 @@
                     throw new Error(`API returned ${response.status}`);
                 }
 
+                // Update local storage cart (for visual feedback)
+                const cart = JSON.parse(localStorage.getItem('cart')) || [];
+                const existing = cart.find(item => item.cartItemId === cartItemId);
+
+                let priceVal = 0;
+                if (window.isCurrentReal && product.variants && product.variants.length > 0) {
+                    const v = product.variants.find(v => v.id === variantId) || product.variants[0];
+                    priceVal = v.price;
+                } else {
+                    priceVal = product.price || 0;
+                }
+
+                if (existing) {
+                    existing.quantity += quantity;
+                } else {
+                    cart.push({
+                        id: product.id,
+                        variantId: variantId,
+                        cartItemId: cartItemId,
+                        name: product.name,
+                        price: priceVal,
+                        image: (product.images && product.images.length > 0) ? product.images[0] : (product.image || 'https://via.placeholder.com/200'),
+                        quantity: quantity,
+                        color: color,
+                        size: size,
+                        checked: true
+                    });
+                }
+                localStorage.setItem('cart', JSON.stringify(cart));
+
                 updateCartBadge();
                 showToast(`✅ Added ${quantity} item(s) to cart!`);
 
             } catch (error) {
                 console.error('Add to cart error:', error);
-                alert('❌ Failed to add to cart. Please try again.');
+                alert(`❌ Failed to add to cart: ${error.message}\nMake sure you are logged in and the server is running.`);
             }
         }
 
@@ -791,20 +784,9 @@
 
             const quantity = parseInt(document.getElementById('quantity').value);
 
-            // Determine variantId for backend (MUST be a real variant ID)
-            let variantIdToUse = id;
-            if (window.isCurrentReal && product.variants && product.variants.length > 0) {
-                const selectedVariant = product.variants.find(v =>
-                    (v.color === color || (!v.color && !color)) &&
-                    (v.size === size || (!v.size && !size))
-                );
-                if (selectedVariant) {
-                    variantIdToUse = selectedVariant.id;
-                } else {
-                    variantIdToUse = product.variants[0].id; // Default to first
             // Find specific variant ID based on selection
             let variantId = id || product.id; // Default to product ID
-            
+
             if (window.isCurrentReal && product.variants && product.variants.length > 0) {
                 // Find variant matching color and size
                 const matchedVariant = product.variants.find(v => {
@@ -812,47 +794,22 @@
                     const sizeMatch = !size || v.size === size;
                     return colorMatch && sizeMatch;
                 });
-                
+
                 if (matchedVariant) {
                     variantId = matchedVariant.id;
                     console.log("Buy Now - Selected Variant ID:", variantId);
                 } else {
-                    console.warn("Buy Now - No matching variant, utilizing default.");
+                    variantId = product.variants[0].id;
+                    console.warn("Buy Now - No matching variant, utilizing first.");
                 }
             }
-
-            // Determine Price
-            let priceVal = 0;
-            if (window.isCurrentReal) {
-                if (product.variants && product.variants.length > 0) priceVal = product.variants[0].price;
-            } else {
-                priceVal = product.price;
-            }
-
-            const cart = [{
-                id: id || product.id,
-                variantId: variantIdToUse,
-                cartItemId: `${id || product.id}-${color || ''}-${size || ''}`,
-                cartItemId: `${variantId}-${color || 'default'}-${size || 'default'}`,
-                name: product.name,
-                price: priceVal,
-                image: (product.images && product.images.length > 0) ? product.images[0] : (product.image || 'https://via.placeholder.com/200'),
-                quantity: quantity,
-                color: color,
-                size: size,
-                checked: true
-            }];
-
-            localStorage.setItem('cart', JSON.stringify(cart));
 
             // IMPORTANT: For Buy Now, we need to add to backend cart first
             try {
                 const token = localStorage.getItem('accessToken');
-
-                // Add this product to cart (using URL params, not JSON body)
-                const response = await fetch(`${API_BASE_URL}/cart/add?variantId=${variantIdToUse}&quantity=${quantity}`, {
                 console.log(`Buy Now fetching: VariantId=${variantId}`);
-                const response = await fetch(`http://localhost:8080/api/cart/add?variantId=${variantId}&quantity=${quantity}`, {
+
+                const response = await fetch(`${API_BASE_URL}/cart/add?variantId=${variantId}&quantity=${quantity}`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -865,20 +822,43 @@
                     throw new Error(`API returned ${response.status}: ${errorData}`);
                 }
 
+                // Update local storage cart (clear it and add only this item for buy now experience)
+                let priceVal = 0;
+                if (window.isCurrentReal && product.variants && product.variants.length > 0) {
+                    const v = product.variants.find(v => v.id === variantId) || product.variants[0];
+                    priceVal = v.price;
+                } else {
+                    priceVal = product.price || 0;
+                }
+
+                const buyNowItem = {
+                    id: product.id,
+                    variantId: variantId,
+                    cartItemId: `${variantId}-${color || 'default'}-${size || 'default'}`,
+                    name: product.name,
+                    price: priceVal,
+                    image: (product.images && product.images.length > 0) ? product.images[0] : (product.image || 'https://via.placeholder.com/200'),
+                    quantity: quantity,
+                    color: color,
+                    size: size,
+                    checked: true
+                };
+
+                // Set only this item in cart for checkout
+                localStorage.setItem('cart', JSON.stringify([buyNowItem]));
+
                 // Redirect to checkout
                 window.location.href = 'checkout-backend.html';
 
             } catch (error) {
                 console.error('Buy Now error:', error);
-
-                // More helpful error message
                 if (error.message.includes('404')) {
-                    alert('❌ Product variant not found in database. This is a demo product.\n\nPlease use "Add to Cart" from a real product page or check the backend seeder.');
+                    alert('❌ Product variant not found in database.');
                 } else if (error.message.includes('401')) {
                     alert('❌ Session expired. Please login again.');
                     window.location.href = 'login.html';
                 } else {
-                    alert('❌ Failed to process Buy Now.\n\nError: ' + error.message + '\n\nCheck console (F12) for details.');
+                    alert('❌ Failed to process Buy Now. Error: ' + error.message);
                 }
             }
         }

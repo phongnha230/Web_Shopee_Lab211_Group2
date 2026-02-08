@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Link Diagnostic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
+        <h1 class="text-3xl font-bold mb-6 text-red-600">🔴 Category Link Diagnostic</h1>
+
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+            <p class="font-bold">⚠️ Important:</p>
+            <p>This page will show you EXACTLY what's happening when you navigate to category.html</p>
+        </div>
+
+        <div class="space-y-4">
+            <div class="bg-blue-50 p-4 rounded">
+                <h2 class="font-bold text-lg mb-2">Current URL:</h2>
+                <code id="currentUrl" class="bg-white p-2 block rounded text-sm break-all"></code>
+            </div>
+
+            <div class="bg-green-50 p-4 rounded">
+                <h2 class="font-bold text-lg mb-2">URL Parameters:</h2>
+                <div id="params" class="space-y-1"></div>
+            </div>
+
+            <div class="bg-purple-50 p-4 rounded">
+                <h2 class="font-bold text-lg mb-2">Test Links:</h2>
+                <p class="text-sm text-gray-600 mb-3">Click these links to test if they work correctly:</p>
+                <div id="testLinks" class="space-y-2"></div>
+            </div>
+
+            <div class="bg-orange-50 p-4 rounded">
+                <h2 class="font-bold text-lg mb-2">Diagnosis:</h2>
+                <div id="diagnosis" class="space-y-2"></div>
+            </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-gray-50 rounded">
+            <h2 class="font-bold mb-2">🔧 Quick Fixes:</h2>
+            <ol class="list-decimal list-inside space-y-1 text-sm">
+                <li>Hard refresh the homepage: <code class="bg-white px-2 py-1 rounded">Ctrl + Shift + R</code></li>
+                <li>Clear browser cache completely</li>
+                <li>Make sure you're clicking from: <code
+                        class="bg-white px-2 py-1 rounded">http://localhost:8080/index.html</code></li>
+                <li>Try the test links below to verify the fix works</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8080/api';
+
+        // Show current URL
+        document.getElementById('currentUrl').textContent = window.location.href;
+
+        // Parse and display URL parameters
+        const params = new URLSearchParams(window.location.search);
+        const paramsDiv = document.getElementById('params');
+
+        if (params.toString() === '') {
+            paramsDiv.innerHTML = '<p class="text-red-600 font-bold">❌ NO PARAMETERS FOUND!</p>';
+        } else {
+            let html = '<table class="w-full"><tr class="border-b"><th class="text-left p-2">Key</th><th class="text-left p-2">Value</th></tr>';
+            for (const [key, value] of params) {
+                html += `<tr class="border-b"><td class="p-2 font-mono">${key}</td><td class="p-2 font-mono">${value || '<span class="text-red-600">null</span>'}</td></tr>`;
+            }
+            html += '</table>';
+            paramsDiv.innerHTML = html;
+        }
+
+        // Diagnosis
+        const diagnosisDiv = document.getElementById('diagnosis');
+        const id = params.get('id');
+        const name = params.get('name');
+
+        let diagnosis = [];
+
+        if (!id || id === 'null' || id === 'undefined') {
+            diagnosis.push('❌ <strong>Problem:</strong> Category ID is missing or invalid');
+            diagnosis.push('🔍 <strong>Cause:</strong> You likely clicked from an old cached version of index.html');
+            diagnosis.push('✅ <strong>Solution:</strong> Hard refresh index.html (Ctrl + Shift + R) and click again');
+        } else if (id.length < 20) {
+            diagnosis.push('⚠️ <strong>Warning:</strong> Category ID seems too short (should be 24 characters)');
+        } else {
+            diagnosis.push('✅ <strong>Success:</strong> Category ID is present and looks valid!');
+            diagnosis.push(`📋 ID: <code class="bg-white px-2 py-1 rounded">${id}</code>`);
+        }
+
+        if (!name || name === 'null' || name === 'undefined') {
+            diagnosis.push('❌ <strong>Problem:</strong> Category name is missing');
+        } else {
+            diagnosis.push(`✅ Category name: <strong>${name}</strong>`);
+        }
+
+        diagnosisDiv.innerHTML = diagnosis.map(d => `<p>${d}</p>`).join('');
+
+        // Create test links
+        async function createTestLinks() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/categories`);
+                const categories = await response.json();
+
+                const testLinksDiv = document.getElementById('testLinks');
+                let html = '';
+
+                categories.slice(0, 5).forEach(cat => {
+                    const testUrl = `category.html?id=${cat.id}&name=${encodeURIComponent(cat.name)}`;
+                    html += `
+                        <div class="flex items-center gap-2">
+                            <a href="${testUrl}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex-shrink-0">
+                                Test ${cat.name}
+                            </a>
+                            <code class="text-xs bg-white p-1 rounded flex-1 overflow-x-auto">${testUrl}</code>
+                        </div>
+                    `;
+                });
+
+                testLinksDiv.innerHTML = html;
+            } catch (error) {
+                testLinksDiv.innerHTML = `<p class="text-red-600">Error loading categories: ${error.message}</p>`;
+            }
+        }
+
+        createTestLinks();
+    </script>
+</body>
+
+</html>
