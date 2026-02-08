@@ -136,4 +136,14 @@ public class ShopController {
         shopService.rejectShop(shopId, reason);
         return ResponseEntity.ok("Shop rejected.");
     }
+
+    @DeleteMapping("/admin/delete/{id}")
+    public ResponseEntity<String> deleteShop(@PathVariable String id) {
+        try {
+            shopService.deleteShop(id);
+            return ResponseEntity.ok("Shop deleted successfully.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

@@ -26,6 +26,7 @@ public class ShopServiceImpl implements ShopService {
     private final ShopRepository shopRepository;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final com.shoppeclone.backend.product.repository.ProductRepository productRepository;
     private final com.shoppeclone.backend.user.service.NotificationService notificationService;
     private final com.shoppeclone.backend.common.service.EmailService emailService;
 
@@ -107,30 +108,39 @@ public class ShopServiceImpl implements ShopService {
         shopRepository.save(shop);
 
         // 2. Promote User to SELLER (If owner exists)
-        userRepository.findById(shop.getOwnerId()).ifPresent(user -> {
-            Role sellerRole = roleRepository.findByName("ROLE_SELLER")
-                    .orElseThrow(() -> new RuntimeException("Role ROLE_SELLER not found"));
+        try {
+            userRepository.findById(shop.getOwnerId()).ifPresent(user -> {
+                Role sellerRole = roleRepository.findByName("ROLE_SELLER")
+                        .orElseThrow(() -> new RuntimeException("Role ROLE_SELLER not found"));
 
-            boolean hasRole = user.getRoles().stream().anyMatch(r -> r.getName().equals("ROLE_SELLER"));
-            if (!hasRole) {
-                user.getRoles().add(sellerRole);
-                userRepository.save(user);
-            }
+                boolean hasRole = user.getRoles().stream().anyMatch(r -> r.getName().equals("ROLE_SELLER"));
+                if (!hasRole) {
+                    user.getRoles().add(sellerRole);
+                    userRepository.save(user);
+                }
 
-            // 3. Send Notification
-            notificationService.createNotification(
-                    user.getId(),
-                    "Shop Approved 🎉",
-                    "Congratulations! Your shop '" + shop.getName() + "' has been approved. You can now start selling.",
-                    "SHOP_APPROVED");
+                // 3. Send Notification
+                try {
+                    notificationService.createNotification(
+                            user.getId(),
+                            "Shop Approved 🎉",
+                            "Congratulations! Your shop '" + shop.getName()
+                                    + "' has been approved. You can now start selling.",
+                            "SHOP_APPROVED");
+                } catch (Throwable t) {
+                    System.err.println("Non-critical failure creating notification: " + t.getMessage());
+                }
 
-            // 4. Send Email
-            try {
-                emailService.sendShopApprovalEmail(user.getEmail(), shop.getName());
-            } catch (Exception e) {
-                System.err.println("Failed to send approval email: " + e.getMessage());
-            }
-        });
+                // 4. Send Email
+                try {
+                    emailService.sendShopApprovalEmail(user.getEmail(), shop.getName());
+                } catch (Throwable t) {
+                    System.err.println("Non-critical failure sending approval email: " + t.getMessage());
+                }
+            });
+        } catch (Throwable t) {
+            System.err.println("Non-critical failure in approval secondary actions: " + t.getMessage());
+        }
     }
 
     private ShopAdminResponse mapToAdminResponse(Shop shop) {
@@ -146,6 +156,7 @@ public class ShopServiceImpl implements ShopService {
         response.setRejectionReason(shop.getRejectionReason());
         response.setCreatedAt(shop.getCreatedAt());
         response.setUpdatedAt(shop.getUpdatedAt());
+        response.setProductCount(productRepository.countByShopId(shop.getId()));
 
         // Fetch owner details if available
         userRepository.findById(shop.getOwnerId()).ifPresent(user -> {
@@ -172,17 +183,21 @@ public class ShopServiceImpl implements ShopService {
         shopRepository.save(shop);
 
         // Send Notification
-        notificationService.createNotification(
-                shop.getOwnerId(),
-                "Shop Registration Rejected ❌",
-                "Your shop application for '" + shop.getName() + "' was rejected. Reason: " + reason,
-                "SHOP_REJECTED");
+        try {
+            notificationService.createNotification(
+                    shop.getOwnerId(),
+                    "Shop Registration Rejected ❌",
+                    "Your shop application for '" + shop.getName() + "' was rejected. Reason: " + reason,
+                    "SHOP_REJECTED");
+        } catch (Throwable t) {
+            System.err.println("Non-critical failure creating notification: " + t.getMessage());
+        }
 
         // Send Email
         try {
             emailService.sendShopRejectionEmail(user.getEmail(), shop.getName(), reason);
-        } catch (Exception e) {
-            System.err.println("Failed to send rejection email: " + e.getMessage());
+        } catch (Throwable t) {
+            System.err.println("Non-critical failure sending rejection email: " + t.getMessage());
         }
     }
 
@@ -219,5 +234,19 @@ public class ShopServiceImpl implements ShopService {
     private User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    @Override
+    @Transactional
+    public void deleteShop(String shopId) {
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new RuntimeException("Shop not found"));
+
+        long productCount = productRepository.countByShopId(shopId);
+        if (productCount > 0) {
+            throw new RuntimeException("Cannot delete shop with existing products. Please remove all products first.");
+        }
+
+        shopRepository.delete(shop);
     }
 }

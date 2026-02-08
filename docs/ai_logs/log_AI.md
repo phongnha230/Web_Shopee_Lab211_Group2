@@ -15341,3 +15341,27 @@ Review Changes
 - `ShopService.java` & `ShopServiceImpl.java`: Updated signatures and logic for graceful owner handling.
 - `ShopController.java`: Updated admin endpoints to return the new DTO.
 - `admin-dashboard.html`: Updated frontend to display `ownerFullName`.
+
+## Session Update (2026-02-08) - Shop Deletion & UI Fixes
+
+### 1. Fix Shop Status Persistence (Shop Arina)
+- **Problem**: Changing shop status (e.g., Reject) was not saving to DB because of email/notification errors rolling back the transaction.
+- **Fix**: Wrapped notification logic in 	ry-catch blocks in ShopServiceImpl.java.
+- **Action**: Temporarily added a 'Reject' button to UI to manually fix 'Shop Arina' status, then removed it.
+
+### 2. UI Alignment in Active Shops
+- **Problem**: The 'Running' button was misaligned because shop addresses had different lengths.
+- **Fix**: Used CSS Flexbox (lex-col, mt-auto) in dmin-dashboard.html to force the button to the bottom of the card.
+
+### 3. Conditional Shop Deletion
+- **Feature**: User requested 'Delete Shop' functionality but ONLY if the shop has NO products.
+- **Backend**:
+    - Added deleteShop(String id) to ShopService.
+    - Logic: Check productRepository.countByShopId(shopId). If > 0, throw Exception. Else, delete.
+    - Endpoint: DELETE /api/shop/admin/delete/{id}.
+- **Frontend**:
+    - Added **Product Count** badge (e.g., '?? 5 Products') to shop cards.
+    - **Conditional Button**:
+        - If products == 0: Button becomes **'Delete Shop'** (Red).
+        - If products > 0: Button remains **'Running'** (Yellow/Disabled).
+
