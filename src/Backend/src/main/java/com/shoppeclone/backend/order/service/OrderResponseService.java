@@ -146,4 +146,33 @@ public class OrderResponseService {
                 .map(order -> enrichWithReviewInfo(order, userId))
                 .toList();
     }
+
+    /**
+     * Enrich order for shipper: paymentMethod + collectCash (for display: "Thu tiền" vs "Đã thanh toán").
+     */
+    public OrderResponse enrichForShipper(Order order) {
+        OrderResponse response = OrderResponse.fromOrder(order);
+
+        List<Payment> payments = paymentRepository.findByOrderId(order.getId());
+        if (!payments.isEmpty()) {
+            paymentMethodRepository.findById(payments.get(0).getPaymentMethodId())
+                    .ifPresent(pm -> response.setPaymentMethod(pm.getCode()));
+        }
+        if (response.getPaymentMethod() == null) {
+            response.setPaymentMethod("COD");
+        }
+
+        // collectCash = true khi COD và chưa thanh toán (shipper thu tiền khi giao)
+        boolean collectCash = "COD".equalsIgnoreCase(response.getPaymentMethod())
+                && order.getPaymentStatus() == com.shoppeclone.backend.order.entity.PaymentStatus.UNPAID;
+        response.setCollectCash(collectCash);
+
+        return response;
+    }
+
+    public List<OrderResponse> enrichForShipper(List<Order> orders) {
+        return orders.stream()
+                .map(this::enrichForShipper)
+                .toList();
+    }
 }

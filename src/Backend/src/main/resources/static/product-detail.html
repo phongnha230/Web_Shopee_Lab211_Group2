@@ -407,7 +407,16 @@
                 const params = new URLSearchParams(window.location.search);
                 let id = params.get('id');
 
-                // Fallback: Check localStorage if ID is missing from URL
+                if (!id && window.location.hash) {
+                    const hashStr = window.location.hash.substring(1);
+                    const hashParams = new URLSearchParams(hashStr);
+                    id = hashParams.get('id');
+                }
+                if (!id && window.location.pathname) {
+                    const match = window.location.pathname.match(/\/product-detail(?:\.html)?\/([a-zA-Z0-9]+)/);
+                    if (match) id = match[1];
+                }
+
                 if (!id) {
                     id = localStorage.getItem('lastClickedProductId');
                 }

@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +26,9 @@ public class PaymentController {
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> createPayment(@RequestBody CreatePaymentRequest request) {
+        if (request.getOrderId() == null || request.getPaymentMethod() == null) {
+            throw new RuntimeException("orderId and paymentMethod are required");
+        }
         PaymentMethod method = paymentMethodRepository.findByCode(request.getPaymentMethod())
                 .orElseThrow(() -> new RuntimeException("Payment method not found: " + request.getPaymentMethod()));
 
@@ -36,11 +40,11 @@ public class PaymentController {
             payment = paymentService.createPayment(request.getOrderId(), method.getId(), BigDecimal.ZERO);
         }
 
-        return ResponseEntity.ok(Map.of(
-                "id", payment.getId(),
-                "orderId", payment.getOrderId(),
-                "redirectUrl", (Object) null
-        ));
+        Map<String, Object> body = new HashMap<>();
+        body.put("id", payment.getId());
+        body.put("orderId", payment.getOrderId());
+        body.put("redirectUrl", null); // null allowed for COD / chưa tích hợp gateway
+        return ResponseEntity.ok(body);
     }
 
     @Data

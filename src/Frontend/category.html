@@ -337,8 +337,7 @@
         }
 
         function goToProduct(id) {
-            // Use hash-based navigation to bypass server routing issues
-            window.location.href = `product-detail.html#id=${id}`;
+            window.location.href = `product-detail.html?id=${id}`;
         }
 
         document.addEventListener('DOMContentLoaded', () => {

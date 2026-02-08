@@ -2,7 +2,9 @@ package com.shoppeclone.backend.shipper.controller;
 
 import com.shoppeclone.backend.auth.model.User;
 import com.shoppeclone.backend.auth.repository.UserRepository;
+import com.shoppeclone.backend.order.dto.OrderResponse;
 import com.shoppeclone.backend.order.entity.Order;
+import com.shoppeclone.backend.order.service.OrderResponseService;
 import com.shoppeclone.backend.shipper.dto.DeliveryUpdateRequest;
 import com.shoppeclone.backend.shipper.service.ShipperService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ public class ShipperController {
 
     private final ShipperService shipperService;
     private final UserRepository userRepository;
+    private final OrderResponseService orderResponseService;
 
     private String getUserId(UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername())
@@ -30,9 +33,11 @@ public class ShipperController {
     }
 
     @GetMapping("/orders")
-    public ResponseEntity<List<Order>> getAssignedOrders(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<List<OrderResponse>> getAssignedOrders(@AuthenticationPrincipal UserDetails userDetails) {
         String shipperId = getUserId(userDetails);
-        return ResponseEntity.ok(shipperService.getAssignedOrders(shipperId));
+        List<Order> orders = shipperService.getAssignedOrders(shipperId);
+        // Enrich with paymentMethod + collectCash for shipper display
+        return ResponseEntity.ok(orderResponseService.enrichForShipper(orders));
     }
 
     @PutMapping("/orders/{orderId}/pickup")

@@ -30,6 +30,7 @@ public class OrderResponse {
     private List<OrderItem> items;
     private List<OrderItemDisplayDto> displayItems; // Enriched for frontend (productName, image, etc.)
     private String paymentMethod; // COD, MOMO, VNPAY, etc.
+    private Boolean collectCash;  // true = shipper thu tiền COD, false = đã thanh toán online
     private OrderShipping shipping;
 
     // Shipper-related fields
@@ -53,6 +54,8 @@ public class OrderResponse {
 
     public String getPaymentMethod() { return paymentMethod; }
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+    public Boolean getCollectCash() { return collectCash; }
+    public void setCollectCash(Boolean collectCash) { this.collectCash = collectCash; }
     public List<OrderItemDisplayDto> getDisplayItems() { return displayItems; }
     public void setDisplayItems(List<OrderItemDisplayDto> displayItems) { this.displayItems = displayItems; }
 

@@ -19,7 +19,8 @@ public class CorsConfig {
         // config.setAllowedOrigins(List.of("http://localhost:3000",
         // "http://127.0.0.1:5500", "http://localhost:5500"));
         config.setAllowedOriginPatterns(List.of("*")); // ✅ Allow all origins (including file://)
-        config.setAllowedHeaders(List.of("*"));
+        // Khi allowCredentials=true, "*" không hoạt động cho headers - phải liệt kê rõ
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

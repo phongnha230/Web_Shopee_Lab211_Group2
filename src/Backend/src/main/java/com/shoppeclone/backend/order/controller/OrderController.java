@@ -10,7 +10,7 @@ import com.shoppeclone.backend.order.service.OrderResponseService;
 import com.shoppeclone.backend.order.service.OrderService;
 import com.shoppeclone.backend.shop.entity.Shop;
 import com.shoppeclone.backend.shop.service.ShopService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,21 +20,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
+@RequiredArgsConstructor
 public class OrderController {
 
     private final OrderService orderService;
     private final UserRepository userRepository;
     private final OrderResponseService orderResponseService;
     private final ShopService shopService;
-
-    @Autowired
-    public OrderController(OrderService orderService, UserRepository userRepository,
-                           OrderResponseService orderResponseService, ShopService shopService) {
-        this.orderService = orderService;
-        this.userRepository = userRepository;
-        this.orderResponseService = orderResponseService;
-        this.shopService = shopService;
-    }
 
     private String getUserId(UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername())
