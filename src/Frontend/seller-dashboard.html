@@ -2214,6 +2214,7 @@
         // ============================================
 
         // Remove Vietnamese tones for consistent storage
+        // Remove Vietnamese tones for consistent storage
         function removeVietnameseTones(str) {
             str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
             str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
@@ -2248,7 +2249,7 @@
                     provinces.forEach(province => {
                         const option = document.createElement('option');
                         option.value = province.code;
-                        option.textContent = removeVietnameseTones(province.name);
+                        option.textContent = province.name; // Keep natural name for display
                         option.dataset.name = removeVietnameseTones(province.name);
                         provinceSelect.appendChild(option);
                     });
@@ -2292,7 +2293,7 @@
                     data.districts.forEach(district => {
                         const option = document.createElement('option');
                         option.value = district.code;
-                        option.textContent = removeVietnameseTones(district.name);
+                        option.textContent = district.name; // Keep natural name for display
                         option.dataset.name = removeVietnameseTones(district.name);
                         districtSelect.appendChild(option);
                     });
@@ -2332,7 +2333,7 @@
                     data.wards.forEach(ward => {
                         const option = document.createElement('option');
                         option.value = ward.code;
-                        option.textContent = removeVietnameseTones(ward.name);
+                        option.textContent = ward.name; // Keep natural name
                         option.dataset.name = removeVietnameseTones(ward.name);
                         wardSelect.appendChild(option);
                     });
@@ -2347,101 +2348,191 @@
             }
         }
 
+        // Helper to check if string is numeric ID
+        function isNumericId(str) {
+            return /^\d+$/.test(str);
+        }
+
         // Parse address string and populate dropdowns (best effort)
         async function parseAndPopulateAddress(addressString) {
             if (!addressString) return;
 
+            console.log("Parsing address:", addressString);
+
             // Split by comma: "detail, ward, district, province"
             const parts = addressString.split(',').map(s => s.trim()).filter(s => s);
+            let detail = '', ward = '', district = '', province = '';
 
             if (parts.length >= 1) {
-                // First part is detail address
-                document.getElementById('profileAddressDetail').value = parts[0] || '';
-
-                // Try to extract ward, district, province from remaining parts
-                let ward = '';
-                let district = '';
-                let province = '';
-
+                // Heuristic mapping based on length
                 if (parts.length === 4) {
-                    // Format: "detail, ward, district, province"
-                    ward = parts[1] || '';
-                    district = parts[2] || '';
-                    province = parts[3] || '';
+                    [detail, ward, district, province] = parts;
                 } else if (parts.length === 3) {
-                    // Format: "detail, district, province" (no ward)
-                    district = parts[1] || '';
-                    province = parts[2] || '';
+                    // "detail, district, province"
+                    [detail, district, province] = parts;
                 } else if (parts.length === 2) {
-                    // Format: "detail, province" (no district/ward)
-                    province = parts[1] || '';
+                    // "detail, province"
+                    [detail, province] = parts;
                 } else if (parts.length > 4) {
-                    // More than expected, assume last 3 are ward, district, province
-                    ward = parts[parts.length - 3] || '';
-                    district = parts[parts.length - 2] || '';
-                    province = parts[parts.length - 1] || '';
+                    // "detail part 1, detail part 2, ward, district, province"
+                    province = parts[parts.length - 1];
+                    district = parts[parts.length - 2];
+                    ward = parts[parts.length - 3];
+                    detail = parts.slice(0, parts.length - 3).join(', ');
+                } else {
+                    detail = parts[0];
                 }
 
-                // Populate text inputs for view mode
-                document.getElementById('profileProvinceText').value = province;
-                document.getElementById('profileDistrictText').value = district;
-                document.getElementById('profileWardText').value = ward;
+                // Populate Detail Text
+                document.getElementById('profileAddressDetail').value = detail;
 
-                // Try to pre-select dropdowns for edit mode
+                // --- LOGIC: CONVERT IDS TO NAMES FOR DISPLAY ---
+
+                // 1. Province
+                let provinceNameDisplay = province;
+                let districtNameDisplay = district;
+                let wardNameDisplay = ward;
+
+                // We need to resolve these potentially numeric IDs to Names
+                // We reuse the logic in standard loading to find names
                 await trySelectAddressInDropdowns(province, district, ward);
+
+                // After trySelectAddressInDropdowns runs, the dropdowns (if successful) 
+                // will have the correct VALUES (IDs) selected.
+                // We can then grab the TEXT from the selected options to update the View Mode inputs.
+
+                const provinceSelect = document.getElementById('profileProvince');
+                const districtSelect = document.getElementById('profileDistrict');
+                const wardSelect = document.getElementById('profileWard');
+
+                // Update View Mode Texts from Dropdowns if selected, else keep original
+                if (provinceSelect.selectedIndex > 0) {
+                    provinceNameDisplay = provinceSelect.options[provinceSelect.selectedIndex].textContent;
+                }
+                if (districtSelect.selectedIndex > 0) {
+                    districtNameDisplay = districtSelect.options[districtSelect.selectedIndex].textContent;
+                }
+                if (wardSelect.selectedIndex > 0) {
+                    wardNameDisplay = wardSelect.options[wardSelect.selectedIndex].textContent;
+                }
+
+                // Populate View Mode Fields
+                document.getElementById('profileProvinceText').value = provinceNameDisplay;
+                document.getElementById('profileDistrictText').value = districtNameDisplay;
+                document.getElementById('profileWardText').value = wardNameDisplay;
             }
         }
 
-        async function trySelectAddressInDropdowns(provinceName, districtName, wardName) {
+        async function trySelectAddressInDropdowns(provinceVal, districtVal, wardVal) {
+            console.log(`Trying to select: P=${provinceVal}, D=${districtVal}, W=${wardVal}`);
+
             try {
-                // Select province by matching name
                 const provinceSelect = document.getElementById('profileProvince');
-                if (provinceName && provinceSelect.options.length > 1) {
+
+                // Wait briefly for provinces to load if empty
+                if (provinceSelect.options.length <= 1) {
+                    await new Promise(r => setTimeout(r, 500));
+                }
+
+                // 1. SELECT PROVINCE
+                let provinceFound = false;
+
+                // Strategy A: Match by ID (Value)
+                if (isNumericId(provinceVal)) {
                     for (let i = 0; i < provinceSelect.options.length; i++) {
-                        const optionName = provinceSelect.options[i].dataset.name || provinceSelect.options[i].textContent;
-                        if (optionName.toLowerCase().includes(provinceName.toLowerCase()) ||
-                            provinceName.toLowerCase().includes(optionName.toLowerCase())) {
-                            provinceSelect.value = provinceSelect.options[i].value;
-
-                            // Load districts for this province
-                            await loadProfileDistricts();
-
-                            // Select district
-                            if (districtName) {
-                                const districtSelect = document.getElementById('profileDistrict');
-                                await new Promise(resolve => setTimeout(resolve, 300)); // Wait for districts to load
-
-                                for (let j = 0; j < districtSelect.options.length; j++) {
-                                    const distOptName = districtSelect.options[j].dataset.name || districtSelect.options[j].textContent;
-                                    if (distOptName.toLowerCase().includes(districtName.toLowerCase()) ||
-                                        districtName.toLowerCase().includes(distOptName.toLowerCase())) {
-                                        districtSelect.value = districtSelect.options[j].value;
-
-                                        // Load wards for this district
-                                        await loadProfileWards();
-
-                                        // Select ward
-                                        if (wardName) {
-                                            const wardSelect = document.getElementById('profileWard');
-                                            await new Promise(resolve => setTimeout(resolve, 300)); // Wait for wards to load
-
-                                            for (let k = 0; k < wardSelect.options.length; k++) {
-                                                const wardOptName = wardSelect.options[k].dataset.name || wardSelect.options[k].textContent;
-                                                if (wardOptName.toLowerCase().includes(wardName.toLowerCase()) ||
-                                                    wardName.toLowerCase().includes(wardOptName.toLowerCase())) {
-                                                    wardSelect.value = wardSelect.options[k].value;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                        break;
-                                    }
-                                }
-                            }
+                        if (provinceSelect.options[i].value == provinceVal) {
+                            provinceSelect.selectedIndex = i;
+                            provinceFound = true;
                             break;
                         }
                     }
                 }
+
+                // Strategy B: Match by Name (Text/Dataset)
+                if (!provinceFound) {
+                    const pNameNorm = removeVietnameseTones(provinceVal).toLowerCase();
+                    for (let i = 0; i < provinceSelect.options.length; i++) {
+                        const optName = provinceSelect.options[i].dataset.name?.toLowerCase() || "";
+                        if (optName && (optName.includes(pNameNorm) || pNameNorm.includes(optName))) {
+                            provinceSelect.selectedIndex = i;
+                            provinceFound = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!provinceFound) {
+                    console.warn("Province not found:", provinceVal);
+                    return;
+                }
+
+                // Load districts for this province
+                await loadProfileDistricts();
+                // Wait for network
+                await new Promise(r => setTimeout(r, 300));
+
+                // 2. SELECT DISTRICT
+                const districtSelect = document.getElementById('profileDistrict');
+                let districtFound = false;
+
+                if (isNumericId(districtVal)) {
+                    for (let i = 0; i < districtSelect.options.length; i++) {
+                        if (districtSelect.options[i].value == districtVal) {
+                            districtSelect.selectedIndex = i;
+                            districtFound = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!districtFound) {
+                    const dNameNorm = removeVietnameseTones(districtVal).toLowerCase();
+                    for (let i = 0; i < districtSelect.options.length; i++) {
+                        const optName = districtSelect.options[i].dataset.name?.toLowerCase() || "";
+                        if (optName && (optName.includes(dNameNorm) || dNameNorm.includes(optName))) {
+                            districtSelect.selectedIndex = i;
+                            districtFound = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!districtFound) {
+                    console.warn("District not found:", districtVal);
+                    return;
+                }
+
+                // Load wards for this district
+                await loadProfileWards();
+                // Wait for network
+                await new Promise(r => setTimeout(r, 300));
+
+                // 3. SELECT WARD
+                const wardSelect = document.getElementById('profileWard');
+                let wardFound = false;
+
+                if (isNumericId(wardVal)) {
+                    for (let i = 0; i < wardSelect.options.length; i++) {
+                        if (wardSelect.options[i].value == wardVal) {
+                            wardSelect.selectedIndex = i;
+                            wardFound = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!wardFound) {
+                    const wNameNorm = removeVietnameseTones(wardVal).toLowerCase();
+                    for (let i = 0; i < wardSelect.options.length; i++) {
+                        const optName = wardSelect.options[i].dataset.name?.toLowerCase() || "";
+                        if (optName && (optName.includes(wNameNorm) || wNameNorm.includes(optName))) {
+                            wardSelect.selectedIndex = i;
+                            wardFound = true;
+                            break;
+                        }
+                    }
+                }
+
             } catch (error) {
                 console.error('Error selecting address dropdowns:', error);
             }
