@@ -1527,6 +1527,18 @@
 
                 if (response.ok) {
                     currentShop = await response.json();
+                    if (currentShop.status !== 'ACTIVE') {
+                        if (currentShop.status === 'PENDING') {
+                            showPendingApprovalMessage();
+                        } else if (currentShop.status === 'REJECTED') {
+                            showRejectedMessage(currentShop.rejectionReason);
+                        } else {
+                            alert('Your shop is not active. Please contact support.');
+                            window.location.href = 'index.html';
+                        }
+                        return;
+                    }
+
                     console.log('✅ Shop loaded successfully!');
                     console.log('📋 Shop Data:', currentShop);
                     console.log('🏷️ Shop ID:', currentShop.id);
@@ -2614,6 +2626,104 @@
 
         function editFlashSale(productId) {
             editProduct(productId);
+        }
+        // ========================================
+        // SHOP STATUS HELPERS
+        // ========================================
+        function showPendingApprovalMessage() {
+            const mainContent = document.querySelector('.flex-1.p-8');
+            mainContent.innerHTML = `
+                <div class="max-w-2xl mx-auto mt-20 text-center">
+                    <div class="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-10 shadow-lg">
+                        <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-clock text-4xl text-yellow-600"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold text-gray-800 mb-4">Shop Pending Approval</h2>
+                        <p class="text-gray-600 mb-8 text-lg">
+                            Your shop request has been submitted and is currently under review by our admin team.<br>
+                            Please check back later or check your email for updates.
+                        </p>
+                        
+                        <div class="bg-white rounded-xl border border-gray-200 p-6 mb-8 text-left shadow-sm">
+                            <h3 class="text-sm uppercase tracking-wide text-gray-400 font-bold mb-4">Application Details</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-xs text-gray-500">Shop Name</p>
+                                    <p class="font-medium text-gray-800">${currentShop.name || 'N/A'}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500">Owner Email</p>
+                                    <p class="font-medium text-gray-800">${currentShop.ownerEmail || 'N/A'}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500">Submitted On</p>
+                                    <p class="font-medium text-gray-800">${currentShop.createdAt ? new Date(currentShop.createdAt).toLocaleDateString() : 'Just now'}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500">Status</p>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        PENDING REVIEW
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-center gap-4">
+                            <button onclick="window.location.href='index.html'" 
+                                class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-2.5 rounded-lg font-medium transition flex items-center shadow-sm">
+                                <i class="fas fa-arrow-left mr-2"></i>Back to Home
+                            </button>
+                            <button onclick="location.reload()" 
+                                class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-lg font-medium transition flex items-center shadow-md shadow-orange-200">
+                                <i class="fas fa-sync-alt mr-2"></i>Check Status Again
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Hide sidebar to prevent navigation
+            const sidebar = document.querySelector('aside');
+            if (sidebar) sidebar.style.display = 'none';
+        }
+
+        function showRejectedMessage(reason) {
+            const mainContent = document.querySelector('.flex-1.p-8');
+            mainContent.innerHTML = `
+                <div class="max-w-2xl mx-auto mt-20 text-center">
+                    <div class="bg-red-50 border-2 border-red-200 rounded-xl p-10 shadow-lg">
+                        <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-ban text-4xl text-red-600"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold text-gray-800 mb-4">Shop Application Rejected</h2>
+                        <p class="text-gray-600 mb-8 text-lg">
+                            We're sorry, but your shop application was not approved at this time.
+                        </p>
+                        
+                        <div class="bg-white rounded-xl border border-red-200 p-6 mb-8 text-left shadow-sm">
+                            <h3 class="text-sm uppercase tracking-wide text-gray-400 font-bold mb-4">Rejection Reason</h3>
+                            <div class="bg-red-50 p-4 rounded-lg border border-red-100 text-red-800">
+                                ${reason || 'No specific reason provided. Please contact support for more details.'}
+                            </div>
+                        </div>
+
+                        <div class="flex justify-center gap-4">
+                            <button onclick="window.location.href='index.html'" 
+                                class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-2.5 rounded-lg font-medium transition flex items-center shadow-sm">
+                                <i class="fas fa-arrow-left mr-2"></i>Back to Home
+                            </button>
+                            <button onclick="window.location.href='seller-register.html'" 
+                                class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-lg font-medium transition flex items-center shadow-md shadow-orange-200">
+                                <i class="fas fa-redo-alt mr-2"></i>Re-Apply
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Hide sidebar
+            const sidebar = document.querySelector('aside');
+            if (sidebar) sidebar.style.display = 'none';
         }
     </script>
 </body>
