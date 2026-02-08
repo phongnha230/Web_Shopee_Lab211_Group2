@@ -16,10 +16,9 @@ public class ShippingProviderSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (shippingProviderRepository.count() > 0) {
-            System.out.println(">>> Shipping Providers already seeded. Skipping...");
-            return;
-        }
+        // Always reset to ensure "standard" and "express" IDs exist
+        shippingProviderRepository.deleteAll();
+        System.out.println(">>> Cleared existing shipping providers.");
 
         System.out.println(">>> Seeding Shipping Providers...");
 

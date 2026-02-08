@@ -45,4 +45,8 @@ public class Order {
     private LocalDateTime completedAt;
     private LocalDateTime cancelledAt;
     private String cancelReason;
+
+    public String getId() {
+        return id;
+    }
 }

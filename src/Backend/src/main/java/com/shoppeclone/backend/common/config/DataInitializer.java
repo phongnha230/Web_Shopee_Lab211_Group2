@@ -91,7 +91,10 @@ public class DataInitializer implements CommandLineRunner {
     private void seedPaymentMethods() {
         createPaymentMethodIfNotFound("COD", "Cash on Delivery");
         createPaymentMethodIfNotFound("CARD", "Credit/Debit Card");
+        createPaymentMethodIfNotFound("CREDIT_CARD", "Credit/Debit Card");
         createPaymentMethodIfNotFound("E_WALLET", "E-Wallet");
+        createPaymentMethodIfNotFound("MOMO", "MoMo");
+        createPaymentMethodIfNotFound("VNPAY", "VNPAY");
     }
 
     private void createPaymentMethodIfNotFound(String code, String name) {

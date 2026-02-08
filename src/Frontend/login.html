@@ -172,7 +172,12 @@
                     const roles = data.user?.roles || [];
                     const isAdmin = roles.some(r => (typeof r === 'string' ? r : r.name) === 'ROLE_ADMIN');
 
-                    if (isAdmin) {
+                    const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
+                    if (returnUrl) {
+                        const m = returnUrl.match(/order-detail\.html\?id=([^&]+)/);
+                        if (m) localStorage.setItem('viewOrderId', m[1]);
+                        window.location.href = returnUrl;
+                    } else if (isAdmin) {
                         window.location.href = 'admin-dashboard.html';
                     } else {
                         window.location.href = 'index.html';

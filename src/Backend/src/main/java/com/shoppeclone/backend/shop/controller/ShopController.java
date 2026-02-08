@@ -81,6 +81,9 @@ public class ShopController {
 
     @GetMapping("/my-shop")
     public ResponseEntity<Shop> getMyShop(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null || authentication.getName().isBlank()) {
+            return ResponseEntity.notFound().build();
+        }
         Shop shop = shopService.getMyShop(getEmail(authentication));
         if (shop == null) {
             return ResponseEntity.notFound().build();

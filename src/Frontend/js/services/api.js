@@ -276,6 +276,19 @@ const ProductAPI = {
 };
 
 // ======================
+// SHIPPING API SERVICE
+// ======================
+const ShippingAPI = {
+    // Get all shipping providers
+    getProviders: async () => {
+        const response = await fetch(`${API_BASE_URL}/shipping-providers`, {
+            headers: getAuthHeaders()
+        });
+        return handleResponse(response);
+    }
+};
+
+// ======================
 // VOUCHER API SERVICE
 // ======================
 const VoucherAPI = {
@@ -298,5 +311,5 @@ const VoucherAPI = {
 
 // Export for use in other files
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { CartAPI, OrderAPI, PaymentAPI, ReviewAPI, ProductAPI, VoucherAPI };
+    module.exports = { CartAPI, OrderAPI, PaymentAPI, ReviewAPI, ProductAPI, VoucherAPI, ShippingAPI };
 }

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - Shopee Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50 flex flex-col min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between py-4 gap-8">
+                <div class="flex items-center gap-4 min-w-fit">
+                    <a href="index.html" class="flex items-center gap-2 text-orange-500 hover:opacity-90">
+                        <i class="fas fa-shopping-bag text-3xl"></i>
+                        <span class="text-2xl font-bold">SHOP CLONE</span>
+                    </a>
+                </div>
+                <div class="flex items-center gap-5 text-gray-600 min-w-fit">
+                    <a href="cart-backend.html" class="hover:text-orange-500 transition">
+                        <i class="fas fa-shopping-cart text-xl"></i>
+                    </a>
+                    <a href="profile.html" class="flex items-center gap-2 cursor-pointer hover:text-orange-500 transition">
+                        <img id="userAvatar" src="" alt="User" class="w-8 h-8 rounded-full border border-gray-200">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-2xl font-bold text-gray-800 flex items-center">
+                <i class="fas fa-box text-orange-500 mr-2"></i>
+                My Orders
+            </h1>
+            <a href="profile.html" class="text-orange-500 hover:text-orange-600 font-medium">
+                <i class="fas fa-arrow-left mr-1"></i> Back to Profile
+            </a>
+        </div>
+
+        <!-- Loading -->
+        <div id="loadingOrders" class="text-center py-16">
+            <i class="fas fa-spinner fa-spin text-4xl text-orange-500 mb-4"></i>
+            <p class="text-gray-600">Loading your orders...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyOrders" class="hidden text-center py-16 bg-white rounded-lg shadow">
+            <i class="fas fa-box-open text-6xl text-gray-300 mb-4"></i>
+            <p class="text-gray-600 text-lg mb-4">You haven't placed any orders yet.</p>
+            <a href="index.html" class="inline-block bg-orange-500 text-white px-8 py-2 rounded hover:bg-orange-600">
+                Start Shopping
+            </a>
+        </div>
+
+        <!-- Orders List - Full width cards -->
+        <div id="ordersList" class="hidden space-y-4 w-full"></div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t py-8 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-gray-500 text-sm">
+            &copy; 2026 SHOP CLONE. All Rights Reserved.
+        </div>
+    </footer>
+
+    <script src="js/services/api.js"></script>
+    <script>
+        function formatVND(amount) {
+            return new Intl.NumberFormat('vi-VN').format(Math.round(Number(amount || 0)));
+        }
+
+        function getStatusColor(status) {
+            const map = {
+                PENDING: 'bg-yellow-100 text-yellow-800',
+                PROCESSING: 'bg-blue-100 text-blue-800',
+                SHIPPING: 'bg-purple-100 text-purple-800',
+                SHIPPED: 'bg-indigo-100 text-indigo-800',
+                COMPLETED: 'bg-green-100 text-green-800',
+                CANCELLED: 'bg-red-100 text-red-800'
+            };
+            return map[status] || 'bg-gray-100 text-gray-800';
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('vi-VN', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        async function loadOrders() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = 'login.html?returnUrl=' + encodeURIComponent('my-orders-backend.html');
+                return;
+            }
+
+            try {
+                document.getElementById('loadingOrders').classList.remove('hidden');
+                document.getElementById('emptyOrders').classList.add('hidden');
+                document.getElementById('ordersList').classList.add('hidden');
+
+                const orders = await OrderAPI.getOrders();
+                console.log('Orders loaded:', orders);
+
+                document.getElementById('loadingOrders').classList.add('hidden');
+
+                if (!orders || orders.length === 0) {
+                    document.getElementById('emptyOrders').classList.remove('hidden');
+                    return;
+                }
+
+                const container = document.getElementById('ordersList');
+                container.classList.remove('hidden');
+                container.innerHTML = orders.map((order, index) => {
+                    const items = order.displayItems || order.items || [];
+                    const firstItem = items[0];
+                    const itemCount = items.length;
+                    const total = order.totalPrice ?? order.totalAmount ?? 0;
+                    const statusClass = getStatusColor(order.orderStatus);
+                    const orderLabel = 'Đơn hàng ' + (index + 1);
+                    const status = (order.orderStatus || '').toUpperCase();
+                    const canCancel = ['PENDING', 'CONFIRMED', 'PAID'].includes(status);
+                    const cancelBtn = canCancel ? `
+                        <button onclick="event.stopPropagation(); cancelOrderFromList('${order.id}')" 
+                            class="px-3 py-1.5 text-sm border border-red-600 text-red-600 rounded hover:bg-red-50 transition">
+                            <i class="fas fa-times mr-1"></i>Hủy đơn
+                        </button>` : '';
+
+                    return `
+                    <div class="w-full bg-white rounded-lg shadow hover:shadow-md transition p-6 border border-gray-100 cursor-pointer"
+                         onclick="goToOrderDetail('${order.id}')">
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-3 mb-2 flex-wrap">
+                                    <span class="text-sm font-medium text-gray-700">${orderLabel}</span>
+                                    <span class="px-2 py-0.5 rounded text-xs font-semibold ${statusClass}">${order.orderStatus || 'PENDING'}</span>
+                                    ${cancelBtn}
+                                </div>
+                                <p class="text-sm text-gray-500 mb-1">${formatDate(order.createdAt)}</p>
+                                <p class="text-gray-700 truncate">
+                                    ${firstItem ? (firstItem.productName || 'Product') : 'Order'} 
+                                    ${itemCount > 1 ? `+${itemCount - 1} sản phẩm khác` : ''}
+                                </p>
+                            </div>
+                            <div class="text-right shrink-0">
+                                <p class="font-bold text-orange-500 text-lg">₫${formatVND(total)}</p>
+                                <p class="text-sm text-orange-500 mt-1">Xem chi tiết <i class="fas fa-chevron-right text-xs"></i></p>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+
+                updateUserAvatar();
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                document.getElementById('loadingOrders').classList.add('hidden');
+                document.getElementById('emptyOrders').classList.remove('hidden');
+                document.getElementById('emptyOrders').querySelector('p').textContent = 
+                    'Failed to load orders. ' + (error.message || '');
+            }
+        }
+
+        function updateUserAvatar() {
+            const userName = localStorage.getItem('userName') || 'User';
+            const el = document.getElementById('userAvatar');
+            if (el) el.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=ffedd5&color=f97316`;
+        }
+
+        async function cancelOrderFromList(orderId) {
+            if (!confirm('Bạn có chắc muốn hủy đơn hàng này?')) return;
+            try {
+                await OrderAPI.cancelOrder(orderId);
+                alert('Đã hủy đơn hàng.');
+                loadOrders();
+            } catch (error) {
+                alert('❌ ' + (error.message || 'Không thể hủy đơn.'));
+            }
+        }
+
+        function goToOrderDetail(orderId) {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                if (confirm('Phiên đăng nhập hết hạn. Đăng nhập lại?')) {
+                    window.location.href = 'login.html?returnUrl=' + encodeURIComponent('order-detail.html?id=' + orderId);
+                }
+                return;
+            }
+            // Lưu orderId vào localStorage trước khi chuyển trang - tránh server "Clean URLs" làm mất ?id=xxx
+            localStorage.setItem('viewOrderId', orderId);
+            window.location.href = 'order-detail.html?id=' + orderId;
+        }
+
+        document.addEventListener('DOMContentLoaded', loadOrders);
+    </script>
+</body>
+
+</html>

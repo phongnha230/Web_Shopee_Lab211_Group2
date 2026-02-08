@@ -1,0 +1,60 @@
+--- createOrder ---
+UserId: 6982d0473cb71f7694e29620
+CartId: 6982d0503cb71f7694e29624
+ItemsSize: 0
+Cart Items is EMPTY list
+--- createOrder ---
+UserId: 6982d0473cb71f7694e29620
+CartId: 6982d0503cb71f7694e29624
+ItemsSize: 1
+First Item: CartItem(variantId=104, quantity=1, addedAt=2026-02-04T12:26:06.082)
+--- createOrder ---
+UserId: 6982d0473cb71f7694e29620
+CartId: 6982d0503cb71f7694e29624
+ItemsSize: 0
+Cart Items is EMPTY list
+--- createOrder ---
+UserId: 6982d0473cb71f7694e29620
+CartId: 6982d0503cb71f7694e29624
+ItemsSize: 1
+First Item: CartItem(variantId=104, quantity=1, addedAt=2026-02-04T12:29:19.917)
+--- createOrder ---
+UserId: 6982d0473cb71f7694e29620
+CartId: 6982d0503cb71f7694e29624
+ItemsSize: 1
+First Item: CartItem(variantId=104, quantity=1, addedAt=2026-02-04T12:37:53.873)
+--- createOrder ---
+UserId: 6982d0473cb71f7694e29620
+CartId: 6982d0503cb71f7694e29624
+ItemsSize: 0
+Cart Items is EMPTY list
+--- createOrder ---
+UserId: 6982d0473cb71f7694e29620
+CartId: 6982d0503cb71f7694e29624
+ItemsSize: 1
+First Item: CartItem(variantId=104, quantity=2, addedAt=2026-02-04T12:43:18.767)
+--- createOrder ---
+UserId: 6982d0473cb71f7694e29620
+CartId: 6982d0503cb71f7694e29624
+ItemsSize: 0
+Cart Items is EMPTY list
+--- createOrder ---
+UserId: 6982d0473cb71f7694e29620
+CartId: 6982d0503cb71f7694e29624
+ItemsSize: 1
+First Item: CartItem(variantId=5, quantity=1, addedAt=2026-02-04T12:48:11.399)
+--- createOrder ---
+UserId: 697e063e4fbc93a07cab8f86
+CartId: 6982bad9e0a019ce1e319d3e
+ItemsSize: 5
+First Item: CartItem(variantId=6982c7a16255fb51aea939df, quantity=2, addedAt=2026-02-04T11:21:00.525)
+--- createOrder ---
+UserId: 697e063e4fbc93a07cab8f86
+CartId: 6982bad9e0a019ce1e319d3e
+ItemsSize: 5
+First Item: CartItem(variantId=6982c7a16255fb51aea939df, quantity=2, addedAt=2026-02-04T11:21:00.525)
+--- createOrder ---
+UserId: 697e063e4fbc93a07cab8f86
+CartId: 6982bad9e0a019ce1e319d3e
+ItemsSize: 2
+First Item: CartItem(variantId=6982c7a16255fb51aea939df, quantity=2, addedAt=2026-02-04T11:21:00.525)

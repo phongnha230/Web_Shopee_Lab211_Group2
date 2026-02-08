@@ -9,10 +9,12 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <script>
-    // AUTH GUARD
+    // AUTH GUARD - preserve FULL URL (including mode=buynow) so user returns to correct checkout after login
     if (!localStorage.getItem('accessToken')) {
         alert('⚠️ You must login to checkout!');
-        window.location.href = 'login.html';
+        const returnUrl = window.location.href; // Full URL with all params
+        const basePath = window.location.pathname.replace(/[^/]+$/, '') || '/';
+        window.location.href = basePath + 'login.html?returnUrl=' + encodeURIComponent(returnUrl);
     }
 </script>
 
@@ -82,7 +84,7 @@
 
                 <!-- Products Ordered -->
                 <div class="bg-white rounded-lg shadow p-6">
-                    <h2 class="text-xl font-bold mb-4 flex items-center">
+                    <h2 id="productsOrderedTitle" class="text-xl font-bold mb-4 flex items-center">
                         <i class="fas fa-box text-orange-500 mr-2"></i>
                         Products Ordered
                     </h2>
@@ -98,22 +100,11 @@
                         Shipping Options
                     </h2>
                     <div class="space-y-3">
-                        <label class="flex items-center gap-3 p-3 border rounded hover:bg-orange-50 cursor-pointer">
-                            <input type="radio" name="shipping" value="standard" checked class="text-orange-500">
-                            <div class="flex-1">
-                                <div class="font-semibold">Standard Shipping</div>
-                                <div class="text-sm text-gray-500">Delivery in 3-5 business days</div>
-                            </div>
-                            <div class="font-bold text-orange-500">₫15</div>
-                        </label>
-                        <label class="flex items-center gap-3 p-3 border rounded hover:bg-orange-50 cursor-pointer">
-                            <input type="radio" name="shipping" value="express" class="text-orange-500">
-                            <div class="flex-1">
-                                <div class="font-semibold">Express Shipping</div>
-                                <div class="text-sm text-gray-500">Delivery in 1-2 business days</div>
-                            </div>
-                            <div class="font-bold text-orange-500">₫30</div>
-                        </label>
+                    <div id="shippingOptionsContainer" class="space-y-3">
+                        <div class="text-center py-4">
+                            <i class="fas fa-spinner fa-spin text-orange-500"></i> Loading shipping options...
+                        </div>
+                    </div>
                     </div>
                 </div>
 
@@ -202,6 +193,22 @@
                                 <div class="text-sm text-gray-500">Visa, Mastercard, etc.</div>
                             </div>
                         </label>
+                        <label class="flex items-center gap-3 p-3 border rounded hover:bg-orange-50 cursor-pointer">
+                            <input type="radio" name="payment" value="MOMO" class="text-orange-500">
+                            <i class="fas fa-wallet text-pink-500 text-xl"></i>
+                            <div class="flex-1">
+                                <div class="font-semibold">MoMo</div>
+                                <div class="text-sm text-gray-500">Ví điện tử MoMo</div>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border rounded hover:bg-orange-50 cursor-pointer">
+                            <input type="radio" name="payment" value="VNPAY" class="text-orange-500">
+                            <i class="fas fa-qrcode text-blue-600 text-xl"></i>
+                            <div class="flex-1">
+                                <div class="font-semibold">VNPAY</div>
+                                <div class="text-sm text-gray-500">Ví VNPAY, thẻ nội địa</div>
+                            </div>
+                        </label>
                     </div>
                 </div>
             </div>
@@ -218,7 +225,7 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Shipping Fee</span>
-                            <span id="shippingFee" class="font-medium">₫15</span>
+                            <span id="shippingFee" class="font-medium">₫15.000</span>
                         </div>
                     </div>
 
@@ -227,7 +234,7 @@
                         <span id="total" class="text-2xl font-bold text-orange-500">₫0</span>
                     </div>
 
-                    <button onclick="placeOrder()" id="placeOrderBtn"
+                    <button type="button" onclick="placeOrder()" id="placeOrderBtn"
                         class="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded font-bold uppercase shadow-lg transition">
                         Place Order
                     </button>
@@ -244,29 +251,153 @@
     <script src="js/services/api.js"></script>
 
     <script>
-        let backendCart = null;
-        let shippingFee = 15;
+        // Helper function to format VND currency
+        function formatVND(amount) {
+            return new Intl.NumberFormat('vi-VN').format(Math.round(amount));
+        }
 
-        // Load cart from backend
+        let backendCart = null;
+        let shippingFee = 15000;
+        let isBuyNowMode = false;
+
+        // Load cart from backend OR construct single-item cart for Buy Now
         async function loadCart() {
             try {
                 document.getElementById('loadingCheckout').classList.remove('hidden');
                 document.getElementById('emptyCart').classList.add('hidden');
                 document.getElementById('checkoutContent').classList.add('hidden');
 
-                backendCart = await CartAPI.getCart();
-                console.log('Cart loaded:', backendCart);
+                const urlParams = new URLSearchParams(window.location.search);
+                let mode = urlParams.get('mode');
+                
+                // Nếu URL không có mode=buynow nhưng vừa bấm Buy Now (sessionStorage) -> redirect đúng URL
+                const buyNowPending = (() => {
+                    try {
+                        const s = sessionStorage.getItem('buyNowPending');
+                        if (!s) return null;
+                        const d = JSON.parse(s);
+                        if (Date.now() - (d.ts || 0) > 120000) return null; // 2 phút
+                        return d;
+                    } catch (e) { return null; }
+                })();
+                
+                // Backup: URL mất params nhưng vừa bấm Buy Now -> redirect đúng
+                if (!mode && buyNowPending) {
+                    sessionStorage.removeItem('buyNowPending');
+                    const p = new URLSearchParams({
+                        mode: 'buynow', productId: buyNowPending.productId, variantId: buyNowPending.variantId,
+                        quantity: buyNowPending.quantity || 1, color: buyNowPending.color || '', size: buyNowPending.size || ''
+                    });
+                    window.location.replace(window.location.pathname + '?' + p.toString());
+                    return;
+                }
+                if (mode === 'buynow') sessionStorage.removeItem('buyNowPending');
+                
+                if (mode === 'buynow') {
+                    isBuyNowMode = true;
+                    console.log('Buy Now mode detected');
+                    
+                    // Get parameters - productId for API fetch, variantId for the selected variant
+                    const productId = urlParams.get('productId') || urlParams.get('variantId');
+                    const variantId = urlParams.get('variantId');
+                    const quantity = parseInt(urlParams.get('quantity')) || 1;
+                    const color = urlParams.get('color') || '';
+                    const size = urlParams.get('size') || '';
+                    
+                    if (!productId || !variantId) {
+                        throw new Error('Missing product information. Please try again from the product page.');
+                    }
+                    
+                    // Fetch product by productId (API expects product ID, not variant ID)
+                    const API_BASE_URL = 'http://localhost:8080/api';
+                    let product = null;
+                    
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/products/${productId}`);
+                        if (!response.ok) {
+                            throw new Error('Product not found');
+                        }
+                        product = await response.json();
+                    } catch (apiError) {
+                        console.error('API Error:', apiError);
+                        throw new Error('Unable to load product details. Please check your connection and try again.');
+                    }
+                    
+                    if (!product) {
+                        throw new Error('Product not found. Please return to the product page and try again.');
+                    }
+                    
+                    console.log('Product loaded for Buy Now:', product);
+                    
+                    // Find the SELECTED variant by variantId (not first variant!)
+                    const selectedVariant = product.variants?.find(v => v.id === variantId);
+                    let price = Number(selectedVariant?.price ?? product.variants?.[0]?.price ?? product.price ?? 0);
+                    let productName = product.name || 'Unknown Product';
+                    let productImage = selectedVariant?.imageUrl || product.images?.[0] || product.image || 'https://via.placeholder.com/80';
+                    let variantName = '';
+                    if (selectedVariant) {
+                        variantName = [selectedVariant.color, selectedVariant.size].filter(v => v).join(' - ');
+                    } else if (color || size) {
+                        variantName = [color, size].filter(v => v).join(' - ');
+                    }
+                    
+                    backendCart = {
+                        items: [{
+                            variantId: variantId,
+                            productName: productName,
+                            productImage: productImage,
+                            variantName: variantName,
+                            price: price,
+                            quantity: quantity
+                        }]
+                    };
+                    
+                    console.log('Buy Now cart constructed:', backendCart, '(sản phẩm:', productName, 'x', quantity, '= ₫' + (price * quantity) + ')');
+                } else {
+                    // Normal cart mode - only when coming from cart page (no mode param)
+                    isBuyNowMode = false;
+                    backendCart = await CartAPI.getCart();
+                    console.log('Cart loaded (from giỏ hàng):', backendCart);
+                }
 
                 if (!backendCart || !backendCart.items || backendCart.items.length === 0) {
+                    if (isBuyNowMode) {
+                        throw new Error('Failed to prepare product for purchase. Please try again.');
+                    }
                     showEmptyCart();
                     return;
                 }
 
+                const titleEl = document.getElementById('productsOrderedTitle');
+                if (titleEl) titleEl.innerHTML = isBuyNowMode 
+                    ? '<i class="fas fa-bolt text-orange-500 mr-2"></i> Mua ngay - Sản phẩm bạn chọn'
+                    : '<i class="fas fa-box text-orange-500 mr-2"></i> Products Ordered';
                 renderCheckout();
             } catch (error) {
-                console.error('Error loading cart:', error);
-                alert('Failed to load cart: ' + error.message);
-                showEmptyCart();
+                console.error('Error loading checkout:', error);
+                
+                // Show more specific error for Buy Now mode
+                if (isBuyNowMode) {
+                    document.getElementById('loadingCheckout').classList.add('hidden');
+                    document.getElementById('emptyCart').classList.remove('hidden');
+                    // Update empty cart message for Buy Now
+                    const emptyCartDiv = document.getElementById('emptyCart');
+                    emptyCartDiv.innerHTML = `
+                        <img src="https://deo.shopeemobile.com/shopee/shopee-pcmall-live-sg/cart/9bdd8040b334d31946f4.png" 
+                             alt="Error" class="w-32 mx-auto mb-4">
+                        <p class="text-red-500 text-lg font-semibold mb-2">⚠️ Buy Now Failed</p>
+                        <p class="text-gray-600 mb-6">${error.message}</p>
+                        <a href="index.html" class="bg-orange-500 text-white px-10 py-2.5 rounded hover:bg-orange-600 mr-2">
+                            Go Shopping
+                        </a>
+                        <button onclick="window.history.back()" class="bg-gray-500 text-white px-10 py-2.5 rounded hover:bg-gray-600">
+                            Go Back
+                        </button>
+                    `;
+                } else {
+                    alert('Failed to load checkout: ' + error.message);
+                    showEmptyCart();
+                }
             } finally {
                 document.getElementById('loadingCheckout').classList.add('hidden');
             }
@@ -292,8 +423,8 @@
                         <p class="text-sm text-gray-500">Quantity: ${item.quantity}</p>
                     </div>
                     <div class="text-right">
-                        <div class="font-bold text-orange-500">₫${(item.price * item.quantity).toFixed(2)}</div>
-                        <div class="text-xs text-gray-400">₫${item.price} each</div>
+                        <div class="font-bold text-orange-500">₫${formatVND(item.price * item.quantity)}</div>
+                        <div class="text-xs text-gray-400">₫${formatVND(item.price)} each</div>
                     </div>
                 </div>
             `).join('');
@@ -313,13 +444,13 @@
             const total = Math.max(0, subtotal + effectiveShipping - discountAmount);
 
             document.getElementById('itemCount').textContent = itemCount;
-            document.getElementById('subtotal').textContent = `₫${subtotal.toFixed(2)}`;
-            document.getElementById('shippingFee').textContent = `₫${shippingFee.toFixed(2)}`;
+            document.getElementById('subtotal').textContent = `₫${formatVND(subtotal)}`;
+            document.getElementById('shippingFee').textContent = `₫${formatVND(shippingFee)}`;
             
             // Update Discount Rows in DOM
             updateDiscountRows();
 
-            document.getElementById('total').textContent = `₫${total.toFixed(2)}`;
+            document.getElementById('total').textContent = `₫${formatVND(total)}`;
         }
 
         function updateDiscountRows() {
@@ -333,7 +464,7 @@
              if (discountAmount > 0) {
                  const row = document.createElement('div');
                  row.className = 'flex justify-between text-orange-600 mb-2 discount-row';
-                 row.innerHTML = `<span class="flex items-center"><i class="fas fa-ticket-alt mr-2"></i>Shop Voucher</span><span class="font-medium">-₫${discountAmount.toFixed(2)}</span>`;
+                 row.innerHTML = `<span class="flex items-center"><i class="fas fa-ticket-alt mr-2"></i>Shop Voucher</span><span class="font-medium">-₫${formatVND(discountAmount)}</span>`;
                  summaryContainer.insertBefore(row, totalRow);
              }
 
@@ -341,7 +472,7 @@
              if (shippingDiscountAmount > 0) {
                  const row = document.createElement('div');
                  row.className = 'flex justify-between text-green-600 mb-2 discount-row';
-                 row.innerHTML = `<span class="flex items-center"><i class="fas fa-shipping-fast mr-2"></i>Shipping Discount</span><span class="font-medium">-₫${shippingDiscountAmount.toFixed(2)}</span>`;
+                 row.innerHTML = `<span class="flex items-center"><i class="fas fa-shipping-fast mr-2"></i>Shipping Discount</span><span class="font-medium">-₫${formatVND(shippingDiscountAmount)}</span>`;
                  summaryContainer.insertBefore(row, totalRow);
              }
         }
@@ -403,9 +534,14 @@
                 const order = await OrderAPI.createOrder(orderData);
                 console.log('Order created:', order);
 
+                const orderId = order.id || order._id;
+                if (!orderId) {
+                    throw new Error('Order created but no order ID returned. Please check your orders.');
+                }
+
                 // Process payment if not COD
                 if (paymentMethod !== 'COD') {
-                    const payment = await PaymentAPI.createPayment(order.id, paymentMethod);
+                    const payment = await PaymentAPI.createPayment(orderId, paymentMethod);
                     console.log('Payment created:', payment);
                     
                     // If payment gateway redirect needed
@@ -415,12 +551,15 @@
                     }
                 }
 
-                // Clear cart after successful order
-                await CartAPI.clearCart();
-                console.log('Cart cleared');
+                // Clear cart after successful order (only if not Buy Now mode)
+                if (!isBuyNowMode) {
+                    await CartAPI.clearCart();
+                    console.log('Cart cleared');
+                }
 
-                // Redirect to success page
-                window.location.href = `order-success-backend.html?orderId=${order.id}`;
+                // Redirect to success page (store in sessionStorage as fallback if URL params get lost)
+                sessionStorage.setItem('lastOrderId', orderId);
+                window.location.href = `order-success-backend.html?orderId=${orderId}`;
 
             } catch (error) {
                 console.error('Order placement failed:', error);
@@ -512,12 +651,12 @@
                     discountAmount = calculatedDiscount;
                     appliedProductVoucherCode = code;
                     messageEl.className = "h-5 mt-1 text-xs text-green-600 font-bold";
-                    messageEl.textContent = `✅ -₫${calculatedDiscount.toFixed(2)}`;
+                    messageEl.textContent = `✅ -₫${formatVND(calculatedDiscount)}`;
                 } else {
                     shippingDiscountAmount = calculatedDiscount;
                     appliedShippingVoucherCode = code;
                     messageEl.className = "h-5 mt-1 text-xs text-green-600 font-bold";
-                    messageEl.textContent = `✅ -₫${calculatedDiscount.toFixed(2)}`;
+                    messageEl.textContent = `✅ -₫${formatVND(calculatedDiscount)}`;
                 }
                 
                 codeInput.disabled = true; // Lock
@@ -544,10 +683,56 @@
             }
         }
 
+        // Load Shipping Providers
+        async function loadShippingProviders() {
+            try {
+                const providers = await ShippingAPI.getProviders();
+                const container = document.getElementById('shippingOptionsContainer');
+                
+                if (!providers || providers.length === 0) {
+                    container.innerHTML = '<p class="text-red-500">No shipping providers available.</p>';
+                    return;
+                }
+
+                // Default checked: first one or standard
+                let defaultChecked = providers.find(p => p.id === 'standard') || providers[0];
+                
+                container.innerHTML = providers.map(p => {
+                    // Logic to mimic price for UI matching Backend (Standard=15k, Express=30k)
+                    const price = p.id === 'express' ? 30000 : 15000; 
+                    const time = p.id === 'express' ? '1-2 business days' : '3-5 business days';
+                    const checked = p.id === defaultChecked.id ? 'checked' : '';
+                    
+                    if (checked) {
+                         shippingFee = price; // Set initial fee
+                    }
+
+                    return `
+                        <label class="flex items-center gap-3 p-3 border rounded hover:bg-orange-50 cursor-pointer">
+                            <input type="radio" name="shipping" value="${p.id}" ${checked} class="text-orange-500" data-price="${price}">
+                            <div class="flex-1">
+                                <div class="font-semibold">${p.name}</div>
+                                <div class="text-sm text-gray-500">Delivery in ${time}</div>
+                            </div>
+                            <div class="font-bold text-orange-500">₫${formatVND(price)}</div>
+                        </label>
+                    `;
+                }).join('');
+
+                updateSummary();
+
+            } catch (error) {
+                console.error("Failed to load shipping providers:", error);
+                document.getElementById('shippingOptionsContainer').innerHTML = 
+                    '<p class="text-red-500">Failed to load shipping options.</p>';
+            }
+        }
+
         // Update shipping fee when option changes
         document.addEventListener('change', (e) => {
             if (e.target.name === 'shipping') {
-                shippingFee = e.target.value === 'express' ? 30 : 15;
+                const price = parseFloat(e.target.getAttribute('data-price') || 0);
+                shippingFee = price;
                 updateSummary();
             }
         });
@@ -556,6 +741,7 @@
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('Page loaded, initializing...');
             await loadCart();
+            await loadShippingProviders();
             
             // Check for voucher in LocalStorage (set by vouchers.html)
             const storedVoucher = localStorage.getItem('autoApplyVoucher');
@@ -598,9 +784,14 @@
                     }
                 }
                 
-                // Clean up URL if matched via URL
+                // Clean up URL - remove only voucher params, preserve mode=buynow & productId for refresh
                 if (!storedVoucher) {
-                     window.history.replaceState({}, document.title, window.location.pathname);
+                    const urlParams = new URLSearchParams(window.location.search);
+                    urlParams.delete('voucherCode');
+                    urlParams.delete('voucherType');
+                    const newSearch = urlParams.toString();
+                    const newUrl = (window.location.pathname || 'checkout-backend.html') + (newSearch ? '?' + newSearch : '');
+                    window.history.replaceState({}, document.title, newUrl);
                 }
             }
         });

@@ -1,4 +1,5 @@
-const API_BASE_URL = 'http://localhost:8080/api';
+// Use existing API_BASE_URL from page scope to avoid duplicate declaration
+const NOTIFICATION_API = (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : 'http://localhost:8080/api');
 
 document.addEventListener('DOMContentLoaded', () => {
     loadNotifications();
@@ -38,7 +39,7 @@ async function loadNotifications() {
     if (!accessToken) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/notifications`, {
+        const response = await fetch(`${NOTIFICATION_API}/notifications`, {
             headers: {
                 'Authorization': `Bearer ${accessToken}`
             }
@@ -111,7 +112,7 @@ async function markAsRead(id, element) {
     if (!accessToken) return;
 
     try {
-        await fetch(`${API_BASE_URL}/notifications/${id}/read`, {
+        await fetch(`${NOTIFICATION_API}/notifications/${id}/read`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${accessToken}`
@@ -145,7 +146,7 @@ async function markAllAsRead() {
     if (!accessToken) return;
 
     try {
-        await fetch(`${API_BASE_URL}/notifications/read-all`, {
+        await fetch(`${NOTIFICATION_API}/notifications/read-all`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${accessToken}`

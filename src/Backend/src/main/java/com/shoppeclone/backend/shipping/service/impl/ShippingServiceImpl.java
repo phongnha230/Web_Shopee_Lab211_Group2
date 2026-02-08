@@ -28,7 +28,14 @@ public class ShippingServiceImpl implements ShippingService {
             return BigDecimal.ZERO;
         }
 
-        // Standard fee 30k
+        // Standard fee logic based on provider
+        if ("standard".equals(providerId)) {
+            return new BigDecimal("15000");
+        } else if ("express".equals(providerId)) {
+            return new BigDecimal("30000");
+        }
+
+        // Default fallback
         return new BigDecimal("30000");
     }
 }

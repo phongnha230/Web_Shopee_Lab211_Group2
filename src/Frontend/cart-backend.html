@@ -302,13 +302,15 @@
 
             const itemCount = selectedItems.reduce((sum, item) => sum + item.quantity, 0);
             const subtotal = selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const shipping = itemCount > 0 ? 15 : 0;
+            // Standard shipping fee in VND (15.000đ - typical Vietnam domestic shipping)
+            const shipping = itemCount > 0 ? 15000 : 0;
             const total = subtotal + shipping;
 
+            const formatVND = (n) => new Intl.NumberFormat('vi-VN').format(n);
             document.getElementById('summaryItemCount').textContent = itemCount;
-            document.getElementById('subtotal').textContent = `₫${subtotal.toFixed(2)}`;
-            document.getElementById('shippingFee').textContent = `₫${shipping}`;
-            document.getElementById('total').textContent = `₫${total.toFixed(2)}`;
+            document.getElementById('subtotal').textContent = `₫${formatVND(subtotal)}`;
+            document.getElementById('shippingFee').textContent = `₫${formatVND(shipping)}`;
+            document.getElementById('total').textContent = `₫${formatVND(total)}`;
 
             // Update checkout button state
             const checkoutBtn = document.querySelector('button[onclick="goCheckout()"]');
@@ -334,8 +336,8 @@
                 alert('Please select at least one item to checkout!');
                 return;
             }
-            // For now, just go to checkout - later we'll integrate with backend order creation
-            window.location.href = 'checkout-backend.html';
+            // Go to checkout with mode=cart so it loads giỏ hàng (not Buy Now product)
+            window.location.href = 'checkout-backend.html?mode=cart';
         }
 
         function showToast(message) {

@@ -10,7 +10,7 @@ import com.shoppeclone.backend.order.service.OrderResponseService;
 import com.shoppeclone.backend.order.service.OrderService;
 import com.shoppeclone.backend.shop.entity.Shop;
 import com.shoppeclone.backend.shop.service.ShopService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,13 +20,21 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
-@RequiredArgsConstructor
 public class OrderController {
 
     private final OrderService orderService;
     private final UserRepository userRepository;
     private final OrderResponseService orderResponseService;
     private final ShopService shopService;
+
+    @Autowired
+    public OrderController(OrderService orderService, UserRepository userRepository,
+                           OrderResponseService orderResponseService, ShopService shopService) {
+        this.orderService = orderService;
+        this.userRepository = userRepository;
+        this.orderResponseService = orderResponseService;
+        this.shopService = shopService;
+    }
 
     private String getUserId(UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername())
@@ -35,13 +43,38 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<OrderResponse> createOrder(
+    public ResponseEntity<Object> createOrder(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody OrderRequest request) {
-        String userId = getUserId(userDetails);
-        Order order = orderService.createOrder(userId, request);
-        OrderResponse response = orderResponseService.enrichWithReviewInfo(order, userId);
-        return ResponseEntity.ok(response);
+        try {
+            System.out.println("DEBUG: OrderController.createOrder called");
+            String userId = getUserId(userDetails);
+            System.out.println("DEBUG: UserId resolved: " + userId);
+
+            Order order = orderService.createOrder(userId, request);
+            System.out.println("DEBUG: Order created: " + order.getId());
+
+            OrderResponse response = orderResponseService.enrichWithReviewInfo(order, userId);
+            System.out.println("DEBUG: Response enriched.");
+
+            // Validate Serialization
+            try {
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                mapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+                String json = mapper.writeValueAsString(response);
+                System.out.println("DEBUG: Serialized JSON successfully: " + json);
+            } catch (Exception ex) {
+                System.err.println("DEBUG: SERIALIZATION FAILURE: " + ex.getMessage());
+                ex.printStackTrace();
+                throw new RuntimeException("Serialization Failed", ex);
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.println("ERROR in createOrder: " + e.getMessage());
+            e.printStackTrace();
+            throw e; // Let GlobalExceptionHandler handle it, but now it's logged
+        }
     }
 
     @GetMapping

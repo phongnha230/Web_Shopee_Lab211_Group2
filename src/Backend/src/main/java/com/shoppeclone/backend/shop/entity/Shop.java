@@ -44,4 +44,8 @@ public class Shop {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    public String getId() {
+        return id;
+    }
 }

@@ -46,6 +46,7 @@ public class SecurityConfig {
                                 "/api/categories/**",
                                 "/api/shop/**",
                                 "/api/reviews/**",
+                                "/api/shipping-providers/**",
                                 "/api/debug/**")
                         .permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // ✅ Allow CORS

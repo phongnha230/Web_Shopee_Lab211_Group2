@@ -42,12 +42,18 @@
 
     <!-- Error State -->
     <div id="errorState" class="hidden flex-grow flex items-center justify-center">
-        <div class="text-center">
+        <div class="text-center max-w-md">
             <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
-            <p class="text-gray-600 mb-4">Failed to load order</p>
-            <a href="index.html" class="bg-orange-500 text-white px-6 py-2 rounded hover:bg-orange-600">
-                Back to Home
-            </a>
+            <p class="text-gray-600 mb-2 font-semibold">Failed to load order</p>
+            <p id="errorDetail" class="text-sm text-gray-500 mb-4"></p>
+            <div class="flex gap-3 justify-center flex-wrap">
+                <a href="checkout-backend.html" class="bg-orange-500 text-white px-6 py-2 rounded hover:bg-orange-600">
+                    Back to Checkout
+                </a>
+                <a href="index.html" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">
+                    Back to Home
+                </a>
+            </div>
         </div>
     </div>
 
@@ -125,12 +131,13 @@
                 document.getElementById('errorState').classList.add('hidden');
                 document.getElementById('successContent').classList.add('hidden');
 
-                // Get order ID from URL parameter
+                // Get order ID from URL parameter, or fallback to sessionStorage (in case redirect lost params)
                 const params = new URLSearchParams(window.location.search);
-                currentOrderId = params.get('orderId');
+                currentOrderId = params.get('orderId') || sessionStorage.getItem('lastOrderId');
+                if (currentOrderId) sessionStorage.removeItem('lastOrderId');
 
-                if (!currentOrderId) {
-                    throw new Error('No order ID provided');
+                if (!currentOrderId || currentOrderId === 'undefined') {
+                    throw new Error('No order ID in URL. Please place order from checkout.');
                 }
 
                 // Load order from backend
@@ -140,7 +147,7 @@
                 renderOrderSuccess(order);
             } catch (error) {
                 console.error('Error loading order:', error);
-                showError();
+                showError(error.message);
             } finally {
                 document.getElementById('loadingOrder').classList.add('hidden');
             }
@@ -149,41 +156,50 @@
         function renderOrderSuccess(order) {
             document.getElementById('successContent').classList.remove('hidden');
 
-            // Display order info
+            // Display order info (backend uses totalPrice, not totalAmount)
+            const total = order.totalPrice ?? order.totalAmount ?? 0;
             document.getElementById('orderId').textContent = order.id;
-            document.getElementById('orderTotal').textContent = `₫${order.totalAmount.toFixed(2)}`;
+            document.getElementById('orderTotal').textContent = `₫${Number(total).toLocaleString('vi-VN')}`;
             document.getElementById('paymentMethod').textContent = order.paymentMethod || 'COD';
-            document.getElementById('orderStatus').textContent = order.orderStatus;
+            document.getElementById('orderStatus').textContent = order.orderStatus || 'PENDING';
 
-            // Render order items
+            // Use displayItems (enriched) or fallback to items
+            const items = order.displayItems || order.items || [];
             const itemsContainer = document.getElementById('orderItems');
-            itemsContainer.innerHTML = order.items.map(item => `
+            itemsContainer.innerHTML = items.map(item => {
+                const price = Number(item.price || 0);
+                const qty = Number(item.quantity || 1);
+                return `
                 <div class="flex gap-3 items-start">
                     <img src="${item.productImage || 'https://via.placeholder.com/60'}" 
-                         alt="${item.productName}"
+                         alt="${item.productName || 'Product'}"
                          class="w-16 h-16 object-cover rounded border">
                     <div class="flex-1">
-                        <div class="font-medium text-sm">${item.productName}</div>
+                        <div class="font-medium text-sm">${item.productName || 'Product'}</div>
                         ${item.variantName ? `<div class="text-xs text-gray-500">Variant: ${item.variantName}</div>` : ''}
-                        <div class="text-xs text-gray-500">Qty: ${item.quantity}</div>
+                        <div class="text-xs text-gray-500">Qty: ${qty}</div>
                     </div>
                     <div class="text-orange-500 font-bold text-sm">
-                        ₫${(item.price * item.quantity).toFixed(2)}
+                        ₫${(price * qty).toLocaleString('vi-VN')}
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
 
             // Update user avatar
             updateUserAvatar();
         }
 
-        function showError() {
+        function showError(msg) {
+            const el = document.getElementById('errorDetail');
+            if (el) el.textContent = msg || '';
             document.getElementById('errorState').classList.remove('hidden');
         }
 
         function viewOrderDetails() {
             if (currentOrderId) {
-                window.location.href = `order-details.html?id=${currentOrderId}`;
+                window.location.href = `order-detail.html?id=${currentOrderId}`;
+            } else {
+                window.location.href = 'my-orders-backend.html';
             }
         }
 

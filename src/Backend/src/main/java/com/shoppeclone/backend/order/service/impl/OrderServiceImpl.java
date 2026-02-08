@@ -4,7 +4,9 @@ import com.shoppeclone.backend.cart.entity.Cart;
 import com.shoppeclone.backend.cart.entity.CartItem;
 import com.shoppeclone.backend.cart.repository.CartRepository;
 import com.shoppeclone.backend.cart.service.CartService;
+import com.shoppeclone.backend.order.dto.OrderItemRequest;
 import com.shoppeclone.backend.order.dto.OrderRequest;
+import com.shoppeclone.backend.order.dto.ShippingAddressRequest;
 import com.shoppeclone.backend.order.entity.*;
 import com.shoppeclone.backend.promotion.entity.Voucher;
 import com.shoppeclone.backend.order.repository.OrderRepository;
@@ -26,7 +28,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,14 +48,23 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public Order createOrder(String userId, OrderRequest request) {
-        // 1. Get Cart
+        // Resolve address: prefer shippingAddress (from frontend) over address
+        com.shoppeclone.backend.user.model.Address resolvedAddress = resolveAddress(request);
+
+        // 1. Buy Now mode: use request.items directly
+        if (request.getItems() != null && !request.getItems().isEmpty()) {
+            return createOrderFromItems(userId, request, resolvedAddress);
+        }
+
+        // 2. Cart mode: get items from cart
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
+
         if (cart.getItems().isEmpty()) {
             throw new RuntimeException("Cart is empty");
         }
 
-        // 2. Filter items to checkout
+        // 3. Filter items to checkout
         List<CartItem> checkoutItems;
         if (request.getVariantIds() != null && !request.getVariantIds().isEmpty()) {
             checkoutItems = cart.getItems().stream()
@@ -64,14 +74,27 @@ public class OrderServiceImpl implements OrderService {
             checkoutItems = new ArrayList<>(cart.getItems());
         }
 
-        if (checkoutItems.isEmpty()) {
-            throw new RuntimeException("No items selected for checkout");
+        // 4. Remove stale items (variants that no longer exist) and clean cart
+        List<String> invalidVariantIds = checkoutItems.stream()
+                .filter(item -> !productVariantRepository.existsById(item.getVariantId()))
+                .map(CartItem::getVariantId)
+                .collect(Collectors.toList());
+        checkoutItems = checkoutItems.stream()
+                .filter(item -> productVariantRepository.existsById(item.getVariantId()))
+                .collect(Collectors.toList());
+
+        for (String invalidId : invalidVariantIds) {
+            cartService.removeCartItem(userId, invalidId);
         }
 
-        // 3. Create Order Items and Deduct Stock
+        if (checkoutItems.isEmpty()) {
+            throw new RuntimeException("No valid items to checkout. Your cart may contain removed products. Please refresh your cart.");
+        }
+
+        // 5. Create Order Items and Deduct Stock
         List<OrderItem> orderItems = new ArrayList<>();
         BigDecimal totalPrice = BigDecimal.ZERO;
-        String shopId = null; // Will be set from first variant
+        String shopId = null;
 
         for (CartItem cartItem : checkoutItems) {
             ProductVariant variant = productVariantRepository.findById(cartItem.getVariantId())
@@ -81,7 +104,6 @@ public class OrderServiceImpl implements OrderService {
                 throw new RuntimeException("Not enough stock for variant: " + variant.getId());
             }
 
-            // Get shopId from product (all items should be from same shop)
             if (shopId == null) {
                 com.shoppeclone.backend.product.entity.Product product = productRepository
                         .findById(variant.getProductId())
@@ -89,11 +111,9 @@ public class OrderServiceImpl implements OrderService {
                 shopId = product.getShopId();
             }
 
-            // Deduct stock
             variant.setStock(variant.getStock() - cartItem.getQuantity());
             productVariantRepository.save(variant);
 
-            // Create Order Item
             OrderItem orderItem = new OrderItem();
             orderItem.setVariantId(variant.getId());
             orderItem.setPrice(variant.getPrice());
@@ -102,6 +122,68 @@ public class OrderServiceImpl implements OrderService {
 
             totalPrice = totalPrice.add(variant.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
         }
+
+        return finishOrder(userId, request, orderItems, totalPrice, shopId, resolvedAddress, checkoutItems, cart);
+    }
+
+    /** Create order from direct items (Buy Now mode) - no cart involved */
+    private Order createOrderFromItems(String userId, OrderRequest request,
+            com.shoppeclone.backend.user.model.Address resolvedAddress) {
+        List<OrderItem> orderItems = new ArrayList<>();
+        BigDecimal totalPrice = BigDecimal.ZERO;
+        String shopId = null;
+
+        for (OrderItemRequest itemReq : request.getItems()) {
+            ProductVariant variant = productVariantRepository.findById(itemReq.getVariantId())
+                    .orElseThrow(() -> new RuntimeException("Variant not found: " + itemReq.getVariantId()));
+
+            if (variant.getStock() < itemReq.getQuantity()) {
+                throw new RuntimeException("Not enough stock for variant: " + variant.getId());
+            }
+
+            if (shopId == null) {
+                com.shoppeclone.backend.product.entity.Product product = productRepository
+                        .findById(variant.getProductId())
+                        .orElseThrow(() -> new RuntimeException("Product not found"));
+                shopId = product.getShopId();
+            }
+
+            variant.setStock(variant.getStock() - itemReq.getQuantity());
+            productVariantRepository.save(variant);
+
+            OrderItem orderItem = new OrderItem();
+            orderItem.setVariantId(variant.getId());
+            orderItem.setPrice(variant.getPrice());
+            orderItem.setQuantity(itemReq.getQuantity());
+            orderItems.add(orderItem);
+
+            totalPrice = totalPrice.add(variant.getPrice().multiply(BigDecimal.valueOf(itemReq.getQuantity())));
+        }
+
+        return finishOrder(userId, request, orderItems, totalPrice, shopId, resolvedAddress, null, null);
+    }
+
+    private com.shoppeclone.backend.user.model.Address resolveAddress(OrderRequest request) {
+        if (request.getAddress() != null) {
+            return request.getAddress();
+        }
+        ShippingAddressRequest sa = request.getShippingAddress();
+        if (sa == null) {
+            throw new RuntimeException("Shipping address is required");
+        }
+        com.shoppeclone.backend.user.model.Address addr = new com.shoppeclone.backend.user.model.Address();
+        addr.setFullName(sa.getFullName());
+        addr.setPhone(sa.getPhone());
+        addr.setAddress(sa.getStreet());
+        addr.setCity(sa.getCity());
+        addr.setDistrict(sa.getState());
+        addr.setWard(sa.getPostalCode());
+        return addr;
+    }
+
+    private Order finishOrder(String userId, OrderRequest request, List<OrderItem> orderItems, BigDecimal totalPrice,
+            String shopId, com.shoppeclone.backend.user.model.Address resolvedAddress,
+            List<CartItem> checkoutItems, Cart cart) {
 
         // 4. Calculate Discount (Product Voucher)
         BigDecimal productDiscount = BigDecimal.ZERO;
@@ -119,7 +201,7 @@ public class OrderServiceImpl implements OrderService {
         if (request.getShippingProviderId() != null) {
             provider = shippingProviderRepository.findById(request.getShippingProviderId())
                     .orElseThrow(() -> new RuntimeException("Shipping Provider not found"));
-            shippingFee = shippingService.calculateShippingFee(provider.getId(), request.getAddress(), totalPrice);
+            shippingFee = shippingService.calculateShippingFee(provider.getId(), resolvedAddress, totalPrice);
         }
 
         // 6. Calculate Shipping Discount (Shipping Voucher)
@@ -163,7 +245,7 @@ public class OrderServiceImpl implements OrderService {
         if (provider != null) {
             OrderShipping shipping = new OrderShipping();
             shipping.setProviderId(provider.getId());
-            shipping.setAddress(request.getAddress());
+            shipping.setAddress(resolvedAddress);
             shipping.setStatus("WAITING");
             shipping.setShippingFee(shippingFee);
             order.setShipping(shipping);
@@ -172,9 +254,11 @@ public class OrderServiceImpl implements OrderService {
         // 9. Save Order
         Order savedOrder = orderRepository.save(order);
 
-        // 10. Remove ordered items from Cart
-        for (CartItem item : checkoutItems) {
-            cartService.removeCartItem(userId, item.getVariantId());
+        // 10. Remove ordered items from Cart (only when order came from cart)
+        if (checkoutItems != null && cart != null) {
+            for (CartItem item : checkoutItems) {
+                cartService.removeCartItem(userId, item.getVariantId());
+            }
         }
 
         // 11. Create Payment
@@ -291,7 +375,8 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public Order cancelOrder(String orderId) {
         Order order = getOrder(orderId);
-        if (order.getOrderStatus() == OrderStatus.COMPLETED || order.getOrderStatus() == OrderStatus.CANCELLED) {
+        if (order.getOrderStatus() == OrderStatus.SHIPPING || order.getOrderStatus() == OrderStatus.SHIPPED
+                || order.getOrderStatus() == OrderStatus.COMPLETED || order.getOrderStatus() == OrderStatus.CANCELLED) {
             throw new RuntimeException("Cannot cancel order in state: " + order.getOrderStatus());
         }
 

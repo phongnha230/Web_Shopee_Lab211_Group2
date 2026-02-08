@@ -31,4 +31,8 @@ public class User {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public String getId() {
+        return id;
+    }
 }

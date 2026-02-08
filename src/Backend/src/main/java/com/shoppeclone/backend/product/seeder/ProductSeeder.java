@@ -85,7 +85,7 @@ public class ProductSeeder implements CommandLineRunner {
                                 "https://images.unsplash.com/photo-1524678606372-571d751b8d57?w=800&h=800&fit=crop"));
 
                 addColorVariants(product.getId(), new String[] { "Black", "Silver", "Red" },
-                                new BigDecimal("99.00"), new int[] { 156, 89, 45 });
+                                new BigDecimal("99000"), new int[] { 156, 89, 45 });
         }
 
         private void createProduct2_UrbanSneakers(String shopId) {
@@ -100,7 +100,7 @@ public class ProductSeeder implements CommandLineRunner {
                 addColorSizeVariants(product.getId(),
                                 new String[] { "White/Red", "Black" },
                                 new String[] { "40", "41", "42", "43" },
-                                new BigDecimal("102.00"), 89);
+                                new BigDecimal("102000"), 89);
         }
 
         private void createProduct3_Watch(String shopId) {
@@ -112,7 +112,7 @@ public class ProductSeeder implements CommandLineRunner {
                                 "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800&h=800&fit=crop"));
 
                 addColorVariants(product.getId(), new String[] { "Gold", "Silver" },
-                                new BigDecimal("15.00"), new int[] { 44, 44 });
+                                new BigDecimal("15000"), new int[] { 44, 44 });
         }
 
         private void createProduct4_RunningSportShoes(String shopId) {
@@ -126,7 +126,7 @@ public class ProductSeeder implements CommandLineRunner {
                 addColorSizeVariants(product.getId(),
                                 new String[] { "Red", "Blue" },
                                 new String[] { "38", "39", "40", "41" },
-                                new BigDecimal("120.00"), 200);
+                                new BigDecimal("120000"), 200);
         }
 
         private void createProduct5_SmartPhone(String shopId) {
@@ -141,7 +141,7 @@ public class ProductSeeder implements CommandLineRunner {
                 addColorSizeVariants(product.getId(),
                                 new String[] { "Graphite", "Silver" },
                                 new String[] { "128GB", "256GB" },
-                                new BigDecimal("199.00"), 12);
+                                new BigDecimal("19999000"), 12);
         }
 
         private void createProduct6_CompactHeadphones(String shopId) {
@@ -153,7 +153,7 @@ public class ProductSeeder implements CommandLineRunner {
                                 "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=800&fit=crop"));
 
                 addColorVariants(product.getId(), new String[] { "Black" },
-                                new BigDecimal("45.00"), new int[] { 330 });
+                                new BigDecimal("45000"), new int[] { 330 });
         }
 
         // === DAILY DISCOVER ITEMS ===
@@ -168,7 +168,7 @@ public class ProductSeeder implements CommandLineRunner {
                                 "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&h=800&fit=crop"));
 
                 addColorVariants(product.getId(), new String[] { "Black" },
-                                new BigDecimal("36.00"), new int[] { 5 });
+                                new BigDecimal("3600000"), new int[] { 5 });
         }
 
         private void createProduct102_NikeAirMax(String shopId) {
@@ -183,7 +183,7 @@ public class ProductSeeder implements CommandLineRunner {
                 addColorSizeVariants(product.getId(),
                                 new String[] { "Red", "Black", "White" },
                                 new String[] { "38", "39", "40", "41", "42", "43" },
-                                new BigDecimal("210.00"), 540);
+                                new BigDecimal("210000"), 540);
         }
 
         private void createProduct103_WaterBottle1L(String shopId) {
@@ -197,7 +197,7 @@ public class ProductSeeder implements CommandLineRunner {
                 addColorSizeVariants(product.getId(),
                                 new String[] { "Silver" },
                                 new String[] { "1L" },
-                                new BigDecimal("15.69"), 980);
+                                new BigDecimal("16000"), 980);
         }
 
         private void createProduct104_BlueWaterBottle(String shopId) {
@@ -211,7 +211,7 @@ public class ProductSeeder implements CommandLineRunner {
                 addColorSizeVariants(product.getId(),
                                 new String[] { "Blue" },
                                 new String[] { "500ml" },
-                                new BigDecimal("14.50"), 760);
+                                new BigDecimal("14500"), 760);
         }
 
         private void createProduct105_ModernChair(String shopId) {
@@ -223,7 +223,7 @@ public class ProductSeeder implements CommandLineRunner {
                                 "https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?w=800&h=800&fit=crop"));
 
                 addColorVariants(product.getId(), new String[] { "Brown" },
-                                new BigDecimal("25.00"), new int[] { 120 });
+                                new BigDecimal("250000"), new int[] { 120 });
         }
 
         private void createProduct106_CanvasSneakers(String shopId) {
@@ -237,7 +237,7 @@ public class ProductSeeder implements CommandLineRunner {
                 addColorSizeVariants(product.getId(),
                                 new String[] { "White" },
                                 new String[] { "38", "39" },
-                                new BigDecimal("18.00"), 230);
+                                new BigDecimal("180000"), 230);
         }
 
         // === HELPER METHODS ===

@@ -28,6 +28,8 @@ public class OrderResponse {
     private OrderStatus orderStatus;
     private PaymentStatus paymentStatus;
     private List<OrderItem> items;
+    private List<OrderItemDisplayDto> displayItems; // Enriched for frontend (productName, image, etc.)
+    private String paymentMethod; // COD, MOMO, VNPAY, etc.
     private OrderShipping shipping;
 
     // Shipper-related fields
@@ -48,6 +50,11 @@ public class OrderResponse {
     @Builder.Default
     private List<OrderItemReviewInfo> itemReviewInfo = new ArrayList<>();
     private boolean canReviewAny;
+
+    public String getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+    public List<OrderItemDisplayDto> getDisplayItems() { return displayItems; }
+    public void setDisplayItems(List<OrderItemDisplayDto> displayItems) { this.displayItems = displayItems; }
 
     public static OrderResponse fromOrder(Order order) {
         return OrderResponse.builder()
