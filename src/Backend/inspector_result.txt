@@ -1,11 +1,12 @@
 ========== DATABASE INSPECTION START ==========
-Total Shops Found: 5
-Total Products Found: 25
-Shop: 'Shop Công Nghệ Số 1' (ID: 69785193e54d760f00ecb62a) has 17 products
+Total Shops Found: 6
+Total Products Found: 12
+Shop: 'Shop Công Nghệ Số 1' (ID: 69785193e54d760f00ecb62a) has 0 products
 Shop: 'Cửa Hàng Điện Tử ABC' (ID: 69797eb8c8a10c06fe7d3de7) has 0 products
-Shop: 'Arina' (ID: 697d92b28929569335e85fe5) has 4 products
+Shop: 'Arina' (ID: 697d92b28929569335e85fe5) has 0 products
 Shop: 'Baribanai' (ID: 697dadea2c4624e9a1b1508a) has 0 products
-Shop: 'Ngoc Nga Shop' (ID: 697dba32a9b96dd9639f8aaf) has 4 products
+Shop: 'Ngoc Nga Shop' (ID: 697dba32a9b96dd9639f8aaf) has 0 products
+Shop: 'PaPaPee' (ID: 6987fca7fe6fb0680294ed8a) has 0 products
 
 CORRECTION: Moving products from 'Baribanai' to 'Shop Công Nghệ Số 1'...
 No products found in source shop to move.
