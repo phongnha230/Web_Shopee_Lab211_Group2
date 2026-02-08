@@ -8,6 +8,36 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* ===== ShopeeClone Red + Beige (MATCH SIGN IN PAGE) ===== */
+        .text-orange-500,
+        .text-orange-600 {
+            color: #AD3029 !important;
+        }
+
+        .bg-orange-500,
+        .bg-orange-600 {
+            background-color: #AD3029 !important;
+            color: white !important;
+        }
+
+        .hover\:bg-orange-600:hover,
+        .hover\:bg-orange-700:hover {
+            background-color: #8f2621 !important;
+        }
+
+        .border-orange-500,
+        .border-orange-600 {
+            border-color: #AD3029 !important;
+        }
+
+        .from-orange-500 {
+            --tw-gradient-from: #AD3029 !important;
+        }
+
+        .to-orange-600 {
+            --tw-gradient-to: #CD5252 !important;
+        }
+
         @keyframes bounceShopee {
 
             0%,
@@ -32,10 +62,10 @@
         }
 
         .thumbnail-active {
-            border: 2px solid #F97316;
+            border: 2px solid #AD3029;
         }
 
-        /* Review Image Gallery */
+        /* Review Image Gallery & Lightbox */
         .review-images {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
@@ -55,10 +85,9 @@
 
         .review-images img:hover {
             transform: scale(1.05);
-            border-color: #f97316;
+            border-color: #AD3029;
         }
 
-        /* Lightbox */
         .lightbox {
             display: none;
             position: fixed;
@@ -376,7 +405,7 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             console.log("🚀 Initializing Product Page...");
-            
+
             // 1. UPDATE NAVBAR FIRST (Sync Header)
             updateNavbar();
             updateCartBadge();
@@ -461,22 +490,26 @@
                         const catData = await catRes.json();
                         catDisplay = catData.name;
                     }
-                } catch (e) {}
+                } catch (e) { }
             } else if (product.cat) {
-                 catDisplay = product.cat.split('>')[0].trim();
+                catDisplay = product.cat.split('>')[0].trim();
             }
             document.getElementById('breadcrumbCategory').textContent = catDisplay;
 
-            // Resolve Shop Address (địa giao hàng)
+            // Resolve Shop Info (Name & Address)
             let shopAddress = "Hanoi, Vietnam";
+            let shopName = "Official Shop";
+            let shopId = product.shopId;
+
             if (isReal && product.shopId) {
                 try {
                     const shopRes = await fetch(`${API_BASE_URL}/shop/${product.shopId}`);
                     if (shopRes.ok) {
                         const shopData = await shopRes.json();
                         if (shopData.address) shopAddress = shopData.address;
+                        if (shopData.name) shopName = shopData.name;
                     }
-                } catch (e) {}
+                } catch (e) { }
             }
 
             // Images
@@ -484,10 +517,10 @@
             let thumbs = [];
 
             if (isReal) {
-                 mainImg = (product.images && product.images.length > 0) ? product.images[0] : 'https://via.placeholder.com/800';
-                 thumbs = product.images || [];
+                mainImg = (product.images && product.images.length > 0) ? product.images[0] : 'https://via.placeholder.com/800';
+                thumbs = product.images || [];
             } else {
-                 thumbs = product.thumbnails || [product.image];
+                thumbs = product.thumbnails || [product.image];
             }
             document.getElementById('mainImage').src = mainImg;
             document.getElementById('mainImage').style.display = 'block';
@@ -502,7 +535,7 @@
             // Price & Discount
             let price = isReal ? (product.variants?.[0]?.price || 0) : product.price;
             let oldPrice = isReal ? (price * 1.2) : (product.oldPrice || price * 1.2);
-            
+
             document.getElementById('priceContainer').innerHTML = `
                  <span class="text-gray-400 line-through text-lg mr-3">₫${new Intl.NumberFormat('vi-VN').format(oldPrice)}</span>
                  <span class="text-orange-600 text-3xl font-bold mr-3">₫${new Intl.NumberFormat('vi-VN').format(price)}</span>
@@ -530,7 +563,7 @@
                         `<button onclick="selectOption(this, 'color')" class="color-btn px-4 py-2 border-2 ${i === 0 ? 'border-orange-500 bg-orange-50' : 'border-gray-300'} rounded-lg font-medium hover:border-orange-500 transition">${c}</button>`
                     ).join('');
                 } else {
-                    if(colorContainer.parentElement) colorContainer.parentElement.style.display = 'none';
+                    if (colorContainer.parentElement) colorContainer.parentElement.style.display = 'none';
                 }
             }
 
@@ -540,28 +573,44 @@
                         `<button onclick="selectOption(this, 'size')" class="size-btn px-6 py-2 border-2 border-gray-300 rounded-lg font-medium hover:border-orange-500 transition">${s}</button>`
                     ).join('');
                 } else {
-                     if(sizeContainer.parentElement) sizeContainer.parentElement.style.display = 'none';
+                    if (sizeContainer.parentElement) sizeContainer.parentElement.style.display = 'none';
                 }
             }
 
             // Stock & Sold
-            let stock = isReal ? (product.variants?.reduce((s,v)=>s+v.stock,0) || 0) : (product.stock || 100);
+            let stock = isReal ? (product.variants?.reduce((s, v) => s + v.stock, 0) || 0) : (product.stock || 100);
             document.getElementById('stockCount').textContent = `${stock} available`;
             document.getElementById('ratingValue').textContent = "4.9";
-            document.getElementById('soldCount').textContent = `${Math.floor(Math.random()*2000)+100} Sold`;
+            document.getElementById('soldCount').textContent = `${Math.floor(Math.random() * 2000) + 100} Sold`;
 
             // Description
             document.getElementById('descContainer').innerHTML = `<p>${isReal ? (product.description || "No description") : product.desc}</p>`;
 
-            // Product Specifications (địa giao hàng, số lượng tồn kho, category)
+
+            // Product Specifications (địa giao hàng, số lượng tồn kho, category, SHOP)
             const specsEl = document.getElementById('specsContainer');
             if (specsEl) {
+                // DEBUG: Log shopId to verify it's correct
+                console.log('🔍 Creating shop link with shopId:', shopId);
+                console.log('🔍 Shop name:', shopName);
+
+                // Ensure shopId is valid before creating link
+                const shopLink = shopId && shopId !== 'undefined' && shopId !== 'null'
+                    ? `shop-detail.html?id=${shopId}`
+                    : '#';
+
+                if (!shopId || shopId === 'undefined' || shopId === 'null') {
+                    console.warn('⚠️ Invalid shopId detected:', shopId);
+                }
+
                 specsEl.innerHTML = `
                     <div class="flex border-b border-gray-200 py-3"><span class="text-gray-600 w-1/3">Category</span><span class="text-gray-800 font-medium">${catDisplay}</span></div>
-                    <div class="flex border-b border-gray-200 py-3"><span class="text-gray-600 w-1/3">Số lượng tồn kho</span><span class="text-gray-800 font-medium">${stock}</span></div>
-                    <div class="flex border-b border-gray-200 py-3"><span class="text-gray-600 w-1/3">Địa chỉ giao hàng</span><span class="text-gray-800 font-medium">${shopAddress}</span></div>
+                    <div class="flex border-b border-gray-200 py-3"><span class="text-gray-600 w-1/3">Stock</span><span class="text-gray-800 font-medium">${stock}</span></div>
+                    <div class="flex border-b border-gray-200 py-3"><span class="text-gray-600 w-1/3">Ships From</span><span class="text-gray-800 font-medium">${shopAddress}</span></div>
+                    <div class="flex border-b border-gray-200 py-3"><span class="text-gray-600 w-1/3">Sold By</span><a href="${shopLink}" class="text-orange-500 font-bold hover:underline cursor-pointer">${shopName} <i class="fas fa-store ml-1 text-sm"></i></a></div>
                 `;
             }
+
 
             // Globals
             window.currentProduct = product;
@@ -579,34 +628,34 @@
             const userAvatar = document.getElementById('userAvatar');
 
             if (token) {
-                if(guestNav) guestNav.classList.add('hidden');
-                if(userNav) userNav.classList.remove('hidden');
-                if(userNameEl) userNameEl.textContent = userName;
-                if(userAvatar) userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=fff&color=f97316`;
+                if (guestNav) guestNav.classList.add('hidden');
+                if (userNav) userNav.classList.remove('hidden');
+                if (userNameEl) userNameEl.textContent = userName;
+                if (userAvatar) userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=fff&color=f97316`;
             } else {
-                if(guestNav) guestNav.classList.remove('hidden');
-                if(userNav) userNav.classList.add('hidden');
+                if (guestNav) guestNav.classList.remove('hidden');
+                if (userNav) userNav.classList.add('hidden');
             }
         }
 
         async function updateCartBadge() {
-             const token = localStorage.getItem('accessToken');
-             const badge = document.getElementById('cartBadge');
-             if(!token) {
-                 if(badge) badge.style.display = 'none';
-                 return;
-             }
-             try {
-                 const res = await fetch(`${API_BASE_URL}/cart`, { headers: { 'Authorization': `Bearer ${token}` } });
-                 if(res.ok) {
-                     const data = await res.json();
-                     const total = data.items ? data.items.reduce((s,i)=>s+i.quantity,0) : 0;
-                     if(badge) {
+            const token = localStorage.getItem('accessToken');
+            const badge = document.getElementById('cartBadge');
+            if (!token) {
+                if (badge) badge.style.display = 'none';
+                return;
+            }
+            try {
+                const res = await fetch(`${API_BASE_URL}/cart`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (res.ok) {
+                    const data = await res.json();
+                    const total = data.items ? data.items.reduce((s, i) => s + i.quantity, 0) : 0;
+                    if (badge) {
                         badge.textContent = total;
                         badge.style.display = total > 0 ? 'inline-block' : 'none';
-                     }
-                 }
-             } catch(e) { console.error(e); }
+                    }
+                }
+            } catch (e) { console.error(e); }
         }
 
         function logout() {
@@ -644,36 +693,36 @@
         }
 
         async function addToCart(isBuyNow = false) {
-             const token = localStorage.getItem('accessToken');
-             if(!token) {
-                 window.location.href = 'login.html';
-                 return false;
-             }
-             const product = window.currentProduct;
-             if(!product) return false;
-             
-             const quantity = parseInt(document.getElementById('quantity').value) || 1;
-             const selectedColorBtn = document.querySelector('#colorContainer button.border-orange-500');
-             const selectedSizeBtn = document.querySelector('#sizeContainer button.border-orange-500');
-             const color = selectedColorBtn ? selectedColorBtn.textContent.trim() : '';
-             const size = selectedSizeBtn ? selectedSizeBtn.textContent.trim() : '';
-             let variantId = product.id;
-             if (window.isCurrentReal && product.variants && product.variants.length > 0) {
-                 const matchedVariant = product.variants.find(v => {
-                     const colorMatch = !color || (v.color && v.color.trim().toLowerCase() === color.toLowerCase());
-                     const sizeMatch = !size || (v.size && v.size.trim().toLowerCase() === size.toLowerCase());
-                     return colorMatch && sizeMatch;
-                 });
-                 variantId = matchedVariant ? matchedVariant.id : product.variants[0].id;
-             }
-             let link = `${API_BASE_URL}/cart/add?quantity=${quantity}&variantId=${variantId}`;
-             
-             try {
-                const res = await fetch(link, { 
-                    method: 'POST', 
-                    headers: { 'Authorization': `Bearer ${token}` } 
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            const product = window.currentProduct;
+            if (!product) return false;
+
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            const selectedColorBtn = document.querySelector('#colorContainer button.border-orange-500');
+            const selectedSizeBtn = document.querySelector('#sizeContainer button.border-orange-500');
+            const color = selectedColorBtn ? selectedColorBtn.textContent.trim() : '';
+            const size = selectedSizeBtn ? selectedSizeBtn.textContent.trim() : '';
+            let variantId = product.id;
+            if (window.isCurrentReal && product.variants && product.variants.length > 0) {
+                const matchedVariant = product.variants.find(v => {
+                    const colorMatch = !color || (v.color && v.color.trim().toLowerCase() === color.toLowerCase());
+                    const sizeMatch = !size || (v.size && v.size.trim().toLowerCase() === size.toLowerCase());
+                    return colorMatch && sizeMatch;
                 });
-                if(res.ok) {
+                variantId = matchedVariant ? matchedVariant.id : product.variants[0].id;
+            }
+            let link = `${API_BASE_URL}/cart/add?quantity=${quantity}&variantId=${variantId}`;
+
+            try {
+                const res = await fetch(link, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
                     if (!isBuyNow) {
                         alert('Added to cart!');
                     }
@@ -683,79 +732,79 @@
                     alert('Failed to add to cart.');
                     return false;
                 }
-             } catch(e) { 
-                 console.error(e); 
-                 alert('Error adding to cart'); 
-                 return false;
-             }
+            } catch (e) {
+                console.error(e);
+                alert('Error adding to cart');
+                return false;
+            }
         }
-        
+
         async function buyNow() {
-             console.log("Buy Now Clicked");
-             
-             const product = window.currentProduct;
-             if(!product) {
-                 alert('Product data not loaded yet!');
-                 return;
-             }
-             // Ensure productId - fallback to URL id (for mock products or edge cases)
-             const productId = product.id || new URLSearchParams(window.location.search).get('id');
-             if (!productId) {
-                 alert('Không xác định được sản phẩm. Vui lòng tải lại trang.');
-                 return;
-             }
-             
-             const selectedColorBtn = document.querySelector('#colorContainer button.border-orange-500');
-             const selectedSizeBtn = document.querySelector('#sizeContainer button.border-orange-500');
-             const color = selectedColorBtn ? selectedColorBtn.textContent.trim() : '';
-             const size = selectedSizeBtn ? selectedSizeBtn.textContent.trim() : '';
-             const quantity = parseInt(document.getElementById('quantity').value) || 1;
-             
-             // Determine variant ID for Buy Now params
-             let variantId = product.id;
-             if (window.isCurrentReal && product.variants && product.variants.length > 0) {
-                 const matchedVariant = product.variants.find(v => {
-                     const colorMatch = !color || (v.color && v.color.trim().toLowerCase() === color.toLowerCase());
-                     const sizeMatch = !size || (v.size && v.size.trim().toLowerCase() === size.toLowerCase());
-                     return colorMatch && sizeMatch;
-                 });
-                 if (matchedVariant) variantId = matchedVariant.id;
-                 else { alert('Tổ hợp màu/kích thước bạn chọn không còn hàng. Vui lòng chọn tổ hợp khác.'); return; }
-             }
-             
-             const buyNowParams = new URLSearchParams({
-                 mode: 'buynow', productId: productId, variantId, quantity,
-                 color: color || '', size: size || ''
-             });
-             const checkoutUrl = getCheckoutBaseUrl() + 'checkout-backend.html?' + buyNowParams.toString();
-             
-             // Lưu vào sessionStorage - checkout sẽ ưu tiên dữ liệu này nếu URL thiếu params
-             sessionStorage.setItem('buyNowPending', JSON.stringify({
-                 productId, variantId, quantity, color, size, ts: Date.now()
-             }));
-             
-             // Auth check - preserve Buy Now params so user returns to correct product after login (not cart!)
-             const token = localStorage.getItem('accessToken');
-             if(!token) {
-                 window.location.href = getCheckoutBaseUrl() + 'login.html?returnUrl=' + encodeURIComponent('checkout-backend.html?' + buyNowParams.toString());
-                 return;
-             }
-             window.location.replace(checkoutUrl); // replace to avoid back-button returning to product with wrong context
+            console.log("Buy Now Clicked");
+
+            const product = window.currentProduct;
+            if (!product) {
+                alert('Product data not loaded yet!');
+                return;
+            }
+            // Ensure productId - fallback to URL id (for mock products or edge cases)
+            const productId = product.id || new URLSearchParams(window.location.search).get('id');
+            if (!productId) {
+                alert('Không xác định được sản phẩm. Vui lòng tải lại trang.');
+                return;
+            }
+
+            const selectedColorBtn = document.querySelector('#colorContainer button.border-orange-500');
+            const selectedSizeBtn = document.querySelector('#sizeContainer button.border-orange-500');
+            const color = selectedColorBtn ? selectedColorBtn.textContent.trim() : '';
+            const size = selectedSizeBtn ? selectedSizeBtn.textContent.trim() : '';
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+
+            // Determine variant ID for Buy Now params
+            let variantId = product.id;
+            if (window.isCurrentReal && product.variants && product.variants.length > 0) {
+                const matchedVariant = product.variants.find(v => {
+                    const colorMatch = !color || (v.color && v.color.trim().toLowerCase() === color.toLowerCase());
+                    const sizeMatch = !size || (v.size && v.size.trim().toLowerCase() === size.toLowerCase());
+                    return colorMatch && sizeMatch;
+                });
+                if (matchedVariant) variantId = matchedVariant.id;
+                else { alert('Tổ hợp màu/kích thước bạn chọn không còn hàng. Vui lòng chọn tổ hợp khác.'); return; }
+            }
+
+            const buyNowParams = new URLSearchParams({
+                mode: 'buynow', productId: productId, variantId, quantity,
+                color: color || '', size: size || ''
+            });
+            const checkoutUrl = getCheckoutBaseUrl() + 'checkout-backend.html?' + buyNowParams.toString();
+
+            // Lưu vào sessionStorage - checkout sẽ ưu tiên dữ liệu này nếu URL thiếu params
+            sessionStorage.setItem('buyNowPending', JSON.stringify({
+                productId, variantId, quantity, color, size, ts: Date.now()
+            }));
+
+            // Auth check - preserve Buy Now params so user returns to correct product after login (not cart!)
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = getCheckoutBaseUrl() + 'login.html?returnUrl=' + encodeURIComponent('checkout-backend.html?' + buyNowParams.toString());
+                return;
+            }
+            window.location.replace(checkoutUrl); // replace to avoid back-button returning to product with wrong context
         }
 
         function showToast(message) {
-             const toast = document.createElement('div');
-             toast.className = 'fixed top-24 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-             toast.innerHTML = message;
-             document.body.appendChild(toast);
-             setTimeout(() => toast.remove(), 2000);
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-24 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
         }
 
         // Lightbox Functions
         function openLightbox(src) {
             const lightbox = document.getElementById('lightbox');
             const lightboxImage = document.getElementById('lightboxImage');
-            lightboxImage.src = src.replace('w=200', 'w=1200'); 
+            lightboxImage.src = src.replace('w=200', 'w=1200');
             lightbox.classList.add('active');
         }
 
@@ -768,4 +817,5 @@
         });
     </script>
 </body>
+
 </html>
