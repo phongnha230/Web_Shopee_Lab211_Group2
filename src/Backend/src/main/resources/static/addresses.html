@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shipping Addresses | ShoppeClone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+
+<body class="bg-gradient-to-br from-red-50 via-white to-red-100 text-gray-800">
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast"
+        class="fixed top-5 right-5 px-6 py-3 rounded-lg shadow-lg text-white font-semibold hidden transition-all z-50">
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 py-10 flex gap-8">
+
+        <!-- SIDEBAR -->
+        <aside class="w-64 bg-[#AD3029] rounded-3xl p-6 text-white shadow-xl">
+            <div class="flex items-center gap-3 mb-10">
+                <div id="sidebarAvatar"
+                    class="w-12 h-12 rounded-full border-2 border-white bg-white text-[#AD3029] flex items-center justify-center font-bold text-xl">
+                    U
+                </div>
+                <div>
+                    <p id="sidebarName" class="font-semibold">Loading...</p>
+                    <p class="text-sm text-red-200">Silver Member</p>
+                </div>
+            </div>
+
+            <nav class="space-y-4 text-sm">
+                <a href="profile.html" class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-white/20">
+                    <i class="fas fa-user"></i> Profile
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-white/20">
+                    <i class="fas fa-box"></i> My Orders
+                </a>
+                <a href="addresses.html" class="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/20">
+                    <i class="fas fa-map-marker-alt"></i> Shipping Addresses
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-white/20">
+                    <i class="fas fa-lock"></i> Change Password
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-white/20">
+                    <i class="fas fa-heart"></i> Wishlist
+                </a>
+                <a href="#" onclick="logout()"
+                    class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-white/20 text-red-200">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 bg-white rounded-3xl shadow-xl p-8">
+
+            <!-- HEADER -->
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-2xl font-bold text-[#AD3029]">Shipping Addresses</h1>
+                <button onclick="showAddModal()"
+                    class="bg-[#AD3029] hover:opacity-90 text-white px-6 py-2 rounded-full font-bold transition">
+                    <i class="fas fa-plus mr-2"></i>Add New Address
+                </button>
+            </div>
+
+            <!-- ADDRESS LIST -->
+            <div id="addressList" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Addresses will be loaded here -->
+                <div class="text-center py-12 col-span-2">
+                    <i class="fas fa-spinner fa-spin text-4xl text-[#AD3029] mb-4"></i>
+                    <p class="text-gray-500">Loading addresses...</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ADD/EDIT ADDRESS MODAL -->
+    <div id="addressModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="p-6 border-b flex justify-between items-center">
+                <h2 id="modalTitle" class="text-2xl font-bold text-[#AD3029]">Add New Address</h2>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+
+            <form id="addressForm" class="p-6 space-y-4">
+                <input type="hidden" id="addressId">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-sm font-medium">Full Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="fullName" required
+                            class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-[#AD3029] focus:outline-none"
+                            placeholder="Nguyen Van A">
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium">Phone Number <span class="text-red-500">*</span></label>
+                        <input type="tel" id="phone" required pattern="^0[0-9]{9}$"
+                            class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-[#AD3029] focus:outline-none"
+                            placeholder="0123456789">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-sm font-medium">Detailed Address <span class="text-red-500">*</span></label>
+                    <input type="text" id="address" required
+                        class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-[#AD3029] focus:outline-none"
+                        placeholder="House number, street name...">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="text-sm font-medium">City/Province <span class="text-red-500">*</span></label>
+                        <input type="text" id="city" required
+                            class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-[#AD3029] focus:outline-none"
+                            placeholder="Hanoi">
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium">District <span class="text-red-500">*</span></label>
+                        <input type="text" id="district" required
+                            class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-[#AD3029] focus:outline-none"
+                            placeholder="Cau Giay">
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium">Ward <span class="text-red-500">*</span></label>
+                        <input type="text" id="ward" required
+                            class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-[#AD3029] focus:outline-none"
+                            placeholder="Dich Vong">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="isDefault" class="w-5 h-5 text-[#AD3029] rounded focus:ring-[#AD3029]">
+                    <label for="isDefault" class="text-sm font-medium">Set as default address</label>
+                </div>
+
+                <div class="flex gap-4 pt-4">
+                    <button type="submit"
+                        class="flex-1 bg-[#AD3029] hover:opacity-90 text-white py-3 rounded-xl font-bold transition">
+                        <i class="fas fa-save mr-2"></i>Save Address
+                    </button>
+                    <button type="button" onclick="closeModal()"
+                        class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 rounded-xl font-semibold transition">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8080/api';
+        let accessToken = localStorage.getItem('accessToken');
+        let addresses = [];
+
+        // Check login
+        if (!accessToken) {
+            showToast('⚠️ Please login!', 'warning');
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1500);
+        }
+
+        // Load profile for sidebar
+        async function loadProfile() {
+            try {
+                const response = await fetch(`${API_URL}/user/profile`, {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+
+                if (!response.ok) throw new Error('Failed to load profile');
+
+                const data = await response.json();
+                const initial = (data.fullName || 'U').charAt(0).toUpperCase();
+                document.getElementById('sidebarName').textContent = data.fullName || 'User';
+                document.getElementById('sidebarAvatar').textContent = initial;
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        // Load addresses
+        async function loadAddresses() {
+            try {
+                const response = await fetch(`${API_URL}/user/addresses`, {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+
+                if (!response.ok) throw new Error('Failed to load addresses');
+
+                addresses = await response.json();
+                renderAddresses();
+            } catch (error) {
+                console.error('Error loading addresses:', error);
+                document.getElementById('addressList').innerHTML = `
+                    <div class="text-center py-12 col-span-2">
+                        <i class="fas fa-exclamation-circle text-4xl text-red-500 mb-4"></i>
+                        <p class="text-gray-500">Cannot load addresses</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Render addresses
+        function renderAddresses() {
+            const container = document.getElementById('addressList');
+
+            if (addresses.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 col-span-2">
+                        <i class="fas fa-map-marker-alt text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500">No addresses yet</p>
+                        <button onclick="showAddModal()" 
+                                class="mt-4 bg-[#AD3029] hover:opacity-90 text-white px-6 py-2 rounded-full font-bold transition">
+                            Add your first address
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = addresses.map(addr => `
+                <div class="bg-gradient-to-br from-red-50 to-white p-6 rounded-2xl shadow-lg border-2 ${addr.default ? 'border-[#AD3029]' : 'border-gray-200'} hover:shadow-xl transition">
+                    ${addr.default ? '<div class="inline-block bg-[#AD3029] text-white text-xs px-3 py-1 rounded-full mb-3">Default</div>' : ''}
+                    
+                    <div class="mb-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fas fa-user text-[#AD3029]"></i>
+                            <span class="font-bold text-lg">${addr.fullName}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-gray-600">
+                            <i class="fas fa-phone text-[#AD3029]"></i>
+                            <span>${addr.phone}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-2 text-gray-700 mb-4">
+                        <i class="fas fa-map-marker-alt text-[#AD3029] mt-1"></i>
+                        <div>
+                            <p>${addr.address}</p>
+                            <p class="text-sm text-gray-500">${addr.ward}, ${addr.district}, ${addr.city}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button onclick="editAddress('${addr.id}')" 
+                                class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg font-semibold transition text-sm">
+                            <i class="fas fa-edit mr-1"></i>Edit
+                        </button>
+                        ${!addr.default ? `
+                            <button onclick="setDefault('${addr.id}')" 
+                                    class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-semibold transition text-sm">
+                                <i class="fas fa-star mr-1"></i>Set Default
+                            </button>
+                        ` : ''}
+                        <button onclick="deleteAddress('${addr.id}')" 
+                                class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg font-semibold transition text-sm">
+                            <i class="fas fa-trash mr-1"></i>Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Show add modal
+        function showAddModal() {
+            document.getElementById('modalTitle').textContent = 'Add New Address';
+            document.getElementById('addressForm').reset();
+            document.getElementById('addressId').value = '';
+            document.getElementById('addressModal').classList.remove('hidden');
+            document.getElementById('addressModal').classList.add('flex');
+        }
+
+        // Edit address
+        function editAddress(id) {
+            const addr = addresses.find(a => a.id === id);
+            if (!addr) return;
+
+            document.getElementById('modalTitle').textContent = 'Edit Address';
+            document.getElementById('addressId').value = addr.id;
+            document.getElementById('fullName').value = addr.fullName;
+            document.getElementById('phone').value = addr.phone;
+            document.getElementById('address').value = addr.address;
+            document.getElementById('city').value = addr.city;
+            document.getElementById('district').value = addr.district;
+            document.getElementById('ward').value = addr.ward;
+            document.getElementById('isDefault').checked = addr.default;
+
+            document.getElementById('addressModal').classList.remove('hidden');
+            document.getElementById('addressModal').classList.add('flex');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('addressModal').classList.add('hidden');
+            document.getElementById('addressModal').classList.remove('flex');
+        }
+
+        // Save address (add or update)
+        document.getElementById('addressForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const addressId = document.getElementById('addressId').value;
+            const data = {
+                fullName: document.getElementById('fullName').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                district: document.getElementById('district').value,
+                ward: document.getElementById('ward').value,
+                isDefault: document.getElementById('isDefault').checked
+            };
+
+            // Validate Phone
+            if (!/^0\d{9}$/.test(data.phone)) {
+                showToast('❌ Phone number must be 10 digits and start with 0!', 'error');
+                return;
+            }
+
+            try {
+                const url = addressId
+                    ? `${API_URL}/user/addresses/${addressId}`
+                    : `${API_URL}/user/addresses`;
+
+                const method = addressId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    const error = await response.text();
+                    throw new Error(error);
+                }
+
+                const message = await response.text();
+                showToast('✅ ' + message, 'success');
+                closeModal();
+                loadAddresses();
+            } catch (error) {
+                showToast('❌ ' + error.message, 'error');
+            }
+        });
+
+        // Set default address
+        async function setDefault(id) {
+            const addr = addresses.find(a => a.id === id);
+            if (!addr) return;
+
+            try {
+                const response = await fetch(`${API_URL}/user/addresses/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({ ...addr, isDefault: true })
+                });
+
+                if (!response.ok) throw new Error('Failed to set default');
+
+                showToast('✅ Set as default address', 'success');
+                loadAddresses();
+            } catch (error) {
+                showToast('❌ ' + error.message, 'error');
+            }
+        }
+
+        // Delete address
+        async function deleteAddress(id) {
+            if (!confirm('Are you sure you want to delete this address?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/user/addresses/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+
+                if (!response.ok) throw new Error('Failed to delete');
+
+                const message = await response.text();
+                showToast('✅ ' + message, 'success');
+                loadAddresses();
+            } catch (error) {
+                showToast('❌ ' + error.message, 'error');
+            }
+        }
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                warning: 'bg-yellow-500',
+                info: 'bg-blue-500'
+            };
+
+            toast.className = `fixed top-5 right-5 px-6 py-3 rounded-lg shadow-lg text-white font-semibold transition-all z-50 ${colors[type] || colors.success}`;
+            toast.textContent = message;
+            toast.classList.remove('hidden');
+
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.clear();
+                showToast('👋 Logged out!', 'info');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1000);
+            }
+        }
+
+        // Load on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadProfile();
+            loadAddresses();
+        });
+    </script>
+
+</body>
+
+</html>

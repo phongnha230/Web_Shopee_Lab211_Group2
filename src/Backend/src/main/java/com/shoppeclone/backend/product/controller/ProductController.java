@@ -4,6 +4,7 @@ import com.shoppeclone.backend.product.dto.request.CreateProductRequest;
 import com.shoppeclone.backend.product.dto.request.CreateProductVariantRequest;
 import com.shoppeclone.backend.product.dto.request.UpdateProductRequest;
 import com.shoppeclone.backend.product.dto.response.ProductResponse;
+import com.shoppeclone.backend.product.dto.response.ProductVariantResponse;
 import com.shoppeclone.backend.product.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,11 @@ public class ProductController {
         return ResponseEntity.ok(productService.getAllProducts());
     }
 
+    @GetMapping("/flash-sale")
+    public ResponseEntity<List<ProductResponse>> getFlashSaleProducts() {
+        return ResponseEntity.ok(productService.getFlashSaleProducts());
+    }
+
     @GetMapping("/category/{categoryId}")
     public ResponseEntity<List<ProductResponse>> getProductsByCategory(@PathVariable String categoryId) {
         return ResponseEntity.ok(productService.getProductsByCategory(categoryId));
@@ -60,6 +66,19 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<Void> updateProductStatus(
+            @PathVariable String id,
+            @RequestBody Map<String, Object> updates) {
+
+        if (updates.containsKey("isFlashSale")) {
+            boolean isFlashSale = (Boolean) updates.get("isFlashSale");
+            productService.updateProductFlashSaleStatus(id, isFlashSale);
+        }
+
+        return ResponseEntity.ok().build();
+    }
+
     // Variant management
     @PostMapping("/{productId}/variants")
     public ResponseEntity<Map<String, String>> addVariant(
@@ -75,6 +94,19 @@ public class ProductController {
     public ResponseEntity<Void> removeVariant(@PathVariable String variantId) {
         productService.removeVariant(variantId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/variant/{variantId}")
+    public ResponseEntity<ProductVariantResponse> getVariantById(@PathVariable String variantId) {
+        return ResponseEntity.ok(productService.getVariantById(variantId));
+    }
+
+    @PatchMapping("/variant/{variantId}/stock")
+    public ResponseEntity<Void> updateVariantStock(
+            @PathVariable String variantId,
+            @RequestParam Integer stock) {
+        productService.updateVariantStock(variantId, stock);
+        return ResponseEntity.ok().build();
     }
 
     // Category management

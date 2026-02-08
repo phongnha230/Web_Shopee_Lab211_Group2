@@ -9,6 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* ===== ShopeeClone Red + Beige (MATCH SKETCH) ===== */
 
@@ -81,9 +82,17 @@
                 class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
                 <i class="fas fa-box w-5"></i> My Products
             </a>
+            <a href="#" onclick="switchView('inventory'); return false;" id="nav-inventory"
+                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
+                <i class="fas fa-warehouse w-5"></i> Inventory
+            </a>
             <a href="#" onclick="switchView('add-product'); return false;" id="nav-add-product"
                 class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
                 <i class="fas fa-plus-circle w-5"></i> Add Product
+            </a>
+            <a href="#" onclick="switchView('flash-sale'); return false;" id="nav-flash-sale"
+                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
+                <i class="fas fa-bolt w-5"></i> Flash Sale
             </a>
             <a href="#" onclick="switchView('orders'); return false;" id="nav-orders"
                 class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
@@ -162,6 +171,56 @@
                 <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
                     <h3 class="text-lg font-bold text-gray-800 mb-4">Welcome to Seller Centre!</h3>
                     <p class="text-gray-600">Manage your products and orders from here.</p>
+                </div>
+            </div>
+
+            <!-- ========================================
+                 VIEW 1.5: INVENTORY (QUẢN LÝ KHO)
+                 ======================================== -->
+            <div id="view-inventory" class="hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-gray-800">Inventory Management</h1>
+                    <button onclick="loadInventory()"
+                        class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition">
+                        <i class="fas fa-sync-alt mr-2"></i>Refresh
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Product</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Variant</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        SKU</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Current Stock</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        New Stock</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTableBody" class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td colspan="6" class="px-6 py-10 text-center text-gray-500">
+                                        <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                                        <p>Loading inventory...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -253,6 +312,27 @@
                                     <input type="number" id="productStock" required min="0"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
                                         placeholder="50">
+                                </div>
+                            </div>
+
+                            <!-- FLASH SALE OPTION (New) -->
+                            <div class="bg-orange-50 p-4 rounded-lg mb-6 border border-orange-100">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <input type="checkbox" id="isFlashSale" onchange="toggleFlashSaleInputs()"
+                                        class="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
+                                    <label for="isFlashSale" class="text-sm font-bold text-gray-800 cursor-pointer">
+                                        <i class="fas fa-bolt text-orange-500 mr-1"></i> Register for Flash Sale
+                                    </label>
+                                </div>
+                                <div id="flashSaleInputs" class="hidden grid grid-cols-1 gap-4">
+                                    <!-- Price removed as per user request -->
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Flash Sale
+                                            Stock</label>
+                                        <input type="number" id="flashSaleStock" min="0"
+                                            class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-sm"
+                                            placeholder="S.lượng bán">
+                                    </div>
                                 </div>
                             </div>
 
@@ -355,6 +435,101 @@
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+
+            <!-- VIEW 3.5: FLASH SALE MANAGEMENT -->
+            <div id="view-flash-sale" class="hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-gray-800">Flash Sale Management</h1>
+                    <div class="flex gap-2">
+                        <button onclick="switchView('add-product')"
+                            class="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-orange-600 transition">
+                            <i class="fas fa-plus mr-2"></i>Add Flash Sale Product
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Dashboard Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm col-span-2">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Sales Performance</h3>
+                        <div class="h-64">
+                            <canvas id="flashSaleChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Overall Performance</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-500">Total Items Sold</span>
+                                    <span class="font-bold text-gray-800">856</span>
+                                </div>
+                                <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-green-500 h-full" style="width: 75%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-500">Flash Sale Reach</span>
+                                    <span class="font-bold text-gray-800">12.5k</span>
+                                </div>
+                                <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-blue-500 h-full" style="width: 60%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-500">Stock Out Risk</span>
+                                    <span class="font-bold text-red-500">High</span>
+                                </div>
+                                <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-red-500 h-full" style="width: 90%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-8 pt-8 border-t border-gray-100">
+                            <p class="text-sm text-gray-500 italic">"Boost your sales by participating in more campaign
+                                events."</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flash Sale Products Table -->
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-gray-800">Active Flash Sale Products</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Product</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        FS Price</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        FS Stock</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="flashSaleTableBody" class="bg-white divide-y divide-gray-200">
+                                <!-- list FS products here -->
+                                <tr>
+                                    <td colspan="5" class="px-6 py-10 text-center text-gray-500">No products found</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -559,7 +734,9 @@
             const titles = {
                 'dashboard': 'Dashboard',
                 'products': 'My Products',
+                'inventory': 'Inventory Management',
                 'add-product': 'Add New Product',
+                'flash-sale': 'Flash Sale Management',
                 'orders': 'Orders',
                 'shop-profile': 'Shop Profile'
             };
@@ -567,6 +744,8 @@
 
             if (viewName === 'products') {
                 loadProducts();
+            } else if (viewName === 'inventory') {
+                loadInventory();
             } else if (viewName === 'add-product') {
                 loadCategories();
                 // If not editing, reset form for fresh creation
@@ -578,6 +757,21 @@
                 loadShopProfile();
             } else if (viewName === 'orders') {
                 loadOrders();
+            } else if (viewName === 'flash-sale') {
+                loadFlashSaleDashboard();
+            }
+        }
+
+        // Toggle Flash Sale Inputs
+        function toggleFlashSaleInputs() {
+            const isFlashSale = document.getElementById('isFlashSale').checked;
+            const container = document.getElementById('flashSaleInputs');
+            if (isFlashSale) {
+                container.classList.remove('hidden');
+                document.getElementById('flashSaleStock').setAttribute('required', 'true');
+            } else {
+                container.classList.add('hidden');
+                document.getElementById('flashSaleStock').removeAttribute('required');
             }
         }
 
@@ -902,19 +1096,24 @@
             }
 
             // Combine main and secondary images (main image first)
-            const allImageUrls = [mainImageUrl, ...secondaryImageUrls];
-
-            const name = document.getElementById('productName').value;
-            const description = document.getElementById('productDescription').value;
-            const categoryId = document.getElementById('productCategory').value;
-            const isVariations = document.getElementById('enableVariations').checked;
+            const productData = {
+                shopId: currentShop.id,
+                name: document.getElementById('productName').value,
+                description: document.getElementById('productDescription').value,
+                categoryId: document.getElementById('productCategory').value,
+                images: [mainImageUrl, ...secondaryImageUrls].filter(url => url),
+                isFlashSale: document.getElementById('isFlashSale').checked,
+                flashSalePrice: null, // Removed as per request
+                flashSaleStock: document.getElementById('isFlashSale').checked ? parseInt(document.getElementById('flashSaleStock').value) : null
+            };
             const globalPrice = parseFloat(document.getElementById('productPrice').value) || 0;
 
-            if (!categoryId) {
+            if (!productData.categoryId) {
                 showToast('Please select a category', 'warning');
                 return;
             }
 
+            const isVariations = document.getElementById('enableVariations').checked;
             let variants = [];
             if (isVariations) {
                 const rows = document.querySelectorAll('#variationTableBody tr');
@@ -961,14 +1160,11 @@
                 });
             }
 
-            const requestData = {
-                shopId: currentShop.id,
-                name,
-                description,
-                categoryId,
-                images: allImageUrls, // Send combined images with main first
-                variants: variants
-            };
+            // Assign variants to productData
+            productData.variants = variants;
+
+            // Use productData for the request
+            const finalData = productData;
 
             const submitBtn = document.getElementById('submitProductBtn');
             const originalBtnText = submitBtn.innerHTML;
@@ -982,7 +1178,7 @@
                 const response = await fetch(url, {
                     method: method,
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify(requestData)
+                    body: JSON.stringify(finalData)
                 });
 
                 if (response.ok) {
@@ -1151,6 +1347,15 @@
                     // No images
                     mainImageUrl = null;
                     secondaryImageUrls = [];
+                }
+
+                if (p.isFlashSale) {
+                    document.getElementById('isFlashSale').checked = true;
+                    toggleFlashSaleInputs(); // Show inputs
+                    document.getElementById('flashSaleStock').value = p.flashSaleStock || 0;
+                } else {
+                    document.getElementById('isFlashSale').checked = false;
+                    toggleFlashSaleInputs(); // Hide inputs
                 }
 
             } catch (err) {
@@ -1365,6 +1570,119 @@
                 console.error('❌ Stack:', err.stack);
             }
             console.log('========================================');
+        }
+
+        // ========================================
+        // INVENTORY MANAGEMENT FUNCTIONS
+        // ========================================
+        async function loadInventory() {
+            if (!currentShop) return;
+            const tableBody = document.getElementById('inventoryTableBody');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="px-6 py-10 text-center text-gray-500">
+                        <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                        <p>Loading inventory...</p>
+                    </td>
+                </tr>`;
+
+            try {
+                const response = await fetch(`${baseUrl}/products/shop/${currentShop.id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const products = await response.json();
+                    let rowsHtml = '';
+                    let variantCount = 0;
+
+                    products.forEach(p => {
+                        if (p.variants && p.variants.length > 0) {
+                            p.variants.forEach(v => {
+                                variantCount++;
+                                const variantName = [v.color, v.size].filter(Boolean).join(' - ') || 'Default';
+                                const rowClass = v.stock < 5 ? 'bg-red-50' : '';
+                                const stockBadgeClass = v.stock < 5 ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700';
+
+                                rowsHtml += `
+                                    <tr class="${rowClass} hover:bg-gray-50 transition">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <img src="${p.images?.[0] || 'https://via.placeholder.com/40'}" class="w-10 h-10 rounded object-cover border">
+                                                <div>
+                                                    <p class="font-bold text-gray-800 text-sm">${p.name}</p>
+                                                    <p class="text-xs text-gray-400">ID: ${p.id.substring(0, 8)}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 text-sm font-medium text-gray-700">${variantName}</td>
+                                        <td class="px-6 py-4 text-xs font-mono text-gray-500">${v.id.substring(0, 8)}</td>
+                                        <td class="px-6 py-4">
+                                            <span class="px-2 py-1 rounded-full text-xs font-bold ${stockBadgeClass}">
+                                                ${v.stock} in stock
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <input type="number" id="stock-input-${v.id}" 
+                                                class="w-20 px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 outline-none text-sm"
+                                                placeholder="New qty" min="0">
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <button onclick="updateStock('${v.id}')"
+                                                class="text-orange-500 hover:text-orange-700 font-bold text-sm">
+                                                Update
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `;
+                            });
+                        }
+                    });
+
+                    if (variantCount === 0) {
+                        tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-10 text-center text-gray-500">No product variants found</td></tr>`;
+                    } else {
+                        tableBody.innerHTML = rowsHtml;
+                    }
+                } else {
+                    tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-10 text-center text-red-500">Failed to load inventory</td></tr>`;
+                }
+            } catch (err) {
+                console.error(err);
+                tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-10 text-center text-red-500">Error loading inventory</td></tr>`;
+            }
+        }
+
+        async function updateStock(variantId) {
+            const input = document.getElementById(`stock-input-${variantId}`);
+            const newStock = parseInt(input.value);
+
+            if (isNaN(newStock) || newStock < 0) {
+                showToast('Please enter a valid stock quantity', 'error');
+                return;
+            }
+
+            try {
+                // We use a PATCH request to update stock. 
+                // We need to implement this endpoint in the backend.
+                const response = await fetch(`${baseUrl}/products/variant/${variantId}/stock?stock=${newStock}`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    showToast('Stock updated successfully', 'success');
+                    input.value = '';
+                    loadInventory(); // Refresh list
+                    loadTotalProductsCount(); // Update total stock on dashboard
+                } else {
+                    const err = await response.text();
+                    showToast(`Failed to update stock: ${err}`, 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error updating stock', 'error');
+            }
         }
 
         async function loadTotalProductsCount() {
@@ -2173,6 +2491,128 @@
             // View mode is set automatically in loadShopProfile
         }
 
+        async function loadFlashSaleDashboard() {
+            const tableBody = document.getElementById('flashSaleTableBody');
+            tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i>Loading flash sale products...</td></tr>';
+
+            try {
+                const response = await fetch(`${baseUrl}/products/flash-sale`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch flash sale products');
+                const products = await response.json();
+
+                // Filter products for this shop
+                const shopProducts = products.filter(p => p.shopId === currentShop.id);
+
+                renderFlashSaleTable(shopProducts);
+                renderFlashSaleChart(shopProducts);
+
+            } catch (error) {
+                console.error('Error loading flash sale dashboard:', error);
+                tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-red-500">Error loading flash sale products.</td></tr>';
+            }
+        }
+
+        function renderFlashSaleTable(products) {
+            const tableBody = document.getElementById('flashSaleTableBody');
+            if (products.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-gray-500">No active flash sale products</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = products.map(p => `
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 flex items-center gap-3">
+                        <img src="${p.images[0] || 'https://via.placeholder.com/40'}" class="w-10 h-10 rounded object-cover border">
+                        <span class="text-sm font-medium text-gray-800 truncate max-w-[200px]">${p.name}</span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-700 font-bold">Standard Price</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${p.flashSaleStock || 0} units</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 text-xs font-bold bg-green-100 text-green-600 rounded-full">ACTIVE</span>
+                    </td>
+                    <td class="px-6 py-4 text-sm">
+                        <button onclick="editFlashSale('${p.id}')" class="text-blue-600 hover:text-blue-800 mr-3"><i class="fas fa-edit"></i></button>
+                        <button onclick="removeFlashSale('${p.id}')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        let fsChart = null;
+        function renderFlashSaleChart(products) {
+            const canvasEl = document.getElementById('flashSaleChart');
+            if (!canvasEl) return;
+            const ctx = canvasEl.getContext('2d');
+
+            if (fsChart) fsChart.destroy();
+
+            // Symbolic data if no products
+            const labels = products.length > 0 ? products.map(p => p.name.substring(0, 10)) : ['Product A', 'Product B', 'Product C'];
+            const data = products.length > 0 ? products.map(p => p.flashSaleStock) : [50, 80, 45];
+            const soldData = products.length > 0 ? products.map(p => Math.floor(Math.random() * p.flashSaleStock)) : [30, 60, 20];
+
+            fsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Flash Sale Stock',
+                            data: data,
+                            backgroundColor: 'rgba(173, 48, 41, 0.2)',
+                            borderColor: '#AD3029',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Sold Units',
+                            data: soldData,
+                            backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                            borderColor: '#22c55e',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        async function removeFlashSale(productId) {
+            if (!confirm('Are you sure you want to remove this product from Flash Sale?')) return;
+
+            try {
+                const response = await fetch(`${baseUrl}/products/${productId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ isFlashSale: false })
+                });
+
+                if (response.ok) {
+                    showToast('Successfully removed from Flash Sale', 'success');
+                    loadFlashSaleDashboard();
+                } else {
+                    showToast('Failed to remove from Flash Sale', 'error');
+                }
+            } catch (error) {
+                console.error('Error removing flash sale:', error);
+                showToast('Error removing flash sale', 'error');
+            }
+        }
+
+        function editFlashSale(productId) {
+            editProduct(productId);
+        }
     </script>
 </body>
 

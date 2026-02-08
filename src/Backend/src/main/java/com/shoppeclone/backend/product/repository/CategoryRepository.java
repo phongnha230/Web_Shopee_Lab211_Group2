@@ -10,4 +10,6 @@ public interface CategoryRepository extends MongoRepository<Category, String> {
     List<Category> findByParentIdIsNull(); // Get root categories
 
     boolean existsByName(String name);
+
+    java.util.Optional<Category> findByName(String name);
 }

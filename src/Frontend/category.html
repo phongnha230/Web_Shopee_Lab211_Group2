@@ -78,9 +78,7 @@
             <nav class="flex text-sm text-gray-600">
                 <a href="index.html" class="hover:text-orange-500">Home</a>
                 <span class="mx-2">/</span>
-                <a href="index.html#categoryList" class="hover:text-orange-500">Category</a>
-                <span class="mx-2">/</span>
-                <span class="text-gray-800 font-semibold" id="categoryName">All Products</span>
+                <span class="text-gray-800 font-semibold" id="categoryName">Loading...</span>
             </nav>
         </div>
     </div>
@@ -182,7 +180,20 @@
         const API_BASE_URL = 'http://localhost:8080/api';
 
         async function loadProducts() {
-            const params = new URLSearchParams(window.location.search);
+            // Read parameters from hash fragment instead of query string
+            // Support both ?id=... (old) and #id=... (new hash-based)
+            let params;
+            if (window.location.hash && window.location.hash.length > 1) {
+                // Hash-based: #id=123&name=Fashion
+                const hashParams = window.location.hash.substring(1); // Remove '#'
+                params = new URLSearchParams(hashParams);
+                console.log('📍 Reading from HASH:', hashParams);
+            } else {
+                // Query-based: ?id=123&name=Fashion (fallback)
+                params = new URLSearchParams(window.location.search);
+                console.log('📍 Reading from QUERY:', window.location.search);
+            }
+
             let categoryId = params.get('id');
             // Sanitize ID
             if (categoryId && (categoryId === 'undefined' || categoryId === 'null' || categoryId.trim() === '')) {
@@ -191,10 +202,23 @@
                 categoryId = categoryId.trim();
             }
 
-            let categoryName = params.get('name') || 'All Products';
+            let categoryName = params.get('name');
+            if (categoryName) {
+                categoryName = decodeURIComponent(categoryName);
+            } else {
+                categoryName = 'Category';
+            }
 
+            // Initial placeholder
             document.getElementById('categoryTitle').textContent = categoryName;
             document.getElementById('categoryName').textContent = categoryName;
+
+            // UPDATE DEBUG INFO - Show both raw and processed values
+            const rawId = params.get('id');
+            const rawName = params.get('name');
+
+            // Debug info removed - element no longer exists
+            // document.getElementById('debugText').textContent = `Raw ID: ${rawId} | Processed ID: ${categoryId} | Raw Name: ${rawName} | Processed Name: ${categoryName}`;
 
             const grid = document.getElementById('productsGrid');
             const noProducts = document.getElementById('noProducts');
@@ -204,17 +228,18 @@
             try {
                 grid.innerHTML = '<div class="col-span-full text-center text-gray-500 py-20">Loading products...</div>';
 
-                // 1. Fetch Categories for Name Mapping
-                const catResponse = await fetch(`${API_BASE_URL}/categories`);
-                const categories = catResponse.ok ? await catResponse.json() : [];
-                const catMap = {};
-                categories.forEach(c => catMap[c.id] = c.name);
-
-                // Robustness: Recover name if missing or default
-                if (categoryId && (categoryName === 'Category' || categoryName === 'All Products') && catMap[categoryId]) {
-                    categoryName = catMap[categoryId];
-                    document.getElementById('categoryName').textContent = categoryName;
-                    document.getElementById('categoryTitle').innerHTML = categoryName + debugText;
+                if (categoryId && (categoryName === 'Category' || categoryName === 'All Products')) {
+                    try {
+                        const directResponse = await fetch(`${API_BASE_URL}/categories/${categoryId}`);
+                        if (directResponse.ok) {
+                            const catDetails = await directResponse.json();
+                            categoryName = catDetails.name;
+                            document.getElementById('categoryName').textContent = categoryName;
+                            document.getElementById('categoryTitle').textContent = categoryName;
+                        }
+                    } catch (e) {
+                        console.error("Failed to fetch category details", e);
+                    }
                 }
 
                 // 2. Try fetching from Backend by ID or All
@@ -230,30 +255,13 @@
                 }
 
                 // If no products by ID, or ID is missing, fetch ALL and filter more flexibly
-                if (realProducts.length === 0) {
+                // MODIFIED: Only fallback if NO category ID was provided. 
+                // If User clicked a Category, they want ONLY that category. If empty, show empty.
+                if (realProducts.length === 0 && !categoryId) {
                     const allResponse = await fetch(`${API_BASE_URL}/products`);
                     if (allResponse.ok) {
                         const allProducts = await allResponse.json();
-
-                        // Filter
-                        if (categoryName === 'All Products' && !categoryId) {
-                            realProducts = allProducts;
-                        } else {
-                            realProducts = allProducts.filter(p => {
-                                const pCategories = p.categories || [];
-
-                                // Direct ID Match
-                                if (categoryId && pCategories.includes(categoryId)) return true;
-
-                                // Name Match
-                                return pCategories.some(id => {
-                                    const name = catMap[id];
-                                    if (!name) return false;
-                                    return name.toLowerCase().includes(categoryName.toLowerCase()) ||
-                                        categoryName.toLowerCase().includes(name.toLowerCase());
-                                });
-                            });
-                        }
+                        realProducts = allProducts;
                     }
                 }
 
@@ -329,7 +337,8 @@
         }
 
         function goToProduct(id) {
-            window.location.href = `product-detail.html?id=${id}`;
+            // Use hash-based navigation to bypass server routing issues
+            window.location.href = `product-detail.html#id=${id}`;
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -372,7 +381,7 @@
                     const cartData = await response.json();
                     // Calculate total items from backend response
                     const totalItems = cartData.items ? cartData.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
-                    
+
                     const badge = document.getElementById('cartBadge');
                     if (badge) {
                         badge.textContent = totalItems;

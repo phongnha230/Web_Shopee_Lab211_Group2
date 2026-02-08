@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify OTP | ShoppeClone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        @keyframes blob {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            33% {
+                transform: translate(30px, -40px) scale(1.1);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) scale(0.9);
+            }
+
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+        }
+
+        @keyframes pulseInput {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(173, 48, 41, 0.6);
+            }
+
+            50% {
+                box-shadow: 0 0 0 10px rgba(173, 48, 41, 0);
+            }
+        }
+
+        .otp-input {
+            animation: pulseInput 2s infinite;
+        }
+    </style>
+</head>
+
+<body
+    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FEEFCD] via-[#F8E8D0] to-[#AD3029]/20 overflow-hidden">
+
+    <!-- Animated blobs -->
+    <div
+        class="absolute w-96 h-96 bg-[#AD3029]/25 rounded-full blur-3xl top-[-100px] left-[-100px] animate-[blob_20s_infinite]">
+    </div>
+    <div
+        class="absolute w-96 h-96 bg-[#AD3029]/20 rounded-full blur-3xl bottom-[-100px] right-[-100px] animate-[blob_25s_infinite]">
+    </div>
+
+    <div class="relative z-10 w-full max-w-md bg-white/60 backdrop-blur-xl rounded-3xl shadow-2xl p-12">
+
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-extrabold text-[#AD3029] mb-2">ShoppeClone</h2>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">Verify your email</h3>
+            <p class="text-gray-600">Enter the 6-digit code sent to your email</p>
+        </div>
+
+        <!-- Countdown timer -->
+        <div class="text-center mb-8 p-4 bg-[#FEEFCD] border-2 border-[#AD3029] rounded-2xl">
+            <div id="countdown" class="text-lg font-semibold text-[#AD3029] mb-1">00:30</div>
+            <p class="text-sm text-gray-600">
+                Didn't receive code?
+                <span id="resendLink" class="text-gray-400 font-medium cursor-pointer pointer-events-none">
+                    Resend
+                </span>
+            </p>
+        </div>
+
+        <form id="otpForm">
+            <!-- OTP Input Fields -->
+            <div class="flex gap-3 justify-center mb-8">
+                <input id="otp1" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
+                    class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-gray-300 focus:border-[#AD3029] focus:outline-none shadow-lg">
+                <input id="otp2" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
+                    class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-gray-300 focus:border-[#AD3029] focus:outline-none shadow-lg">
+                <input id="otp3" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
+                    class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-gray-300 focus:border-[#AD3029] focus:outline-none shadow-lg">
+                <input id="otp4" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
+                    class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-gray-300 focus:border-[#AD3029] focus:outline-none shadow-lg">
+                <input id="otp5" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
+                    class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-gray-300 focus:border-[#AD3029] focus:outline-none shadow-lg">
+                <input id="otp6" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
+                    class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-gray-300 focus:border-[#AD3029] focus:outline-none shadow-lg">
+            </div>
+
+            <!-- Verify Button -->
+            <button type="submit"
+                class="w-full py-4 rounded-full bg-gradient-to-r from-[#AD3029] to-[#CD5252] text-white font-semibold text-lg shadow-xl hover:opacity-90 hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-200 mb-6">
+                Verify Code
+            </button>
+        </form>
+
+        <!-- Back to login -->
+        <p class="text-center text-sm text-gray-700">
+            Wrong email?
+            <a href="/login.html" class="text-[#AD3029] font-semibold hover:underline">
+                Sign in instead
+            </a>
+        </p>
+    </div>
+
+
+    <script>
+        // Verify OTP
+        document.getElementById('otpForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = document.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerText;
+
+            // Disable button to prevent double click
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Verifying...';
+            submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+
+            const inputs = document.querySelectorAll('.otp-input');
+            let otp = '';
+            inputs.forEach(input => otp += input.value);
+
+            if (otp.length !== 6) {
+                alert('⚠️ Please enter 6 digits');
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalBtnText;
+                submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                return;
+            }
+
+            const email = localStorage.getItem('pendingEmail');
+            const password = localStorage.getItem('pendingPassword');
+
+            try {
+                const response = await fetch('http://localhost:8080/api/auth/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, code: otp }) // Backend expects 'code'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // alert('✅ Email verified successfully!'); // Optional: Skip alert for smoother flow
+
+                    // Auto Login
+                    if (password) {
+                        const loginRes = await fetch('http://localhost:8080/api/auth/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email, password })
+                        });
+
+                        const loginData = await loginRes.json();
+
+                        if (loginRes.ok) {
+                            localStorage.setItem('accessToken', loginData.accessToken);
+                            localStorage.setItem(
+                                'userName',
+                                loginData.user.fullName || email.split('@')[0]
+                            );
+                            localStorage.removeItem('pendingPassword'); // Clear sensitive data
+                            localStorage.removeItem('pendingEmail'); // Clear sensitive data
+                            window.location.href = 'index.html';
+                        } else {
+                            alert('✅ Verified! Please login manually.');
+                            localStorage.removeItem('pendingEmail'); // Clear sensitive data
+                            localStorage.removeItem('pendingPassword'); // Clear sensitive data
+                            window.location.href = 'login.html';
+                        }
+                    } else {
+                        localStorage.removeItem('pendingEmail'); // Clear sensitive data
+                        localStorage.removeItem('pendingPassword'); // Clear sensitive data
+                        window.location.href = 'login.html';
+                    }
+                } else {
+                    alert('❌ ' + (data.message || 'Verification failed'));
+                    // Re-enable button on error
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = originalBtnText;
+                    submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('❌ Server connection error');
+                // Re-enable button on error
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalBtnText;
+                submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+            }
+        });
+
+        // Timer Logic
+        let timeLeft = 30; // 30 seconds
+        let timerInterval;
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            const timerEl = document.getElementById('countdown');
+            if (timerEl) timerEl.textContent = display;
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+
+            timeLeft = 30;
+            updateTimerDisplay();
+
+            // Ensure disabled state initially
+            const resendLink = document.getElementById('resendLink');
+            if (resendLink) {
+                resendLink.classList.add('pointer-events-none', 'text-gray-400');
+                resendLink.classList.remove('text-[#AD3029]', 'cursor-pointer', 'underline');
+                resendLink.innerText = "Resend";
+            }
+
+            timerInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    updateTimerDisplay(); // Show 00:00
+
+                    if (resendLink) {
+                        resendLink.classList.remove('pointer-events-none', 'text-gray-400');
+                        resendLink.classList.add('text-[#AD3029]', 'cursor-pointer', 'underline');
+                        resendLink.onclick = resendOTP;
+                        resendLink.innerText = "Resend";
+                    }
+                    return;
+                }
+
+                timeLeft--;
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        // Auto start when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 OTP Page Loaded - Starting Timer');
+            startTimer();
+        });
+
+        // Resend OTP
+        async function resendOTP() {
+            try {
+                // Disable link again
+                const resendLink = document.getElementById('resendLink');
+                resendLink.classList.add('pointer-events-none', 'text-gray-400');
+                resendLink.classList.remove('text-[#AD3029]', 'cursor-pointer', 'underline');
+                resendLink.innerText = "Sending...";
+
+                const email = localStorage.getItem('pendingEmail');
+                if (!email) {
+                    alert('❌ Session expired. Please register again.');
+                    window.location.href = 'register.html';
+                    return;
+                }
+
+                const response = await fetch('http://localhost:8080/api/auth/send-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                if (response.ok) {
+                    alert('✅ New OTP sent!');
+                    resendLink.innerText = "Resend"; // Reset text
+                    timeLeft = 30;
+                    startTimer();
+                } else {
+                    const data = await response.json();
+                    alert('❌ ' + (data.message || 'Failed to resend'));
+                    // Re-enable if failed but keep red if allow retry? No, retry timer logic handles it.
+                    // But if fetch failed, we should probably allow retry immediately?
+                    // For now, let's keep it consistent: error -> button stays disabled? No, re-enable.
+                    resendLink.classList.remove('pointer-events-none', 'text-gray-400');
+                    resendLink.classList.add('text-[#AD3029]', 'cursor-pointer', 'underline');
+                    resendLink.innerText = "Resend";
+                }
+            } catch (error) {
+                console.error(error);
+                alert('❌ Connection error');
+                // Re-enable if failed
+                const resendLink = document.getElementById('resendLink');
+                resendLink.classList.remove('pointer-events-none', 'text-gray-400');
+                resendLink.classList.add('text-[#AD3029]', 'cursor-pointer', 'underline');
+                resendLink.innerText = "Resend";
+            }
+        }
+
+        // Auto-focus Logic
+        const otpInputs = document.querySelectorAll('.otp-input');
+
+        otpInputs.forEach((input, index) => {
+            // Handle Input (Type number & Move Next)
+            input.addEventListener('input', (e) => {
+                const value = e.target.value;
+
+                // Allow only numbers
+                if (!/^\d*$/.test(value)) {
+                    e.target.value = value.replace(/\D/g, '');
+                    return;
+                }
+
+                if (value.length >= 1) {
+                    if (index < otpInputs.length - 1) {
+                        // Use setTimeout to avoid event conflict and smooth transition
+                        setTimeout(() => {
+                            otpInputs[index + 1].focus();
+                            otpInputs[index + 1].select();
+                        }, 0);
+                    }
+                }
+            });
+
+            // Select text on focus for easier editing
+            input.addEventListener('focus', () => {
+                input.select();
+            });
+
+            // Handle Keydown (Backspace & Arrows)
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace') {
+                    if (input.value === '' && index > 0) {
+                        otpInputs[index - 1].focus();
+                    }
+                } else if (e.key === 'ArrowLeft' && index > 0) {
+                    otpInputs[index - 1].focus();
+                } else if (e.key === 'ArrowRight' && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+            });
+
+            // Handle Paste (Paste full code)
+            input.addEventListener('paste', (e) => {
+                const paste = (e.clipboardData || window.clipboardData).getData('text');
+                // Only digits
+                if (!/^\d+$/.test(paste)) return;
+
+                e.preventDefault();
+                const digits = paste.split('');
+                otpInputs.forEach((inp, idx) => {
+                    if (digits[idx]) {
+                        inp.value = digits[idx];
+                    }
+                });
+
+                // Focus on last filled or last input
+                const focusIdx = Math.min(digits.length, otpInputs.length) - 1;
+                if (focusIdx >= 0 && focusIdx < otpInputs.length) {
+                    otpInputs[focusIdx].focus();
+                }
+            });
+        });
+
+        // Auto start timer
+        // startTimer() called in DOMContentLoaded above
+
+        // === ENTER KEY SUPPORT ===
+        const allOtpInputs = document.querySelectorAll('.otp-input');
+        allOtpInputs.forEach(input => {
+            input.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    const form = document.getElementById('otpForm');
+                    if (form) form.submit(); // Direct submit
+                }
+            });
+        });
+    </script>
+
+
+
+</body>
+
+</html>

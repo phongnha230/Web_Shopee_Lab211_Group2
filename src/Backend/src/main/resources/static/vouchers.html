@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Vouchers - Shopee Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+
+        .shimmer {
+            background: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite;
+        }
+
+        .voucher-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .voucher-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .voucher-orange {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
+        }
+
+        .voucher-green {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+        }
+
+        .voucher-blue {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .voucher-purple {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-orange-500 to-orange-600 shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <a href="index.html" class="text-white hover:text-orange-200">
+                        <i class="fas fa-arrow-left text-xl"></i>
+                    </a>
+                    <i class="fas fa-tags text-3xl text-white"></i>
+                    <span class="text-2xl font-bold text-white">Product Vouchers</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Tabs -->
+    <div class="bg-white border-b sticky top-16 z-40">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex space-x-8">
+                <button id="tab-product" onclick="switchTab('product')" class="py-4 px-2 border-b-2 border-orange-500 text-orange-600 font-semibold transition-colors">
+                    Product Discounts
+                </button>
+                <button id="tab-shipping" onclick="switchTab('shipping')" class="py-4 px-2 text-gray-600 hover:text-orange-500 transition-colors">
+                    Free Shipping
+                </button>
+                <button id="tab-collected" onclick="switchTab('collected')" class="py-4 px-2 text-gray-600 hover:text-orange-500 transition-colors">
+                    Collected (<span id="collectedCount">3</span>)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <!-- Banner -->
+        <div class="bg-gradient-to-r from-orange-400 to-pink-500 rounded-xl p-6 mb-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold mb-2">� Save Big on Products!</h2>
+                    <p class="text-orange-100">Get up to 50% OFF on your orders</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-4xl font-bold">15</div>
+                    <div class="text-sm">Available</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vouchers Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4" id="vouchersContainer">
+            <!-- Vouchers will be loaded here -->
+        </div>
+    </main>
+
+    <script>
+        const VOUCHERS = [
+            {
+                id: 'PD001',
+                code: 'ELECTRO10',
+                type: 'product',
+                title: '10% OFF Electronics',
+                discount: '10% OFF',
+                minOrder: '₫100',
+                expiry: '31 Jan 2026',
+                color: 'voucher-blue',
+                icon: '💻',
+                collected: false,
+                stock: 450
+            },
+            {
+                id: 'PD002',
+                code: 'FASHION20',
+                type: 'product',
+                title: '20% OFF Fashion Items',
+                discount: '20% OFF',
+                minOrder: '₫50',
+                expiry: '28 Feb 2026',
+                color: 'voucher-purple',
+                icon: '👗',
+                collected: false,
+                stock: 320
+            },
+            {
+                id: 'PD003',
+                code: 'WELCOME50',
+                type: 'product',
+                title: '50% OFF First Order',
+                discount: '50% OFF',
+                minOrder: '₫0',
+                expiry: '31 Dec 2026',
+                color: 'voucher-orange',
+                icon: '🎉',
+                collected: true,
+                stock: 999
+            },
+            {
+                id: 'PD004',
+                code: 'MOBILE15',
+                type: 'product',
+                title: '15% OFF Mobile Phones',
+                discount: '15% OFF',
+                minOrder: '₫200',
+                expiry: '15 Feb 2026',
+                color: 'voucher-green',
+                icon: '📱',
+                collected: false,
+                stock: 89
+            },
+            {
+                id: 'PD005',
+                code: 'SPORT30',
+                type: 'product',
+                title: '₫30 OFF Sports Items',
+                discount: '₫30 OFF',
+                minOrder: '₫100',
+                expiry: '20 Jan 2026',
+                color: 'voucher-blue',
+                icon: '⚽',
+                collected: false,
+                stock: 156
+            },
+            {
+                id: 'PD006',
+                code: 'HOME25',
+                type: 'product',
+                title: '25% OFF Home & Living',
+                discount: '25% OFF',
+                minOrder: '₫150',
+                expiry: '28 Feb 2026',
+                color: 'voucher-purple',
+                icon: '🏠',
+                collected: false,
+                stock: 234
+            },
+            {
+                id: 'FS001',
+                code: 'FREESHIP15',
+                type: 'shipping',
+                title: 'Free Shipping Voucher',
+                discount: '₫15k OFF',
+                minOrder: '₫50',
+                expiry: '31 Jan 2026',
+                color: 'voucher-green',
+                icon: '🚚',
+                collected: false,
+                stock: 234
+            },
+            {
+                id: 'FS002',
+                code: 'SUPER30',
+                type: 'shipping',
+                title: 'Super Freeship Voucher',
+                discount: '₫30k OFF',
+                minOrder: '₫100',
+                expiry: '15 Feb 2026',
+                color: 'voucher-blue',
+                icon: '🚀',
+                collected: false,
+                stock: 89
+            },
+            {
+                id: 'FS003',
+                code: 'EXPRESS25',
+                type: 'shipping',
+                title: 'Express Delivery Free',
+                discount: '₫25k OFF',
+                minOrder: '₫75',
+                expiry: '28 Feb 2026',
+                color: 'voucher-orange',
+                icon: '⚡',
+                collected: false,
+                stock: 156
+            }
+        ];
+
+        let currentTab = 'product';
+
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Update Tab UI
+            document.querySelectorAll('button[id^="tab-"]').forEach(btn => {
+                btn.className = 'py-4 px-2 text-gray-600 hover:text-orange-500 transition-colors border-b-2 border-transparent';
+            });
+            
+            const activeBtn = document.getElementById(`tab-${tab}`);
+            activeBtn.className = 'py-4 px-2 border-b-2 border-orange-500 text-orange-600 font-semibold transition-colors';
+            
+            renderVouchers();
+        }
+
+        function renderVouchers() {
+            const container = document.getElementById('vouchersContainer');
+            
+            // Filter Logic
+            let filteredVouchers = [];
+            if (currentTab === 'collected') {
+                filteredVouchers = VOUCHERS.filter(v => v.collected);
+            } else {
+                filteredVouchers = VOUCHERS.filter(v => v.type === currentTab);
+            }
+
+            // Update Collected Count
+            const collectedCount = VOUCHERS.filter(v => v.collected).length;
+            document.getElementById('collectedCount').textContent = collectedCount;
+
+            if (filteredVouchers.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-400">
+                        <div class="text-5xl mb-4">🏷️</div>
+                        <p>No vouchers found in this category.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredVouchers.map(v => `
+                <div class="voucher-card ${v.color} rounded-lg p-3 text-white shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-1 relative">
+                    <div class="relative z-10">
+                        <div class="flex items-start justify-between mb-2">
+                            <div class="text-2xl">${v.icon}</div>
+                            <div class="bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-full text-xs font-semibold">
+                                ${v.stock} left
+                            </div>
+                        </div>
+                        
+                        <h3 class="text-sm font-bold mb-1 line-clamp-2">${v.title}</h3>
+                        <div class="text-xs font-mono bg-black/20 inline-block px-1.5 rounded mb-2" title="Voucher Code">
+                            <i class="fas fa-key mr-1"></i>${v.code}
+                        </div>
+                        
+                        <div class="flex items-center gap-1 mb-2">
+                            <div class="text-xl font-bold">${v.discount}</div>
+                            <div class="bg-white/20 px-1.5 py-0.5 rounded text-xs">
+                                Min. ${v.minOrder}
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="text-xs opacity-90">
+                                <i class="far fa-clock mr-1"></i>
+                                ${v.expiry}
+                            </div>
+                        </div>
+                        
+                        <div class="mt-2">
+                            ${v.collected ? 
+                                `<button onclick="useVoucher('${v.code}')" 
+                                    class="bg-white text-orange-600 hover:bg-orange-50 w-full py-2 rounded-lg text-sm font-bold transition-all transform active:scale-95 shadow-sm">
+                                    Use Now
+                                </button>` 
+                                : 
+                                `<button onclick="collectVoucher('${v.id}')" 
+                                    class="bg-white/90 text-orange-600 hover:bg-white w-full py-2 rounded-lg text-sm font-bold transition-all transform active:scale-95 shadow-sm">
+                                    Collect Now
+                                </button>`
+                            }
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function useVoucher(code) {
+            const voucher = VOUCHERS.find(v => v.code === code);
+            const type = voucher && voucher.type === 'product' ? 'PRODUCT' : 'SHIPPING';
+            
+            // Save to localStorage for robust transfer
+            localStorage.setItem('autoApplyVoucher', JSON.stringify({ code, type }));
+            
+            // Redirect to checkout
+            window.location.href = 'checkout-backend.html';
+        }
+
+        function collectVoucher(id) {
+            const voucher = VOUCHERS.find(v => v.id === id);
+            if (!voucher || voucher.collected) return;
+            
+            voucher.collected = true;
+            renderVouchers(); // Re-render to update UI (and move to Collected tab if needed)
+            
+            showToast('🎉 Voucher collected! Check "Collected" tab to use it.');
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-20 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-bounce';
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', renderVouchers);
+    </script>
+</body>
+
+</html>

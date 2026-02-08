@@ -18,4 +18,9 @@ public class CreateProductRequest {
     private List<CreateProductVariantRequest> variants;
     private List<String> images; // List of Image URLs
     private String categoryId;
+
+    // Flash Sale fields
+    private Boolean isFlashSale;
+    private java.math.BigDecimal flashSalePrice;
+    private Integer flashSaleStock;
 }
