@@ -77,6 +77,13 @@ public class OrderController {
         return ResponseEntity.ok(responses);
     }
 
+    @DeleteMapping
+    public ResponseEntity<Void> deleteAllUserOrders(@AuthenticationPrincipal UserDetails userDetails) {
+        String userId = getUserId(userDetails);
+        orderService.deleteAllUserOrders(userId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderResponse> getOrder(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -142,15 +149,4 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
 
-    @PutMapping("/{orderId}/assign-shipper")
-    public ResponseEntity<OrderResponse> assignShipper(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable String orderId,
-            @RequestParam String shipperId) {
-        String userId = getUserId(userDetails);
-        // TODO: Check if admin/seller
-        Order order = orderService.assignShipper(orderId, shipperId);
-        OrderResponse response = orderResponseService.enrichWithReviewInfo(order, userId);
-        return ResponseEntity.ok(response);
-    }
 }

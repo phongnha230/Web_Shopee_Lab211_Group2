@@ -7,11 +7,14 @@ import com.shoppeclone.backend.auth.dto.request.SendOtpRequest;
 import com.shoppeclone.backend.auth.dto.request.VerifyOtpRequest;
 import com.shoppeclone.backend.auth.dto.request.VerifyOtpAndResetPasswordRequest;
 import com.shoppeclone.backend.auth.dto.response.AuthResponse;
+import com.shoppeclone.backend.auth.dto.response.UserDto;
 import com.shoppeclone.backend.auth.service.AuthService;
 import com.shoppeclone.backend.auth.service.OtpService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -24,6 +27,11 @@ public class AuthController {
 
     private final AuthService authService;
     private final OtpService otpService;
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDto> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(authService.getCurrentUser(userDetails.getUsername()));
+    }
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {

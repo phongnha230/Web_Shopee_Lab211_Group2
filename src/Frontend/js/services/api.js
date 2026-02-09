@@ -16,7 +16,15 @@ async function handleResponse(response) {
         const error = await response.json().catch(() => ({ message: 'Network error' }));
         throw new Error(error.message || `HTTP error! status: ${response.status}`);
     }
-    return response.json();
+    // 204 No Content hoặc body rỗng - không parse JSON
+    if (response.status === 204) return null;
+    const text = await response.text();
+    if (!text || text.trim() === '') return null;
+    try {
+        return JSON.parse(text);
+    } catch {
+        return null;
+    }
 }
 
 // ======================
@@ -115,6 +123,15 @@ const OrderAPI = {
             headers: getAuthHeaders()
         });
         return handleResponse(response);
+    },
+
+    // Delete all user orders (clear virtual/test shop data)
+    deleteAllOrders: async () => {
+        const response = await fetch(`${API_BASE_URL}/orders`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+        });
+        return handleResponse(response);
     }
 };
 
@@ -146,12 +163,29 @@ const PaymentAPI = {
 // REVIEW API SERVICE
 // ======================
 const ReviewAPI = {
+    // Upload review image (returns { imageUrl })
+    uploadReviewImage: async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        const token = localStorage.getItem('accessToken');
+        const headers = { ...(token && { 'Authorization': `Bearer ${token}` }) };
+        const response = await fetch(`${API_BASE_URL}/reviews/upload-image`, {
+            method: 'POST',
+            headers,
+            body: formData
+        });
+        const data = await handleResponse(response);
+        return data.imageUrl;
+    },
+
     // Create review for a product
-    createReview: async (productId, orderId, rating, comment) => {
+    createReview: async (productId, orderId, rating, comment, imageUrls = []) => {
+        const body = { productId, orderId, rating, comment };
+        if (imageUrls && imageUrls.length > 0) body.imageUrls = imageUrls;
         const response = await fetch(`${API_BASE_URL}/reviews`, {
             method: 'POST',
             headers: getAuthHeaders(),
-            body: JSON.stringify({ productId, orderId, rating, comment })
+            body: JSON.stringify(body)
         });
         return handleResponse(response);
     },
@@ -173,11 +207,13 @@ const ReviewAPI = {
     },
 
     // Update review
-    updateReview: async (reviewId, rating, comment) => {
+    updateReview: async (reviewId, rating, comment, imageUrls) => {
+        const body = { rating, comment };
+        if (imageUrls && imageUrls.length > 0) body.imageUrls = imageUrls;
         const response = await fetch(`${API_BASE_URL}/reviews/${reviewId}`, {
             method: 'PUT',
             headers: getAuthHeaders(),
-            body: JSON.stringify({ rating, comment })
+            body: JSON.stringify(body)
         });
         return handleResponse(response);
     },
@@ -289,6 +325,72 @@ const ShippingAPI = {
 };
 
 // ======================
+// REFUND API SERVICE
+// ======================
+const RefundAPI = {
+    requestRefund: async (orderId, buyerId, amount, reason) => {
+        const response = await fetch(`${API_BASE_URL}/refunds/${orderId}/request`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ buyerId, amount, reason })
+        });
+        return handleResponse(response);
+    },
+
+    getRefundByOrder: async (orderId) => {
+        const response = await fetch(`${API_BASE_URL}/refunds/${orderId}`, {
+            headers: getAuthHeaders()
+        });
+        return handleResponse(response);
+    }
+};
+
+// ======================
+// DISPUTE API SERVICE
+// ======================
+const DisputeAPI = {
+    createDispute: async (orderId, buyerId, reason, description) => {
+        const response = await fetch(`${API_BASE_URL}/disputes`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ orderId, buyerId, reason, description })
+        });
+        return handleResponse(response);
+    },
+
+    getDisputeByOrder: async (orderId) => {
+        const response = await fetch(`${API_BASE_URL}/disputes/order/${orderId}`, {
+            headers: getAuthHeaders()
+        });
+        if (response.status === 404) return null;
+        return handleResponse(response);
+    },
+
+    getDispute: async (disputeId) => {
+        const response = await fetch(`${API_BASE_URL}/disputes/${disputeId}`, {
+            headers: getAuthHeaders()
+        });
+        return handleResponse(response);
+    },
+
+    addImage: async (disputeId, imageUrl, uploadedBy) => {
+        const response = await fetch(`${API_BASE_URL}/disputes/${disputeId}/images`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ imageUrl, uploadedBy })
+        });
+        return handleResponse(response);
+    },
+
+    getDisputeImages: async (disputeId) => {
+        const response = await fetch(`${API_BASE_URL}/disputes/${disputeId}/images`, {
+            headers: getAuthHeaders()
+        });
+        return handleResponse(response);
+    }
+};
+
+// ======================
 // VOUCHER API SERVICE
 // ======================
 const VoucherAPI = {
@@ -306,10 +408,18 @@ const VoucherAPI = {
             headers: getAuthHeaders()
         });
         return handleResponse(response);
+    },
+
+    // Get voucher codes the current user has already used (from their orders)
+    getUsedVoucherCodes: async () => {
+        const response = await fetch(`${API_BASE_URL}/vouchers/used-codes`, {
+            headers: getAuthHeaders()
+        });
+        return handleResponse(response);
     }
 };
 
 // Export for use in other files
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { CartAPI, OrderAPI, PaymentAPI, ReviewAPI, ProductAPI, VoucherAPI, ShippingAPI };
+    module.exports = { CartAPI, OrderAPI, PaymentAPI, ReviewAPI, ProductAPI, VoucherAPI, ShippingAPI, RefundAPI, DisputeAPI };
 }

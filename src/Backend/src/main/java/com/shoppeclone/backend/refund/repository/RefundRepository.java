@@ -12,4 +12,6 @@ public interface RefundRepository extends MongoRepository<Refund, String> {
     Optional<Refund> findByOrderId(String orderId);
 
     List<Refund> findByBuyerId(String buyerId);
+
+    List<Refund> findByOrderIdIn(List<String> orderIds);
 }

@@ -169,41 +169,28 @@
                     <h1 class="text-2xl font-bold text-gray-800 mb-2">Chi tiết đơn hàng</h1>
                     <p class="text-gray-600">Đặt ngày <span id="orderDate">Feb 1, 2026</span></p>
                 </div>
-                <div class="text-right flex items-center gap-3">
-                    <span id="orderStatus" class="inline-block px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-800">
-                        COMPLETED
-                    </span>
-                    <div id="cancelOrderBtnWrap"></div>
+                <div class="text-right flex flex-col items-end gap-2">
+                    <div class="flex items-center gap-3">
+                        <span id="orderStatus" class="inline-block px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+                            COMPLETED
+                        </span>
+                        <div id="cancelOrderBtnWrap"></div>
+                    </div>
+                    <p id="cancelReasonDisplay" class="text-red-600 text-sm" style="display:none;"></p>
+                    <p id="refundStatusDisplay" class="text-blue-600 text-sm font-semibold" style="display:none;"></p>
                 </div>
             </div>
             
-            <!-- Order Timeline -->
-            <div class="border-t border-gray-200 pt-4 mt-4">
-                <div class="flex items-center justify-between text-sm">
-                    <div class="flex-1 text-center">
-                        <div class="w-10 h-10 bg-green-500 rounded-full mx-auto mb-2 flex items-center justify-center">
-                            <i class="fas fa-check text-white"></i>
-                        </div>
-                        <p class="font-semibold text-gray-800">Order Placed</p>
-                        <p class="text-gray-500 text-xs">Feb 1, 10:00</p>
-                    </div>
-                    <div class="flex-1 border-t-2 border-green-500 -mt-5"></div>
-                    <div class="flex-1 text-center">
-                        <div class="w-10 h-10 bg-green-500 rounded-full mx-auto mb-2 flex items-center justify-center">
-                            <i class="fas fa-box text-white"></i>
-                        </div>
-                        <p class="font-semibold text-gray-800">Shipped</p>
-                        <p class="text-gray-500 text-xs">Feb 1, 14:00</p>
-                    </div>
-                    <div class="flex-1 border-t-2 border-green-500 -mt-5"></div>
-                    <div class="flex-1 text-center">
-                        <div class="w-10 h-10 bg-green-500 rounded-full mx-auto mb-2 flex items-center justify-center">
-                            <i class="fas fa-truck text-white"></i>
-                        </div>
-                        <p class="font-semibold text-gray-800">Delivered</p>
-                        <p class="text-gray-500 text-xs">Feb 1, 18:00</p>
-                    </div>
+            <!-- Order Timeline (rendered by JS with real data) -->
+            <div id="orderTimeline" class="border-t border-gray-200 pt-4 mt-4">
+                <div class="flex items-center justify-between text-sm" id="orderTimelineInner">
+                    <p class="text-gray-500 py-2">Đang tải...</p>
                 </div>
+            </div>
+
+            <!-- Khiếu nại (xử lý tại Admin, nếu duyệt sẽ tự động hoàn tiền) -->
+            <div id="disputeActions" class="border-t border-gray-200 pt-4 mt-4 flex flex-wrap gap-3">
+                <!-- Buttons rendered by JS based on order status -->
             </div>
         </div>
 
@@ -302,11 +289,64 @@
         </div>
     </div>
 
+    <!-- Dispute Modal -->
+    <div id="disputeModal" class="modal">
+        <div class="modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Tạo khiếu nại</h2>
+                    <button onclick="closeDisputeModal()" class="text-gray-400 hover:text-gray-600 text-2xl">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <p class="text-sm text-gray-600 mb-4">Đơn hàng phải ở trạng thái Đã gửi hoặc Đã giao (trong 7 ngày).</p>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">Lý do khiếu nại</label>
+                    <select id="disputeReason" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none">
+                        <option value="Sản phẩm không đúng mô tả">Sản phẩm không đúng mô tả</option>
+                        <option value="Sản phẩm bị hỏng/lỗi">Sản phẩm bị hỏng/lỗi</option>
+                        <option value="Không nhận được hàng">Không nhận được hàng</option>
+                        <option value="Thiếu hàng">Thiếu hàng</option>
+                        <option value="Chất lượng kém">Chất lượng kém</option>
+                        <option value="Khác">Khác</option>
+                    </select>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-semibold mb-2">Mô tả chi tiết</label>
+                    <textarea id="disputeDescription" rows="4" placeholder="Mô tả chi tiết vấn đề..."
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"></textarea>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-semibold mb-3">
+                        Ảnh minh chứng (tùy chọn)
+                        <span class="text-sm font-normal text-gray-500">- Tối đa 5 ảnh, 3MB/ảnh</span>
+                    </label>
+                    <div class="image-preview-container mb-4" id="disputeImagePreviewContainer"></div>
+                    <div class="upload-btn" onclick="document.getElementById('disputeImageInput').click()">
+                        <i class="fas fa-camera"></i>
+                        <span>Thêm ảnh</span>
+                    </div>
+                    <input type="file" id="disputeImageInput" accept="image/*" multiple class="hidden" onchange="handleDisputeImageSelect(event)">
+                    <p class="text-xs text-gray-500 mt-2">Hỗ trợ: JPG, PNG, WEBP</p>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="closeDisputeModal()" 
+                        class="flex-1 px-6 py-3 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition">Hủy</button>
+                    <button onclick="submitDispute()" 
+                        class="flex-1 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition">Gửi khiếu nại</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentOrder = null;
         let currentReviewProduct = null;
         let selectedRating = 0;
         let uploadedImages = [];
+        let disputeImages = [];
+        let orderDispute = null;
+        let orderRefund = null;
 
         function formatVND(n) {
             return new Intl.NumberFormat('vi-VN').format(Math.round(Number(n || 0)));
@@ -322,6 +362,10 @@
         function formatDate(d) {
             if (!d) return '-';
             return new Date(d).toLocaleDateString('vi-VN', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+        function formatDateTime(d) {
+            if (!d) return '-';
+            return new Date(d).toLocaleDateString('vi-VN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -347,6 +391,10 @@
 
             try {
                 currentOrder = await OrderAPI.getOrderById(orderId);
+                await Promise.all([
+                    loadDisputeStatus(orderId),
+                    loadRefundStatus(orderId)
+                ]);
                 renderOrder(currentOrder);
             } catch (error) {
                 console.error('Error loading order:', error);
@@ -361,11 +409,211 @@
         }
 
         const CANCELLABLE_STATUSES = ['PENDING', 'CONFIRMED', 'PAID'];
+        const REFUND_DISPUTE_ELIGIBLE = ['SHIPPED', 'COMPLETED'];
+
+        async function loadDisputeStatus(orderId) {
+            orderDispute = null;
+            try {
+                orderDispute = await DisputeAPI.getDisputeByOrder(orderId);
+            } catch (e) {
+                if (e.message && !e.message.includes('404')) console.warn('Dispute check:', e.message);
+            }
+        }
+
+        async function loadRefundStatus(orderId) {
+            orderRefund = null;
+            try {
+                orderRefund = await RefundAPI.getRefundByOrder(orderId);
+            } catch (e) {
+                if (e.message && !e.message.includes('404')) console.warn('Refund check:', e.message);
+            }
+        }
+
+        function canDispute(order) {
+            if (!order || !REFUND_DISPUTE_ELIGIBLE.includes((order.orderStatus || '').toUpperCase())) return false;
+            if (order.orderStatus === 'COMPLETED' && order.completedAt) {
+                const deadline = new Date(order.completedAt);
+                deadline.setDate(deadline.getDate() + 7);
+                if (new Date() > deadline) return false;
+            }
+            // Đã đánh giá sản phẩm rồi thì không được khiếu nại
+            const hasReviewedAny = (order.itemReviewInfo || []).some(r => r && r.hasReviewed);
+            if (hasReviewedAny) return false;
+            return true;
+        }
+
+        function renderDisputeActions(order) {
+            const wrap = document.getElementById('disputeActions');
+            let html = '';
+            const hasReviewedAny = (order.itemReviewInfo || []).some(r => r && r.hasReviewed);
+            if (orderDispute) {
+                html = `<span class="px-4 py-2 rounded-lg font-semibold bg-amber-100 text-amber-800">
+                    <i class="fas fa-exclamation-circle mr-2"></i>Khiếu nại: ${orderDispute.status || 'OPEN'}</span>`;
+            } else if (hasReviewedAny) {
+                html = '<span class="text-gray-500 text-sm">Đã đánh giá sản phẩm nên không thể khiếu nại</span>';
+            } else if (canDispute(order)) {
+                html = `<button onclick="openDisputeModal()" class="px-4 py-2 border-2 border-red-500 text-red-500 rounded-lg font-semibold hover:bg-red-50 transition">
+                    <i class="fas fa-exclamation-circle mr-2"></i>Khiếu nại (trả hàng, hàng hỏng, sai mô tả...)</button>`;
+            } else {
+                html = '<span class="text-gray-500 text-sm">Không có thao tác</span>';
+            }
+            wrap.innerHTML = html;
+        }
+
+        function openDisputeModal() {
+            if (!currentOrder) return;
+            document.getElementById('disputeReason').value = 'Sản phẩm không đúng mô tả';
+            document.getElementById('disputeDescription').value = '';
+            disputeImages = [];
+            renderDisputeImagePreviews();
+            document.getElementById('disputeModal').classList.add('active');
+        }
+
+        function closeDisputeModal() {
+            document.getElementById('disputeModal').classList.remove('active');
+            disputeImages = [];
+            const c = document.getElementById('disputeImagePreviewContainer');
+            if (c) c.innerHTML = '';
+        }
+
+        function handleDisputeImageSelect(event) {
+            const files = Array.from(event.target.files);
+            if (disputeImages.length + files.length > 5) {
+                alert('⚠️ Tối đa 5 ảnh minh chứng!');
+                return;
+            }
+            files.forEach(file => {
+                if (file.size > 3 * 1024 * 1024) {
+                    alert(`⚠️ ${file.name} vượt 3MB!`);
+                    return;
+                }
+                if (!file.type.startsWith('image/')) {
+                    alert(`⚠️ ${file.name} không phải ảnh!`);
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = e => {
+                    disputeImages.push({ file, url: e.target.result });
+                    renderDisputeImagePreviews();
+                };
+                reader.readAsDataURL(file);
+            });
+            event.target.value = '';
+        }
+
+        function renderDisputeImagePreviews() {
+            const container = document.getElementById('disputeImagePreviewContainer');
+            if (!container) return;
+            container.innerHTML = disputeImages.map((img, index) => `
+                <div class="image-preview">
+                    <img src="${img.url}" alt="Dispute ${index + 1}">
+                    <div class="remove-btn" onclick="removeDisputeImage(${index})">
+                        <i class="fas fa-times"></i>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function removeDisputeImage(index) {
+            disputeImages.splice(index, 1);
+            renderDisputeImagePreviews();
+        }
+
+        async function submitDispute() {
+            if (!currentOrder) return;
+            const reason = document.getElementById('disputeReason').value || 'Khác';
+            const description = document.getElementById('disputeDescription').value.trim();
+            if (!description || description.length < 10) {
+                alert('Vui lòng mô tả chi tiết tối thiểu 10 ký tự.');
+                return;
+            }
+            try {
+                const dispute = await DisputeAPI.createDispute(currentOrder.id, currentOrder.userId, reason, description);
+                const hasImages = disputeImages.some(img => img && img.file);
+                if (dispute && dispute.id && hasImages) {
+                    showToast('📤 Đang tải ảnh minh chứng...');
+                    const uploadedBy = localStorage.getItem('userName') || currentOrder.userId || 'buyer';
+                    for (const img of disputeImages) {
+                        if (!img || !img.file) continue;
+                        try {
+                            const url = await ReviewAPI.uploadReviewImage(img.file);
+                            if (url) await DisputeAPI.addImage(dispute.id, url, uploadedBy);
+                        } catch (e) {
+                            console.error('Upload dispute image failed:', e);
+                            alert('⚠️ Một số ảnh tải lên thất bại. Khiếu nại vẫn được gửi.');
+                        }
+                    }
+                }
+                showToast('✅ Đã gửi khiếu nại. Admin sẽ xem xét.');
+                closeDisputeModal();
+                await loadDisputeStatus(currentOrder.id);
+                renderDisputeActions(currentOrder);
+            } catch (e) {
+                alert('❌ ' + (e.message || 'Không thể gửi khiếu nại.'));
+            }
+        }
+
+        function renderOrderTimeline(order) {
+            const status = (order.orderStatus || '').toUpperCase();
+            const shippedAt = order.shippedAt || (order.shipping && order.shipping.shippedAt);
+            const deliveredAt = order.completedAt || (order.shipping && order.shipping.deliveredAt);
+            const step1Done = true;
+            const step2Done = !!shippedAt || ['SHIPPED', 'SHIPPING', 'COMPLETED'].includes(status);
+            const step3Done = !!deliveredAt || status === 'COMPLETED';
+            const t1 = order.createdAt ? formatDateTime(order.createdAt) : '-';
+            const t2 = shippedAt ? formatDateTime(shippedAt) : '-';
+            const t3 = deliveredAt ? formatDateTime(deliveredAt) : '-';
+            const line12 = step2Done ? 'border-green-500' : 'border-gray-200';
+            const line23 = step3Done ? 'border-green-500' : 'border-gray-200';
+            const icon = (done, fa) => done ? '<i class="fas fa-check text-white"></i>' : `<i class="fas fa-${fa} text-white"></i>`;
+            const bg = (done) => done ? 'bg-green-500' : 'bg-gray-300';
+            document.getElementById('orderTimelineInner').innerHTML = `
+                <div class="flex-1 text-center">
+                    <div class="w-10 h-10 ${bg(step1Done)} rounded-full mx-auto mb-2 flex items-center justify-center">${icon(step1Done, 'check')}</div>
+                    <p class="font-semibold text-gray-800">Đặt hàng</p>
+                    <p class="text-gray-500 text-xs">${t1}</p>
+                </div>
+                <div class="flex-1 border-t-2 ${line12} -mt-5"></div>
+                <div class="flex-1 text-center">
+                    <div class="w-10 h-10 ${bg(step2Done)} rounded-full mx-auto mb-2 flex items-center justify-center">${icon(step2Done, 'box')}</div>
+                    <p class="font-semibold text-gray-800">Đã gửi hàng</p>
+                    <p class="text-gray-500 text-xs">${t2}</p>
+                </div>
+                <div class="flex-1 border-t-2 ${line23} -mt-5"></div>
+                <div class="flex-1 text-center">
+                    <div class="w-10 h-10 ${bg(step3Done)} rounded-full mx-auto mb-2 flex items-center justify-center">${icon(step3Done, 'truck')}</div>
+                    <p class="font-semibold text-gray-800">Đã giao</p>
+                    <p class="text-gray-500 text-xs">${t3}</p>
+                </div>
+            `;
+        }
 
         function renderOrder(order) {
             document.getElementById('orderDate').textContent = formatDate(order.createdAt);
-            document.getElementById('orderStatus').textContent = order.orderStatus || 'PENDING';
+            const isShippingReturned = (order.orderStatus || '').toUpperCase() === 'CANCELLED' && (order.shipping?.status || '').toUpperCase() === 'RETURNED';
+            const statusText = isShippingReturned ? 'Đã hủy - Vận chuyển thất bại' : (order.orderStatus || 'PENDING');
+            document.getElementById('orderStatus').textContent = statusText;
             document.getElementById('orderStatus').className = 'inline-block px-4 py-2 rounded-full text-sm font-semibold ' + getStatusClass(order.orderStatus);
+            const reasonEl = document.getElementById('cancelReasonDisplay');
+            if (isShippingReturned && order.cancelReason) {
+                reasonEl.textContent = 'Lý do: ' + order.cancelReason;
+                reasonEl.style.display = 'block';
+            } else {
+                reasonEl.textContent = '';
+                reasonEl.style.display = 'none';
+            }
+
+            const refundEl = document.getElementById('refundStatusDisplay');
+            const hasRefunded = orderRefund && ['APPROVED', 'REFUNDED'].includes((orderRefund.status || '').toUpperCase());
+            if (hasRefunded) {
+                refundEl.innerHTML = '<i class="fas fa-undo-alt mr-1"></i>Hàng đã trả / Đã hoàn tiền' + (orderRefund.amount ? ` (₫${formatVND(orderRefund.amount)})` : '');
+                refundEl.style.display = 'block';
+            } else {
+                refundEl.innerHTML = '';
+                refundEl.style.display = 'none';
+            }
+
+            renderOrderTimeline(order);
 
             const cancelWrap = document.getElementById('cancelOrderBtnWrap');
             const status = (order.orderStatus || '').toUpperCase();
@@ -380,17 +628,30 @@
 
             const items = order.displayItems || order.items || [];
             const productsList = document.getElementById('productsList');
-            const reviewInfoMap = (order.itemReviewInfo || []).reduce((acc, r) => { acc[r.productId] = r; return acc; }, {});
+            const reviewInfoMap = (order.itemReviewInfo || []).reduce((acc, r) => { acc[r.variantId || r.productId] = r; return acc; }, {});
             productsList.innerHTML = items.map((item) => {
                 const price = Number(item.price || 0);
                 const qty = Number(item.quantity || 1);
-                const ri = item.productId ? reviewInfoMap[item.productId] : null;
+                const ri = (item.variantId ? reviewInfoMap[item.variantId] : null) || (item.productId ? reviewInfoMap[item.productId] : null);
                 const canReview = ri && ri.canReview;
-                const reviewBtn = canReview && item.productId ? `
-                    <button onclick="openReviewModalByProductId('${item.productId}')" 
+                const hasReviewed = ri && ri.hasReviewed;
+                const reviewId = ri && ri.reviewId;
+                let reviewBtn = '';
+                if (canReview && item.productId) {
+                    reviewBtn = `<button onclick="openReviewModalByProductId('${item.productId}')" 
                         class="px-6 py-2 border-2 border-orange-500 text-orange-500 rounded-lg font-semibold hover:bg-orange-50 transition">
-                        <i class="fas fa-star mr-2"></i>Write Review
-                    </button>` : '';
+                        <i class="fas fa-star mr-2"></i>Viết đánh giá
+                    </button>`;
+                } else if (hasReviewed) {
+                    const pid = (ri && ri.productId) ? ri.productId : item.productId;
+                    const pidStr = String(pid || '').trim();
+                    if (pidStr && pidStr !== 'undefined' && pidStr !== 'null') {
+                        reviewBtn = `<button type="button" onclick="goToProductReviews(this.dataset.pid)" data-pid="${pidStr.replace(/"/g, '&quot;')}" 
+                            class="inline-block px-6 py-2 border-2 border-gray-400 text-gray-600 rounded-lg font-semibold hover:bg-gray-50 transition cursor-pointer">
+                            <i class="fas fa-eye mr-2"></i>Xem đánh giá
+                        </button>`;
+                    }
+                }
                 return `
                 <div class="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition">
                     <img src="${item.productImage || 'https://via.placeholder.com/96'}" alt="${item.productName || 'Product'}" class="w-24 h-24 object-cover rounded">
@@ -410,6 +671,8 @@
                 <p>${[addr.address, addr.city, addr.district, addr.ward].filter(Boolean).join(', ') || '-'}</p>
                 <p>Phone: ${addr.phone || '-'}</p>
             ` : '<p class="text-gray-500">No shipping address</p>';
+
+            renderDisputeActions(order);
         }
 
         async function cancelOrder(orderId) {
@@ -420,6 +683,14 @@
                 loadOrderDetails();
             } catch (error) {
                 alert('❌ ' + (error.message || 'Không thể hủy đơn.'));
+            }
+        }
+
+        function goToProductReviews(productId) {
+            if (productId && productId !== 'undefined' && productId !== 'null') {
+                sessionStorage.setItem('viewReviewProductId', productId);
+                const base = window.location.href.replace(/[#?].*$/, '').replace(/\/[^/]*$/, '/');
+                window.location.href = base + 'product-detail.html?id=' + encodeURIComponent(productId) + '#reviews';
             }
         }
 
@@ -544,9 +815,26 @@
             if (!currentOrder || !currentReviewProduct) return;
 
             try {
-                await ReviewAPI.createReview(currentReviewProduct.id, currentOrder.id, selectedRating, comment);
+                const imageUrls = [];
+                const hasImages = uploadedImages.some(i => i && i.file);
+                if (hasImages) {
+                    showToast('📤 Đang tải ảnh lên...');
+                    for (const img of uploadedImages) {
+                        if (img && img.file) {
+                            try {
+                                const url = await ReviewAPI.uploadReviewImage(img.file);
+                                if (url) imageUrls.push(url);
+                            } catch (e) {
+                                console.error('Upload image failed:', e);
+                                alert('⚠️ Một số ảnh tải lên thất bại. Đánh giá sẽ được gửi không có ảnh đó.');
+                            }
+                        }
+                    }
+                }
+                await ReviewAPI.createReview(currentReviewProduct.id, currentOrder.id, selectedRating, comment, imageUrls);
                 showToast('✅ Review submitted successfully!');
                 closeReviewModal();
+                await loadOrderDetails(); // Reload để ẩn nút Write Review, hiện nút Xem review
             } catch (error) {
                 alert('❌ ' + (error.message || 'Failed to submit review'));
             }
@@ -582,11 +870,12 @@
             window.location.href = 'index.html';
         }
 
-        // Close modal on outside click
+        // Close modals on outside click
         document.getElementById('reviewModal').addEventListener('click', (e) => {
-            if (e.target.id === 'reviewModal') {
-                closeReviewModal();
-            }
+            if (e.target.id === 'reviewModal') closeReviewModal();
+        });
+        document.getElementById('disputeModal').addEventListener('click', (e) => {
+            if (e.target.id === 'disputeModal') closeDisputeModal();
         });
     </script>
 </body>

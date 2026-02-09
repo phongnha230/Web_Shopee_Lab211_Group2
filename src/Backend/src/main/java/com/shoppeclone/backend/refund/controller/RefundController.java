@@ -33,6 +33,8 @@ public class RefundController {
 
     @GetMapping("/{orderId}")
     public ResponseEntity<Refund> getRefundByOrder(@PathVariable String orderId) {
-        return ResponseEntity.ok(refundService.getRefundByOrderId(orderId));
+        return refundService.findOptionalByOrderId(orderId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }

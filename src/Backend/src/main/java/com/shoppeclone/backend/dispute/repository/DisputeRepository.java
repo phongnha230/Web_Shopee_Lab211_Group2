@@ -15,5 +15,7 @@ public interface DisputeRepository extends MongoRepository<Dispute, String> {
 
     List<Dispute> findBySellerId(String sellerId);
 
+    List<Dispute> findByOrderIdIn(List<String> orderIds);
+
     long countByStatus(com.shoppeclone.backend.dispute.entity.DisputeStatus status);
 }

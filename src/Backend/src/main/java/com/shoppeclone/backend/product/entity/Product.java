@@ -28,6 +28,7 @@ public class Product {
     private Integer totalStock;
     private Double rating = 0.0;
     private Integer sold = 0;
+    private Integer reviewCount = 0;
 
     // Flash Sale fields
     private Boolean isFlashSale = false;

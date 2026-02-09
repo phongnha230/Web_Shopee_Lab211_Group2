@@ -3,7 +3,9 @@ package com.shoppeclone.backend.review.service.impl;
 import com.shoppeclone.backend.order.entity.Order;
 import com.shoppeclone.backend.order.entity.OrderStatus;
 import com.shoppeclone.backend.order.repository.OrderRepository;
+import com.shoppeclone.backend.product.entity.Product;
 import com.shoppeclone.backend.product.entity.ProductVariant;
+import com.shoppeclone.backend.product.repository.ProductRepository;
 import com.shoppeclone.backend.product.repository.ProductVariantRepository;
 import com.shoppeclone.backend.review.dto.request.CreateReviewRequest;
 import com.shoppeclone.backend.review.dto.request.UpdateReviewRequest;
@@ -12,6 +14,8 @@ import com.shoppeclone.backend.review.entity.Review;
 import com.shoppeclone.backend.review.exception.ReviewException;
 import com.shoppeclone.backend.review.repository.ReviewRepository;
 import com.shoppeclone.backend.review.service.ReviewService;
+import com.shoppeclone.backend.auth.model.User;
+import com.shoppeclone.backend.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +30,8 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository reviewRepository;
     private final OrderRepository orderRepository;
     private final ProductVariantRepository productVariantRepository;
+    private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
     private static final int REVIEW_TIMEFRAME_DAYS = 30;
 
@@ -94,6 +100,7 @@ public class ReviewServiceImpl implements ReviewService {
         review.setCreatedAt(LocalDateTime.now());
 
         Review savedReview = reviewRepository.save(review);
+        syncProductRatingAndCount(request.getProductId());
         return mapToResponse(savedReview);
     }
 
@@ -121,9 +128,12 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public ReviewResponse updateReview(String id, UpdateReviewRequest request) {
+    public ReviewResponse updateReview(String id, String userId, UpdateReviewRequest request) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Review not found with id: " + id));
+        if (!review.getUserId().equals(userId)) {
+            throw new ReviewException("Bạn không có quyền sửa đánh giá này");
+        }
 
         if (request.getRating() != null) {
             review.setRating(request.getRating());
@@ -136,15 +146,20 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
         Review updatedReview = reviewRepository.save(review);
+        syncProductRatingAndCount(review.getProductId());
         return mapToResponse(updatedReview);
     }
 
     @Override
-    public void deleteReview(String id) {
-        if (!reviewRepository.existsById(id)) {
-            throw new RuntimeException("Review not found with id: " + id);
+    public void deleteReview(String id, String userId) {
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Review not found with id: " + id));
+        if (!review.getUserId().equals(userId)) {
+            throw new ReviewException("Bạn không có quyền xóa đánh giá này");
         }
+        String productId = review.getProductId();
         reviewRepository.deleteById(id);
+        syncProductRatingAndCount(productId);
     }
 
     @Override
@@ -248,16 +263,39 @@ public class ReviewServiceImpl implements ReviewService {
                 .collect(Collectors.toList());
     }
 
+    private void syncProductRatingAndCount(String productId) {
+        Product product = productRepository.findById(productId).orElse(null);
+        if (product == null) return;
+
+        List<Review> reviews = reviewRepository.findByProductId(productId);
+        if (reviews.isEmpty()) {
+            product.setRating(0.0);
+            product.setReviewCount(0);
+        } else {
+            double avg = reviews.stream().mapToInt(Review::getRating).sum() / (double) reviews.size();
+            product.setRating(Math.round(avg * 10.0) / 10.0); // 1 decimal
+            product.setReviewCount(reviews.size());
+        }
+        product.setUpdatedAt(LocalDateTime.now());
+        productRepository.save(product);
+    }
+
     private ReviewResponse mapToResponse(Review review) {
         ReviewResponse response = new ReviewResponse();
         response.setId(review.getId());
         response.setUserId(review.getUserId());
+        String userName = userRepository.findById(review.getUserId())
+                .map(User::getFullName)
+                .filter(n -> n != null && !n.isBlank())
+                .orElse("Khách hàng");
+        response.setUserName(userName);
         response.setProductId(review.getProductId());
         response.setOrderId(review.getOrderId());
         response.setRating(review.getRating());
         response.setComment(review.getComment());
-        response.setImageUrls(review.getImageUrls()); // Include image URLs
+        response.setImageUrls(review.getImageUrls());
         response.setCreatedAt(review.getCreatedAt());
+        response.setVerifiedPurchase(review.getOrderId() != null && !review.getOrderId().isBlank());
         return response;
     }
 }

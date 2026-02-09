@@ -22,6 +22,7 @@ public class WebhookController {
         private String trackingCode;
         private String status; // PICKED, DELIVERING, DELIVERED, RETURNED
         private String location;
+        private String reason; // Lý do khi vận chuyển thất bại (RETURNED)
     }
 
     @PostMapping("/update")
@@ -43,8 +44,12 @@ public class WebhookController {
                 }
                 order.setPaymentStatus(com.shoppeclone.backend.order.entity.PaymentStatus.PAID); // COD assumption
             } else if ("RETURNED".equalsIgnoreCase(payload.getStatus())) {
-                order.setOrderStatus(OrderStatus.CANCELLED); // Or RETURNED if enum exists
+                order.setOrderStatus(OrderStatus.CANCELLED);
                 order.setCancelledAt(LocalDateTime.now());
+                String reason = (payload.getReason() != null && !payload.getReason().isBlank())
+                        ? payload.getReason().trim()
+                        : "Đơn hàng từ chối nhận / không giao được hàng";
+                order.setCancelReason(reason);
             }
         }
 

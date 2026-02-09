@@ -201,6 +201,13 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public UserDto getCurrentUser(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return mapToUserDto(user);
+    }
+
+    @Override
     public void forgotPassword(String email) {
         System.out.println("========== FORGOT PASSWORD START ==========");
         System.out.println("Email: " + email);

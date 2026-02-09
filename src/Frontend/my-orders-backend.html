@@ -34,14 +34,19 @@
 
     <!-- Main Content -->
     <main class="flex-grow w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
             <h1 class="text-2xl font-bold text-gray-800 flex items-center">
                 <i class="fas fa-box text-orange-500 mr-2"></i>
                 My Orders
             </h1>
-            <a href="profile.html" class="text-orange-500 hover:text-orange-600 font-medium">
-                <i class="fas fa-arrow-left mr-1"></i> Back to Profile
-            </a>
+            <div class="flex items-center gap-3">
+                <button id="btnDeleteAllOrders" class="hidden px-4 py-2 text-sm border border-red-600 text-red-600 rounded-lg hover:bg-red-50 transition font-medium">
+                    <i class="fas fa-trash-alt mr-1"></i> Xóa tất cả đơn hàng
+                </button>
+                <a href="profile.html" class="text-orange-500 hover:text-orange-600 font-medium">
+                    <i class="fas fa-arrow-left mr-1"></i> Back to Profile
+                </a>
+            </div>
         </div>
 
         <!-- Loading -->
@@ -113,9 +118,11 @@
 
                 if (!orders || orders.length === 0) {
                     document.getElementById('emptyOrders').classList.remove('hidden');
+                    document.getElementById('btnDeleteAllOrders').classList.add('hidden');
                     return;
                 }
 
+                document.getElementById('btnDeleteAllOrders').classList.remove('hidden');
                 const container = document.getElementById('ordersList');
                 container.classList.remove('hidden');
                 container.innerHTML = orders.map((order, index) => {
@@ -140,7 +147,10 @@
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-3 mb-2 flex-wrap">
                                     <span class="text-sm font-medium text-gray-700">${orderLabel}</span>
-                                    <span class="px-2 py-0.5 rounded text-xs font-semibold ${statusClass}">${order.orderStatus || 'PENDING'}</span>
+                                    <div class="flex flex-col">
+                                        <span class="px-2 py-0.5 rounded text-xs font-semibold ${statusClass}">${((order.orderStatus || '').toUpperCase() === 'CANCELLED' && (order.shipping?.status || '').toUpperCase() === 'RETURNED') ? 'Đã hủy - Vận chuyển thất bại' : (order.orderStatus || 'PENDING')}</span>
+                                        ${((order.orderStatus || '').toUpperCase() === 'CANCELLED' && (order.shipping?.status || '').toUpperCase() === 'RETURNED' && order.cancelReason) ? `<span class="text-xs text-red-600 mt-0.5">${order.cancelReason}</span>` : ''}
+                                    </div>
                                     ${cancelBtn}
                                 </div>
                                 <p class="text-sm text-gray-500 mb-1">${formatDate(order.createdAt)}</p>
@@ -184,6 +194,22 @@
                 alert('❌ ' + (error.message || 'Không thể hủy đơn.'));
             }
         }
+
+        async function deleteAllOrders() {
+            if (!confirm('Bạn có chắc muốn xóa TẤT CẢ đơn hàng? Đơn PENDING sẽ được hoàn tồn kho.')) return;
+            try {
+                await OrderAPI.deleteAllOrders();
+                alert('Đã xóa tất cả đơn hàng.');
+                loadOrders();
+            } catch (error) {
+                alert('❌ ' + (error.message || 'Không thể xóa đơn hàng.'));
+            }
+        }
+
+        document.getElementById('btnDeleteAllOrders').addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteAllOrders();
+        });
 
         function goToOrderDetail(orderId) {
             const token = localStorage.getItem('accessToken');

@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderItemReviewInfo {
+    private String variantId;  // Khớp chính xác với từng dòng đơn hàng
     private String productId;
     private boolean canReview;
     private boolean hasReviewed;

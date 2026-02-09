@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shoppeclone.backend.product.entity.Category;
 import com.shoppeclone.backend.product.entity.Product;
+import com.shoppeclone.backend.product.util.CategoryDetectionUtil;
 import com.shoppeclone.backend.product.entity.ProductCategory;
 import com.shoppeclone.backend.product.entity.ProductImage;
 import com.shoppeclone.backend.product.entity.ProductStatus;
@@ -129,119 +130,55 @@ public class ProductSeeder implements CommandLineRunner {
                         productVariantRepository.save(variant);
                 }
 
-                // Link Category - Smart Detection
+                // Link Category - Smart Detection (clear old links first for clean restore)
+                productCategoryRepository.deleteByProductId(product.getId());
                 String categoryToAssign = null;
+                boolean fromCategoriesArray = false;
 
                 // First, try explicit category from JSON
                 if (dto.getCategory() != null) {
                         categoryToAssign = dto.getCategory();
                 } else if (dto.getCategories() != null && !dto.getCategories().isEmpty()) {
                         categoryToAssign = dto.getCategories().get(0);
+                        fromCategoriesArray = true;
                 } else {
                         // Auto-detect category from product name
-                        categoryToAssign = detectCategoryFromName(product.getName());
+                        categoryToAssign = CategoryDetectionUtil.detectFromName(product.getName());
                 }
 
                 if (categoryToAssign != null) {
-                        addCategory(product.getId(), categoryToAssign);
+                        boolean added = addCategory(product.getId(), categoryToAssign);
+                        // Fallback: JSON had old category ID that doesn't exist - use name detection
+                        if (!added && fromCategoriesArray) {
+                                String fallback = CategoryDetectionUtil.detectFromName(product.getName());
+                                if (fallback != null) {
+                                        addCategory(product.getId(), fallback);
+                                        categoryToAssign = fallback;
+                                }
+                        }
                 }
 
                 log.info("👉 Restored Product: {} → Category: {}", product.getName(), categoryToAssign);
         }
 
-        /**
-         * Detect category from product name using keyword matching
-         */
-        private String detectCategoryFromName(String productName) {
-                if (productName == null)
-                        return "Electronics"; // Default fallback
-
-                String lowerName = productName.toLowerCase();
-
-                // Fashion keywords
-                if (lowerName.contains("shoe") || lowerName.contains("sneaker") ||
-                                lowerName.contains("nike") || lowerName.contains("adidas") ||
-                                lowerName.contains("shirt") || lowerName.contains("dress") ||
-                                lowerName.contains("jacket") || lowerName.contains("pant") ||
-                                lowerName.contains("jean") || lowerName.contains("clothing")) {
-                        return "Fashion";
+        /** Add ProductCategory link. Supports both category ID and category name. Returns true if added. */
+        private boolean addCategory(String productId, String categoryIdOrName) {
+                Optional<Category> categoryOpt = Optional.empty();
+                // If it looks like MongoDB ObjectId (24 hex chars), try findById first
+                if (categoryIdOrName != null && categoryIdOrName.matches("[a-fA-F0-9]{24}")) {
+                        categoryOpt = categoryRepository.findById(categoryIdOrName);
                 }
-
-                // Mobile & Gadgets keywords
-                if (lowerName.contains("phone") || lowerName.contains("iphone") ||
-                                lowerName.contains("samsung") || lowerName.contains("xiaomi") ||
-                                lowerName.contains("mobile") || lowerName.contains("smartphone") ||
-                                lowerName.contains("tablet") || lowerName.contains("ipad")) {
-                        return "Mobile & Gadgets";
+                if (categoryOpt.isEmpty()) {
+                        categoryOpt = categoryRepository.findByName(categoryIdOrName);
                 }
-
-                // Electronics keywords
-                if (lowerName.contains("headphone") || lowerName.contains("earphone") ||
-                                lowerName.contains("speaker") || lowerName.contains("laptop") ||
-                                lowerName.contains("computer") || lowerName.contains("camera") ||
-                                lowerName.contains("tv") || lowerName.contains("monitor") ||
-                                lowerName.contains("keyboard") || lowerName.contains("mouse")) {
-                        return "Electronics";
-                }
-
-                // Home keywords
-                if (lowerName.contains("chair") || lowerName.contains("table") ||
-                                lowerName.contains("sofa") || lowerName.contains("bed") ||
-                                lowerName.contains("furniture") || lowerName.contains("lamp") ||
-                                lowerName.contains("home") || lowerName.contains("kitchen")) {
-                        return "Home";
-                }
-
-                // Sports keywords
-                if (lowerName.contains("sport") || lowerName.contains("running") ||
-                                lowerName.contains("gym") || lowerName.contains("fitness") ||
-                                lowerName.contains("yoga") || lowerName.contains("ball") ||
-                                lowerName.contains("exercise")) {
-                        return "Sports";
-                }
-
-                // Beauty keywords
-                if (lowerName.contains("beauty") || lowerName.contains("makeup") ||
-                                lowerName.contains("cosmetic") || lowerName.contains("skincare") ||
-                                lowerName.contains("perfume") || lowerName.contains("lipstick")) {
-                        return "Beauty";
-                }
-
-                // Watch keywords (Fashion subcategory)
-                if (lowerName.contains("watch") || lowerName.contains("clock")) {
-                        return "Fashion";
-                }
-
-                // Books keywords
-                if (lowerName.contains("book") || lowerName.contains("novel") ||
-                                lowerName.contains("magazine") || lowerName.contains("reading")) {
-                        return "Books";
-                }
-
-                // Baby & Toys keywords
-                if (lowerName.contains("baby") || lowerName.contains("toy") ||
-                                lowerName.contains("kid") || lowerName.contains("child")) {
-                        return "Baby & Toys";
-                }
-
-                // Food keywords
-                if (lowerName.contains("food") || lowerName.contains("snack") ||
-                                lowerName.contains("drink") || lowerName.contains("coffee")) {
-                        return "Food";
-                }
-
-                // Default to Electronics if no match
-                return "Electronics";
-        }
-
-        private void addCategory(String productId, String categoryName) {
-                Optional<Category> categoryOpt = categoryRepository.findByName(categoryName);
                 if (categoryOpt.isPresent()) {
                         ProductCategory pc = new ProductCategory();
                         pc.setProductId(productId);
                         pc.setCategoryId(categoryOpt.get().getId());
                         productCategoryRepository.save(pc);
+                        return true;
                 }
+                return false;
         }
 
         // DTO Helper Classes for JSON Deserialization

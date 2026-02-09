@@ -290,9 +290,9 @@
 
                     const priceDisplay = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(priceVal);
 
-                    // Stats
-                    const sold = p.sold || Math.floor(Math.random() * 500) + 10;
-                    const rating = p.rating || (Math.random() * 1 + 4).toFixed(1);
+                    // Stats - use real data from API
+                    const sold = p.sold != null ? p.sold : 0;
+                    const rating = p.rating != null ? p.rating.toFixed(1) : '-';
 
                     return `
                         <div onclick="goToProduct('${p.id || p._id}')"
@@ -305,14 +305,9 @@
                                 <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2">${p.name}</p>
                                 <p class="text-orange-600 text-lg font-bold">${priceDisplay}</p>
                                 <div class="flex items-center text-xs text-gray-500 mt-1">
-                                    <div class="flex text-yellow-400 mr-2">
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star-half-alt"></i>
-                                    </div>
-                                    <span class="border-l border-gray-300 pl-2">Sold ${sold}</span>
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    <span>${rating}</span>
+                                    <span class="border-l border-gray-300 pl-2 ml-2">Sold ${sold}</span>
                                 </div>
                             </div>
                         </div>

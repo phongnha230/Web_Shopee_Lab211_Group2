@@ -92,24 +92,29 @@ public class ReviewController {
     }
 
     /**
-     * Update a review
+     * Update a review (chỉ chủ review mới sửa được)
      * PUT /api/reviews/{id}
      */
     @PutMapping("/{id}")
     public ResponseEntity<ReviewResponse> updateReview(
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String id,
             @Valid @RequestBody UpdateReviewRequest request) {
-        ReviewResponse response = reviewService.updateReview(id, request);
+        String userId = getUserId(userDetails);
+        ReviewResponse response = reviewService.updateReview(id, userId, request);
         return ResponseEntity.ok(response);
     }
 
     /**
-     * Delete a review
+     * Delete a review (chỉ chủ review mới xóa được)
      * DELETE /api/reviews/{id}
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReview(@PathVariable String id) {
-        reviewService.deleteReview(id);
+    public ResponseEntity<Void> deleteReview(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String id) {
+        String userId = getUserId(userDetails);
+        reviewService.deleteReview(id, userId);
         return ResponseEntity.noContent().build();
     }
 

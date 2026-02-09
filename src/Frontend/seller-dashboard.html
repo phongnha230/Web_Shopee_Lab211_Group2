@@ -98,6 +98,10 @@
                 class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
                 <i class="fas fa-shopping-bag w-5"></i> Orders
             </a>
+            <a href="#" onclick="switchView('returns'); return false;" id="nav-returns"
+                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
+                <i class="fas fa-exchange-alt w-5"></i> Trả hàng / Khiếu nại
+            </a>
             <a href="#" onclick="switchView('shop-profile'); return false;" id="nav-shop-profile"
                 class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
                 <i class="fas fa-store w-5"></i> Shop Profile
@@ -136,41 +140,122 @@
                  VIEW 1: DASHBOARD (TỔNG QUAN)
                  ======================================== -->
             <div id="view-dashboard" class="space-y-6">
-                <!-- Dashboard content skipped for brevity, keeping existing structure -->
+                <!-- Header -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">Tổng quan cửa hàng</h1>
+                        <p class="text-gray-500 text-sm mt-1">Theo dõi hiệu suất và quản lý đơn hàng của bạn</p>
+                    </div>
+                    <button onclick="loadDashboardStats()" class="flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium text-sm">
+                        <i class="fas fa-sync-alt"></i> Làm mới
+                    </button>
+                </div>
+
+                <!-- KPI Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+                    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition group">
                         <div class="flex justify-between items-start mb-3">
-                            <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+                            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition">
                                 <i class="fas fa-box"></i>
                             </div>
+                            <span class="text-xs text-gray-400 font-medium">Sản phẩm</span>
                         </div>
-                        <p class="text-gray-500 text-xs font-semibold uppercase">Total Products</p>
+                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Total Products</p>
                         <h3 id="totalProducts" class="text-2xl font-bold text-gray-800 mt-1">0</h3>
                     </div>
-                    <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+                    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition group">
                         <div class="flex justify-between items-start mb-3">
-                            <div
-                                class="w-10 h-10 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center">
+                            <div class="w-12 h-12 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition">
                                 <i class="fas fa-clock"></i>
                             </div>
+                            <span id="pendingOrdersBadge" class="hidden bg-orange-100 text-orange-700 text-xs font-bold px-2 py-0.5 rounded-full">!</span>
                         </div>
-                        <p class="text-gray-500 text-xs font-semibold uppercase">Pending Orders</p>
+                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Pending Orders</p>
                         <h3 id="pendingOrders" class="text-2xl font-bold text-gray-800 mt-1">0</h3>
                     </div>
-                    <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+                    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition group">
                         <div class="flex justify-between items-start mb-3">
-                            <div
-                                class="w-10 h-10 bg-green-50 text-green-600 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-dollar-sign"></i>
+                            <div class="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition">
+                                <i class="fas fa-coins"></i>
                             </div>
+                            <span class="text-xs text-gray-400 font-medium">₫</span>
                         </div>
-                        <p class="text-gray-500 text-xs font-semibold uppercase">Revenue (Mock)</p>
-                        <h3 class="text-2xl font-bold text-gray-800 mt-1">₫0</h3>
+                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Doanh thu</p>
+                        <h3 id="totalRevenue" class="text-2xl font-bold text-gray-800 mt-1">₫0</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition group">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <span class="text-xs text-gray-400 font-medium">Đã giao</span>
+                        </div>
+                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Completed Orders</p>
+                        <h3 id="completedOrders" class="text-2xl font-bold text-gray-800 mt-1">0</h3>
                     </div>
                 </div>
-                <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">Welcome to Seller Centre!</h3>
-                    <p class="text-gray-600">Manage your products and orders from here.</p>
+
+                <!-- Charts Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Revenue Chart -->
+                    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800">Doanh thu 7 ngày gần đây</h3>
+                                <p class="text-xs text-gray-500">Biểu đồ theo ngày</p>
+                            </div>
+                        </div>
+                        <div class="h-64">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                    <!-- Order Status Chart -->
+                    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800">Đơn hàng theo trạng thái</h3>
+                                <p class="text-xs text-gray-500">Phân bố trạng thái đơn</p>
+                            </div>
+                        </div>
+                        <div class="h-64 flex items-center justify-center">
+                            <canvas id="orderStatusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Welcome + Quick Actions -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-gradient-to-br from-orange-50 to-orange-100/50 p-6 rounded-2xl border border-orange-100 shadow-sm">
+                        <h3 class="text-lg font-bold text-gray-800 mb-2 flex items-center gap-2">
+                            <i class="fas fa-store text-orange-600"></i> Chào mừng đến Seller Centre!
+                        </h3>
+                        <p class="text-gray-600 text-sm mb-4">Quản lý sản phẩm, đơn hàng và kho hàng của bạn tại đây.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="switchView('add-product')" class="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition">
+                                <i class="fas fa-plus mr-1"></i> Thêm sản phẩm
+                            </button>
+                            <button onclick="switchView('orders')" class="px-4 py-2 bg-white border border-orange-300 text-orange-600 rounded-lg text-sm font-medium hover:bg-orange-50 transition">
+                                <i class="fas fa-shopping-bag mr-1"></i> Xem đơn hàng
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Hành động nhanh</h3>
+                        <div class="space-y-3">
+                            <a href="#" onclick="switchView('products'); return false;" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition">
+                                <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-box"></i></div>
+                                <div><p class="font-medium text-gray-800">Sản phẩm của tôi</p><p class="text-xs text-gray-500">Quản lý danh sách sản phẩm</p></div>
+                            </a>
+                            <a href="#" onclick="switchView('inventory'); return false;" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition">
+                                <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center"><i class="fas fa-warehouse"></i></div>
+                                <div><p class="font-medium text-gray-800">Quản lý kho</p><p class="text-xs text-gray-500">Cập nhật tồn kho</p></div>
+                            </a>
+                            <a href="#" onclick="switchView('orders'); return false;" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition">
+                                <div class="w-10 h-10 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center"><i class="fas fa-shopping-bag"></i></div>
+                                <div><p class="font-medium text-gray-800">Đơn hàng</p><p class="text-xs text-gray-500">Xem và xử lý đơn hàng</p></div>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -576,6 +661,54 @@
                 </div>
             </div>
 
+            <!-- VIEW: TRẢ HÀNG / KHIẾU NẠI -->
+            <div id="view-returns" class="hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold text-gray-800">Trả hàng / Khiếu nại</h2>
+                    <button onclick="loadReturns()" class="flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium text-sm">
+                        <i class="fas fa-sync-alt"></i> Làm mới
+                    </button>
+                </div>
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div class="flex border-b border-gray-100">
+                        <button onclick="showReturnsTab('disputes')" id="returnsTab-disputes"
+                            class="returns-tab px-6 py-3 text-sm font-medium border-b-2 border-orange-500 text-orange-600">
+                            Khiếu nại
+                        </button>
+                        <button onclick="showReturnsTab('refunds')" id="returnsTab-refunds"
+                            class="returns-tab px-6 py-3 text-sm font-medium border-b-2 border-transparent text-gray-600 hover:text-gray-800">
+                            Hoàn tiền
+                        </button>
+                        <button onclick="showReturnsTab('returned')" id="returnsTab-returned"
+                            class="returns-tab px-6 py-3 text-sm font-medium border-b-2 border-transparent text-gray-600 hover:text-gray-800">
+                            Hàng hoàn về
+                        </button>
+                    </div>
+                    <div id="returnsDisputesList" class="divide-y divide-gray-100">
+                        <div class="p-10 text-center text-gray-500"><i class="fas fa-spinner fa-spin text-2xl mb-2"></i><p>Đang tải...</p></div>
+                    </div>
+                    <div id="returnsRefundsList" class="hidden divide-y divide-gray-100">
+                        <div class="p-10 text-center text-gray-500"><i class="fas fa-spinner fa-spin text-2xl mb-2"></i><p>Đang tải...</p></div>
+                    </div>
+                    <div id="returnsReturnedList" class="hidden divide-y divide-gray-100">
+                        <div class="p-10 text-center text-gray-500"><i class="fas fa-spinner fa-spin text-2xl mb-2"></i><p>Đang tải...</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dispute Detail Modal (Seller view - read only) -->
+            <div id="returnsDisputeDetailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="sticky top-0 bg-white border-b border-gray-100 p-6 flex justify-between items-center">
+                        <h3 class="text-xl font-bold text-gray-800">Chi tiết khiếu nại</h3>
+                        <button onclick="closeReturnsDisputeModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    <div id="returnsDisputeDetailContent" class="p-6"></div>
+                </div>
+            </div>
+
             <!-- Order Detail Modal -->
             <div id="orderDetailModal"
                 class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -738,11 +871,14 @@
                 'add-product': 'Add New Product',
                 'flash-sale': 'Flash Sale Management',
                 'orders': 'Orders',
+                'returns': 'Trả hàng / Khiếu nại',
                 'shop-profile': 'Shop Profile'
             };
             document.getElementById('pageTitle').textContent = titles[viewName] || 'Dashboard';
 
-            if (viewName === 'products') {
+            if (viewName === 'dashboard') {
+                loadDashboardStats();
+            } else if (viewName === 'products') {
                 loadProducts();
             } else if (viewName === 'inventory') {
                 loadInventory();
@@ -757,6 +893,8 @@
                 loadShopProfile();
             } else if (viewName === 'orders') {
                 loadOrders();
+            } else if (viewName === 'returns') {
+                loadReturns();
             } else if (viewName === 'flash-sale') {
                 loadFlashSaleDashboard();
             }
@@ -1555,9 +1693,9 @@
                         }
                     }
 
-                    // Populate dashboard stats immediately
-                    console.log('📊 Loading product count for dashboard...');
-                    loadTotalProductsCount();
+                    // Populate dashboard stats immediately (sync products, orders, revenue)
+                    console.log('📊 Loading dashboard stats...');
+                    loadDashboardStats();
 
                     // Re-trigger view-specific loads once shop is ready
                     if (currentView === 'products') {
@@ -1713,6 +1851,171 @@
                     if (dashboardTotal) dashboardTotal.textContent = products.length;
                 }
             } catch (err) { console.error('Error loading product count:', err); }
+        }
+
+        // ========================================
+        // DASHBOARD STATS (đồng bộ sản phẩm, đơn hàng, doanh thu)
+        // ========================================
+        let revenueChartInstance = null;
+        let orderStatusChartInstance = null;
+
+        async function loadDashboardStats() {
+            if (!currentShop) return;
+            try {
+                // Fetch products, orders, and returns in parallel
+                const [productsRes, ordersAllRes, returnsRes] = await Promise.all([
+                    fetch(`${baseUrl}/products/shop/${currentShop.id}`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch(`${baseUrl}/orders/shop/${currentShop.id}`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch(`${baseUrl}/seller/returns`, { headers: { 'Authorization': `Bearer ${token}` } }).catch(() => null)
+                ]);
+
+                const products = productsRes.ok ? await productsRes.json() : [];
+                const allOrders = ordersAllRes.ok ? await ordersAllRes.json() : [];
+
+                let refundedIds = new Set();
+                if (returnsRes && returnsRes.ok) {
+                    try {
+                        const returnsData = await returnsRes.json();
+                        const refunds = returnsData.refunds || [];
+                        refundedIds = new Set(refunds.filter(r => ['APPROVED', 'REFUNDED'].includes((r.status || '').toUpperCase())).map(r => r.orderId));
+                    } catch (e) {}
+                }
+
+                const isCompletedAndNotReturned = o => (o.orderStatus === 'COMPLETED' || o.orderStatus === 'SHIPPED') && !refundedIds.has(o.id);
+
+                // Update KPI cards
+                document.getElementById('totalProducts').textContent = products.length;
+
+                const pendingOrders = allOrders.filter(o => o.orderStatus === 'PENDING').length;
+                const completedOrders = allOrders.filter(isCompletedAndNotReturned).length;
+                const revenue = allOrders
+                    .filter(isCompletedAndNotReturned)
+                    .reduce((sum, o) => sum + (Number(o.totalPrice) || 0), 0);
+
+                document.getElementById('pendingOrders').textContent = pendingOrders;
+                const pendingBadge = document.getElementById('pendingOrdersBadge');
+                if (pendingBadge) {
+                    if (pendingOrders > 0) { pendingBadge.classList.remove('hidden'); pendingBadge.textContent = pendingOrders; }
+                    else pendingBadge.classList.add('hidden');
+                }
+
+                document.getElementById('totalRevenue').textContent = '₫' + revenue.toLocaleString('vi-VN');
+                const completedEl = document.getElementById('completedOrders');
+                if (completedEl) completedEl.textContent = completedOrders;
+
+                // Build revenue by day (last 7 days)
+                const revenueByDay = {};
+                const now = new Date();
+                for (let i = 6; i >= 0; i--) {
+                    const d = new Date(now);
+                    d.setDate(d.getDate() - i);
+                    const key = d.toISOString().split('T')[0];
+                    revenueByDay[key] = { date: key, label: d.toLocaleDateString('vi-VN', { day: '2-digit', month: 'short' }), total: 0 };
+                }
+                allOrders.filter(isCompletedAndNotReturned).forEach(o => {
+                    const key = o.createdAt ? new Date(o.createdAt).toISOString().split('T')[0] : null;
+                    if (key && revenueByDay[key]) revenueByDay[key].total += Number(o.totalPrice) || 0;
+                });
+                const revenueData = Object.values(revenueByDay).sort((a, b) => a.date.localeCompare(b.date));
+
+                // Order status distribution (đơn đã return tách riêng, không tính vào COMPLETED)
+                const statusCounts = {};
+                ['PENDING', 'CONFIRMED', 'PAID', 'SHIPPING', 'SHIPPED', 'COMPLETED', 'RETURN', 'CANCELLED'].forEach(s => statusCounts[s] = 0);
+                allOrders.forEach(o => {
+                    if (refundedIds.has(o.id) && (o.orderStatus === 'COMPLETED' || o.orderStatus === 'SHIPPED')) {
+                        statusCounts['RETURN']++;
+                    } else {
+                        statusCounts[o.orderStatus] = (statusCounts[o.orderStatus] || 0) + 1;
+                    }
+                });
+                const statusLabels = { PENDING: 'Chờ xử lý', CONFIRMED: 'Đã xác nhận', PAID: 'Đã thanh toán', SHIPPING: 'Đang giao', SHIPPED: 'Đã giao', COMPLETED: 'Hoàn thành', RETURN: 'Hàng trả về', CANCELLED: 'Đã hủy' };
+                const orderChartData = Object.entries(statusCounts)
+                    .filter(([_, v]) => v > 0)
+                    .map(([k, v]) => ({ label: statusLabels[k] || k, value: v }));
+
+                // Update charts
+                updateRevenueChart(revenueData);
+                updateOrderStatusChart(orderChartData);
+            } catch (err) {
+                console.error('Error loading dashboard stats:', err);
+                document.getElementById('totalProducts').textContent = '0';
+                document.getElementById('pendingOrders').textContent = '0';
+                document.getElementById('totalRevenue').textContent = '₫0';
+                const completedEl = document.getElementById('completedOrders');
+                if (completedEl) completedEl.textContent = '0';
+            }
+        }
+
+        function updateRevenueChart(revenueData) {
+            const ctx = document.getElementById('revenueChart');
+            if (!ctx) return;
+            if (revenueChartInstance) revenueChartInstance.destroy();
+            revenueChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: revenueData.map(d => d.label),
+                    datasets: [{
+                        label: 'Doanh thu (₫)',
+                        data: revenueData.map(d => d.total),
+                        backgroundColor: 'rgba(173, 48, 41, 0.7)',
+                        borderColor: '#AD3029',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => '₫' + ctx.raw.toLocaleString('vi-VN')
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: v => '₫' + (v >= 1000000 ? (v/1000000)+'M' : v.toLocaleString()) }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function updateOrderStatusChart(orderChartData) {
+            const ctx = document.getElementById('orderStatusChart');
+            if (!ctx) return;
+            if (orderStatusChartInstance) orderStatusChartInstance.destroy();
+            if (orderChartData.length === 0) {
+                orderStatusChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: { labels: ['Chưa có đơn'], datasets: [{ data: [1], backgroundColor: ['#E5E7EB'] }] },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+                return;
+            }
+            const colors = ['#F59E0B', '#3B82F6', '#8B5CF6', '#EC4899', '#10B981', '#AD3029', '#6B7280'];
+            orderStatusChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: orderChartData.map(d => d.label),
+                    datasets: [{
+                        data: orderChartData.map(d => d.value),
+                        backgroundColor: orderChartData.map((_, i) => colors[i % colors.length]),
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' }
+                    }
+                }
+            });
         }
 
         async function loadProducts() {
@@ -1893,7 +2196,7 @@
                                     <td class="px-6 py-4"><span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">${p.status || 'ACTIVE'}</span></td>
                                     <td class="px-6 py-4 text-right">
                                         <div class="flex justify-end gap-2">
-                                            <button onclick="localStorage.setItem('lastClickedProductId', '${p.id || p._id}'); window.open('product-detail.html?id=${p.id || p._id}', '_blank')" class="text-gray-500 hover:text-gray-700 p-2" title="View">
+                                            <button onclick="localStorage.setItem('lastClickedProductId', '${p.id || p._id}'); sessionStorage.setItem('lastClickedProductId', '${p.id || p._id}'); window.open('product-detail.html?id=${p.id || p._id}', '_blank')" class="text-gray-500 hover:text-gray-700 p-2" title="View">
                                                 <i class="fas fa-eye"></i>
                                             </button>
                                             <button onclick="localStorage.setItem('lastClickedProductId', '${p.id || p._id}'); editProduct('${p.id || p._id}')" class="text-blue-500 hover:text-blue-700 p-2" title="Edit">
@@ -1968,6 +2271,7 @@
         // ========================================
         let currentOrderStatus = 'ALL';
         let allOrders = [];
+        let refundedOrderIds = new Set(); // Order IDs đã admin duyệt hoàn tiền
 
         async function loadOrders(status = 'ALL') {
             if (!currentShop) return;
@@ -1981,12 +2285,21 @@
 
             try {
                 const statusParam = status === 'ALL' ? '' : `?status=${status}`;
-                const response = await fetch(`${baseUrl}/orders/shop/${currentShop.id}${statusParam}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const [ordersRes, returnsRes] = await Promise.all([
+                    fetch(`${baseUrl}/orders/shop/${currentShop.id}${statusParam}`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch(`${baseUrl}/seller/returns`, { headers: { 'Authorization': `Bearer ${token}` } }).catch(() => null)
+                ]);
 
-                if (response.ok) {
-                    const orders = await response.json();
+                if (returnsRes && returnsRes.ok) {
+                    try {
+                        const returnsData = await returnsRes.json();
+                        const refunds = returnsData.refunds || [];
+                        refundedOrderIds = new Set(refunds.filter(r => ['APPROVED', 'REFUNDED'].includes((r.status || '').toUpperCase())).map(r => r.orderId));
+                    } catch (e) {}
+                }
+
+                if (ordersRes.ok) {
+                    const orders = await ordersRes.json();
                     allOrders = orders;
                     currentOrderStatus = status;
                     renderOrders(orders);
@@ -2036,7 +2349,16 @@
                     'CANCELLED': 'bg-red-100 text-red-800'
                 };
 
-                const statusColor = statusColors[order.orderStatus] || 'bg-gray-100 text-gray-800';
+                const isRefunded = refundedOrderIds.has(order.id);
+                const isShippingReturned = (order.orderStatus || '').toUpperCase() === 'CANCELLED' && (order.shipping?.status || '').toUpperCase() === 'RETURNED';
+                let statusBadge = order.orderStatus;
+                let statusColor = statusColors[order.orderStatus] || 'bg-gray-100 text-gray-800';
+                if (isShippingReturned) {
+                    statusBadge = 'Đã hủy - Vận chuyển thất bại';
+                } else if (isRefunded && (order.orderStatus || '').toUpperCase() === 'COMPLETED') {
+                    statusBadge = 'RETURN';
+                    statusColor = 'bg-blue-100 text-blue-800';
+                }
                 const itemCount = order.items ? order.items.length : 0;
                 const createdDate = order.createdAt ? new Date(order.createdAt).toLocaleDateString('vi-VN') : 'N/A';
 
@@ -2047,7 +2369,10 @@
                                 <p class="text-sm text-gray-500">Order ID: <span class="font-mono text-gray-700">${order.id ? order.id.substring(0, 10) : 'N/A'}...</span></p>
                                 <p class="text-sm text-gray-500 mt-1">Date: ${createdDate}</p>
                             </div>
-                            <span class="${statusColor} text-xs font-bold px-3 py-1 rounded-full">${order.orderStatus}</span>
+                            <div class="text-right">
+                                <span class="${statusColor} text-xs font-bold px-3 py-1 rounded-full">${statusBadge}</span>
+                                ${isShippingReturned && order.cancelReason ? `<p class="text-xs text-red-600 mt-1">${order.cancelReason}</p>` : ''}
+                            </div>
                         </div>
                         <div class="mb-4">
                             <p class="text-gray-700"><i class="fas fa-box mr-2 text-gray-400"></i>${itemCount} item(s)</p>
@@ -2070,6 +2395,12 @@
                                     <i class="fas fa-truck mr-1"></i>Ship
                                 </button>
                             ` : ''}
+                            ${['PENDING', 'CONFIRMED', 'PAID'].includes((order.orderStatus || '').toUpperCase()) ? `
+                                <button onclick="event.stopPropagation(); cancelOrderFromSeller('${order.id}')" 
+                                    class="px-4 py-2 border border-red-600 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium transition">
+                                    <i class="fas fa-times mr-1"></i>Hủy đơn
+                                </button>
+                            ` : ''}
                         </div>
                     </div>
                 `;
@@ -2078,14 +2409,22 @@
 
         async function showOrderDetail(orderId) {
             try {
-                const response = await fetch(`${baseUrl}/orders/${orderId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const [orderRes, refundRes] = await Promise.all([
+                    fetch(`${baseUrl}/orders/${orderId}`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch(`${baseUrl}/refunds/${orderId}`, { headers: { 'Authorization': `Bearer ${token}` } }).catch(() => null)
+                ]);
 
-                if (!response.ok) throw new Error('Failed to load order details');
+                if (!orderRes.ok) throw new Error('Failed to load order details');
+                const order = await orderRes.json();
 
-                const order = await response.json();
-                renderOrderDetail(order);
+                let refund = null;
+                if (refundRes && refundRes.ok) {
+                    try {
+                        refund = await refundRes.json();
+                    } catch (e) {}
+                }
+
+                renderOrderDetail(order, refund);
                 document.getElementById('orderDetailModal').classList.remove('hidden');
             } catch (err) {
                 console.error(err);
@@ -2093,8 +2432,22 @@
             }
         }
 
-        async function renderOrderDetail(order) {
+        function formatShippingAddress(addr) {
+            if (!addr) return 'N/A';
+            if (typeof addr === 'string') return addr;
+            const parts = [addr.address, addr.ward, addr.district, addr.city].filter(Boolean);
+            const fullAddr = parts.join(', ') || 'N/A';
+            const namePhone = [addr.fullName, addr.phone].filter(Boolean).join(' - ');
+            return namePhone ? `${namePhone}<br><span class="text-gray-700">${fullAddr}</span>` : fullAddr;
+        }
+
+        async function renderOrderDetail(order, refund) {
             const container = document.getElementById('orderDetailContent');
+            // Online payment (Momo, VNPAY) = đã thanh toán ngay; COD = chưa thanh toán cho đến khi shipper thu tiền
+            const isPaid = (order.paymentStatus === 'PAID' || order.paymentStatus === 'Paid')
+                || ['MOMO', 'VNPAY', 'BANKING'].includes((order.paymentMethod || '').toUpperCase());
+
+            const hasRefunded = refund && ['APPROVED', 'REFUNDED'].includes((refund.status || '').toUpperCase());
 
             // Load product details for order items
             let itemsHtml = '';
@@ -2139,7 +2492,10 @@
                         <h4 class="font-bold text-gray-800 mb-3">Order Information</h4>
                         <div class="bg-gray-50 p-4 rounded-lg space-y-2">
                             <p><span class="text-gray-600">Order ID:</span> <span class="font-mono text-sm">${order.id}</span></p>
-                            <p><span class="text-gray-600">Status:</span> <span class="font-bold">${order.orderStatus}</span></p>
+                            <p><span class="text-gray-600">Status:</span> <span class="font-bold">${((order.orderStatus || '').toUpperCase() === 'CANCELLED' && (order.shipping?.status || '').toUpperCase() === 'RETURNED') ? 'Đã hủy - Vận chuyển thất bại' : order.orderStatus}</span></p>
+                            ${hasRefunded ? `<p><span class="text-gray-600">Trả hàng:</span> <span class="font-bold text-blue-600"><i class="fas fa-undo-alt mr-1"></i>Hàng đã trả / Đã hoàn tiền</span> ${refund.amount ? `(₫${Number(refund.amount).toLocaleString()})` : ''}</p>` : ''}
+                            ${((order.orderStatus || '').toUpperCase() === 'CANCELLED' && order.cancelReason) ? `<p><span class="text-gray-600">Lý do:</span> <span class="text-red-600">${order.cancelReason}</span></p>` : ''}
+                            <p><span class="text-gray-600">Payment:</span> <span class="font-bold ${isPaid ? 'text-green-600' : 'text-amber-600'}">${isPaid ? (order.paymentMethod === 'COD' ? 'Đã thanh toán (COD - đã thu tiền khi giao)' : 'Đã thanh toán') : 'Chưa thanh toán'}${order.paymentMethod && !(isPaid && order.paymentMethod === 'COD') ? ` <span class="text-sm text-gray-600">(${order.paymentMethod})</span>` : ''}</p>
                             <p><span class="text-gray-600">Date:</span> ${order.createdAt ? new Date(order.createdAt).toLocaleString('vi-VN') : 'N/A'}</p>
                         </div>
                     </div>
@@ -2155,9 +2511,36 @@
                         <div>
                             <h4 class="font-bold text-gray-800 mb-3">Shipping Information</h4>
                             <div class="bg-gray-50 p-4 rounded-lg space-y-2">
-                                <p><span class="text-gray-600">Address:</span> ${order.shipping.address || 'N/A'}</p>
+                                <p><span class="text-gray-600">Address:</span> ${formatShippingAddress(order.shipping.address)}</p>
                                 <p><span class="text-gray-600">Shipping Fee:</span> ₫${Number(order.shipping.shippingFee || 0).toLocaleString()}</p>
-                                ${order.shipping.trackingCode ? `<p><span class="text-gray-600">Tracking:</span> ${order.shipping.trackingCode}</p>` : ''}
+                                ${order.shipping.trackingCode ? `<p><span class="text-gray-600">Tracking:</span> <span class="font-mono font-bold">${order.shipping.trackingCode}</span></p>` : ''}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${['CONFIRMED', 'SHIPPING', 'SHIPPED'].includes((order.orderStatus || '').toUpperCase()) ? `
+                        <div class="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                            <h4 class="font-bold text-gray-800 mb-2"><i class="fas fa-truck mr-2 text-blue-600"></i>Mã vận đơn (cho Webhook GHTK/GHN/VNPost)</h4>
+                            <p class="text-sm text-gray-600 mb-3">Nhập mã vận đơn từ bên giao hàng để hệ thống tự động cập nhật khi giao thành công.</p>
+                            <div class="flex gap-3 flex-wrap items-end">
+                                <div class="flex-1 min-w-[180px]">
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Mã vận đơn</label>
+                                    <input type="text" id="trackingCodeInput" value="${(order.shipping && order.shipping.trackingCode) || ''}" 
+                                        placeholder="VD: GHN123456789" 
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                </div>
+                                <div class="w-32">
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Đơn vị VC</label>
+                                    <select id="providerIdInput" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                        <option value="ghn" ${(order.shipping && order.shipping.providerId === 'ghn') ? 'selected' : ''}>GHN</option>
+                                        <option value="ghtk" ${(order.shipping && order.shipping.providerId === 'ghtk') ? 'selected' : ''}>GHTK</option>
+                                        <option value="vnpost" ${(order.shipping && order.shipping.providerId === 'vnpost') ? 'selected' : ''}>VNPost</option>
+                                    </select>
+                                </div>
+                                <button onclick="updateTrackingCode('${order.id}')" 
+                                    class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-bold transition">
+                                    <i class="fas fa-save mr-1"></i>Cập nhật
+                                </button>
                             </div>
                         </div>
                     ` : ''}
@@ -2169,18 +2552,276 @@
                                 <span class="text-gray-600">Subtotal:</span>
                                 <span>₫${Number(order.totalPrice || 0).toLocaleString()}</span>
                             </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Payment Status:</span>
+                                <span class="font-bold ${isPaid ? 'text-green-600' : 'text-amber-600'}">${isPaid ? (order.paymentMethod === 'COD' ? 'Đã thanh toán (COD - đã thu tiền khi giao)' : 'Đã thanh toán') : 'Chưa thanh toán'}${order.paymentMethod && !(isPaid && order.paymentMethod === 'COD') ? ` (${order.paymentMethod})` : ''}</span>
+                            </div>
+                            ${order.paymentMethod ? `<div class="flex justify-between"><span class="text-gray-600">Payment Method:</span><span>${order.paymentMethod}</span></div>` : ''}
                             <div class="flex justify-between pt-2 border-t border-gray-200">
                                 <span class="font-bold">Total:</span>
                                 <span class="font-bold text-orange-600 text-lg">₫${Number(order.totalPrice || 0).toLocaleString()}</span>
                             </div>
                         </div>
                     </div>
+                    ${['PENDING', 'CONFIRMED', 'PAID'].includes((order.orderStatus || '').toUpperCase()) ? `
+                        <div class="pt-4 border-t border-gray-200">
+                            <button onclick="cancelOrderFromSeller('${order.id}')" 
+                                class="px-4 py-2 border border-red-600 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium transition">
+                                <i class="fas fa-times mr-1"></i>Hủy đơn
+                            </button>
+                        </div>
+                    ` : ''}
                 </div>
             `;
         }
 
+        async function cancelOrderFromSeller(orderId) {
+            if (!confirm('Bạn có chắc muốn hủy đơn hàng này?')) return;
+            try {
+                const response = await fetch(`${baseUrl}/orders/${orderId}/cancel`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    showToast('Đã hủy đơn hàng.', 'success');
+                    closeOrderModal();
+                    loadOrders(currentOrderStatus);
+                    loadDashboardStats();
+                } else {
+                    const err = await response.json().catch(() => ({}));
+                    showToast(err.message || 'Không thể hủy đơn.', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Lỗi kết nối', 'error');
+            }
+        }
+
         function closeOrderModal() {
             document.getElementById('orderDetailModal').classList.add('hidden');
+        }
+
+        // ========================================
+        // TRẢ HÀNG / KHIẾU NẠI
+        // ========================================
+        let returnsData = { disputes: [], refunds: [] };
+
+        async function loadReturns() {
+            if (!currentShop) return;
+
+            const disputesList = document.getElementById('returnsDisputesList');
+            const refundsList = document.getElementById('returnsRefundsList');
+            const returnedList = document.getElementById('returnsReturnedList');
+            const loadingHtml = '<div class="p-10 text-center text-gray-500"><i class="fas fa-spinner fa-spin text-2xl mb-2"></i><p>Đang tải...</p></div>';
+            disputesList.innerHTML = loadingHtml;
+            refundsList.innerHTML = loadingHtml;
+            if (returnedList) returnedList.innerHTML = loadingHtml;
+
+            try {
+                const response = await fetch(`${baseUrl}/seller/returns`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error('Failed to load');
+                const data = await response.json();
+                returnsData = { disputes: data.disputes || [], refunds: data.refunds || [] };
+                renderReturnsDisputes(returnsData.disputes);
+                renderReturnsRefunds(returnsData.refunds);
+                renderReturnsReturned(returnsData.refunds);
+            } catch (err) {
+                console.error(err);
+                disputesList.innerHTML = '<div class="p-10 text-center text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>Lỗi tải dữ liệu</div>';
+                refundsList.innerHTML = '<div class="p-10 text-center text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>Lỗi tải dữ liệu</div>';
+                if (returnedList) returnedList.innerHTML = '<div class="p-10 text-center text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>Lỗi tải dữ liệu</div>';
+            }
+        }
+
+        function showReturnsTab(tab) {
+            document.querySelectorAll('.returns-tab').forEach(t => {
+                t.classList.remove('border-orange-500', 'text-orange-600');
+                t.classList.add('border-transparent', 'text-gray-600');
+            });
+            const activeTab = document.getElementById(`returnsTab-${tab}`);
+            if (activeTab) {
+                activeTab.classList.remove('border-transparent', 'text-gray-600');
+                activeTab.classList.add('border-orange-500', 'text-orange-600');
+            }
+            document.getElementById('returnsDisputesList').classList.toggle('hidden', tab !== 'disputes');
+            document.getElementById('returnsRefundsList').classList.toggle('hidden', tab !== 'refunds');
+            document.getElementById('returnsReturnedList').classList.toggle('hidden', tab !== 'returned');
+        }
+
+        function getReturnsDisputeStatusClass(status) {
+            switch (status) {
+                case 'OPEN': return 'bg-yellow-100 text-yellow-700';
+                case 'IN_REVIEW': return 'bg-orange-50 text-orange-600';
+                case 'RESOLVED': return 'bg-green-100 text-green-700';
+                case 'REJECTED': return 'bg-red-100 text-red-700';
+                default: return 'bg-gray-100 text-gray-700';
+            }
+        }
+
+        function getReturnsRefundStatusClass(status) {
+            switch (status) {
+                case 'REQUESTED': return 'bg-yellow-100 text-yellow-700';
+                case 'APPROVED': return 'bg-green-100 text-green-700';
+                case 'REJECTED': return 'bg-red-100 text-red-700';
+                case 'REFUNDED': return 'bg-blue-100 text-blue-700';
+                default: return 'bg-gray-100 text-gray-700';
+            }
+        }
+
+        function renderReturnsDisputes(disputes) {
+            const el = document.getElementById('returnsDisputesList');
+            if (!disputes || disputes.length === 0) {
+                el.innerHTML = '<div class="p-10 text-center text-gray-500">Chưa có khiếu nại nào</div>';
+                return;
+            }
+            el.innerHTML = disputes.map(d => `
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50 transition">
+                    <div class="flex-1 min-w-0">
+                        <p class="font-medium text-gray-800">Đơn #${(d.orderId || '').substring(0, 8)}</p>
+                        <p class="text-sm text-gray-500">Buyer: ${d.buyerId || '-'}</p>
+                        <p class="text-sm text-gray-600 mt-1">${d.reason || '-'}</p>
+                        <p class="text-xs text-gray-400 mt-1">${d.createdAt ? new Date(d.createdAt).toLocaleString('vi-VN') : ''}</p>
+                    </div>
+                    <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase shrink-0 ml-2 ${getReturnsDisputeStatusClass(d.status)}">${d.status}</span>
+                    <button onclick="showReturnsDisputeDetail('${d.id}')" class="ml-3 px-3 py-1.5 text-orange-600 hover:bg-orange-50 rounded-lg text-sm font-medium transition">
+                        <i class="fas fa-eye mr-1"></i>Xem chi tiết
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function renderReturnsRefunds(refunds) {
+            const el = document.getElementById('returnsRefundsList');
+            if (!refunds || refunds.length === 0) {
+                el.innerHTML = '<div class="p-10 text-center text-gray-500">Chưa có hoàn tiền nào</div>';
+                return;
+            }
+            el.innerHTML = refunds.map(r => `
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50 transition">
+                    <div class="flex-1 min-w-0">
+                        <p class="font-medium text-gray-800">Đơn #${(r.orderId || '').substring(0, 8)}</p>
+                        <p class="text-sm text-gray-500">Buyer: ${r.buyerId || '-'}</p>
+                        <p class="text-sm text-gray-600 mt-1">₫${Number(r.amount || 0).toLocaleString()} - ${r.reason || '-'}</p>
+                        <p class="text-xs text-gray-400 mt-1">${r.createdAt ? new Date(r.createdAt).toLocaleString('vi-VN') : ''}</p>
+                    </div>
+                    <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase shrink-0 ml-2 ${getReturnsRefundStatusClass(r.status)}">${r.status}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderReturnsReturned(refunds) {
+            const el = document.getElementById('returnsReturnedList');
+            const returned = (refunds || []).filter(r => ['APPROVED', 'REFUNDED'].includes((r.status || '').toUpperCase()));
+            if (returned.length === 0) {
+                el.innerHTML = '<div class="p-10 text-center text-gray-500">Chưa có hàng hoàn về</div>';
+                return;
+            }
+            el.innerHTML = returned.map(r => `
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50 transition">
+                    <div class="flex-1 min-w-0">
+                        <p class="font-medium text-gray-800">Đơn #${(r.orderId || '').substring(0, 8)}</p>
+                        <p class="text-sm text-gray-500">Buyer: ${r.buyerId || '-'}</p>
+                        <p class="text-sm text-gray-600 mt-1">₫${Number(r.amount || 0).toLocaleString()} - ${r.reason || '-'}</p>
+                        <p class="text-xs text-gray-400 mt-1"><i class="fas fa-undo-alt mr-1 text-green-600"></i>Đã hoàn về ${r.processedAt ? new Date(r.processedAt).toLocaleString('vi-VN') : r.createdAt ? new Date(r.createdAt).toLocaleString('vi-VN') : ''}</p>
+                    </div>
+                    <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase shrink-0 ml-2 ${getReturnsRefundStatusClass(r.status)}">${r.status}</span>
+                </div>
+            `).join('');
+        }
+
+        async function showReturnsDisputeDetail(disputeId) {
+            const container = document.getElementById('returnsDisputeDetailContent');
+            container.innerHTML = '<div class="text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin text-2xl"></i> Đang tải...</div>';
+            document.getElementById('returnsDisputeDetailModal').classList.remove('hidden');
+
+            try {
+                const [disputeRes, imagesRes] = await Promise.all([
+                    fetch(`${baseUrl}/disputes/${disputeId}`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch(`${baseUrl}/disputes/${disputeId}/images`, { headers: { 'Authorization': `Bearer ${token}` } })
+                ]);
+                if (!disputeRes.ok) throw new Error('Failed to load dispute');
+                const dispute = await disputeRes.json();
+                const images = imagesRes.ok ? await imagesRes.json() : [];
+
+                let order = null;
+                if (dispute.orderId) {
+                    try {
+                        const orderRes = await fetch(`${baseUrl}/orders/${dispute.orderId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                        if (orderRes.ok) order = await orderRes.json();
+                    } catch (e) { console.warn('Order fetch failed:', e); }
+                }
+
+                const items = order?.displayItems || order?.items || [];
+                const itemsHtml = items.map(item => `
+                    <div class="flex gap-4 p-4 border-b border-gray-100">
+                        <img src="${item.productImage || 'https://via.placeholder.com/80'}" class="w-20 h-20 object-cover rounded border">
+                        <div class="flex-1">
+                            <p class="font-bold text-gray-800">${item.productName || 'Product'}</p>
+                            <p class="text-sm text-gray-500">${item.variantName || ''}</p>
+                            <p class="text-sm text-gray-600">Qty: ${item.quantity || 1}</p>
+                        </div>
+                        <p class="font-bold text-orange-600">₫${Number((item.price || 0) * (item.quantity || 1)).toLocaleString()}</p>
+                    </div>
+                `).join('') || '<p class="p-4 text-gray-500">Không có sản phẩm</p>';
+
+                const imagesHtml = images.length > 0 ? images.map(img => `
+                    <a href="${img.imageUrl}" target="_blank" class="block w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-200 hover:border-orange-500 transition">
+                        <img src="${img.imageUrl}" alt="Minh chứng" class="w-full h-full object-cover">
+                    </a>
+                `).join('') : '<p class="text-gray-500 text-sm">Không có ảnh minh chứng</p>';
+
+                const formatAddr = (addr) => {
+                    if (!addr) return 'N/A';
+                    const parts = [addr.address, addr.ward, addr.district, addr.city].filter(Boolean);
+                    return parts.join(', ') || 'N/A';
+                };
+
+                container.innerHTML = `
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="font-bold text-gray-800 mb-3">Thông tin khiếu nại</h4>
+                            <div class="bg-gray-50 p-4 rounded-lg space-y-2">
+                                <p><span class="text-gray-600">Order ID:</span> <span class="font-mono text-sm">${dispute.orderId || '-'}</span></p>
+                                <p><span class="text-gray-600">Buyer:</span> ${dispute.buyerId || '-'}</p>
+                                <p><span class="text-gray-600">Lý do:</span> <span class="font-semibold text-orange-600">${dispute.reason || '-'}</span></p>
+                                <p><span class="text-gray-600">Mô tả:</span> ${dispute.description || '-'}</p>
+                                <p><span class="text-gray-600">Trạng thái:</span> <span class="px-2 py-1 rounded-full text-xs font-bold ${getReturnsDisputeStatusClass(dispute.status)}">${dispute.status}</span></p>
+                                ${dispute.adminNote ? `<p><span class="text-gray-600">Ghi chú Admin:</span> ${dispute.adminNote}</p>` : ''}
+                                <p><span class="text-gray-600">Ngày tạo:</span> ${dispute.createdAt ? new Date(dispute.createdAt).toLocaleString('vi-VN') : '-'}</p>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-800 mb-3">Ảnh minh chứng (buyer gửi)</h4>
+                            <div class="flex flex-wrap gap-3">${imagesHtml}</div>
+                        </div>
+                        ${order ? `
+                        <div>
+                            <h4 class="font-bold text-gray-800 mb-3">Thông tin đơn hàng</h4>
+                            <div class="bg-gray-50 p-4 rounded-lg space-y-2 mb-4">
+                                <p><span class="text-gray-600">Trạng thái đơn:</span> ${order.orderStatus || '-'}</p>
+                                <p><span class="text-gray-600">Tổng tiền:</span> <span class="font-bold text-orange-600">₫${Number(order.totalPrice || 0).toLocaleString()}</span></p>
+                            </div>
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">${itemsHtml}</div>
+                        </div>
+                        ${order.shipping ? `
+                        <div>
+                            <h4 class="font-bold text-gray-800 mb-3">Địa chỉ giao hàng</h4>
+                            <div class="bg-gray-50 p-4 rounded-lg">${formatAddr(order.shipping.address)}</div>
+                        </div>
+                        ` : ''}
+                        ` : '<p class="text-gray-500">Không tải được thông tin đơn hàng.</p>'}
+                    </div>
+                `;
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = '<div class="text-center py-10 text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>Không tải được chi tiết.</div>';
+            }
+        }
+
+        function closeReturnsDisputeModal() {
+            document.getElementById('returnsDisputeDetailModal').classList.add('hidden');
         }
 
         async function updateOrderStatusUI(orderId, newStatus) {
@@ -2195,12 +2836,46 @@
                 if (response.ok) {
                     showToast(`Order updated to ${newStatus}`, 'success');
                     loadOrders(currentOrderStatus);
+                    loadDashboardStats(); // Đồng bộ số liệu dashboard
                 } else {
                     showToast('Failed to update order', 'error');
                 }
             } catch (err) {
                 console.error(err);
                 showToast('Error updating order', 'error');
+            }
+        }
+
+        async function updateTrackingCode(orderId) {
+            const trackingInput = document.getElementById('trackingCodeInput');
+            const providerInput = document.getElementById('providerIdInput');
+            if (!trackingInput || !providerInput) return;
+
+            const trackingCode = trackingInput.value.trim();
+            if (!trackingCode) {
+                showToast('Vui lòng nhập mã vận đơn', 'error');
+                return;
+            }
+
+            try {
+                const params = new URLSearchParams({ trackingCode, providerId: providerInput.value });
+                const response = await fetch(`${baseUrl}/orders/${orderId}/shipping?${params}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    showToast('Đã cập nhật mã vận đơn. Webhook sẽ tự cập nhật khi giao thành công.', 'success');
+                    showOrderDetail(orderId); // Refresh modal
+                    loadOrders(currentOrderStatus);
+                    loadDashboardStats();
+                } else {
+                    const err = await response.json().catch(() => ({}));
+                    showToast(err.message || 'Cập nhật thất bại', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Lỗi kết nối', 'error');
             }
         }
 
@@ -2657,7 +3332,7 @@
             // Symbolic data if no products
             const labels = products.length > 0 ? products.map(p => p.name.substring(0, 10)) : ['Product A', 'Product B', 'Product C'];
             const data = products.length > 0 ? products.map(p => p.flashSaleStock) : [50, 80, 45];
-            const soldData = products.length > 0 ? products.map(p => Math.floor(Math.random() * p.flashSaleStock)) : [30, 60, 20];
+            const soldData = products.length > 0 ? products.map(p => p.sold ?? 0) : [30, 60, 20];
 
             fsChart = new Chart(ctx, {
                 type: 'bar',

@@ -39,4 +39,16 @@ public class DisputeController {
     public ResponseEntity<Dispute> getDispute(@PathVariable String id) {
         return ResponseEntity.ok(disputeService.getDispute(id));
     }
+
+    @GetMapping("/{id}/images")
+    public ResponseEntity<java.util.List<com.shoppeclone.backend.dispute.entity.DisputeImage>> getDisputeImages(@PathVariable String id) {
+        return ResponseEntity.ok(disputeService.getDisputeImages(id));
+    }
+
+    @GetMapping("/order/{orderId}")
+    public ResponseEntity<Dispute> getDisputeByOrder(@PathVariable String orderId) {
+        return disputeService.findOptionalByOrderId(orderId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

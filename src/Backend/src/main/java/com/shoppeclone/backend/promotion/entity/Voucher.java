@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Document(collection = "vouchers")
 @Data
@@ -15,6 +16,11 @@ public class Voucher {
 
     private String code;
     private String description; // e.g., "10% OFF Electronics"
+
+    /** Category IDs this voucher applies to. Null/empty = applies to all products. */
+    private List<String> categoryIds;
+    /** Display name of restricted category (e.g. "Electronics") - for UI hint. */
+    private String categoryRestriction;
 
     // Discount Logic
     private DiscountType discountType; // PERCENTAGE, FIXED_AMOUNT

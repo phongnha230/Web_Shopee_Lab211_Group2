@@ -66,6 +66,18 @@
         .voucher-purple {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
+
+        .voucher-pink {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .voucher-cyan {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .voucher-teal {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
     </style>
 </head>
 
@@ -108,11 +120,11 @@
         <div class="bg-gradient-to-r from-orange-400 to-pink-500 rounded-xl p-6 mb-6 text-white">
             <div class="flex items-center justify-between">
                 <div>
-                    <h2 class="text-2xl font-bold mb-2">� Save Big on Products!</h2>
+                    <h2 class="text-2xl font-bold mb-2">Save Big on Products!</h2>
                     <p class="text-orange-100">Get up to 50% OFF on your orders</p>
                 </div>
                 <div class="text-right">
-                    <div class="text-4xl font-bold">15</div>
+                    <div class="text-4xl font-bold" id="availableCount">0</div>
                     <div class="text-sm">Available</div>
                 </div>
             </div>
@@ -124,128 +136,102 @@
         </div>
     </main>
 
+    <script src="js/services/api.js"></script>
     <script>
-        const VOUCHERS = [
-            {
-                id: 'PD001',
-                code: 'ELECTRO10',
-                type: 'product',
-                title: '10% OFF Electronics',
-                discount: '10% OFF',
-                minOrder: '₫100',
-                expiry: '31 Jan 2026',
-                color: 'voucher-blue',
-                icon: '💻',
-                collected: false,
-                stock: 450
-            },
-            {
-                id: 'PD002',
-                code: 'FASHION20',
-                type: 'product',
-                title: '20% OFF Fashion Items',
-                discount: '20% OFF',
-                minOrder: '₫50',
-                expiry: '28 Feb 2026',
-                color: 'voucher-purple',
-                icon: '👗',
-                collected: false,
-                stock: 320
-            },
-            {
-                id: 'PD003',
-                code: 'WELCOME50',
-                type: 'product',
-                title: '50% OFF First Order',
-                discount: '50% OFF',
-                minOrder: '₫0',
-                expiry: '31 Dec 2026',
-                color: 'voucher-orange',
-                icon: '🎉',
-                collected: true,
-                stock: 999
-            },
-            {
-                id: 'PD004',
-                code: 'MOBILE15',
-                type: 'product',
-                title: '15% OFF Mobile Phones',
-                discount: '15% OFF',
-                minOrder: '₫200',
-                expiry: '15 Feb 2026',
-                color: 'voucher-green',
-                icon: '📱',
-                collected: false,
-                stock: 89
-            },
-            {
-                id: 'PD005',
-                code: 'SPORT30',
-                type: 'product',
-                title: '₫30 OFF Sports Items',
-                discount: '₫30 OFF',
-                minOrder: '₫100',
-                expiry: '20 Jan 2026',
-                color: 'voucher-blue',
-                icon: '⚽',
-                collected: false,
-                stock: 156
-            },
-            {
-                id: 'PD006',
-                code: 'HOME25',
-                type: 'product',
-                title: '25% OFF Home & Living',
-                discount: '25% OFF',
-                minOrder: '₫150',
-                expiry: '28 Feb 2026',
-                color: 'voucher-purple',
-                icon: '🏠',
-                collected: false,
-                stock: 234
-            },
-            {
-                id: 'FS001',
-                code: 'FREESHIP15',
-                type: 'shipping',
-                title: 'Free Shipping Voucher',
-                discount: '₫15k OFF',
-                minOrder: '₫50',
-                expiry: '31 Jan 2026',
-                color: 'voucher-green',
-                icon: '🚚',
-                collected: false,
-                stock: 234
-            },
-            {
-                id: 'FS002',
-                code: 'SUPER30',
-                type: 'shipping',
-                title: 'Super Freeship Voucher',
-                discount: '₫30k OFF',
-                minOrder: '₫100',
-                expiry: '15 Feb 2026',
-                color: 'voucher-blue',
-                icon: '🚀',
-                collected: false,
-                stock: 89
-            },
-            {
-                id: 'FS003',
-                code: 'EXPRESS25',
-                type: 'shipping',
-                title: 'Express Delivery Free',
-                discount: '₫25k OFF',
-                minOrder: '₫75',
-                expiry: '28 Feb 2026',
-                color: 'voucher-orange',
-                icon: '⚡',
-                collected: false,
-                stock: 156
-            }
-        ];
+        const COLLECTED_STORAGE_KEY = 'vouchers_collected';
+        const COLOR_ICON_MAP = {
+            'Electronics': { color: 'voucher-blue', icon: '💻' },
+            'Fashion': { color: 'voucher-purple', icon: '👗' },
+            'Mobile & Gadgets': { color: 'voucher-green', icon: '📱' },
+            'Home': { color: 'voucher-purple', icon: '🏠' },
+            'Sports': { color: 'voucher-blue', icon: '⚽' },
+            'Beauty': { color: 'voucher-pink', icon: '💄' },
+            'Baby & Toys': { color: 'voucher-teal', icon: '🧸' },
+            'Food': { color: 'voucher-orange', icon: '🍜' },
+            'Books': { color: 'voucher-cyan', icon: '📚' }
+        };
 
+        let VOUCHERS = [];
         let currentTab = 'product';
+        let usedVoucherCodes = [];
+        let vouchersLoaded = false;
+
+        function getCollectedIds() {
+            try {
+                const raw = localStorage.getItem(COLLECTED_STORAGE_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch { return []; }
+        }
+
+        function setCollectedIds(ids) {
+            localStorage.setItem(COLLECTED_STORAGE_KEY, JSON.stringify(ids));
+        }
+
+        function formatMinSpend(val) {
+            if (!val || val === 0) return '₫0';
+            if (val >= 1000) return '₫' + (val / 1000) + 'k';
+            return '₫' + val;
+        }
+
+        function formatDiscount(v) {
+            if (!v) return '';
+            const type = (v.discountType || '').toUpperCase();
+            const val = v.discountValue;
+            if (type === 'PERCENTAGE') return val + '% OFF';
+            return '₫' + (val >= 1000 ? (val / 1000) + 'k' : val) + ' OFF';
+        }
+
+        function formatExpiry(endDate) {
+            if (!endDate) return '-';
+            const d = new Date(endDate);
+            return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function mapApiVoucherToFrontend(v) {
+            const cat = v.categoryRestriction ? (COLOR_ICON_MAP[v.categoryRestriction] || { color: 'voucher-blue', icon: '🏷️' }) : { color: 'voucher-orange', icon: '🎉' };
+            if (v.type === 'SHIPPING') cat.icon = v.code.includes('SUPER') ? '🚀' : v.code.includes('EXPRESS') ? '⚡' : v.code.includes('WEEKEND') ? '🌴' : v.code.includes('NEWUSER') ? '👋' : v.code.includes('FLASH') ? '🔥' : '🚚';
+            const collected = getCollectedIds().includes(v.id);
+            return {
+                id: v.id,
+                code: v.code,
+                type: v.type === 'SHIPPING' ? 'shipping' : 'product',
+                title: v.description,
+                discount: formatDiscount(v),
+                minOrder: formatMinSpend(v.minSpend),
+                expiry: formatExpiry(v.endDate),
+                color: v.type === 'SHIPPING' ? (v.code.includes('SUPER') ? 'voucher-blue' : v.code.includes('EXPRESS') ? 'voucher-orange' : 'voucher-green') : cat.color,
+                icon: cat.icon,
+                collected,
+                stock: v.quantity != null ? v.quantity : 0,
+                categoryRestriction: v.categoryRestriction || null
+            };
+        }
+
+        async function loadVouchers() {
+            try {
+                const list = await VoucherAPI.getAllVouchers();
+                VOUCHERS = (list || []).map(mapApiVoucherToFrontend);
+            } catch (e) {
+                console.error('Failed to load vouchers:', e);
+                VOUCHERS = [];
+            } finally {
+                vouchersLoaded = true;
+            }
+        }
+
+        async function loadUsedVoucherCodes() {
+            try {
+                // Chỉ gọi API khi user đã đăng nhập (tránh lỗi 403)
+                const token = localStorage.getItem('accessToken');
+                if (typeof VoucherAPI !== 'undefined' && token) {
+                    usedVoucherCodes = await VoucherAPI.getUsedVoucherCodes() || [];
+                } else {
+                    usedVoucherCodes = [];
+                }
+            } catch (e) {
+                usedVoucherCodes = [];
+            }
+        }
 
         function switchTab(tab) {
             currentTab = tab;
@@ -264,7 +250,19 @@
         function renderVouchers() {
             const container = document.getElementById('vouchersContainer');
             
-            // Filter Logic
+            if (!vouchersLoaded) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-16 text-gray-500">
+                        <div class="inline-block w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                        <p>Đang tải voucher...</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const collectedIds = getCollectedIds();
+            VOUCHERS.forEach(v => { v.collected = collectedIds.includes(v.id); });
+            
             let filteredVouchers = [];
             if (currentTab === 'collected') {
                 filteredVouchers = VOUCHERS.filter(v => v.collected);
@@ -272,9 +270,11 @@
                 filteredVouchers = VOUCHERS.filter(v => v.type === currentTab);
             }
 
-            // Update Collected Count
             const collectedCount = VOUCHERS.filter(v => v.collected).length;
             document.getElementById('collectedCount').textContent = collectedCount;
+            const productCount = VOUCHERS.filter(v => v.type === 'product').length;
+            const availEl = document.getElementById('availableCount');
+            if (availEl) availEl.textContent = productCount;
 
             if (filteredVouchers.length === 0) {
                 container.innerHTML = `
@@ -314,9 +314,14 @@
                                 ${v.expiry}
                             </div>
                         </div>
+                        ${v.categoryRestriction ? `<div class="text-xs opacity-80 mb-1"><i class="fas fa-tag mr-1"></i>Chỉ áp dụng: ${v.categoryRestriction}</div>` : ''}
                         
                         <div class="mt-2">
-                            ${v.collected ? 
+                            ${usedVoucherCodes.includes(v.code) ?
+                                `<button disabled class="bg-gray-300 text-gray-500 w-full py-2 rounded-lg text-sm font-bold cursor-not-allowed">
+                                    Đã sử dụng
+                                </button>`
+                                : v.collected ? 
                                 `<button onclick="useVoucher('${v.code}')" 
                                     class="bg-white text-orange-600 hover:bg-orange-50 w-full py-2 rounded-lg text-sm font-bold transition-all transform active:scale-95 shadow-sm">
                                     Use Now
@@ -334,23 +339,36 @@
         }
 
         function useVoucher(code) {
+            if (usedVoucherCodes.includes(code)) {
+                showToast('Voucher này đã được sử dụng trong đơn hàng trước.');
+                return;
+            }
             const voucher = VOUCHERS.find(v => v.code === code);
             const type = voucher && voucher.type === 'product' ? 'PRODUCT' : 'SHIPPING';
             
             // Save to localStorage for robust transfer
             localStorage.setItem('autoApplyVoucher', JSON.stringify({ code, type }));
             
-            // Redirect to checkout
-            window.location.href = 'checkout-backend.html';
+            // Redirect back to checkout - preserve Buy Now params (mode=buynow&productId=...) 
+            // so cart doesn't become empty when user came from Buy Now flow
+            const returnUrl = sessionStorage.getItem('checkoutReturnUrl') 
+                || (document.referrer && document.referrer.includes('checkout-backend') ? document.referrer : null);
+            window.location.href = returnUrl || 'checkout-backend.html';
         }
 
         function collectVoucher(id) {
             const voucher = VOUCHERS.find(v => v.id === id);
             if (!voucher || voucher.collected) return;
+            if (usedVoucherCodes.includes(voucher.code)) {
+                showToast('Voucher này đã được sử dụng trong đơn hàng trước.');
+                return;
+            }
             
+            const ids = getCollectedIds();
+            if (!ids.includes(id)) ids.push(id);
+            setCollectedIds(ids);
             voucher.collected = true;
-            renderVouchers(); // Re-render to update UI (and move to Collected tab if needed)
-            
+            renderVouchers();
             showToast('🎉 Voucher collected! Check "Collected" tab to use it.');
         }
 
@@ -365,7 +383,13 @@
             }, 3000);
         }
 
-        document.addEventListener('DOMContentLoaded', renderVouchers);
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (document.referrer && document.referrer.includes('checkout-backend')) {
+                sessionStorage.setItem('checkoutReturnUrl', document.referrer);
+            }
+            await Promise.all([loadVouchers(), loadUsedVoucherCodes()]);
+            renderVouchers();
+        });
     </script>
 </body>
 
