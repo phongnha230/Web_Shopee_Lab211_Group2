@@ -43,6 +43,11 @@ public class ProductController {
         return ResponseEntity.ok(productService.getAllProducts(sort));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<ProductResponse>> searchProducts(@RequestParam String keyword) {
+        return ResponseEntity.ok(productService.searchProducts(keyword));
+    }
+
     @GetMapping("/flash-sale")
     public ResponseEntity<List<ProductResponse>> getFlashSaleProducts() {
         return ResponseEntity.ok(productService.getFlashSaleProducts());

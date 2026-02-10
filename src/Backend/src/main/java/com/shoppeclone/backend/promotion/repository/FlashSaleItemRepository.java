@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface FlashSaleItemRepository extends MongoRepository<FlashSaleItem, String> {
     List<FlashSaleItem> findByFlashSaleId(String flashSaleId);
+
+    void deleteByFlashSaleId(String flashSaleId);
 }

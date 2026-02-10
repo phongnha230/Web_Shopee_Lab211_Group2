@@ -10,4 +10,7 @@ import java.util.List;
 @Repository
 public interface FlashSaleRepository extends MongoRepository<FlashSale, String> {
     List<FlashSale> findByStartTimeAfter(LocalDateTime time);
+
+    /** Flash sale đang diễn ra: startTime <= now <= endTime */
+    List<FlashSale> findByStartTimeLessThanEqualAndEndTimeGreaterThanEqual(LocalDateTime now, LocalDateTime nowEnd);
 }

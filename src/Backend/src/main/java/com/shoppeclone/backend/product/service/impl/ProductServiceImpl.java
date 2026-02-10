@@ -9,6 +9,7 @@ import com.shoppeclone.backend.product.entity.*;
 import com.shoppeclone.backend.product.repository.*;
 import com.shoppeclone.backend.product.service.ProductService;
 import com.shoppeclone.backend.product.util.CategoryDetectionUtil;
+import com.shoppeclone.backend.promotion.service.FlashSaleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductImageRepository imageRepository;
     private final ProductCategoryRepository productCategoryRepository;
     private final CategoryRepository categoryRepository;
+    private final FlashSaleService flashSaleService;
 
     @Override
     @Transactional
@@ -136,6 +138,22 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return productRepository.findAll(sorting).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductResponse> searchProducts(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            // If no keyword is provided, return an empty list instead of all products
+            return java.util.List.of();
+        }
+
+        String trimmed = keyword.trim();
+
+        return productRepository
+                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(trimmed, trimmed)
+                .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
@@ -372,6 +390,11 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductResponse> getFlashSaleProducts() {
+        // Chỉ hiển thị sản phẩm flash sale nếu đang có chiến dịch flash sale đang chạy
+        if (flashSaleService.getCurrentFlashSale().isEmpty()) {
+            return java.util.List.of();
+        }
+
         return productRepository.findByIsFlashSaleTrue().stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());

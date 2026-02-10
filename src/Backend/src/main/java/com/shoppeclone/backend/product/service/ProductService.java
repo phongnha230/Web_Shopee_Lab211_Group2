@@ -18,6 +18,8 @@ public interface ProductService {
 
     List<ProductResponse> getProductsByCategory(String categoryId);
 
+    List<ProductResponse> searchProducts(String keyword);
+
     ProductResponse updateProduct(String id, UpdateProductRequest request);
 
     void deleteProduct(String id);

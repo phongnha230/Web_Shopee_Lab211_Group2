@@ -120,12 +120,12 @@
                 <!-- Search -->
                 <div class="flex-1 max-w-2xl mx-8">
                     <div class="relative">
-                        <input type="text" placeholder="Search for millions of products..."
-                            class="w-full p-3 pl-12 pr-16 rounded-sm border-2 border-white focus:border-orange-300 focus:outline-none">
+                        <input id="globalSearchInput" type="text" placeholder="Search for millions of products..."
+                            class="w-full p-3 pl-12 pr-20 rounded-full border-2 border-white focus:border-orange-300 focus:outline-none">
                         <i
                             class="fas fa-search absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl"></i>
-                        <button
-                            class="absolute right-3 top-1/2 transform -translate-y-1/2 bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-sm font-semibold">
+                        <button id="globalSearchButton"
+                            class="absolute right-3 top-1/2 transform -translate-y-1/2 bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-full font-semibold">
                             Search
                         </button>
                     </div>
@@ -333,10 +333,13 @@
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center space-x-4">
                     <h2 class="text-2xl font-bold text-orange-600">FLASH SALE</h2>
-                    <div class="flex items-center space-x-2">
-                        <div class="bg-black text-white px-2 py-1 rounded text-sm font-bold">00</div>
-                        <div class="bg-black text-white px-2 py-1 rounded text-sm font-bold">45</div>
-                        <div class="bg-black text-white px-2 py-1 rounded text-sm font-bold">23</div>
+                    <div class="flex items-center space-x-2" id="flashSaleCountdown">
+                        <span class="text-sm font-bold text-gray-500 mr-1">Còn:</span>
+                        <div id="flashSaleHours" class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-bold">00</div>
+                        <span class="text-gray-400">:</span>
+                        <div id="flashSaleMinutes" class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-bold">00</div>
+                        <span class="text-gray-400">:</span>
+                        <div id="flashSaleSeconds" class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-bold">00</div>
                     </div>
                 </div>
                 <a href="flash-sale.html" class="text-orange-500 font-semibold hover:text-orange-600">See All →</a>
@@ -384,7 +387,81 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadHomepageProducts();
             loadHomepageCategories();
+            loadFlashSaleCountdown();
+            setupGlobalSearch();
         });
+
+        let flashSaleCountdownInterval = null;
+
+        async function loadFlashSaleCountdown() {
+            const hoursEl = document.getElementById('flashSaleHours');
+            const minutesEl = document.getElementById('flashSaleMinutes');
+            const secondsEl = document.getElementById('flashSaleSeconds');
+            if (!hoursEl || !minutesEl || !secondsEl) return;
+            try {
+                const res = await fetch(`${API_BASE_URL}/flash-sales/current`);
+                if (!res.ok || res.status === 204) {
+                    setCountdownText(hoursEl, minutesEl, secondsEl, '--', '--', '--');
+                    return;
+                }
+                const data = await res.json();
+                const endTime = data.endTime;
+                if (!endTime) {
+                    setCountdownText(hoursEl, minutesEl, secondsEl, '--', '--', '--');
+                    return;
+                }
+                const end = new Date(endTime);
+                function tick() {
+                    const now = new Date();
+                    let ms = end - now;
+                    if (ms <= 0) {
+                        setCountdownText(hoursEl, minutesEl, secondsEl, '00', '00', '00');
+                        if (flashSaleCountdownInterval) clearInterval(flashSaleCountdownInterval);
+                        return;
+                    }
+                    const s = Math.floor((ms / 1000) % 60);
+                    const m = Math.floor((ms / 60000) % 60);
+                    const h = Math.floor(ms / 3600000);
+                    setCountdownText(hoursEl, minutesEl, secondsEl,
+                        String(h).padStart(2, '0'),
+                        String(m).padStart(2, '0'),
+                        String(s).padStart(2, '0'));
+                }
+                tick();
+                if (flashSaleCountdownInterval) clearInterval(flashSaleCountdownInterval);
+                flashSaleCountdownInterval = setInterval(tick, 1000);
+            } catch (e) {
+                console.error('Flash sale countdown error:', e);
+                setCountdownText(hoursEl, minutesEl, secondsEl, '--', '--', '--');
+            }
+        }
+
+        function setCountdownText(hEl, mEl, sEl, h, m, s) {
+            if (hEl) hEl.textContent = h;
+            if (mEl) mEl.textContent = m;
+            if (sEl) sEl.textContent = s;
+        }
+
+        // Global header search: redirect to search results page (category.html) with keyword
+        function setupGlobalSearch() {
+            const searchInput = document.getElementById('globalSearchInput');
+            const searchButton = document.getElementById('globalSearchButton');
+            if (!searchInput || !searchButton) return;
+
+            const redirectToSearchPage = () => {
+                const keyword = searchInput.value.trim();
+                if (!keyword) return;
+                const encoded = encodeURIComponent(keyword);
+                window.location.href = `category.html?search=${encoded}`;
+            };
+
+            searchButton.addEventListener('click', redirectToSearchPage);
+            searchInput.addEventListener('keyup', (event) => {
+                if (event.key === 'Enter') {
+                    redirectToSearchPage();
+                }
+            });
+        }
 
         async function loadHomepageCategories() {
             try {

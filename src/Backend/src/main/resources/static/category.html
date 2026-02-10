@@ -20,12 +20,14 @@
                 </div>
                 <div class="flex-1 max-w-2xl mx-8">
                     <div class="relative">
-                        <input type="text" placeholder="Search for millions of products..."
-                            class="w-full p-3 pl-12 pr-16 rounded-sm">
+                        <input id="globalSearchInput" type="text" placeholder="Search for millions of products..."
+                            class="w-full p-3 pl-12 pr-20 rounded-full border border-white/60 focus:border-orange-300 focus:outline-none">
                         <i
                             class="fas fa-search absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl"></i>
-                        <button
-                            class="absolute right-3 top-1/2 transform -translate-y-1/2 bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-sm font-semibold">Search</button>
+                        <button id="globalSearchButton"
+                            class="absolute right-3 top-1/2 transform -translate-y-1/2 bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-full font-semibold">
+                            Search
+                        </button>
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
@@ -186,6 +188,8 @@
 
         async function loadProducts() {
             const params = new URLSearchParams(window.location.search);
+
+            const searchQuery = params.get('search');
             let categoryId = params.get('id');
             // Sanitize ID
             if (categoryId && (categoryId === 'undefined' || categoryId === 'null' || categoryId.trim() === '')) {
@@ -212,6 +216,77 @@
 
             const grid = document.getElementById('productsGrid');
             const noProducts = document.getElementById('noProducts');
+
+            // 🔎 SEARCH MODE: if ?search=keyword is present, ignore category id and show search results
+            if (searchQuery && searchQuery.trim() !== '') {
+                const keyword = searchQuery.trim();
+                document.getElementById('categoryTitle').textContent = `Search: "${keyword}"`;
+                document.getElementById('categoryName').textContent = 'Search results';
+
+                try {
+                    grid.innerHTML = '<div class="col-span-full text-center text-gray-500 py-20">Loading products...</div>';
+
+                    const response = await fetch(`${API_BASE_URL}/products/search?keyword=${encodeURIComponent(keyword)}`);
+                    if (!response.ok) {
+                        throw new Error('Failed to search products');
+                    }
+
+                    const products = await response.json();
+
+                    document.getElementById('productCount').textContent = products.length;
+
+                    if (products.length === 0) {
+                        grid.classList.add('hidden');
+                        noProducts.classList.remove('hidden');
+                        grid.innerHTML = '';
+                        return;
+                    }
+
+                    grid.classList.remove('hidden');
+                    noProducts.classList.add('hidden');
+
+                    grid.innerHTML = products.map(p => {
+                        // Image normalization
+                        let imageUrl = 'https://via.placeholder.com/400x400?text=No+Image';
+                        if (p.images && p.images.length > 0) imageUrl = p.images[0];
+                        else if (p.image) imageUrl = p.image;
+
+                        // Price normalization
+                        let priceVal = 0;
+                        if (p.variants && p.variants.length > 0) priceVal = p.variants[0].price;
+                        else if (p.price) priceVal = p.price;
+
+                        const priceDisplay = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(priceVal);
+
+                        const sold = p.sold != null ? p.sold : 0;
+                        const rating = p.rating != null ? p.rating.toFixed(1) : '-';
+
+                        return `
+                        <div onclick="goToProduct('${p.id || p._id}')"
+                            class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer overflow-hidden group">
+                            <div class="relative">
+                                <img src="${imageUrl}" alt="${p.name}" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                            </div>
+                            <div class="p-3">
+                                <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2">${p.name}</p>
+                                <p class="text-orange-600 text-lg font-bold">${priceDisplay}</p>
+                                <div class="flex items-center text-xs text-gray-500 mt-1">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    <span>${rating}</span>
+                                    <span class="border-l border-gray-300 pl-2 ml-2">Sold ${sold}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    }).join('');
+
+                } catch (error) {
+                    console.error('Error searching products:', error);
+                    grid.innerHTML = '<div class="col-span-full text-center text-red-500 py-20">Error loading products.</div>';
+                    document.getElementById('productCount').textContent = 0;
+                }
+                return;
+            }
 
             let productsToDisplay = [];
 
@@ -329,7 +404,29 @@
             loadProducts();
             updateNavbar();
             updateCartBadge();
+            setupGlobalSearch();
         });
+
+        // Reuse same global header search behavior as homepage
+        function setupGlobalSearch() {
+            const searchInput = document.getElementById('globalSearchInput');
+            const searchButton = document.getElementById('globalSearchButton');
+            if (!searchInput || !searchButton) return;
+
+            const redirectToSearchPage = () => {
+                const keyword = searchInput.value.trim();
+                if (!keyword) return;
+                const encoded = encodeURIComponent(keyword);
+                window.location.href = `category.html?search=${encoded}`;
+            };
+
+            searchButton.addEventListener('click', redirectToSearchPage);
+            searchInput.addEventListener('keyup', (event) => {
+                if (event.key === 'Enter') {
+                    redirectToSearchPage();
+                }
+            });
+        }
 
         function updateNavbar() {
             const token = localStorage.getItem('accessToken');
