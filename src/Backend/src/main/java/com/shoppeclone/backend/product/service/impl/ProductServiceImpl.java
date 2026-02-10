@@ -127,8 +127,15 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductResponse> getAllProducts() {
-        return productRepository.findAll().stream()
+    public List<ProductResponse> getAllProducts(String sort) {
+        org.springframework.data.domain.Sort sorting = org.springframework.data.domain.Sort.unsorted();
+
+        if ("sold_desc".equals(sort)) {
+            sorting = org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC,
+                    "sold");
+        }
+
+        return productRepository.findAll(sorting).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }

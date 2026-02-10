@@ -24,6 +24,7 @@ public class DashboardStatsResponse {
     // Trend Data
     private List<TrendData> userTrend;
     private List<TrendData> shopTrend;
+    private List<TrendData> disputeTrend;
 
     // Distribution Data (e.g., Users by Role or Shops by Category)
     private List<DistributionData> distribution;

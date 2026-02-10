@@ -15342,6 +15342,61 @@ Review Changes
 - `ShopController.java`: Updated admin endpoints to return the new DTO.
 - `admin-dashboard.html`: Updated frontend to display `ownerFullName`.
 
+## Session Update (2026-02-08) - Shop Deletion & UI Fixes
+
+### 1. Fix Shop Status Persistence (Shop Arina)
+- **Problem**: Changing shop status (e.g., Reject) was not saving to DB because of email/notification errors rolling back the transaction.
+- **Fix**: Wrapped notification logic in 	ry-catch blocks in ShopServiceImpl.java.
+- **Action**: Temporarily added a 'Reject' button to UI to manually fix 'Shop Arina' status, then removed it.
+
+### 2. UI Alignment in Active Shops
+- **Problem**: The 'Running' button was misaligned because shop addresses had different lengths.
+- **Fix**: Used CSS Flexbox (lex-col, mt-auto) in dmin-dashboard.html to force the button to the bottom of the card.
+
+### 3. Conditional Shop Deletion
+- **Feature**: User requested 'Delete Shop' functionality but ONLY if the shop has NO products.
+- **Backend**:
+    - Added deleteShop(String id) to ShopService.
+    - Logic: Check productRepository.countByShopId(shopId). If > 0, throw Exception. Else, delete.
+    - Endpoint: DELETE /api/shop/admin/delete/{id}.
+- **Frontend**:
+    - Added **Product Count** badge (e.g., '?? 5 Products') to shop cards.
+    - **Conditional Button**:
+        - If products == 0: Button becomes **'Delete Shop'** (Red).
+        - If products > 0: Button remains **'Running'** (Yellow/Disabled).
+
+# LOG UPDATE: 2026-02-10 - Dashboard Synchronization & New Features
+
+## 1. Dispute Trend Visualization
+- **Feature**: Added "Dispute Trend" to the main Registration Chart on the Admin Dashboard.
+- **Backend**:
+    - Updated `AdminDashboardService` to include `getDisputeTrend` logic (daily & hourly).
+    - Updated `DashboardStatsResponse` DTO to carry dispute trend data.
+- **Frontend**:
+    - Updated `admin-dashboard.html` to render a 3rd dataset (Purple line) for disputes.
+    - Synchronized chart title to "Daily new users, shops & disputes".
+    - Updated dynamic title logic to reflect time filters (Today, Last 7 Days, etc.).
+
+## 2. Admin Dashboard UI Synchronization
+- **Consistency**: Ensured all dashboard counters and charts reflect real-time data from the database.
+- **Bug Fix**: Fixed a syntax error in `AdminDashboardService.java` (duplicate code and missing `.map` call in `getHourlyTrend`) that caused compilation failures.
+
+## 3. Top Selling Products "View All"
+- **Feature**: The "View All" link in the "Top Selling Products" section now correctly navigates to the full product list sorted by sales volume.
+- **Backend**:
+    - Updated `ProductService` interface and implementation to support `getAllProducts(String sort)`.
+    - Updated `ProductController` to accept `sort` query parameter.
+- **Frontend**:
+    - Updated `loadProducts` function to accept `sortBy` argument.
+    - Configured "View All" button to trigger `loadProducts('sold_desc')`.
+
+### Status
+✅ Dispute Trend Live on Dashboard
+✅ Dashboard UI Text & Logic Synchronized
+✅ "View All" Top Selling Products works correctly (Sorts by Sales)
+✅ AdminDashboardService Refactored & Fixed
+
+
 
 Thought for 4s
 
