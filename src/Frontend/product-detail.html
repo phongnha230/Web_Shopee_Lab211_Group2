@@ -215,7 +215,7 @@
             <div class="bg-white p-6 rounded-lg">
                 <h1 id="productTitle" class="text-2xl font-bold text-gray-800 mb-3">Product Not Found</h1>
 
-                <div class="flex items-center mb-4">
+                <div id="ratingSoldRow" class="flex items-center mb-4">
                     <div class="flex items-center">
                         <span class="text-orange-500 text-lg font-bold mr-1" id="ratingValue">4.8</span>
                         <div class="flex text-orange-400">
@@ -235,21 +235,21 @@
                     </div>
                 </div>
 
-                <div class="mb-6">
+                <div id="colorSection" class="mb-6">
                     <p class="text-gray-700 font-semibold mb-3">Color</p>
                     <div class="flex gap-2" id="colorContainer">
                         <!-- Colors populated by JS -->
                     </div>
                 </div>
 
-                <div class="mb-6">
+                <div id="sizeSection" class="mb-6">
                     <p class="text-gray-700 font-semibold mb-3">Size</p>
                     <div class="flex gap-2" id="sizeContainer">
                         <!-- Sizes populated by JS -->
                     </div>
                 </div>
 
-                <div class="mb-6">
+                <div id="quantitySection" class="mb-6">
                     <p class="text-gray-700 font-semibold mb-3">Quantity</p>
                     <div class="flex items-center gap-3">
                         <button onclick="decreaseQty()"
@@ -264,7 +264,7 @@
                     </div>
                 </div>
 
-                <div class="flex gap-4 mb-4">
+                <div id="actionButtons" class="flex gap-4 mb-4">
                     <button onclick="addToCart()"
                         class="flex-1 border-2 border-orange-500 text-orange-500 py-3 px-6 rounded-lg font-semibold hover:bg-orange-50 transition flex items-center justify-center">
                         <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
@@ -293,73 +293,19 @@
 
         <!-- Reviews Section -->
         <div id="reviews" class="bg-white p-6 rounded-lg mb-8">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Product Ratings & Reviews</h2>
-            <div class="flex items-center gap-8 mb-6 bg-orange-50 p-6 rounded-lg">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Đánh giá sản phẩm</h2>
+            <div class="flex items-center gap-8 mb-6 bg-orange-50 p-6 rounded-lg" id="reviewsSummary">
                 <div class="text-center">
-                    <div class="text-5xl font-bold text-orange-600 mb-2">4.8</div>
-                    <div class="flex text-orange-400 mb-2 justify-center"><i class="fas fa-star"></i><i
-                            class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
-                            class="fas fa-star-half-alt"></i></div>
-                    <div class="text-gray-600 text-sm">out of 5</div>
+                    <div class="text-5xl font-bold text-orange-600 mb-2" id="avgRatingDisplay">-</div>
+                    <div class="flex text-orange-400 mb-2 justify-center" id="avgStarsDisplay"></div>
+                    <div class="text-gray-600 text-sm">trên 5</div>
                 </div>
                 <div class="flex-1">
-                    <div class="flex gap-2 flex-wrap">
-                        <button
-                            class="px-4 py-2 border-2 border-orange-500 bg-orange-500 text-white rounded-lg font-medium">All</button>
-                        <button
-                            class="px-4 py-2 border-2 border-gray-300 rounded-lg font-medium hover:border-orange-500">5
-                            Star (1.2k)</button>
-                        <button
-                            class="px-4 py-2 border-2 border-gray-300 rounded-lg font-medium hover:border-orange-500">4
-                            Star (856)</button>
-                        <button
-                            class="px-4 py-2 border-2 border-gray-300 rounded-lg font-medium hover:border-orange-500">With
-                            Photos</button>
-                    </div>
+                    <p class="text-gray-600" id="reviewCountDisplay">Đang tải đánh giá...</p>
                 </div>
             </div>
-
-            <!-- Review with Images Example -->
-            <div class="border-b border-gray-200 pb-6 mb-6">
-                <div class="flex items-start gap-4">
-                    <img src="https://i.pravatar.cc/60?img=12" alt="User" class="w-12 h-12 rounded-full">
-                    <div class="flex-1">
-                        <div class="flex items-center justify-between mb-2">
-                            <h4 class="font-semibold text-gray-800">John Doe</h4>
-                            <span class="text-sm text-gray-500">2 days ago</span>
-                        </div>
-                        <div class="flex text-yellow-400 mb-2"><i class="fas fa-star"></i><i class="fas fa-star"></i><i
-                                class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                        <p class="text-gray-700 mb-2">Great product! Exactly as described. The quality is amazing and
-                            shipping was super fast. Highly recommend!</p>
-
-                        <!-- Review Images -->
-                        <div class="review-images">
-                            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200" alt="Review"
-                                onclick="openLightbox(this.src)">
-                            <img src="https://images.unsplash.com/photo-1484704849700-f032a568e944?w=200" alt="Review"
-                                onclick="openLightbox(this.src)">
-                            <img src="https://images.unsplash.com/photo-1524678606372-571d751b8d57?w=200" alt="Review"
-                                onclick="openLightbox(this.src)">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Review without Images -->
-            <div class="border-b border-gray-200 pb-6">
-                <div class="flex items-start gap-4">
-                    <img src="https://i.pravatar.cc/60?img=8" alt="User" class="w-12 h-12 rounded-full">
-                    <div class="flex-1">
-                        <div class="flex items-center justify-between mb-2">
-                            <h4 class="font-semibold text-gray-800">Jane Smith</h4>
-                            <span class="text-sm text-gray-500">5 days ago</span>
-                        </div>
-                        <div class="flex text-yellow-400 mb-2"><i class="fas fa-star"></i><i class="fas fa-star"></i><i
-                                class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i></div>
-                        <p class="text-gray-700">Good value for money. Works as expected.</p>
-                    </div>
-                </div>
+            <div id="reviewsList">
+                <!-- Reviews populated by JS -->
             </div>
         </div>
     </main>
@@ -370,6 +316,32 @@
         <img id="lightboxImage" src="" alt="Full size">
     </div>
 
+    <!-- Edit Review Modal -->
+    <div id="editReviewModal" class="lightbox" style="align-items: center; justify-content: center;" onclick="if(event.target===this)closeEditReviewModal()">
+        <div class="bg-white rounded-xl p-6 max-w-lg w-full mx-4 shadow-2xl" onclick="event.stopPropagation()">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Sửa đánh giá</h2>
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">Đánh giá sao</label>
+                <div class="flex gap-1" id="editStarRating">
+                    <i class="fas fa-star text-2xl cursor-pointer text-gray-300" data-r="1" onclick="setEditRating(1)"></i>
+                    <i class="fas fa-star text-2xl cursor-pointer text-gray-300" data-r="2" onclick="setEditRating(2)"></i>
+                    <i class="fas fa-star text-2xl cursor-pointer text-gray-300" data-r="3" onclick="setEditRating(3)"></i>
+                    <i class="fas fa-star text-2xl cursor-pointer text-gray-300" data-r="4" onclick="setEditRating(4)"></i>
+                    <i class="fas fa-star text-2xl cursor-pointer text-gray-300" data-r="5" onclick="setEditRating(5)"></i>
+                </div>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">Nhận xét</label>
+                <textarea id="editReviewComment" rows="4" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-orange-500 focus:outline-none" minlength="10"></textarea>
+                <p class="text-xs text-gray-500 mt-1">Tối thiểu 10 ký tự</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closeEditReviewModal()" class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50">Hủy</button>
+                <button onclick="submitEditReview()" class="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600">Lưu</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="bg-gray-800 text-white mt-16">
         <div class="max-w-7xl mx-auto px-4 py-12">
@@ -377,6 +349,7 @@
         </div>
     </footer>
 
+    <script src="js/services/api.js"></script>
     <script>
         // --- MOCK DATA FOR FRONTEND TESTING ---
         const MOCK_PRODUCTS = {
@@ -394,7 +367,7 @@
             '106': { name: "Canvas Sneakers", cat: "Fashion > Shoes", price: 18.00, oldPrice: 25.00, discount: "28%", stock: 230, image: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=800&h=800&fit=crop", thumbnails: [], colors: ["White"], sizes: ["38", "39"], desc: "Casual everyday wear." }
         };
 
-        const API_BASE_URL = 'http://localhost:8080/api';
+        // API_BASE_URL được định nghĩa trong api.js (đã load ở trên)
 
         function getCheckoutBaseUrl() {
             const path = window.location.pathname || '';
@@ -413,6 +386,7 @@
             // 2. GET PRODUCT ID - from ?id=, #id=, /product-detail/ID, or localStorage
             const params = new URLSearchParams(window.location.search);
             let id = params.get('id');
+            const urlHasExplicitId = id !== null; // URL đã có tham số id (kể cả id=undefined)
 
             if (!id && window.location.hash) {
                 const hashStr = window.location.hash.substring(1);
@@ -420,12 +394,30 @@
                 id = hashParams.get('id');
             }
             if (!id && window.location.pathname) {
-                const match = window.location.pathname.match(/\/product-detail(?:\.html)?\/([a-zA-Z0-9]+)/);
+                // Hỗ trợ UUID (có dấu -) trong path: /product-detail/xxx hoặc /product-detail.html/xxx
+                const match = window.location.pathname.match(/\/product-detail(?:\.html)?\/([a-zA-Z0-9\-]+)/);
                 if (match) id = match[1];
             }
 
             if (!id || id === 'null' || id === 'undefined') {
-                id = localStorage.getItem('lastClickedProductId');
+                id = sessionStorage.getItem('viewReviewProductId');
+                if (id) sessionStorage.removeItem('viewReviewProductId');
+            }
+            if (!id || id === 'null' || id === 'undefined') {
+                const hasReviewsHash = (window.location.hash || '').includes('reviews');
+                if (!urlHasExplicitId && !hasReviewsHash) {
+                    id = localStorage.getItem('lastClickedProductId');
+                }
+                if (!id || id === 'null' || id === 'undefined') {
+                    id = sessionStorage.getItem('lastClickedProductId');
+                }
+            }
+
+            // Khôi phục URL nếu ID có trong storage nhưng bị mất do redirect (ví dụ npx serve clean URLs)
+            if (id && !params.get('id') && !window.location.hash) {
+                try {
+                    history.replaceState({}, '', window.location.pathname + '?id=' + encodeURIComponent(id));
+                } catch (e) { /* ignore */ }
             }
 
             // 3. CHECK ID EXISTENCE
@@ -439,6 +431,7 @@
             let product = null;
             let isReal = false;
 
+            let connectionError = false;
             try {
                 // Try Backend Fetch First
                 const response = await fetch(`${API_BASE_URL}/products/${id}`);
@@ -451,11 +444,13 @@
                 }
             } catch (err) {
                 console.error("⚠️ Backend connection error:", err);
+                connectionError = true;
             }
 
-            // Fallback to Mock
+            // Fallback to Mock (chỉ với ID 1-6, 101-106)
             if (!product && MOCK_PRODUCTS[id]) {
                 product = MOCK_PRODUCTS[id];
+                product.id = id;
                 console.log("✅ Fetched from Mock:", product);
             }
 
@@ -463,16 +458,29 @@
             if (product) {
                 renderProduct(product, isReal);
             } else {
-                showErrorState("Product not found (ID: " + id + ")");
+                const errMsg = connectionError
+                    ? "Không kết nối được server. Vui lòng kiểm tra backend đã chạy chưa (localhost:8080)."
+                    : "Sản phẩm không tồn tại hoặc đã bị xóa (ID: " + id + ").";
+                showErrorState(errMsg);
             }
         });
 
         function showErrorState(msg) {
-            document.getElementById('productTitle').textContent = "Product Not Found";
+            document.getElementById('productTitle').textContent = "Không tìm thấy sản phẩm";
             document.getElementById('priceContainer').innerHTML = `<span class='text-red-500'>${msg}</span>`;
             document.getElementById('stockCount').textContent = "-";
-            document.getElementById('descContainer').innerHTML = `<div class='bg-red-50 p-4 rounded text-red-600 border border-red-200'>${msg}</div>`;
-            document.getElementById('mainImage').style.display = 'none'; // Hide broken image placeholder
+            document.getElementById('descContainer').innerHTML = `
+                <div class='bg-amber-50 p-6 rounded-lg border border-amber-200'>
+                    <p class='text-amber-800 mb-3'>${msg}</p>
+                    <p class='text-sm text-amber-700 mb-4'>Sản phẩm có thể đã bị xóa, không tồn tại, hoặc server chưa chạy (localhost:8080).</p>
+                    <a href='index.html' class='inline-block px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600'>← Quay lại trang chủ</a>
+                </div>`;
+            document.getElementById('mainImage').style.display = 'none';
+            // Ẩn phần ratings/sold/color/size/quantity khi không có sản phẩm
+            ['ratingSoldRow', 'colorSection', 'sizeSection', 'quantitySection', 'actionButtons'].forEach(rid => {
+                const el = document.getElementById(rid);
+                if (el) el.style.display = 'none';
+            });
         }
 
         async function renderProduct(product, isReal) {
@@ -499,11 +507,11 @@
             // Resolve Shop Info (Name & Address)
             let shopAddress = "Hanoi, Vietnam";
             let shopName = "Official Shop";
-            let shopId = product.shopId;
+            let shopId = product.shopId || (product.shop && product.shop.id) || product.shop;
 
-            if (isReal && product.shopId) {
+            if (isReal && shopId) {
                 try {
-                    const shopRes = await fetch(`${API_BASE_URL}/shop/${product.shopId}`);
+                    const shopRes = await fetch(`${API_BASE_URL}/shop/${shopId}`);
                     if (shopRes.ok) {
                         const shopData = await shopRes.json();
                         if (shopData.address) shopAddress = shopData.address;
@@ -580,8 +588,14 @@
             // Stock & Sold
             let stock = isReal ? (product.variants?.reduce((s, v) => s + v.stock, 0) || 0) : (product.stock || 100);
             document.getElementById('stockCount').textContent = `${stock} available`;
-            document.getElementById('ratingValue').textContent = "4.9";
-            document.getElementById('soldCount').textContent = `${Math.floor(Math.random() * 2000) + 100} Sold`;
+            // Rating, ReviewCount, Sold - use real data from API
+            const rating = (isReal && product.rating != null) ? product.rating.toFixed(1) : (product.rating || '4.9');
+            const reviewCount = (isReal && product.reviewCount != null) ? product.reviewCount : (product.reviewCount ?? 0);
+            const sold = (isReal && product.sold != null) ? product.sold : (product.sold ?? 0);
+            const formatCount = n => (n >= 1000 ? (n/1000).toFixed(1) + 'k' : String(n));
+            document.getElementById('ratingValue').textContent = rating;
+            document.getElementById('reviewCount').textContent = reviewCount > 0 ? `${formatCount(reviewCount)} Ratings` : '0 Ratings';
+            document.getElementById('soldCount').textContent = `${formatCount(sold)} Sold`;
 
             // Description
             document.getElementById('descContainer').innerHTML = `<p>${isReal ? (product.description || "No description") : product.desc}</p>`;
@@ -590,24 +604,19 @@
             // Product Specifications (địa giao hàng, số lượng tồn kho, category, SHOP)
             const specsEl = document.getElementById('specsContainer');
             if (specsEl) {
-                // DEBUG: Log shopId to verify it's correct
-                console.log('🔍 Creating shop link with shopId:', shopId);
-                console.log('🔍 Shop name:', shopName);
-
-                // Ensure shopId is valid before creating link
-                const shopLink = shopId && shopId !== 'undefined' && shopId !== 'null'
-                    ? `shop-detail.html?id=${shopId}`
-                    : '#';
-
-                if (!shopId || shopId === 'undefined' || shopId === 'null') {
-                    console.warn('⚠️ Invalid shopId detected:', shopId);
+                const validShopId = shopId && String(shopId) !== 'undefined' && String(shopId) !== 'null';
+                if (validShopId) {
+                    sessionStorage.setItem('lastViewedShopId', String(shopId));
+                    localStorage.setItem('lastViewedShopId', String(shopId));
                 }
+                const base = getCheckoutBaseUrl();
+                const shopHref = validShopId ? (base + 'shop-detail.html?id=' + encodeURIComponent(shopId)) : '#';
 
                 specsEl.innerHTML = `
                     <div class="flex border-b border-gray-200 py-3"><span class="text-gray-600 w-1/3">Category</span><span class="text-gray-800 font-medium">${catDisplay}</span></div>
                     <div class="flex border-b border-gray-200 py-3"><span class="text-gray-600 w-1/3">Stock</span><span class="text-gray-800 font-medium">${stock}</span></div>
                     <div class="flex border-b border-gray-200 py-3"><span class="text-gray-600 w-1/3">Ships From</span><span class="text-gray-800 font-medium">${shopAddress}</span></div>
-                    <div class="flex border-b border-gray-200 py-3"><span class="text-gray-600 w-1/3">Sold By</span><a href="${shopLink}" class="text-orange-500 font-bold hover:underline cursor-pointer">${shopName} <i class="fas fa-store ml-1 text-sm"></i></a></div>
+                    <div class="flex border-b border-gray-200 py-3"><span class="text-gray-600 w-1/3">Sold By</span><a href="${shopHref}" onclick="if(this.getAttribute('data-sid')){sessionStorage.setItem('lastViewedShopId',this.getAttribute('data-sid'));localStorage.setItem('lastViewedShopId',this.getAttribute('data-sid'));}" data-sid="${validShopId ? String(shopId) : ''}" class="text-orange-500 font-bold hover:underline cursor-pointer">${shopName} <i class="fas fa-store ml-1 text-sm"></i></a></div>
                 `;
             }
 
@@ -615,6 +624,178 @@
             // Globals
             window.currentProduct = product;
             window.isCurrentReal = isReal;
+
+            // Load reviews (API for real products)
+            if (isReal && product.id) {
+                loadProductReviews(product.id);
+            } else {
+                document.getElementById('reviewsList').innerHTML = '<p class="text-gray-500 py-4">Chưa có đánh giá.</p>';
+                document.getElementById('avgRatingDisplay').textContent = '-';
+                document.getElementById('reviewCountDisplay').textContent = 'Chưa có đánh giá';
+            }
+        }
+
+        let currentUserId = null;
+        let editingReviewId = null;
+        let reviewsCache = {};
+
+        async function loadProductReviews(productId) {
+            try {
+                const token = localStorage.getItem('accessToken');
+                if (token) {
+                    currentUserId = localStorage.getItem('userId');
+                    try {
+                        const meRes = await fetch(`${API_BASE_URL}/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+                        if (meRes.ok) {
+                            const me = await meRes.json();
+                            currentUserId = me.id || currentUserId;
+                            if (me.id) localStorage.setItem('userId', me.id);
+                        }
+                    } catch (_) {}
+                } else {
+                    currentUserId = null;
+                }
+
+                const [reviewsRes, avgRes] = await Promise.all([
+                    fetch(`${API_BASE_URL}/reviews/product/${productId}`),
+                    fetch(`${API_BASE_URL}/reviews/product/${productId}/average-rating`)
+                ]);
+                const reviews = reviewsRes.ok ? await reviewsRes.json() : [];
+                const avgData = avgRes.ok ? await avgRes.json() : { averageRating: 0 };
+                const avg = avgData.averageRating || 0;
+
+                document.getElementById('avgRatingDisplay').textContent = avg > 0 ? avg.toFixed(1) : '-';
+                const starsEl = document.getElementById('avgStarsDisplay');
+                const fullStars = Math.floor(avg);
+                const hasHalf = (avg - fullStars) >= 0.5;
+                starsEl.innerHTML = Array(5).fill(0).map((_, i) => {
+                    if (i < fullStars) return '<i class="fas fa-star"></i>';
+                    if (i === fullStars && hasHalf) return '<i class="fas fa-star-half-alt"></i>';
+                    return '<i class="far fa-star"></i>';
+                }).join('');
+                document.getElementById('reviewCountDisplay').textContent =
+                    reviews.length > 0 ? `${reviews.length} đánh giá` : 'Chưa có đánh giá';
+                // Sync ratingSoldRow with real review data
+                const formatCount = n => (n >= 1000 ? (n/1000).toFixed(1) + 'k' : String(n));
+                const rv = document.getElementById('ratingValue');
+                const rc = document.getElementById('reviewCount');
+                const sc = document.getElementById('soldCount');
+                if (rv) rv.textContent = avg > 0 ? avg.toFixed(1) : '-';
+                if (rc) rc.textContent = reviews.length > 0 ? `${formatCount(reviews.length)} Ratings` : '0 Ratings';
+                if (sc && window.currentProduct && window.currentProduct.sold != null) {
+                    sc.textContent = `${formatCount(window.currentProduct.sold)} Sold`;
+                }
+
+                const listEl = document.getElementById('reviewsList');
+                if (reviews.length === 0) {
+                    listEl.innerHTML = '<p class="text-gray-500 py-4">Chưa có đánh giá. Hãy là người đầu tiên đánh giá!</p>';
+                } else {
+                    reviewsCache = {};
+                    listEl.innerHTML = reviews.map(r => {
+                        reviewsCache[r.id] = r;
+                        const isOwner = currentUserId && r.userId === currentUserId;
+                        const actionBtns = isOwner ? `
+                            <div class="flex gap-2 mt-2">
+                                <button onclick="openEditReviewModal('${r.id}')" 
+                                    class="px-3 py-1 text-sm border border-orange-500 text-orange-500 rounded hover:bg-orange-50">Sửa</button>
+                                <button onclick="confirmDeleteReview('${r.id}')" 
+                                    class="px-3 py-1 text-sm border border-red-500 text-red-500 rounded hover:bg-red-50">Xóa</button>
+                            </div>
+                        ` : '';
+                        const starsHtml = Array(5).fill(0).map((_, i) =>
+                            i < (r.rating || 0) ? '<i class="fas fa-star text-yellow-400"></i>' : '<i class="far fa-star text-yellow-400"></i>'
+                        ).join('');
+                        const verifiedBadge = (r.verifiedPurchase === true) 
+                            ? '<span class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">Đã mua hàng</span>' 
+                            : '';
+                        const dateStr = r.createdAt ? new Date(r.createdAt).toLocaleDateString('vi-VN', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+                        const imagesHtml = (r.imageUrls && Array.isArray(r.imageUrls) && r.imageUrls.length > 0) 
+                            ? `<div class="review-images mt-2">${r.imageUrls.map(url => 
+                                `<img src="${url}" alt="Review" class="cursor-pointer" onclick="if(typeof openLightbox==='function')openLightbox(this.src)">`
+                            ).join('')}</div>` 
+                            : '';
+                        return `<div class="border-b border-gray-200 pb-6 mb-6" data-review-id="${r.id}">
+                            <div class="flex items-start gap-4">
+                                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(r.userName || 'U')}&background=eee&color=666" alt="User" class="w-12 h-12 rounded-full">
+                                <div class="flex-1">
+                                    <div class="flex items-center flex-wrap gap-2 mb-2">
+                                        <h4 class="font-semibold text-gray-800">${r.userName || 'Khách hàng'}</h4>
+                                        ${verifiedBadge}
+                                        <span class="text-sm text-gray-500 ml-auto">${dateStr}</span>
+                                    </div>
+                                    <div class="flex text-yellow-400 mb-2">${starsHtml}</div>
+                                    <p class="text-gray-700 mb-2">${r.comment || '-'}</p>
+                                    ${imagesHtml}
+                                    ${actionBtns}
+                                </div>
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
+            } catch (e) {
+                console.error('Load reviews error:', e);
+                document.getElementById('reviewsList').innerHTML = '<p class="text-gray-500 py-4">Không tải được đánh giá.</p>';
+                document.getElementById('avgRatingDisplay').textContent = '-';
+                document.getElementById('reviewCountDisplay').textContent = 'Lỗi tải đánh giá';
+            }
+        }
+
+        function setEditRating(r) {
+            editingRating = r;
+            document.querySelectorAll('#editStarRating i').forEach((star, i) => {
+                star.classList.toggle('text-yellow-400', i < r);
+                star.classList.toggle('text-gray-300', i >= r);
+                star.classList.toggle('fas', i < r);
+                star.classList.toggle('far', i >= r);
+            });
+        }
+        let editingRating = 0;
+
+        function openEditReviewModal(reviewId) {
+            const r = reviewsCache[reviewId];
+            if (!r) return;
+            editingReviewId = reviewId;
+            editingRating = r.rating || 0;
+            setEditRating(editingRating);
+            document.getElementById('editReviewComment').value = r.comment || '';
+            document.getElementById('editReviewModal').style.display = 'flex';
+            document.getElementById('editReviewModal').classList.add('active');
+        }
+
+        function closeEditReviewModal() {
+            editingReviewId = null;
+            document.getElementById('editReviewModal').style.display = 'none';
+            document.getElementById('editReviewModal').classList.remove('active');
+        }
+
+        async function submitEditReview() {
+            if (!editingReviewId) return;
+            const comment = document.getElementById('editReviewComment').value.trim();
+            if (comment.length < 10) {
+                alert('Nhận xét phải có ít nhất 10 ký tự');
+                return;
+            }
+            try {
+                await ReviewAPI.updateReview(editingReviewId, editingRating, comment);
+                closeEditReviewModal();
+                if (window.currentProduct && window.currentProduct.id) loadProductReviews(window.currentProduct.id);
+            } catch (e) {
+                alert('❌ ' + (e.message || 'Không thể cập nhật đánh giá'));
+            }
+        }
+
+        async function confirmDeleteReview(reviewId) {
+            if (!confirm('Bạn có chắc muốn xóa đánh giá này?')) return;
+            try {
+                await ReviewAPI.deleteReview(reviewId);
+                if (window.currentProduct && window.currentProduct.id) loadProductReviews(window.currentProduct.id);
+            } catch (e) {
+                const msg = (e.message || '').toLowerCase();
+                const hint = (msg.includes('fetch') || msg.includes('network') || msg.includes('failed'))
+                    ? '\n\nKiểm tra: Backend đã chạy trên http://localhost:8080 chưa?'
+                    : '';
+                alert('❌ ' + (e.message || 'Không thể xóa đánh giá') + hint);
+            }
         }
 
         // --- AUTH & NAVBAR LOGIC ---

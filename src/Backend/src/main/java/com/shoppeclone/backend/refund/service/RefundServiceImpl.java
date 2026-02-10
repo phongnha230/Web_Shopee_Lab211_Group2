@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +31,22 @@ public class RefundServiceImpl implements RefundService {
         refund.setReason(reason);
         refund.setStatus(RefundStatus.REQUESTED);
 
+        return refundRepository.save(refund);
+    }
+
+    @Override
+    public Refund createAndApproveRefund(String orderId, String buyerId, BigDecimal amount, String reason, String adminId) {
+        if (refundRepository.findByOrderId(orderId).isPresent()) {
+            throw new RuntimeException("Refund already exists for this order");
+        }
+        Refund refund = new Refund();
+        refund.setOrderId(orderId);
+        refund.setBuyerId(buyerId);
+        refund.setAmount(amount);
+        refund.setReason(reason);
+        refund.setStatus(RefundStatus.APPROVED);
+        refund.setApprovedBy(adminId);
+        refund.setProcessedAt(LocalDateTime.now());
         return refundRepository.save(refund);
     }
 
@@ -77,5 +94,10 @@ public class RefundServiceImpl implements RefundService {
     public Refund getRefundByOrderId(String orderId) {
         return refundRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new RuntimeException("Refund not found for orderId: " + orderId));
+    }
+
+    @Override
+    public Optional<Refund> findOptionalByOrderId(String orderId) {
+        return refundRepository.findByOrderId(orderId);
     }
 }

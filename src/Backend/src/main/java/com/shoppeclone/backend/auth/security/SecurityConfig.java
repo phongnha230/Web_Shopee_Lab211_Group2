@@ -33,6 +33,7 @@ public class SecurityConfig {
                 })
 
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/me").authenticated()
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/upload/**", // Allow image upload (Cloudinary)
@@ -40,14 +41,20 @@ public class SecurityConfig {
                                 "/api/webhooks/**") // Allow Webhooks explicitly
                         .permitAll()
 
-                        // ✅ Allow Public GET Access (View Products, Categories, Shops)
+                        // ✅ Allow Public GET Access (View Products, Categories, Shops, Vouchers)
                         .requestMatchers(org.springframework.http.HttpMethod.GET,
                                 "/api/products/**",
                                 "/api/categories/**",
                                 "/api/shop/**",
                                 "/api/reviews/**",
                                 "/api/shipping-providers/**",
+                                "/api/vouchers",
+                                "/api/vouchers/code/**",
                                 "/api/debug/**")
+                        .permitAll()
+                        // Allow POST fix-category for dev (fix product category so vouchers apply)
+                        .requestMatchers(org.springframework.http.HttpMethod.POST,
+                                "/api/debug/products/*/fix-category")
                         .permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // ✅ Allow CORS
                                                                                                          // Preflight

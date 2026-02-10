@@ -8,6 +8,7 @@ import com.shoppeclone.backend.product.dto.response.ProductVariantResponse;
 import com.shoppeclone.backend.product.entity.*;
 import com.shoppeclone.backend.product.repository.*;
 import com.shoppeclone.backend.product.service.ProductService;
+import com.shoppeclone.backend.product.util.CategoryDetectionUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductVariantRepository variantRepository;
     private final ProductImageRepository imageRepository;
     private final ProductCategoryRepository productCategoryRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
     @Transactional
@@ -93,11 +95,17 @@ public class ProductServiceImpl implements ProductService {
             }
         }
 
-        // 3. Save Category
-        if (request.getCategoryId() != null && !request.getCategoryId().isEmpty()) {
+        // 3. Save Category (auto-detect from name if not provided)
+        String categoryIdToUse = request.getCategoryId();
+        if ((categoryIdToUse == null || categoryIdToUse.isEmpty()) && request.getName() != null) {
+            String detectedName = CategoryDetectionUtil.detectFromName(request.getName());
+            categoryIdToUse = categoryRepository.findByName(detectedName)
+                    .map(c -> c.getId()).orElse(null);
+        }
+        if (categoryIdToUse != null && !categoryIdToUse.isEmpty()) {
             ProductCategory productCategory = new ProductCategory();
             productCategory.setProductId(savedProduct.getId());
-            productCategory.setCategoryId(request.getCategoryId());
+            productCategory.setCategoryId(categoryIdToUse);
             productCategoryRepository.save(productCategory);
         }
 
@@ -377,6 +385,7 @@ public class ProductServiceImpl implements ProductService {
         response.setTotalStock(product.getTotalStock());
         response.setSold(product.getSold());
         response.setRating(product.getRating());
+        response.setReviewCount(product.getReviewCount() != null ? product.getReviewCount() : 0);
         response.setIsFlashSale(product.getIsFlashSale());
         response.setFlashSalePrice(product.getFlashSalePrice());
         response.setFlashSaleStock(product.getFlashSaleStock());

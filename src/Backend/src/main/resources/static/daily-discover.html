@@ -147,9 +147,9 @@
                     const randomBadge = badges[Math.floor(Math.random() * badges.length)];
                     const badgeColor = randomBadge === 'HOT' ? 'bg-red-500' : (randomBadge === 'NEW' ? 'bg-green-500' : 'bg-orange-500');
 
-                    // Stats
-                    const soldCount = product.sold || Math.floor(Math.random() * 500) + 10;
-                    const rating = (Math.random() * 1 + 4).toFixed(1);
+                    // Stats - use real data from API
+                    const soldCount = product.sold != null ? product.sold : 0;
+                    const rating = product.rating != null ? product.rating.toFixed(1) : '-';
 
                     return `
                     <div onclick="window.location.href='product-detail.html?id=${product.id}'" 

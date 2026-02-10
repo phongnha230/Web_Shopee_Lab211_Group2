@@ -168,6 +168,7 @@
                 if (response.ok) {
                     localStorage.setItem('accessToken', data.accessToken);
                     localStorage.setItem('userName', data.user?.fullName || email.split('@')[0]);
+                    if (data.user?.id) localStorage.setItem('userId', data.user.id);
 
                     const roles = data.user?.roles || [];
                     const isAdmin = roles.some(r => (typeof r === 'string' ? r : r.name) === 'ROLE_ADMIN');

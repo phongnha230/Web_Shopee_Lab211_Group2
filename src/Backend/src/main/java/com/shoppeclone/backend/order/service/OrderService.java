@@ -22,5 +22,6 @@ public interface OrderService {
 
     Order updateShipment(String orderId, String trackingCode, String providerId);
 
-    Order assignShipper(String orderId, String shipperId);
+    /** Delete all orders for a user (e.g. clear virtual/test shop data). Restores stock for non-cancelled orders. */
+    void deleteAllUserOrders(String userId);
 }

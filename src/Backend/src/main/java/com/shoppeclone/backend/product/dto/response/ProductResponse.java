@@ -24,6 +24,7 @@ public class ProductResponse {
     private Integer totalStock;
     private Integer sold;
     private Double rating;
+    private Integer reviewCount;
 
     // Flash Sale fields
     private Boolean isFlashSale;

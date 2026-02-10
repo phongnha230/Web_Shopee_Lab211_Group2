@@ -31,7 +31,6 @@ public class DataInitializer implements CommandLineRunner {
         createRoleIfNotFound("ROLE_USER", "Regular User");
         createRoleIfNotFound("ROLE_ADMIN", "Administrator");
         createRoleIfNotFound("ROLE_SELLER", "Seller");
-        createRoleIfNotFound("ROLE_SHIPPER", "Delivery Person");
         System.out.println("✅ Role verification and initialization completed!");
 
         seedCategories();

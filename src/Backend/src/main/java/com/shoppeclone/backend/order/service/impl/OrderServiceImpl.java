@@ -11,7 +11,9 @@ import com.shoppeclone.backend.order.entity.*;
 import com.shoppeclone.backend.promotion.entity.Voucher;
 import com.shoppeclone.backend.order.repository.OrderRepository;
 import com.shoppeclone.backend.order.service.OrderService;
+import com.shoppeclone.backend.product.entity.ProductCategory;
 import com.shoppeclone.backend.product.entity.ProductVariant;
+import com.shoppeclone.backend.product.repository.ProductCategoryRepository;
 import com.shoppeclone.backend.product.repository.ProductRepository;
 import com.shoppeclone.backend.product.repository.ProductVariantRepository;
 import com.shoppeclone.backend.shipping.entity.ShippingProvider;
@@ -39,6 +41,7 @@ public class OrderServiceImpl implements OrderService {
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
+    private final ProductCategoryRepository productCategoryRepository;
     private final ShippingProviderRepository shippingProviderRepository;
     private final ShippingService shippingService;
     private final PaymentService paymentService;
@@ -190,9 +193,9 @@ public class OrderServiceImpl implements OrderService {
         String appliedProductVoucherCode = null;
 
         if (request.getVoucherCode() != null && !request.getVoucherCode().trim().isEmpty()) {
-            appliedProductVoucherCode = processVoucher(request.getVoucherCode(), totalPrice,
-                    Voucher.VoucherType.PRODUCT);
-            productDiscount = calculateDiscount(appliedProductVoucherCode, totalPrice);
+            appliedProductVoucherCode = processVoucher(userId, request.getVoucherCode(), totalPrice,
+                    Voucher.VoucherType.PRODUCT, orderItems);
+            productDiscount = calculateProductDiscount(appliedProductVoucherCode, totalPrice, orderItems);
         }
 
         // 5. Shipping Calculation (moved before shipping voucher processing)
@@ -210,8 +213,8 @@ public class OrderServiceImpl implements OrderService {
 
         if (request.getShippingVoucherCode() != null && !request.getShippingVoucherCode().trim().isEmpty()) {
             if (shippingFee.compareTo(BigDecimal.ZERO) > 0) {
-                appliedShippingVoucherCode = processVoucher(request.getShippingVoucherCode(), totalPrice,
-                        Voucher.VoucherType.SHIPPING);
+                appliedShippingVoucherCode = processVoucher(userId, request.getShippingVoucherCode(), totalPrice,
+                        Voucher.VoucherType.SHIPPING, null);
                 shippingDiscount = calculateDiscount(appliedShippingVoucherCode, shippingFee); // Apply against Shipping
                                                                                                // Fee, but minSpend
                                                                                                // checks Subtotal
@@ -273,14 +276,44 @@ public class OrderServiceImpl implements OrderService {
     }
 
     // Helper to validate voucher and return code if valid
-    private String processVoucher(String code, BigDecimal orderValue, Voucher.VoucherType expectedType) {
+    private String processVoucher(String userId, String code, BigDecimal orderValue, Voucher.VoucherType expectedType,
+            List<OrderItem> orderItems) {
         Voucher voucher = voucherRepository.findByCode(code)
                 .orElseThrow(() -> new RuntimeException("Voucher not found: " + code));
+
+        // Validate user hasn't already used this voucher
+        List<Order> userOrders = orderRepository.findByUserId(userId);
+        for (Order o : userOrders) {
+            if (code.equals(o.getVoucherCode()) || code.equals(o.getShippingVoucherCode())) {
+                throw new RuntimeException("Bạn đã sử dụng voucher này trong đơn hàng trước.");
+            }
+        }
 
         // Validate Type
         if (voucher.getType() != null && voucher.getType() != expectedType) {
             throw new RuntimeException(
                     "Invalid voucher type. Expected " + expectedType + " but got " + voucher.getType());
+        }
+
+        // Category restriction (PRODUCT only): must have eligible items
+        if (expectedType == Voucher.VoucherType.PRODUCT && orderItems != null
+                && voucher.getCategoryIds() != null && !voucher.getCategoryIds().isEmpty()) {
+            BigDecimal eligibleAmount = getEligibleAmount(orderItems, voucher.getCategoryIds());
+            if (eligibleAmount.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new RuntimeException(
+                        "Voucher chỉ áp dụng cho sản phẩm thuộc danh mục: " + voucher.getDescription());
+            }
+            // Min spend for category voucher: check against eligible amount
+            if (voucher.getMinSpend() != null && eligibleAmount.compareTo(voucher.getMinSpend()) < 0) {
+                throw new RuntimeException(
+                        "Tổng tiền sản phẩm thuộc danh mục không đạt tối thiểu: " + voucher.getMinSpend());
+            }
+        } else {
+            // Min Spend Check (for non-category or shipping)
+            if (voucher.getMinSpend() != null && orderValue.compareTo(voucher.getMinSpend()) < 0) {
+                throw new RuntimeException(
+                        "Order total does not meet minimum spend for voucher: " + voucher.getMinSpend());
+            }
         }
 
         // Validate Status
@@ -295,18 +328,40 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("Voucher is out of stock");
         }
 
-        // Min Spend Check (Always checks against Subtotal/OrderValue)
-        if (voucher.getMinSpend() != null && orderValue.compareTo(voucher.getMinSpend()) < 0) {
-            throw new RuntimeException(
-                    "Order total does not meet minimum spend for voucher: " + voucher.getMinSpend());
-        }
-
         // Update Usage (Optimistic)
         voucher.setQuantity(voucher.getQuantity() - 1);
         voucher.setUsedCount(voucher.getUsedCount() == null ? 1 : voucher.getUsedCount() + 1);
         voucherRepository.save(voucher);
 
         return code;
+    }
+
+    /** Sum of (price * quantity) for items whose product belongs to allowed categories */
+    private BigDecimal getEligibleAmount(List<OrderItem> orderItems, List<String> categoryIds) {
+        if (orderItems == null || categoryIds == null || categoryIds.isEmpty())
+            return BigDecimal.ZERO;
+        BigDecimal sum = BigDecimal.ZERO;
+        for (OrderItem item : orderItems) {
+            ProductVariant variant = productVariantRepository.findById(item.getVariantId()).orElse(null);
+            if (variant == null) continue;
+            List<ProductCategory> pcs = productCategoryRepository.findByProductId(variant.getProductId());
+            boolean eligible = pcs.stream().anyMatch(pc -> categoryIds.contains(pc.getCategoryId()));
+            if (eligible) {
+                sum = sum.add(item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
+            }
+        }
+        return sum;
+    }
+
+    private BigDecimal calculateProductDiscount(String code, BigDecimal totalPrice, List<OrderItem> orderItems) {
+        if (code == null) return BigDecimal.ZERO;
+        Voucher voucher = voucherRepository.findByCode(code)
+                .orElseThrow(() -> new RuntimeException("Voucher not found during calc: " + code));
+        BigDecimal baseAmount = totalPrice;
+        if (voucher.getCategoryIds() != null && !voucher.getCategoryIds().isEmpty() && orderItems != null) {
+            baseAmount = getEligibleAmount(orderItems, voucher.getCategoryIds());
+        }
+        return calculateDiscount(code, baseAmount);
     }
 
     private BigDecimal calculateDiscount(String code, BigDecimal baseAmount) {
@@ -355,15 +410,33 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public Order updateOrderStatus(String orderId, OrderStatus status) {
         Order order = getOrder(orderId);
+        OrderStatus previousStatus = order.getOrderStatus();
 
-        // Update timestamps based on status
-        if (status == OrderStatus.SHIPPED && order.getShippedAt() == null) {
+        // Update timestamps based on status (dùng thời gian thực khi seller đổi trạng thái)
+        if ((status == OrderStatus.SHIPPING || status == OrderStatus.SHIPPED) && order.getShippedAt() == null) {
             order.setShippedAt(LocalDateTime.now());
         }
         if (status == OrderStatus.COMPLETED && order.getCompletedAt() == null) {
             order.setCompletedAt(LocalDateTime.now());
+        }
+
+        // Sync product.sold when transitioning TO COMPLETED
+        if (status == OrderStatus.COMPLETED && previousStatus != OrderStatus.COMPLETED) {
+            for (OrderItem item : order.getItems()) {
+                ProductVariant variant = productVariantRepository.findById(item.getVariantId()).orElse(null);
+                if (variant != null) {
+                    com.shoppeclone.backend.product.entity.Product product = productRepository
+                            .findById(variant.getProductId()).orElse(null);
+                    if (product != null) {
+                        product.setSold((product.getSold() != null ? product.getSold() : 0) + item.getQuantity());
+                        product.setUpdatedAt(LocalDateTime.now());
+                        productRepository.save(product);
+                    }
+                }
+            }
         }
 
         order.setOrderStatus(status);
@@ -428,13 +501,23 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public Order assignShipper(String orderId, String shipperId) {
-        Order order = getOrder(orderId);
-
-        order.setShipperId(shipperId);
-        order.setAssignedAt(LocalDateTime.now());
-        order.setUpdatedAt(LocalDateTime.now());
-
-        return orderRepository.save(order);
+    public void deleteAllUserOrders(String userId) {
+        List<Order> orders = orderRepository.findByUserId(userId);
+        // Restore stock for orders that haven't been cancelled yet
+        for (Order order : orders) {
+            if (order.getOrderStatus() != OrderStatus.CANCELLED
+                    && order.getOrderStatus() != OrderStatus.SHIPPING
+                    && order.getOrderStatus() != OrderStatus.SHIPPED
+                    && order.getOrderStatus() != OrderStatus.COMPLETED) {
+                for (OrderItem item : order.getItems()) {
+                    ProductVariant variant = productVariantRepository.findById(item.getVariantId()).orElse(null);
+                    if (variant != null) {
+                        variant.setStock(variant.getStock() + item.getQuantity());
+                        productVariantRepository.save(variant);
+                    }
+                }
+            }
+        }
+        orderRepository.deleteByUserId(userId);
     }
 }

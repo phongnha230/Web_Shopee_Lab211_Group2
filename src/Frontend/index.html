@@ -538,9 +538,9 @@
                     priceDisplay = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
                 }
 
-                // Random Sold Count & Rating for demo effect (since backend might not have it populated fully yet)
-                const sold = product.sold || Math.floor(Math.random() * 100) + 5;
-                const rating = product.rating ? product.rating.toFixed(1) : (Math.random() * (5.0 - 4.5) + 4.5).toFixed(1);
+                // Use real sold & rating from API (synced from orders & reviews)
+                const sold = product.sold != null ? product.sold : 0;
+                const rating = product.rating != null ? product.rating.toFixed(1) : '-';
 
                 // Badge Logic
                 let badgeHtml = '';
@@ -581,6 +581,7 @@
                 productCard.onclick = () => {
                     if (pid) {
                         localStorage.setItem('lastClickedProductId', pid);
+                        sessionStorage.setItem('lastClickedProductId', pid);
                         window.location.href = `product-detail.html?id=${pid}`;
                     } else {
                         console.error("Product ID missing:", product);
@@ -604,7 +605,8 @@
         }
 
         function goToProduct(id) {
-            // Fallback for any old inline onclicks if missed
+            localStorage.setItem('lastClickedProductId', id);
+            sessionStorage.setItem('lastClickedProductId', id);
             window.location.href = `product-detail.html?id=${id}`;
         }
     </script>
@@ -933,6 +935,7 @@
         function goToProduct(id) {
             console.log('Navigating to product:', id);
             localStorage.setItem('lastClickedProductId', id);
+            sessionStorage.setItem('lastClickedProductId', id);
             window.location.href = `product-detail.html?id=${id}`;
         }
 

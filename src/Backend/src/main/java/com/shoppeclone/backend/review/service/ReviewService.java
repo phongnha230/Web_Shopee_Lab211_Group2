@@ -29,14 +29,14 @@ public interface ReviewService {
     ReviewResponse getReviewById(String id);
 
     /**
-     * Update an existing review
+     * Update an existing review (chỉ chủ review mới sửa được)
      */
-    ReviewResponse updateReview(String id, UpdateReviewRequest request);
+    ReviewResponse updateReview(String id, String userId, UpdateReviewRequest request);
 
     /**
-     * Delete a review
+     * Delete a review (chỉ chủ review mới xóa được)
      */
-    void deleteReview(String id);
+    void deleteReview(String id, String userId);
 
     /**
      * Get average rating for a product

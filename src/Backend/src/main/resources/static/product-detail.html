@@ -406,6 +406,7 @@
             try {
                 const params = new URLSearchParams(window.location.search);
                 let id = params.get('id');
+                const urlHasExplicitId = id !== null;
 
                 if (!id && window.location.hash) {
                     const hashStr = window.location.hash.substring(1);
@@ -413,12 +414,24 @@
                     id = hashParams.get('id');
                 }
                 if (!id && window.location.pathname) {
-                    const match = window.location.pathname.match(/\/product-detail(?:\.html)?\/([a-zA-Z0-9]+)/);
+                    const match = window.location.pathname.match(/\/product-detail(?:\.html)?\/([a-zA-Z0-9\-]+)/);
                     if (match) id = match[1];
                 }
 
-                if (!id) {
-                    id = localStorage.getItem('lastClickedProductId');
+                if (!urlHasExplicitId) {
+                    if (!id || id === 'null' || id === 'undefined') {
+                        id = localStorage.getItem('lastClickedProductId');
+                    }
+                    if (!id || id === 'null' || id === 'undefined') {
+                        id = sessionStorage.getItem('lastClickedProductId');
+                    }
+                }
+
+                // Khôi phục URL nếu ID có trong storage nhưng bị mất do redirect
+                if (id && !params.get('id') && !window.location.hash) {
+                    try {
+                        history.replaceState({}, '', window.location.pathname + '?id=' + encodeURIComponent(id));
+                    } catch (e) { /* ignore */ }
                 }
 
                 let product = null;
@@ -449,6 +462,8 @@
                     // Breadcrumbs & Category Name Resolution
                     let catDisplay = "Other";
                     let shopAddress = "Hanoi, Vietnam"; // Default fallback
+                    let shopName = "Official Shop";
+                    let shopId = product.shopId || (product.shop && product.shop.id) || product.shop;
 
                     if (isReal) {
                         // 1. Resolve Category
@@ -467,15 +482,14 @@
                             }
                         }
 
-                        // 2. Resolve Shop Address (Ships From)
-                        if (product.shopId) {
+                        // 2. Resolve Shop Address (Ships From) & Name
+                        if (shopId) {
                             try {
-                                const shopRes = await fetch(`${API_BASE_URL}/shop/${product.shopId}`);
+                                const shopRes = await fetch(`${API_BASE_URL}/shop/${shopId}`);
                                 if (shopRes.ok) {
                                     const shopData = await shopRes.json();
-                                    if (shopData.address) {
-                                        shopAddress = shopData.address;
-                                    }
+                                    if (shopData.address) shopAddress = shopData.address;
+                                    if (shopData.name) shopName = shopData.name;
                                 }
                             } catch (e) {
                                 console.error("Error fetching shop address:", e);
@@ -521,11 +535,15 @@
                     <span class="bg-orange-500 text-white px-2 py-1 rounded text-sm font-semibold">${discountText}</span>
                 `;
 
-                    // Stats
-                    const rating = isReal ? (Math.random() * (5.0 - 4.5) + 4.5).toFixed(1) : (product.rating || 4.8);
-                    const sold = isReal ? (Math.floor(Math.random() * 1000) + 10) : (product.sold || "1.2k");
+                    // Stats - use real rating, reviewCount, sold from API
+                    const rating = (isReal && product.rating != null) ? product.rating.toFixed(1) : (product.rating || 4.8);
+                    const reviewCount = (isReal && product.reviewCount != null) ? product.reviewCount : (product.reviewCount ?? 0);
+                    const sold = (isReal && product.sold != null) ? product.sold : (product.sold ?? 0);
+                    const formatCount = n => (n >= 1000 ? (n/1000).toFixed(1) + 'k' : String(n));
                     document.getElementById('ratingValue').textContent = rating;
-                    document.getElementById('soldCount').textContent = `${sold} Sold`;
+                    const reviewCountEl = document.getElementById('reviewCount');
+                    if (reviewCountEl) reviewCountEl.textContent = reviewCount > 0 ? `${formatCount(reviewCount)} Ratings` : '0 Ratings';
+                    document.getElementById('soldCount').textContent = `${formatCount(sold)} Sold`;
 
                     // Stock
                     let stock = isReal ? (product.variants ? product.variants.reduce((s, v) => s + v.stock, 0) : 0) : (product.stock || 100);
@@ -566,10 +584,18 @@
                     const description = isReal ? (product.description || "No description available.") : product.desc;
                     document.getElementById('descContainer').innerHTML = `<p>${description}</p>`;
 
+                    const validShopId = shopId && String(shopId) !== 'undefined' && String(shopId) !== 'null';
+                    if (validShopId) {
+                        sessionStorage.setItem('lastViewedShopId', String(shopId));
+                        localStorage.setItem('lastViewedShopId', String(shopId));
+                    }
+                    const shopLink = validShopId ? `shop-detail.html?id=${encodeURIComponent(shopId)}` : '#';
+
                     document.getElementById('specsContainer').innerHTML = `
                     <div class="flex border-b border-gray-200 py-3"><span class="text-gray-600 w-1/3">Category</span><span class="text-gray-800 font-medium">${catDisplay}</span></div>
                     <div class="flex border-b border-gray-200 py-3"><span class="text-gray-600 w-1/3">Stock</span><span class="text-gray-800 font-medium">${stock}</span></div>
                     <div class="flex border-b border-gray-200 py-3"><span class="text-gray-600 w-1/3">Ships From</span><span class="text-gray-800 font-medium">${shopAddress}</span></div>
+                    <div class="flex border-b border-gray-200 py-3"><span class="text-gray-600 w-1/3">Sold By</span><a href="${shopLink}" class="text-orange-500 font-bold hover:underline cursor-pointer">${shopName} <i class="fas fa-store ml-1 text-sm"></i></a></div>
                 `;
 
                     // Thumbnails

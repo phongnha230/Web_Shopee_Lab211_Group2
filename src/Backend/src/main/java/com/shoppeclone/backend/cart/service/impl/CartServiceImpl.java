@@ -7,8 +7,10 @@ import com.shoppeclone.backend.cart.entity.CartItem;
 import com.shoppeclone.backend.cart.repository.CartRepository;
 import com.shoppeclone.backend.cart.service.CartService;
 import com.shoppeclone.backend.product.entity.Product;
+import com.shoppeclone.backend.product.entity.ProductCategory;
 import com.shoppeclone.backend.product.entity.ProductImage;
 import com.shoppeclone.backend.product.entity.ProductVariant;
+import com.shoppeclone.backend.product.repository.ProductCategoryRepository;
 import com.shoppeclone.backend.product.repository.ProductImageRepository;
 import com.shoppeclone.backend.product.repository.ProductRepository;
 import com.shoppeclone.backend.product.repository.ProductVariantRepository;
@@ -31,6 +33,7 @@ public class CartServiceImpl implements CartService {
     private final ProductVariantRepository productVariantRepository;
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
+    private final ProductCategoryRepository productCategoryRepository;
 
     @Override
     public CartResponse getCart(String userId) {
@@ -119,48 +122,44 @@ public class CartServiceImpl implements CartService {
         });
     }
 
+    private CartItemResponse toCartItemResponse(CartItem item) {
+        Optional<ProductVariant> variantOpt = productVariantRepository.findById(item.getVariantId());
+        if (variantOpt.isEmpty()) return null;
+
+        ProductVariant variant = variantOpt.get();
+        Optional<Product> productOpt = productRepository.findById(variant.getProductId());
+        if (productOpt.isEmpty()) return null;
+
+        Product product = productOpt.get();
+        List<ProductImage> images = productImageRepository.findByProductIdOrderByDisplayOrderAsc(product.getId());
+        String imageUrl = images.isEmpty() ? "" : images.get(0).getImageUrl();
+
+        String variantName = (variant.getColor() != null ? variant.getColor() : "")
+                + (variant.getSize() != null ? " - " + variant.getSize() : "");
+        variantName = variantName.trim();
+        if (variantName.startsWith("- ")) variantName = variantName.substring(2);
+
+        List<String> categoryIds = productCategoryRepository.findByProductId(product.getId()).stream()
+                .map(ProductCategory::getCategoryId)
+                .collect(Collectors.toList());
+
+        return CartItemResponse.builder()
+                .variantId(item.getVariantId())
+                .productId(product.getId())
+                .categoryIds(categoryIds)
+                .productName(product.getName())
+                .productImage(imageUrl)
+                .variantName(variantName.isEmpty() ? "Default" : variantName)
+                .price(variant.getPrice())
+                .quantity(item.getQuantity())
+                .stock(variant.getStock())
+                .totalPrice(variant.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .build();
+    }
+
     private CartResponse mapToCartResponse(Cart cart) {
         List<CartItemResponse> itemResponses = cart.getItems().stream()
-                .map(item -> {
-                    Optional<ProductVariant> variantOpt = productVariantRepository.findById(item.getVariantId());
-                    if (variantOpt.isEmpty()) {
-                        // Variant might be deleted
-                        return null;
-                    }
-
-                    ProductVariant variant = variantOpt.get();
-                    Optional<Product> productOpt = productRepository.findById(variant.getProductId());
-
-                    if (productOpt.isEmpty()) {
-                        return null; // Product might be deleted
-                    }
-
-                    Product product = productOpt.get();
-
-                    // Get main image
-                    List<ProductImage> images = productImageRepository
-                            .findByProductIdOrderByDisplayOrderAsc(product.getId());
-                    String imageUrl = images.isEmpty() ? "" : images.get(0).getImageUrl();
-
-                    String variantName = (variant.getColor() != null ? variant.getColor() : "")
-                            + (variant.getSize() != null ? " - " + variant.getSize() : "");
-                    variantName = variantName.trim();
-                    if (variantName.startsWith("- "))
-                        variantName = variantName.substring(2);
-
-                    return CartItemResponse.builder()
-                            .variantId(item.getVariantId())
-                            .productId(product.getId())
-                            .productName(product.getName())
-                            .productImage(imageUrl)
-                            .variantName(variantName.isEmpty() ? "Default" : variantName)
-                            .price(variant.getPrice())
-                            .quantity(item.getQuantity())
-                            .stock(variant.getStock())
-                            .totalPrice(variant.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
-                            .build();
-
-                })
+                .map(this::toCartItemResponse)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 

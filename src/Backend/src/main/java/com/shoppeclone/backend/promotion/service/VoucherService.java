@@ -10,4 +10,7 @@ public interface VoucherService {
     Voucher createVoucher(Voucher voucher);
 
     Voucher getVoucherByCode(String code);
+
+    /** Returns list of voucher codes this user has already used in their orders */
+    List<String> getUsedVoucherCodesByUserId(String userId);
 }

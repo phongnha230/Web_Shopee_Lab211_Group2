@@ -8,10 +8,13 @@ import java.util.List;
 public class ReviewResponse {
     private String id;
     private String userId;
+    private String userName; // Tên khách hàng (fullName từ User)
     private String productId;
     private String orderId;
     private Integer rating;
     private String comment;
     private List<String> imageUrls; // URLs of review images
     private LocalDateTime createdAt;
+    /** true nếu reviewer đã mua sản phẩm qua đơn hàng (orderId != null) */
+    private Boolean verifiedPurchase;
 }

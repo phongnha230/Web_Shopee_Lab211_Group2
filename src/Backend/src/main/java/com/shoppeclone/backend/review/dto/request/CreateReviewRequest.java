@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 public class CreateReviewRequest {
 
-    @NotBlank(message = "User ID is required")
+    // userId is set by backend from authenticated user - do not send from client
     private String userId;
 
     @NotBlank(message = "Product ID is required")

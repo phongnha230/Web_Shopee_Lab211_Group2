@@ -218,10 +218,36 @@
             updateCartBadge();
 
             const params = new URLSearchParams(window.location.search);
-            const shopId = params.get('id');
+            let shopId = params.get('id');
 
             if (!shopId || shopId === 'null' || shopId === 'undefined') {
-                showError("No shop selected. Please go back to the product page.");
+                shopId = sessionStorage.getItem('lastViewedShopId') || localStorage.getItem('lastViewedShopId');
+                if (shopId) {
+                    try { history.replaceState({}, '', window.location.pathname + '?id=' + encodeURIComponent(shopId)); } catch (e) {}
+                }
+            }
+
+            if (!shopId || shopId === 'null' || shopId === 'undefined') {
+                const lastProductId = sessionStorage.getItem('lastClickedProductId') || localStorage.getItem('lastClickedProductId');
+                if (lastProductId) {
+                    try {
+                        const res = await fetch(`${API_BASE_URL}/products/${lastProductId}`);
+                        if (res.ok) {
+                            const prod = await res.json();
+                            const sid = prod.shopId || (prod.shop && prod.shop.id);
+                            if (sid) {
+                                shopId = String(sid);
+                                sessionStorage.setItem('lastViewedShopId', shopId);
+                                localStorage.setItem('lastViewedShopId', shopId);
+                                try { history.replaceState({}, '', window.location.pathname + '?id=' + encodeURIComponent(shopId)); } catch (e) {}
+                            }
+                        }
+                    } catch (e) { console.warn('Fallback from last product failed:', e); }
+                }
+            }
+
+            if (!shopId || shopId === 'null' || shopId === 'undefined') {
+                showError("No shop selected. Please go to a product page first and click on the shop name.");
                 return;
             }
 
@@ -258,11 +284,10 @@
 
         async function loadShopProducts(shopId) {
             try {
-                const response = await fetch(`${API_BASE_URL}/products`);
-                if (!response.ok) throw new Error('Failed to fetch products');
+                const response = await fetch(`${API_BASE_URL}/products/shop/${shopId}`);
+                if (!response.ok) throw new Error('Failed to fetch shop products');
 
-                const allProducts = await response.json();
-                allShopProducts = allProducts.filter(p => p.shopId === shopId);
+                allShopProducts = await response.json();
 
                 console.log(`✅ Found ${allShopProducts.length} products for shop ${shopId}`);
 
@@ -328,7 +353,7 @@
                     priceDisplay = '₫' + new Intl.NumberFormat('vi-VN').format(price);
                 }
 
-                const sold = product.sold || Math.floor(Math.random() * 100) + 5;
+                const sold = product.sold != null ? product.sold : 0;
 
                 const productCard = document.createElement('div');
                 productCard.className = 'bg-white border border-gray-200 rounded-sm hover:shadow-md hover:border-orange-500 transition-all overflow-hidden group cursor-pointer';
@@ -337,6 +362,7 @@
                 productCard.onclick = () => {
                     if (pid) {
                         localStorage.setItem('lastClickedProductId', pid);
+                        sessionStorage.setItem('lastClickedProductId', pid);
                         window.location.href = `product-detail.html?id=${pid}`;
                     }
                 };
@@ -351,7 +377,7 @@
                         <div class="flex items-center justify-between text-xs text-gray-500 mt-1">
                             <span class="flex items-center">
                                 <i class="fas fa-star text-yellow-400 text-xs mr-0.5"></i>
-                                ${(Math.random() * (5.0 - 4.5) + 4.5).toFixed(1)}
+                                ${product.rating != null ? product.rating.toFixed(1) : '-'}
                             </span>
                             <span>Sold ${sold}</span>
                         </div>
@@ -364,8 +390,9 @@
 
         function showError(message) {
             document.getElementById('shopName').textContent = 'Error';
+            const base = (window.location.pathname || '').lastIndexOf('/') >= 0 ? window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1) : window.location.origin + '/';
             document.getElementById('productsList').innerHTML =
-                `<div class="col-span-full text-center text-red-500 py-12"><i class="fas fa-exclamation-triangle text-4xl mb-3"></i><p class="text-sm">${message}</p><a href="index.html" class="text-orange-500 hover:underline mt-2 inline-block">← Back to Home</a></div>`;
+                `<div class="col-span-full text-center text-red-500 py-12"><i class="fas fa-exclamation-triangle text-4xl mb-3"></i><p class="text-sm">${message}</p><p class="text-gray-600 text-xs mt-2">Vào trang chủ, chọn sản phẩm, rồi bấm tên cửa hàng ở mục "Sold By".</p><a href="${base}index.html" class="text-orange-500 hover:underline mt-3 inline-block font-medium">← Về trang chủ chọn sản phẩm</a></div>`;
         }
 
         function updateNavbar() {
