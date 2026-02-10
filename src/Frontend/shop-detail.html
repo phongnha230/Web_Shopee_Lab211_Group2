@@ -157,14 +157,16 @@
                             </div>
                         </div>
                         <div class="flex gap-2">
-                            <button
-                                class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-1.5 rounded-sm font-medium transition text-sm flex items-center">
-                                <i class="fas fa-plus mr-1.5 text-xs"></i>Follow
-                            </button>
-                            <button
-                                class="border border-gray-300 text-gray-700 hover:border-orange-500 hover:text-orange-500 px-5 py-1.5 rounded-sm font-medium transition text-sm flex items-center">
-                                <i class="fas fa-comment mr-1.5 text-xs"></i>Chat Now
-                            </button>
+                            <div class="flex gap-2">
+                                <button id="followBtn" onclick="toggleFollow()"
+                                    class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-1.5 rounded-sm font-medium transition text-sm flex items-center">
+                                    <i class="fas fa-plus mr-1.5 text-xs"></i><span id="followText">Follow</span>
+                                </button>
+                                <button onclick="startChat()"
+                                    class="border border-gray-300 text-gray-700 hover:border-orange-500 hover:text-orange-500 px-5 py-1.5 rounded-sm font-medium transition text-sm flex items-center">
+                                    <i class="fas fa-comment mr-1.5 text-xs"></i>Chat Now
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -223,7 +225,7 @@
             if (!shopId || shopId === 'null' || shopId === 'undefined') {
                 shopId = sessionStorage.getItem('lastViewedShopId') || localStorage.getItem('lastViewedShopId');
                 if (shopId) {
-                    try { history.replaceState({}, '', window.location.pathname + '?id=' + encodeURIComponent(shopId)); } catch (e) {}
+                    try { history.replaceState({}, '', window.location.pathname + '?id=' + encodeURIComponent(shopId)); } catch (e) { }
                 }
             }
 
@@ -239,7 +241,7 @@
                                 shopId = String(sid);
                                 sessionStorage.setItem('lastViewedShopId', shopId);
                                 localStorage.setItem('lastViewedShopId', shopId);
-                                try { history.replaceState({}, '', window.location.pathname + '?id=' + encodeURIComponent(shopId)); } catch (e) {}
+                                try { history.replaceState({}, '', window.location.pathname + '?id=' + encodeURIComponent(shopId)); } catch (e) { }
                             }
                         }
                     } catch (e) { console.warn('Fallback from last product failed:', e); }
@@ -253,7 +255,126 @@
 
             await loadShopDetails(shopId);
             await loadShopProducts(shopId);
+            checkFollowStatus(shopId);
         });
+
+        async function checkFollowStatus(shopId) {
+            const token = localStorage.getItem('accessToken');
+            if (!token) return;
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/follow/check/${shopId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    updateFollowButton(data.isFollowing);
+                }
+            } catch (e) {
+                console.error('Error checking follow status:', e);
+            }
+        }
+
+        async function toggleFollow() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const params = new URLSearchParams(window.location.search);
+            const shopId = params.get('id') || sessionStorage.getItem('lastViewedShopId');
+
+            if (!shopId) return;
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/follow/${shopId}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    updateFollowButton(data.isFollowing);
+                } else {
+                    alert('Failed to update follow status');
+                }
+            } catch (e) {
+                console.error('Error toggling follow:', e);
+                alert('An error occurred');
+            }
+        }
+
+        function updateFollowButton(isFollowing) {
+            const btn = document.getElementById('followBtn');
+            const text = document.getElementById('followText');
+            const icon = btn.querySelector('i');
+
+            if (isFollowing) {
+                text.textContent = 'Unfollow';
+                if (icon) {
+                    icon.className = 'fas fa-minus mr-1.5 text-xs';
+                }
+                btn.classList.remove('bg-orange-500', 'hover:bg-orange-600', 'text-white');
+                btn.classList.add('bg-white', 'border', 'border-gray-300', 'text-gray-700');
+            } else {
+                text.textContent = 'Follow';
+                if (icon) {
+                    icon.className = 'fas fa-plus mr-1.5 text-xs';
+                }
+                btn.classList.add('bg-orange-500', 'hover:bg-orange-600', 'text-white');
+                btn.classList.remove('bg-white', 'border', 'border-gray-300', 'text-gray-700');
+            }
+        }
+
+        async function startChat() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const params = new URLSearchParams(window.location.search);
+            const shopId = params.get('id') || sessionStorage.getItem('lastViewedShopId');
+
+            if (!shopId) {
+                alert("Shop ID is missing. Cannot start chat.");
+                return;
+            }
+
+            // Start chat conversation
+            try {
+                const res = await fetch(`${API_BASE_URL}/chat/start/${shopId}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    console.log("Chat started, redirecting to:", `chat.html?id=${data.conversationId}`);
+
+                    // Saving to localStorage as fallback
+                    localStorage.setItem('pendingChatConversationId', data.conversationId);
+
+                    window.location.href = `chat.html?id=${data.conversationId}`;
+                } else {
+                    console.error("Failed to start chat, status:", res.status);
+                    if (res.status === 401) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+
+                    // Fallback using shopID
+                    localStorage.setItem('pendingChatShopId', shopId);
+                    window.location.href = `chat.html?shopId=${shopId}`;
+                }
+            } catch (e) {
+                console.error('Error starting chat (Network/Exception):', e);
+                // Fallback using shopID
+                localStorage.setItem('pendingChatShopId', shopId);
+                window.location.href = `chat.html?shopId=${shopId}`;
+            }
+        }
 
         async function loadShopDetails(shopId) {
             try {
@@ -267,18 +388,129 @@
                 document.getElementById('breadcrumbShop').textContent = shop.name || 'Shop';
                 document.getElementById('shopAddress').textContent = shop.address || 'Vietnam';
 
-                if (shop.logoUrl) {
-                    document.getElementById('shopLogo').src = shop.logoUrl;
+                // Fix: shop.logo might be the field name, but let's check both
+                const logoUrl = shop.logo || shop.logoUrl;
+                const shopLogoImg = document.getElementById('shopLogo');
+
+                if (logoUrl) {
+                    shopLogoImg.src = logoUrl;
                 } else {
                     const initials = (shop.name || 'SH').substring(0, 2).toUpperCase();
-                    document.getElementById('shopLogo').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=AD3029&color=fff&size=100`;
+                    shopLogoImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=AD3029&color=fff&size=100`;
                 }
 
                 document.title = `${shop.name} - Shopee Clone`;
 
+                // Check if current user is owner to allow logo update
+                checkOwnerAndEnableEdit(shop.ownerId);
+
             } catch (error) {
                 console.error('Error loading shop details:', error);
                 showError('Failed to load shop details.');
+            }
+        }
+
+        async function checkOwnerAndEnableEdit(ownerId) {
+            const token = localStorage.getItem('accessToken');
+            if (!token) return;
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const user = await res.json();
+                    if (user.id === ownerId) {
+                        enableLogoEdit();
+                    }
+                }
+            } catch (e) {
+                console.warn('Failed to check ownership', e);
+            }
+        }
+
+        function enableLogoEdit() {
+            const logoContainer = document.getElementById('shopLogo').parentElement;
+            // Make container relative if not already (it is absolute in HTML but parent is relative)
+            // The HTML structure is: 
+            // <div class="shop-header-bg ... relative">
+            //    <div class="absolute ...">
+            //       <img id="shopLogo" ...>
+            //    </div>
+            // </div>
+
+            // We want to add an overlay to the img container
+            const imgContainer = document.getElementById('shopLogo').parentElement;
+            imgContainer.classList.add('group', 'cursor-pointer');
+
+            const overlay = document.createElement('div');
+            overlay.className = 'absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity';
+            overlay.innerHTML = '<i class="fas fa-camera text-white"></i>';
+            overlay.onclick = () => document.getElementById('logoInput').click();
+
+            imgContainer.appendChild(overlay);
+
+            // Create hidden input if not exists
+            if (!document.getElementById('logoInput')) {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.id = 'logoInput';
+                input.className = 'hidden';
+                input.accept = 'image/*';
+                input.onchange = handleLogoUpload;
+                document.body.appendChild(input);
+            }
+        }
+
+        async function handleLogoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const token = localStorage.getItem('accessToken');
+            if (!token) return;
+
+            // 1. Upload Image
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('folder', 'shop_logos');
+
+            try {
+                // Show loading
+                document.getElementById('shopLogo').style.opacity = '0.5';
+
+                const uploadRes = await fetch(`${API_BASE_URL}/upload`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+
+                if (!uploadRes.ok) throw new Error('Upload failed');
+
+                const uploadData = await uploadRes.json();
+                const newLogoUrl = uploadData.url;
+
+                // 2. Update Shop
+                const updateRes = await fetch(`${API_BASE_URL}/shop/my-shop`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ logo: newLogoUrl })
+                });
+
+                if (!updateRes.ok) throw new Error('Update shop failed');
+
+                // 3. Update UI
+                document.getElementById('shopLogo').src = newLogoUrl;
+                alert('Shop logo updated successfully!');
+
+            } catch (e) {
+                console.error(e);
+                alert('Failed to update logo');
+            } finally {
+                document.getElementById('shopLogo').style.opacity = '1';
+                event.target.value = ''; // Reset input
             }
         }
 
