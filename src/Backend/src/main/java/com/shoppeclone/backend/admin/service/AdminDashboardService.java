@@ -59,14 +59,18 @@ public class AdminDashboardService {
             LocalDate today = LocalDate.now();
             stats.setUserTrend(getHourlyTrend(today, "user"));
             stats.setShopTrend(getHourlyTrend(today, "shop"));
+            stats.setDisputeTrend(getHourlyTrend(today, "dispute"));
         } else if (days == 0) {
             LocalDate yesterday = LocalDate.now().minusDays(1);
             stats.setUserTrend(getHourlyTrend(yesterday, "user"));
             stats.setShopTrend(getHourlyTrend(yesterday, "shop"));
+            stats.setDisputeTrend(getHourlyTrend(yesterday, "dispute"));
         } else {
             LocalDate today = LocalDate.now();
             stats.setUserTrend(getUserRegistrationTrend(today, days));
+            stats.setUserTrend(getUserRegistrationTrend(today, days));
             stats.setShopTrend(getShopRegistrationTrend(today, days));
+            stats.setDisputeTrend(getDisputeTrend(today, days));
         }
 
         // User Distribution Calculation (ROLE_USER, ROLE_SELLER, ROLE_ADMIN)
@@ -130,11 +134,17 @@ public class AdminDashboardService {
                             && u.getCreatedAt().isBefore(end))
                     .map(User::getCreatedAt)
                     .collect(Collectors.toList());
-        } else {
+        } else if (type.equals("shop")) {
             timestamps = shopRepository.findAll().stream()
                     .filter(s -> s.getCreatedAt() != null && s.getCreatedAt().isAfter(start)
                             && s.getCreatedAt().isBefore(end))
                     .map(Shop::getCreatedAt)
+                    .collect(Collectors.toList());
+        } else {
+            timestamps = disputeRepository.findAll().stream()
+                    .filter(d -> d.getCreatedAt() != null && d.getCreatedAt().isAfter(start)
+                            && d.getCreatedAt().isBefore(end))
+                    .map(com.shoppeclone.backend.dispute.entity.Dispute::getCreatedAt)
                     .collect(Collectors.toList());
         }
 
@@ -158,6 +168,19 @@ public class AdminDashboardService {
                 .collect(Collectors.toList());
 
         return groupAndFormatTrendDaily(shops.stream().map(Shop::getCreatedAt).collect(Collectors.toList()), endDate,
+                days);
+    }
+
+    private List<DashboardStatsResponse.TrendData> getDisputeTrend(LocalDate endDate, int days) {
+        LocalDateTime start = endDate.minusDays(days - 1).atStartOfDay();
+        List<com.shoppeclone.backend.dispute.entity.Dispute> disputes = disputeRepository.findAll().stream()
+                .filter(d -> d.getCreatedAt() != null && d.getCreatedAt().isAfter(start))
+                .collect(Collectors.toList());
+
+        return groupAndFormatTrendDaily(
+                disputes.stream().map(com.shoppeclone.backend.dispute.entity.Dispute::getCreatedAt)
+                        .collect(Collectors.toList()),
+                endDate,
                 days);
     }
 
