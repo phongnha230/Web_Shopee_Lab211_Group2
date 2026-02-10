@@ -293,15 +293,15 @@
 
         <!-- Reviews Section -->
         <div id="reviews" class="bg-white p-6 rounded-lg mb-8">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Đánh giá sản phẩm</h2>
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Product Reviews</h2>
             <div class="flex items-center gap-8 mb-6 bg-orange-50 p-6 rounded-lg" id="reviewsSummary">
                 <div class="text-center">
                     <div class="text-5xl font-bold text-orange-600 mb-2" id="avgRatingDisplay">-</div>
                     <div class="flex text-orange-400 mb-2 justify-center" id="avgStarsDisplay"></div>
-                    <div class="text-gray-600 text-sm">trên 5</div>
+                    <div class="text-gray-600 text-sm">out of 5</div>
                 </div>
                 <div class="flex-1">
-                    <p class="text-gray-600" id="reviewCountDisplay">Đang tải đánh giá...</p>
+                    <p class="text-gray-600" id="reviewCountDisplay">Loading reviews...</p>
                 </div>
             </div>
             <div id="reviewsList">
@@ -317,27 +317,37 @@
     </div>
 
     <!-- Edit Review Modal -->
-    <div id="editReviewModal" class="lightbox" style="align-items: center; justify-content: center;" onclick="if(event.target===this)closeEditReviewModal()">
+    <div id="editReviewModal" class="lightbox" style="align-items: center; justify-content: center;"
+        onclick="if(event.target===this)closeEditReviewModal()">
         <div class="bg-white rounded-xl p-6 max-w-lg w-full mx-4 shadow-2xl" onclick="event.stopPropagation()">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Sửa đánh giá</h2>
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Edit Review</h2>
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Đánh giá sao</label>
+                <label class="block text-gray-700 font-semibold mb-2">Star Rating</label>
                 <div class="flex gap-1" id="editStarRating">
-                    <i class="fas fa-star text-2xl cursor-pointer text-gray-300" data-r="1" onclick="setEditRating(1)"></i>
-                    <i class="fas fa-star text-2xl cursor-pointer text-gray-300" data-r="2" onclick="setEditRating(2)"></i>
-                    <i class="fas fa-star text-2xl cursor-pointer text-gray-300" data-r="3" onclick="setEditRating(3)"></i>
-                    <i class="fas fa-star text-2xl cursor-pointer text-gray-300" data-r="4" onclick="setEditRating(4)"></i>
-                    <i class="fas fa-star text-2xl cursor-pointer text-gray-300" data-r="5" onclick="setEditRating(5)"></i>
+                    <i class="fas fa-star text-2xl cursor-pointer text-gray-300" data-r="1"
+                        onclick="setEditRating(1)"></i>
+                    <i class="fas fa-star text-2xl cursor-pointer text-gray-300" data-r="2"
+                        onclick="setEditRating(2)"></i>
+                    <i class="fas fa-star text-2xl cursor-pointer text-gray-300" data-r="3"
+                        onclick="setEditRating(3)"></i>
+                    <i class="fas fa-star text-2xl cursor-pointer text-gray-300" data-r="4"
+                        onclick="setEditRating(4)"></i>
+                    <i class="fas fa-star text-2xl cursor-pointer text-gray-300" data-r="5"
+                        onclick="setEditRating(5)"></i>
                 </div>
             </div>
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Nhận xét</label>
-                <textarea id="editReviewComment" rows="4" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-orange-500 focus:outline-none" minlength="10"></textarea>
-                <p class="text-xs text-gray-500 mt-1">Tối thiểu 10 ký tự</p>
+                <label class="block text-gray-700 font-semibold mb-2">Comment</label>
+                <textarea id="editReviewComment" rows="4"
+                    class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-orange-500 focus:outline-none"
+                    minlength="10"></textarea>
+                <p class="text-xs text-gray-500 mt-1">Minimum 10 characters</p>
             </div>
             <div class="flex gap-3">
-                <button onclick="closeEditReviewModal()" class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50">Hủy</button>
-                <button onclick="submitEditReview()" class="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600">Lưu</button>
+                <button onclick="closeEditReviewModal()"
+                    class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50">Cancel</button>
+                <button onclick="submitEditReview()"
+                    class="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600">Save</button>
             </div>
         </div>
     </div>
@@ -459,21 +469,21 @@
                 renderProduct(product, isReal);
             } else {
                 const errMsg = connectionError
-                    ? "Không kết nối được server. Vui lòng kiểm tra backend đã chạy chưa (localhost:8080)."
-                    : "Sản phẩm không tồn tại hoặc đã bị xóa (ID: " + id + ").";
+                    ? "Cannot connect to server. Please check if backend is running (localhost:8080)."
+                    : "Product does not exist or has been deleted (ID: " + id + ").";
                 showErrorState(errMsg);
             }
         });
 
         function showErrorState(msg) {
-            document.getElementById('productTitle').textContent = "Không tìm thấy sản phẩm";
+            document.getElementById('productTitle').textContent = "Product Not Found";
             document.getElementById('priceContainer').innerHTML = `<span class='text-red-500'>${msg}</span>`;
             document.getElementById('stockCount').textContent = "-";
             document.getElementById('descContainer').innerHTML = `
                 <div class='bg-amber-50 p-6 rounded-lg border border-amber-200'>
                     <p class='text-amber-800 mb-3'>${msg}</p>
-                    <p class='text-sm text-amber-700 mb-4'>Sản phẩm có thể đã bị xóa, không tồn tại, hoặc server chưa chạy (localhost:8080).</p>
-                    <a href='index.html' class='inline-block px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600'>← Quay lại trang chủ</a>
+                    <p class='text-sm text-amber-700 mb-4'>Product may have been deleted, does not exist, or server is not running (localhost:8080).</p>
+                    <a href='index.html' class='inline-block px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600'>← Back to Home</a>
                 </div>`;
             document.getElementById('mainImage').style.display = 'none';
             // Ẩn phần ratings/sold/color/size/quantity khi không có sản phẩm
@@ -545,8 +555,8 @@
             let oldPrice = isReal ? (price * 1.2) : (product.oldPrice || price * 1.2);
 
             document.getElementById('priceContainer').innerHTML = `
-                 <span class="text-gray-400 line-through text-lg mr-3">₫${new Intl.NumberFormat('vi-VN').format(oldPrice)}</span>
-                 <span class="text-orange-600 text-3xl font-bold mr-3">₫${new Intl.NumberFormat('vi-VN').format(price)}</span>
+                 <span class="text-gray-400 line-through text-lg mr-3">₫${new Intl.NumberFormat('en-US').format(oldPrice)}</span>
+                 <span class="text-orange-600 text-3xl font-bold mr-3">₫${new Intl.NumberFormat('en-US').format(price)}</span>
                  <span class="bg-orange-500 text-white px-2 py-1 rounded text-sm font-semibold">SALE</span>
             `;
 
@@ -592,7 +602,7 @@
             const rating = (isReal && product.rating != null) ? product.rating.toFixed(1) : (product.rating || '4.9');
             const reviewCount = (isReal && product.reviewCount != null) ? product.reviewCount : (product.reviewCount ?? 0);
             const sold = (isReal && product.sold != null) ? product.sold : (product.sold ?? 0);
-            const formatCount = n => (n >= 1000 ? (n/1000).toFixed(1) + 'k' : String(n));
+            const formatCount = n => (n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(n));
             document.getElementById('ratingValue').textContent = rating;
             document.getElementById('reviewCount').textContent = reviewCount > 0 ? `${formatCount(reviewCount)} Ratings` : '0 Ratings';
             document.getElementById('soldCount').textContent = `${formatCount(sold)} Sold`;
@@ -629,9 +639,9 @@
             if (isReal && product.id) {
                 loadProductReviews(product.id);
             } else {
-                document.getElementById('reviewsList').innerHTML = '<p class="text-gray-500 py-4">Chưa có đánh giá.</p>';
+                document.getElementById('reviewsList').innerHTML = '<p class="text-gray-500 py-4">No reviews yet.</p>';
                 document.getElementById('avgRatingDisplay').textContent = '-';
-                document.getElementById('reviewCountDisplay').textContent = 'Chưa có đánh giá';
+                document.getElementById('reviewCountDisplay').textContent = 'No reviews yet';
             }
         }
 
@@ -651,7 +661,7 @@
                             currentUserId = me.id || currentUserId;
                             if (me.id) localStorage.setItem('userId', me.id);
                         }
-                    } catch (_) {}
+                    } catch (_) { }
                 } else {
                     currentUserId = null;
                 }
@@ -674,9 +684,9 @@
                     return '<i class="far fa-star"></i>';
                 }).join('');
                 document.getElementById('reviewCountDisplay').textContent =
-                    reviews.length > 0 ? `${reviews.length} đánh giá` : 'Chưa có đánh giá';
+                    reviews.length > 0 ? `${reviews.length} review(s)` : 'No reviews yet';
                 // Sync ratingSoldRow with real review data
-                const formatCount = n => (n >= 1000 ? (n/1000).toFixed(1) + 'k' : String(n));
+                const formatCount = n => (n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(n));
                 const rv = document.getElementById('ratingValue');
                 const rc = document.getElementById('reviewCount');
                 const sc = document.getElementById('soldCount');
@@ -688,7 +698,7 @@
 
                 const listEl = document.getElementById('reviewsList');
                 if (reviews.length === 0) {
-                    listEl.innerHTML = '<p class="text-gray-500 py-4">Chưa có đánh giá. Hãy là người đầu tiên đánh giá!</p>';
+                    listEl.innerHTML = '<p class="text-gray-500 py-4">No reviews yet. Be the first to review!</p>';
                 } else {
                     reviewsCache = {};
                     listEl.innerHTML = reviews.map(r => {
@@ -697,29 +707,29 @@
                         const actionBtns = isOwner ? `
                             <div class="flex gap-2 mt-2">
                                 <button onclick="openEditReviewModal('${r.id}')" 
-                                    class="px-3 py-1 text-sm border border-orange-500 text-orange-500 rounded hover:bg-orange-50">Sửa</button>
+                                    class="px-3 py-1 text-sm border border-orange-500 text-orange-500 rounded hover:bg-orange-50">Edit</button>
                                 <button onclick="confirmDeleteReview('${r.id}')" 
-                                    class="px-3 py-1 text-sm border border-red-500 text-red-500 rounded hover:bg-red-50">Xóa</button>
+                                    class="px-3 py-1 text-sm border border-red-500 text-red-500 rounded hover:bg-red-50">Delete</button>
                             </div>
                         ` : '';
                         const starsHtml = Array(5).fill(0).map((_, i) =>
                             i < (r.rating || 0) ? '<i class="fas fa-star text-yellow-400"></i>' : '<i class="far fa-star text-yellow-400"></i>'
                         ).join('');
-                        const verifiedBadge = (r.verifiedPurchase === true) 
-                            ? '<span class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">Đã mua hàng</span>' 
+                        const verifiedBadge = (r.verifiedPurchase === true)
+                            ? '<span class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">Verified Purchase</span>'
                             : '';
-                        const dateStr = r.createdAt ? new Date(r.createdAt).toLocaleDateString('vi-VN', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
-                        const imagesHtml = (r.imageUrls && Array.isArray(r.imageUrls) && r.imageUrls.length > 0) 
-                            ? `<div class="review-images mt-2">${r.imageUrls.map(url => 
+                        const dateStr = r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+                        const imagesHtml = (r.imageUrls && Array.isArray(r.imageUrls) && r.imageUrls.length > 0)
+                            ? `<div class="review-images mt-2">${r.imageUrls.map(url =>
                                 `<img src="${url}" alt="Review" class="cursor-pointer" onclick="if(typeof openLightbox==='function')openLightbox(this.src)">`
-                            ).join('')}</div>` 
+                            ).join('')}</div>`
                             : '';
                         return `<div class="border-b border-gray-200 pb-6 mb-6" data-review-id="${r.id}">
                             <div class="flex items-start gap-4">
                                 <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(r.userName || 'U')}&background=eee&color=666" alt="User" class="w-12 h-12 rounded-full">
                                 <div class="flex-1">
                                     <div class="flex items-center flex-wrap gap-2 mb-2">
-                                        <h4 class="font-semibold text-gray-800">${r.userName || 'Khách hàng'}</h4>
+                                        <h4 class="font-semibold text-gray-800">${r.userName || 'Customer'}</h4>
                                         ${verifiedBadge}
                                         <span class="text-sm text-gray-500 ml-auto">${dateStr}</span>
                                     </div>
@@ -734,9 +744,9 @@
                 }
             } catch (e) {
                 console.error('Load reviews error:', e);
-                document.getElementById('reviewsList').innerHTML = '<p class="text-gray-500 py-4">Không tải được đánh giá.</p>';
+                document.getElementById('reviewsList').innerHTML = '<p class="text-gray-500 py-4">Failed to load reviews.</p>';
                 document.getElementById('avgRatingDisplay').textContent = '-';
-                document.getElementById('reviewCountDisplay').textContent = 'Lỗi tải đánh giá';
+                document.getElementById('reviewCountDisplay').textContent = 'Error loading reviews';
             }
         }
 
@@ -772,7 +782,7 @@
             if (!editingReviewId) return;
             const comment = document.getElementById('editReviewComment').value.trim();
             if (comment.length < 10) {
-                alert('Nhận xét phải có ít nhất 10 ký tự');
+                alert('Comment must be at least 10 characters');
                 return;
             }
             try {
@@ -780,12 +790,12 @@
                 closeEditReviewModal();
                 if (window.currentProduct && window.currentProduct.id) loadProductReviews(window.currentProduct.id);
             } catch (e) {
-                alert('❌ ' + (e.message || 'Không thể cập nhật đánh giá'));
+                alert('❌ ' + (e.message || 'Cannot update review'));
             }
         }
 
         async function confirmDeleteReview(reviewId) {
-            if (!confirm('Bạn có chắc muốn xóa đánh giá này?')) return;
+            if (!confirm('Are you sure you want to delete this review?')) return;
             try {
                 await ReviewAPI.deleteReview(reviewId);
                 if (window.currentProduct && window.currentProduct.id) loadProductReviews(window.currentProduct.id);

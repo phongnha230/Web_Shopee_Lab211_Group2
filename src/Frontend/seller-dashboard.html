@@ -100,12 +100,17 @@
             </a>
             <a href="#" onclick="switchView('returns'); return false;" id="nav-returns"
                 class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
-                <i class="fas fa-exchange-alt w-5"></i> Trả hàng / Khiếu nại
+                <i class="fas fa-exchange-alt w-5"></i> Return / Refund
             </a>
             <a href="#" onclick="switchView('shop-profile'); return false;" id="nav-shop-profile"
                 class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
                 <i class="fas fa-store w-5"></i> Shop Profile
             </a>
+            <a href="#" onclick="switchView('customers'); return false;" id="nav-customers"
+                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
+                <i class="fas fa-user-friends w-5"></i> Customer Mgmt
+            </a>
+
 
             <div class="my-4 border-b border-gray-100"></div>
 
@@ -143,52 +148,62 @@
                 <!-- Header -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-800">Tổng quan cửa hàng</h1>
-                        <p class="text-gray-500 text-sm mt-1">Theo dõi hiệu suất và quản lý đơn hàng của bạn</p>
+                        <h1 class="text-2xl font-bold text-gray-800">Shop Overview</h1>
+                        <p class="text-gray-500 text-sm mt-1">Track performance and manage your orders</p>
                     </div>
-                    <button onclick="loadDashboardStats()" class="flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium text-sm">
-                        <i class="fas fa-sync-alt"></i> Làm mới
+                    <button onclick="loadDashboardStats()"
+                        class="flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium text-sm">
+                        <i class="fas fa-sync-alt"></i> Refresh
                     </button>
                 </div>
 
                 <!-- KPI Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition group">
+                    <div
+                        class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition group">
                         <div class="flex justify-between items-start mb-3">
-                            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition">
+                            <div
+                                class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition">
                                 <i class="fas fa-box"></i>
                             </div>
-                            <span class="text-xs text-gray-400 font-medium">Sản phẩm</span>
+                            <span class="text-xs text-gray-400 font-medium">Products</span>
                         </div>
                         <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Total Products</p>
                         <h3 id="totalProducts" class="text-2xl font-bold text-gray-800 mt-1">0</h3>
                     </div>
-                    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition group">
+                    <div
+                        class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition group">
                         <div class="flex justify-between items-start mb-3">
-                            <div class="w-12 h-12 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition">
+                            <div
+                                class="w-12 h-12 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition">
                                 <i class="fas fa-clock"></i>
                             </div>
-                            <span id="pendingOrdersBadge" class="hidden bg-orange-100 text-orange-700 text-xs font-bold px-2 py-0.5 rounded-full">!</span>
+                            <span id="pendingOrdersBadge"
+                                class="hidden bg-orange-100 text-orange-700 text-xs font-bold px-2 py-0.5 rounded-full">!</span>
                         </div>
                         <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Pending Orders</p>
                         <h3 id="pendingOrders" class="text-2xl font-bold text-gray-800 mt-1">0</h3>
                     </div>
-                    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition group">
+                    <div
+                        class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition group">
                         <div class="flex justify-between items-start mb-3">
-                            <div class="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition">
+                            <div
+                                class="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition">
                                 <i class="fas fa-coins"></i>
                             </div>
                             <span class="text-xs text-gray-400 font-medium">₫</span>
                         </div>
-                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Doanh thu</p>
+                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Revenue</p>
                         <h3 id="totalRevenue" class="text-2xl font-bold text-gray-800 mt-1">₫0</h3>
                     </div>
-                    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition group">
+                    <div
+                        class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition group">
                         <div class="flex justify-between items-start mb-3">
-                            <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition">
+                            <div
+                                class="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition">
                                 <i class="fas fa-check-circle"></i>
                             </div>
-                            <span class="text-xs text-gray-400 font-medium">Đã giao</span>
+                            <span class="text-xs text-gray-400 font-medium">Delivered</span>
                         </div>
                         <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Completed Orders</p>
                         <h3 id="completedOrders" class="text-2xl font-bold text-gray-800 mt-1">0</h3>
@@ -201,8 +216,8 @@
                     <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                         <div class="flex justify-between items-center mb-6">
                             <div>
-                                <h3 class="text-lg font-bold text-gray-800">Doanh thu 7 ngày gần đây</h3>
-                                <p class="text-xs text-gray-500">Biểu đồ theo ngày</p>
+                                <h3 class="text-lg font-bold text-gray-800">Revenue last 7 days</h3>
+                                <p class="text-xs text-gray-500">Chart by day</p>
                             </div>
                         </div>
                         <div class="h-64">
@@ -213,8 +228,8 @@
                     <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                         <div class="flex justify-between items-center mb-6">
                             <div>
-                                <h3 class="text-lg font-bold text-gray-800">Đơn hàng theo trạng thái</h3>
-                                <p class="text-xs text-gray-500">Phân bố trạng thái đơn</p>
+                                <h3 class="text-lg font-bold text-gray-800">Orders by Status</h3>
+                                <p class="text-xs text-gray-500">Order Status Distribution</p>
                             </div>
                         </div>
                         <div class="h-64 flex items-center justify-center">
@@ -225,34 +240,58 @@
 
                 <!-- Welcome + Quick Actions -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-gradient-to-br from-orange-50 to-orange-100/50 p-6 rounded-2xl border border-orange-100 shadow-sm">
+                    <div
+                        class="bg-gradient-to-br from-orange-50 to-orange-100/50 p-6 rounded-2xl border border-orange-100 shadow-sm">
                         <h3 class="text-lg font-bold text-gray-800 mb-2 flex items-center gap-2">
-                            <i class="fas fa-store text-orange-600"></i> Chào mừng đến Seller Centre!
+                            <i class="fas fa-store text-orange-600"></i> Welcome to Seller Centre!
                         </h3>
-                        <p class="text-gray-600 text-sm mb-4">Quản lý sản phẩm, đơn hàng và kho hàng của bạn tại đây.</p>
+                        <p class="text-gray-600 text-sm mb-4">Manage your products, orders, and inventory here.</p>
                         <div class="flex flex-wrap gap-2">
-                            <button onclick="switchView('add-product')" class="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition">
-                                <i class="fas fa-plus mr-1"></i> Thêm sản phẩm
+                            <button onclick="switchView('add-product')"
+                                class="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition">
+                                <i class="fas fa-plus mr-1"></i> Add Product
                             </button>
-                            <button onclick="switchView('orders')" class="px-4 py-2 bg-white border border-orange-300 text-orange-600 rounded-lg text-sm font-medium hover:bg-orange-50 transition">
-                                <i class="fas fa-shopping-bag mr-1"></i> Xem đơn hàng
+                            <button onclick="switchView('orders')"
+                                class="px-4 py-2 bg-white border border-orange-300 text-orange-600 rounded-lg text-sm font-medium hover:bg-orange-50 transition">
+                                <i class="fas fa-shopping-bag mr-1"></i> View Orders
                             </button>
                         </div>
                     </div>
                     <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4">Hành động nhanh</h3>
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Quick Actions</h3>
                         <div class="space-y-3">
-                            <a href="#" onclick="switchView('products'); return false;" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition">
-                                <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-box"></i></div>
-                                <div><p class="font-medium text-gray-800">Sản phẩm của tôi</p><p class="text-xs text-gray-500">Quản lý danh sách sản phẩm</p></div>
+                            <a href="#" onclick="switchView('products'); return false;"
+                                class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition">
+                                <div
+                                    class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-box"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-800">My Products</p>
+                                    <p class="text-xs text-gray-500">Manage product list</p>
+                                </div>
                             </a>
-                            <a href="#" onclick="switchView('inventory'); return false;" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition">
-                                <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center"><i class="fas fa-warehouse"></i></div>
-                                <div><p class="font-medium text-gray-800">Quản lý kho</p><p class="text-xs text-gray-500">Cập nhật tồn kho</p></div>
+                            <a href="#" onclick="switchView('inventory'); return false;"
+                                class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition">
+                                <div
+                                    class="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-warehouse"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-800">Inventory Management</p>
+                                    <p class="text-xs text-gray-500">Update stock</p>
+                                </div>
                             </a>
-                            <a href="#" onclick="switchView('orders'); return false;" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition">
-                                <div class="w-10 h-10 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center"><i class="fas fa-shopping-bag"></i></div>
-                                <div><p class="font-medium text-gray-800">Đơn hàng</p><p class="text-xs text-gray-500">Xem và xử lý đơn hàng</p></div>
+                            <a href="#" onclick="switchView('orders'); return false;"
+                                class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition">
+                                <div
+                                    class="w-10 h-10 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-shopping-bag"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-800">Orders</p>
+                                    <p class="text-xs text-gray-500">View and process orders</p>
+                                </div>
                             </a>
                         </div>
                     </div>
@@ -416,7 +455,7 @@
                                             Stock</label>
                                         <input type="number" id="flashSaleStock" min="0"
                                             class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-sm"
-                                            placeholder="S.lượng bán">
+                                            placeholder="Sale Quantity">
                                     </div>
                                 </div>
                             </div>
@@ -610,10 +649,164 @@
                             <tbody id="flashSaleTableBody" class="bg-white divide-y divide-gray-200">
                                 <!-- list FS products here -->
                                 <tr>
-                                    <td colspan="5" class="px-6 py-10 text-center text-gray-500">No products found</td>
+                                    <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                                        No active flash sales found.
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: CUSTOMER MANAGEMENT (CHAT & FOLLOWERS) -->
+            <div id="view-customers" class="hidden space-y-6 h-[calc(100vh-140px)] flex flex-col">
+                <div class="flex border-b border-gray-200 shrink-0">
+                    <button onclick="switchCustomerTab('chat')" id="tab-cust-chat"
+                        class="px-8 py-4 text-sm font-bold border-b-2 border-orange-600 text-orange-600 transition-all">
+                        <i class="fas fa-comments mr-2"></i>Messages
+                    </button>
+                    <button onclick="switchCustomerTab('followers')" id="tab-cust-followers"
+                        class="px-8 py-4 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-all">
+                        <i class="fas fa-users mr-2"></i>Followers
+                    </button>
+                </div>
+
+                <!-- Tab Content: Chat -->
+                <div id="cust-tab-chat" class="flex-1 flex gap-4 min-h-0">
+                    <!-- Sidebar: Conversations List -->
+                    <div
+                        class="w-80 bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col min-h-0 overflow-hidden">
+                        <div class="p-4 border-b border-gray-100 shrink-0">
+                            <div class="relative">
+                                <input type="text" placeholder="Search conversations..."
+                                    class="w-full pl-9 pr-4 py-2 bg-gray-50 border-0 rounded-lg text-sm focus:ring-2 focus:ring-orange-500">
+                                <i
+                                    class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                            </div>
+                        </div>
+                        <div id="chatConversations"
+                            class="flex-1 overflow-y-auto divide-y divide-gray-50 p-2 space-y-1">
+                            <!-- Conversations will be loaded here -->
+                            <div class="p-8 text-center text-gray-400">
+                                <i class="fas fa-spinner fa-spin mb-2"></i>
+                                <p class="text-xs">Loading...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Area -->
+                    <div
+                        class="flex-1 bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col min-h-0 overflow-hidden relative">
+                        <!-- Placeholder when no chat selected -->
+                        <div id="chatPlaceholder"
+                            class="absolute inset-0 flex flex-col items-center justify-center p-12 text-center">
+                            <div class="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mb-4">
+                                <i class="fas fa-comments text-3xl text-orange-600"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-800 mb-2">Customer Center</h3>
+                            <p class="text-gray-500 max-w-xs">Select a customer to start consulting or view follower
+                                info.</p>
+                        </div>
+
+                        <!-- Actual Chat Interface -->
+                        <div id="chatInterface" class="hidden h-full flex flex-col">
+                            <!-- Chat Header -->
+                            <div
+                                class="p-4 border-b border-gray-100 flex justify-between items-center bg-white shrink-0">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold border border-orange-200">
+                                        <span id="activeUserInitial">U</span>
+                                    </div>
+                                    <div>
+                                        <div id="activeUserName" class="font-bold text-gray-800">User Name</div>
+                                        <div id="activeUserStatus"
+                                            class="text-[10px] text-green-500 flex items-center gap-1">
+                                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span> Online
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button onclick="deleteShopConversation(activeConversationId)"
+                                        class="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                                        title="Delete conversation">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                    <button onclick="closeChat()"
+                                        class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                                        <i class="fas fa-times text-xl"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Messages Area -->
+                            <div id="chatMessages" class="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50/50">
+                                <!-- Messages will be loaded here -->
+                            </div>
+
+                            <!-- Input Area -->
+                            <div class="p-4 bg-white border-t border-gray-100 shrink-0">
+                                <form onsubmit="sendShopMessage(event)" class="flex gap-2 items-center">
+                                    <input type="file" id="chatImageInput" class="hidden" accept="image/*"
+                                        onchange="handleChatImageUpload(this)">
+                                    <button type="button" onclick="document.getElementById('chatImageInput').click()"
+                                        class="text-gray-400 hover:text-orange-500 p-2 transition-colors">
+                                        <i class="fas fa-image text-xl"></i>
+                                    </button>
+                                    <input type="text" id="shopMessageInput" placeholder="Nhập tin nhắn..."
+                                        class="flex-1 bg-gray-100 border-0 rounded-full px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:bg-white transition">
+                                    <button type="submit"
+                                        class="bg-orange-600 text-white w-10 h-10 rounded-full hover:bg-orange-700 transition flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Followers -->
+                <div id="cust-tab-followers"
+                    class="hidden flex-1 min-h-0 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+                    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">Follower List</h3>
+                            <p class="text-sm text-gray-500">Total: <span id="followerTotalCount"
+                                    class="font-bold text-orange-600">0</span> people</p>
+                        </div>
+                        <button onclick="loadFollowers()"
+                            class="p-2 bg-white border border-gray-200 rounded-lg text-gray-600 hover:text-orange-600 hover:border-orange-600 transition shadow-sm">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="flex-1 overflow-y-auto">
+                        <table class="w-full text-left">
+                            <thead class="sticky top-0 bg-gray-50/95 backdrop-blur-sm border-b border-gray-100 z-10">
+                                <tr>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Customer</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Email
+                                    </th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Followed Date</th>
+                                    <th
+                                        class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">
+                                        Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="followersTableBody" class="divide-y divide-gray-50">
+                                <!-- Followers rows here -->
+                            </tbody>
+                        </table>
+                        <div id="followersLoading" class="hidden p-20 text-center text-gray-400">
+                            <i class="fas fa-circle-notch fa-spin text-3xl mb-4"></i>
+                            <p>Loading list...</p>
+                        </div>
+                        <div id="followersEmpty" class="hidden p-20 text-center text-gray-400">
+                            <i class="fas fa-users text-5xl mb-4 opacity-20"></i>
+                            <p>No one is following your shop yet</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -664,43 +857,51 @@
             <!-- VIEW: TRẢ HÀNG / KHIẾU NẠI -->
             <div id="view-returns" class="hidden space-y-6">
                 <div class="flex justify-between items-center">
-                    <h2 class="text-2xl font-bold text-gray-800">Trả hàng / Khiếu nại</h2>
-                    <button onclick="loadReturns()" class="flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium text-sm">
-                        <i class="fas fa-sync-alt"></i> Làm mới
+                    <h2 class="text-2xl font-bold text-gray-800">Return / Refund</h2>
+                    <button onclick="loadReturns()"
+                        class="flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium text-sm">
+                        <i class="fas fa-sync-alt"></i> Refresh
                     </button>
                 </div>
                 <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                     <div class="flex border-b border-gray-100">
                         <button onclick="showReturnsTab('disputes')" id="returnsTab-disputes"
                             class="returns-tab px-6 py-3 text-sm font-medium border-b-2 border-orange-500 text-orange-600">
-                            Khiếu nại
+                            Disputes
                         </button>
                         <button onclick="showReturnsTab('refunds')" id="returnsTab-refunds"
                             class="returns-tab px-6 py-3 text-sm font-medium border-b-2 border-transparent text-gray-600 hover:text-gray-800">
-                            Hoàn tiền
+                            Refunds
                         </button>
                         <button onclick="showReturnsTab('returned')" id="returnsTab-returned"
                             class="returns-tab px-6 py-3 text-sm font-medium border-b-2 border-transparent text-gray-600 hover:text-gray-800">
-                            Hàng hoàn về
+                            Returned Items
                         </button>
                     </div>
                     <div id="returnsDisputesList" class="divide-y divide-gray-100">
-                        <div class="p-10 text-center text-gray-500"><i class="fas fa-spinner fa-spin text-2xl mb-2"></i><p>Đang tải...</p></div>
+                        <div class="p-10 text-center text-gray-500"><i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                            <p>Loading...</p>
+                        </div>
                     </div>
                     <div id="returnsRefundsList" class="hidden divide-y divide-gray-100">
-                        <div class="p-10 text-center text-gray-500"><i class="fas fa-spinner fa-spin text-2xl mb-2"></i><p>Đang tải...</p></div>
+                        <div class="p-10 text-center text-gray-500"><i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                            <p>Loading...</p>
+                        </div>
                     </div>
                     <div id="returnsReturnedList" class="hidden divide-y divide-gray-100">
-                        <div class="p-10 text-center text-gray-500"><i class="fas fa-spinner fa-spin text-2xl mb-2"></i><p>Đang tải...</p></div>
+                        <div class="p-10 text-center text-gray-500"><i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                            <p>Loading...</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Dispute Detail Modal (Seller view - read only) -->
-            <div id="returnsDisputeDetailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div id="returnsDisputeDetailModal"
+                class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                 <div class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                     <div class="sticky top-0 bg-white border-b border-gray-100 p-6 flex justify-between items-center">
-                        <h3 class="text-xl font-bold text-gray-800">Chi tiết khiếu nại</h3>
+                        <h3 class="text-xl font-bold text-gray-800">Dispute Details</h3>
                         <button onclick="closeReturnsDisputeModal()" class="text-gray-400 hover:text-gray-600">
                             <i class="fas fa-times text-xl"></i>
                         </button>
@@ -838,6 +1039,7 @@
         const token = localStorage.getItem('accessToken');
         const baseUrl = 'http://localhost:8080/api';
         let currentShop = null;
+        let currentShopId = null;
         let mainImageUrl = null; // Store main image URL
         let secondaryImageUrls = []; // Store secondary image URLs
         let currentView = 'dashboard';
@@ -871,8 +1073,9 @@
                 'add-product': 'Add New Product',
                 'flash-sale': 'Flash Sale Management',
                 'orders': 'Orders',
-                'returns': 'Trả hàng / Khiếu nại',
-                'shop-profile': 'Shop Profile'
+                'returns': 'Return / Refund',
+                'shop-profile': 'Shop Profile',
+                'customers': 'Customer Center'
             };
             document.getElementById('pageTitle').textContent = titles[viewName] || 'Dashboard';
 
@@ -897,6 +1100,8 @@
                 loadReturns();
             } else if (viewName === 'flash-sale') {
                 loadFlashSaleDashboard();
+            } else if (viewName === 'customers') {
+                switchCustomerTab('chat');
             }
         }
 
@@ -1527,6 +1732,7 @@
                 await loadShopInfo();
             }
             if (currentShop) {
+                currentShopId = currentShop.id || currentShop._id;
                 document.getElementById('profileShopName').value = currentShop.name || '';
                 document.getElementById('profileShopEmail').value = currentShop.email || '';
                 document.getElementById('profileShopPhone').value = currentShop.phone || '';
@@ -1665,6 +1871,7 @@
 
                 if (response.ok) {
                     currentShop = await response.json();
+                    currentShopId = currentShop.id || currentShop._id;
                     if (currentShop.status !== 'ACTIVE') {
                         if (currentShop.status === 'PENDING') {
                             showPendingApprovalMessage();
@@ -1878,7 +2085,7 @@
                         const returnsData = await returnsRes.json();
                         const refunds = returnsData.refunds || [];
                         refundedIds = new Set(refunds.filter(r => ['APPROVED', 'REFUNDED'].includes((r.status || '').toUpperCase())).map(r => r.orderId));
-                    } catch (e) {}
+                    } catch (e) { }
                 }
 
                 const isCompletedAndNotReturned = o => (o.orderStatus === 'COMPLETED' || o.orderStatus === 'SHIPPED') && !refundedIds.has(o.id);
@@ -1899,7 +2106,7 @@
                     else pendingBadge.classList.add('hidden');
                 }
 
-                document.getElementById('totalRevenue').textContent = '₫' + revenue.toLocaleString('vi-VN');
+                document.getElementById('totalRevenue').textContent = '₫' + revenue.toLocaleString('en-US');
                 const completedEl = document.getElementById('completedOrders');
                 if (completedEl) completedEl.textContent = completedOrders;
 
@@ -1910,7 +2117,7 @@
                     const d = new Date(now);
                     d.setDate(d.getDate() - i);
                     const key = d.toISOString().split('T')[0];
-                    revenueByDay[key] = { date: key, label: d.toLocaleDateString('vi-VN', { day: '2-digit', month: 'short' }), total: 0 };
+                    revenueByDay[key] = { date: key, label: d.toLocaleDateString('en-US', { day: '2-digit', month: 'short' }), total: 0 };
                 }
                 allOrders.filter(isCompletedAndNotReturned).forEach(o => {
                     const key = o.createdAt ? new Date(o.createdAt).toISOString().split('T')[0] : null;
@@ -1928,7 +2135,7 @@
                         statusCounts[o.orderStatus] = (statusCounts[o.orderStatus] || 0) + 1;
                     }
                 });
-                const statusLabels = { PENDING: 'Chờ xử lý', CONFIRMED: 'Đã xác nhận', PAID: 'Đã thanh toán', SHIPPING: 'Đang giao', SHIPPED: 'Đã giao', COMPLETED: 'Hoàn thành', RETURN: 'Hàng trả về', CANCELLED: 'Đã hủy' };
+                const statusLabels = { PENDING: 'Pending', CONFIRMED: 'Confirmed', PAID: 'Paid', SHIPPING: 'Shipping', SHIPPED: 'Shipped', COMPLETED: 'Completed', RETURN: 'Returned', CANCELLED: 'Cancelled' };
                 const orderChartData = Object.entries(statusCounts)
                     .filter(([_, v]) => v > 0)
                     .map(([k, v]) => ({ label: statusLabels[k] || k, value: v }));
@@ -1955,7 +2162,7 @@
                 data: {
                     labels: revenueData.map(d => d.label),
                     datasets: [{
-                        label: 'Doanh thu (₫)',
+                        label: 'Revenue (₫)',
                         data: revenueData.map(d => d.total),
                         backgroundColor: 'rgba(173, 48, 41, 0.7)',
                         borderColor: '#AD3029',
@@ -1969,14 +2176,14 @@
                         legend: { display: false },
                         tooltip: {
                             callbacks: {
-                                label: (ctx) => '₫' + ctx.raw.toLocaleString('vi-VN')
+                                label: (ctx) => '₫' + ctx.raw.toLocaleString('en-US')
                             }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: { callback: v => '₫' + (v >= 1000000 ? (v/1000000)+'M' : v.toLocaleString()) }
+                            ticks: { callback: v => '₫' + (v >= 1000000 ? (v / 1000000) + 'M' : v.toLocaleString()) }
                         },
                         x: { grid: { display: false } }
                     }
@@ -1991,7 +2198,7 @@
             if (orderChartData.length === 0) {
                 orderStatusChartInstance = new Chart(ctx, {
                     type: 'doughnut',
-                    data: { labels: ['Chưa có đơn'], datasets: [{ data: [1], backgroundColor: ['#E5E7EB'] }] },
+                    data: { labels: ['No Orders'], datasets: [{ data: [1], backgroundColor: ['#E5E7EB'] }] },
                     options: { responsive: true, maintainAspectRatio: false }
                 });
                 return;
@@ -2295,7 +2502,7 @@
                         const returnsData = await returnsRes.json();
                         const refunds = returnsData.refunds || [];
                         refundedOrderIds = new Set(refunds.filter(r => ['APPROVED', 'REFUNDED'].includes((r.status || '').toUpperCase())).map(r => r.orderId));
-                    } catch (e) {}
+                    } catch (e) { }
                 }
 
                 if (ordersRes.ok) {
@@ -2354,13 +2561,13 @@
                 let statusBadge = order.orderStatus;
                 let statusColor = statusColors[order.orderStatus] || 'bg-gray-100 text-gray-800';
                 if (isShippingReturned) {
-                    statusBadge = 'Đã hủy - Vận chuyển thất bại';
+                    statusBadge = 'Cancelled - Delivery Failed';
                 } else if (isRefunded && (order.orderStatus || '').toUpperCase() === 'COMPLETED') {
                     statusBadge = 'RETURN';
                     statusColor = 'bg-blue-100 text-blue-800';
                 }
                 const itemCount = order.items ? order.items.length : 0;
-                const createdDate = order.createdAt ? new Date(order.createdAt).toLocaleDateString('vi-VN') : 'N/A';
+                const createdDate = order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-US') : 'N/A';
 
                 return `
                     <div class="p-6 hover:bg-gray-50 transition">
@@ -2398,7 +2605,7 @@
                             ${['PENDING', 'CONFIRMED', 'PAID'].includes((order.orderStatus || '').toUpperCase()) ? `
                                 <button onclick="event.stopPropagation(); cancelOrderFromSeller('${order.id}')" 
                                     class="px-4 py-2 border border-red-600 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium transition">
-                                    <i class="fas fa-times mr-1"></i>Hủy đơn
+                                    <i class="fas fa-times mr-1"></i>Cancel Order
                                 </button>
                             ` : ''}
                         </div>
@@ -2421,7 +2628,7 @@
                 if (refundRes && refundRes.ok) {
                     try {
                         refund = await refundRes.json();
-                    } catch (e) {}
+                    } catch (e) { }
                 }
 
                 renderOrderDetail(order, refund);
@@ -2492,11 +2699,11 @@
                         <h4 class="font-bold text-gray-800 mb-3">Order Information</h4>
                         <div class="bg-gray-50 p-4 rounded-lg space-y-2">
                             <p><span class="text-gray-600">Order ID:</span> <span class="font-mono text-sm">${order.id}</span></p>
-                            <p><span class="text-gray-600">Status:</span> <span class="font-bold">${((order.orderStatus || '').toUpperCase() === 'CANCELLED' && (order.shipping?.status || '').toUpperCase() === 'RETURNED') ? 'Đã hủy - Vận chuyển thất bại' : order.orderStatus}</span></p>
-                            ${hasRefunded ? `<p><span class="text-gray-600">Trả hàng:</span> <span class="font-bold text-blue-600"><i class="fas fa-undo-alt mr-1"></i>Hàng đã trả / Đã hoàn tiền</span> ${refund.amount ? `(₫${Number(refund.amount).toLocaleString()})` : ''}</p>` : ''}
-                            ${((order.orderStatus || '').toUpperCase() === 'CANCELLED' && order.cancelReason) ? `<p><span class="text-gray-600">Lý do:</span> <span class="text-red-600">${order.cancelReason}</span></p>` : ''}
-                            <p><span class="text-gray-600">Payment:</span> <span class="font-bold ${isPaid ? 'text-green-600' : 'text-amber-600'}">${isPaid ? (order.paymentMethod === 'COD' ? 'Đã thanh toán (COD - đã thu tiền khi giao)' : 'Đã thanh toán') : 'Chưa thanh toán'}${order.paymentMethod && !(isPaid && order.paymentMethod === 'COD') ? ` <span class="text-sm text-gray-600">(${order.paymentMethod})</span>` : ''}</p>
-                            <p><span class="text-gray-600">Date:</span> ${order.createdAt ? new Date(order.createdAt).toLocaleString('vi-VN') : 'N/A'}</p>
+                            <p><span class="text-gray-600">Status:</span> <span class="font-bold">${((order.orderStatus || '').toUpperCase() === 'CANCELLED' && (order.shipping?.status || '').toUpperCase() === 'RETURNED') ? 'Cancelled - Delivery Failed' : order.orderStatus}</span></p>
+                            ${hasRefunded ? `<p><span class="text-gray-600">Return:</span> <span class="font-bold text-blue-600"><i class="fas fa-undo-alt mr-1"></i>Item returned / Refunded</span> ${refund.amount ? `(₫${Number(refund.amount).toLocaleString()})` : ''}</p>` : ''}
+                            ${((order.orderStatus || '').toUpperCase() === 'CANCELLED' && order.cancelReason) ? `<p><span class="text-gray-600">Reason:</span> <span class="text-red-600">${order.cancelReason}</span></p>` : ''}
+                            <p><span class="text-gray-600">Payment:</span> <span class="font-bold ${isPaid ? 'text-green-600' : 'text-amber-600'}">${isPaid ? (order.paymentMethod === 'COD' ? 'Paid (COD - collected upon delivery)' : 'Paid') : 'Unpaid'}${order.paymentMethod && !(isPaid && order.paymentMethod === 'COD') ? ` <span class="text-sm text-gray-600">(${order.paymentMethod})</span>` : ''}</p>
+                            <p><span class="text-gray-600">Date:</span> ${order.createdAt ? new Date(order.createdAt).toLocaleString('en-US') : 'N/A'}</p>
                         </div>
                     </div>
 
@@ -2520,17 +2727,17 @@
 
                     ${['CONFIRMED', 'SHIPPING', 'SHIPPED'].includes((order.orderStatus || '').toUpperCase()) ? `
                         <div class="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
-                            <h4 class="font-bold text-gray-800 mb-2"><i class="fas fa-truck mr-2 text-blue-600"></i>Mã vận đơn (cho Webhook GHTK/GHN/VNPost)</h4>
-                            <p class="text-sm text-gray-600 mb-3">Nhập mã vận đơn từ bên giao hàng để hệ thống tự động cập nhật khi giao thành công.</p>
+                            <h4 class="font-bold text-gray-800 mb-2"><i class="fas fa-truck mr-2 text-blue-600"></i>Tracking Code (for Webhook GHTK/GHN/VNPost)</h4>
+                            <p class="text-sm text-gray-600 mb-3">Enter tracking code from carrier to auto-update status upon successful delivery.</p>
                             <div class="flex gap-3 flex-wrap items-end">
                                 <div class="flex-1 min-w-[180px]">
-                                    <label class="block text-xs font-medium text-gray-600 mb-1">Mã vận đơn</label>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Tracking Code</label>
                                     <input type="text" id="trackingCodeInput" value="${(order.shipping && order.shipping.trackingCode) || ''}" 
                                         placeholder="VD: GHN123456789" 
                                         class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                                 </div>
                                 <div class="w-32">
-                                    <label class="block text-xs font-medium text-gray-600 mb-1">Đơn vị VC</label>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Carrier</label>
                                     <select id="providerIdInput" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                                         <option value="ghn" ${(order.shipping && order.shipping.providerId === 'ghn') ? 'selected' : ''}>GHN</option>
                                         <option value="ghtk" ${(order.shipping && order.shipping.providerId === 'ghtk') ? 'selected' : ''}>GHTK</option>
@@ -2539,7 +2746,7 @@
                                 </div>
                                 <button onclick="updateTrackingCode('${order.id}')" 
                                     class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-bold transition">
-                                    <i class="fas fa-save mr-1"></i>Cập nhật
+                                    <i class="fas fa-save mr-1"></i>Update
                                 </button>
                             </div>
                         </div>
@@ -2554,7 +2761,7 @@
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Payment Status:</span>
-                                <span class="font-bold ${isPaid ? 'text-green-600' : 'text-amber-600'}">${isPaid ? (order.paymentMethod === 'COD' ? 'Đã thanh toán (COD - đã thu tiền khi giao)' : 'Đã thanh toán') : 'Chưa thanh toán'}${order.paymentMethod && !(isPaid && order.paymentMethod === 'COD') ? ` (${order.paymentMethod})` : ''}</span>
+                                <span class="font-bold ${isPaid ? 'text-green-600' : 'text-amber-600'}">${isPaid ? (order.paymentMethod === 'COD' ? 'Paid (COD - collected upon delivery)' : 'Paid') : 'Unpaid'}${order.paymentMethod && !(isPaid && order.paymentMethod === 'COD') ? ` (${order.paymentMethod})` : ''}</span>
                             </div>
                             ${order.paymentMethod ? `<div class="flex justify-between"><span class="text-gray-600">Payment Method:</span><span>${order.paymentMethod}</span></div>` : ''}
                             <div class="flex justify-between pt-2 border-t border-gray-200">
@@ -2567,7 +2774,7 @@
                         <div class="pt-4 border-t border-gray-200">
                             <button onclick="cancelOrderFromSeller('${order.id}')" 
                                 class="px-4 py-2 border border-red-600 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium transition">
-                                <i class="fas fa-times mr-1"></i>Hủy đơn
+                                <i class="fas fa-times mr-1"></i>Cancel Order
                             </button>
                         </div>
                     ` : ''}
@@ -2576,24 +2783,24 @@
         }
 
         async function cancelOrderFromSeller(orderId) {
-            if (!confirm('Bạn có chắc muốn hủy đơn hàng này?')) return;
+            if (!confirm('Are you sure you want to cancel this order?')) return;
             try {
                 const response = await fetch(`${baseUrl}/orders/${orderId}/cancel`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (response.ok) {
-                    showToast('Đã hủy đơn hàng.', 'success');
+                    showToast('Order cancelled.', 'success');
                     closeOrderModal();
                     loadOrders(currentOrderStatus);
                     loadDashboardStats();
                 } else {
                     const err = await response.json().catch(() => ({}));
-                    showToast(err.message || 'Không thể hủy đơn.', 'error');
+                    showToast(err.message || 'Cannot cancel order.', 'error');
                 }
             } catch (err) {
                 console.error(err);
-                showToast('Lỗi kết nối', 'error');
+                showToast('Connection error', 'error');
             }
         }
 
@@ -2612,7 +2819,7 @@
             const disputesList = document.getElementById('returnsDisputesList');
             const refundsList = document.getElementById('returnsRefundsList');
             const returnedList = document.getElementById('returnsReturnedList');
-            const loadingHtml = '<div class="p-10 text-center text-gray-500"><i class="fas fa-spinner fa-spin text-2xl mb-2"></i><p>Đang tải...</p></div>';
+            const loadingHtml = '<div class="p-10 text-center text-gray-500"><i class="fas fa-spinner fa-spin text-2xl mb-2"></i><p>Loading...</p></div>';
             disputesList.innerHTML = loadingHtml;
             refundsList.innerHTML = loadingHtml;
             if (returnedList) returnedList.innerHTML = loadingHtml;
@@ -2629,9 +2836,9 @@
                 renderReturnsReturned(returnsData.refunds);
             } catch (err) {
                 console.error(err);
-                disputesList.innerHTML = '<div class="p-10 text-center text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>Lỗi tải dữ liệu</div>';
-                refundsList.innerHTML = '<div class="p-10 text-center text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>Lỗi tải dữ liệu</div>';
-                if (returnedList) returnedList.innerHTML = '<div class="p-10 text-center text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>Lỗi tải dữ liệu</div>';
+                disputesList.innerHTML = '<div class="p-10 text-center text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>Error loading data</div>';
+                refundsList.innerHTML = '<div class="p-10 text-center text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>Error loading data</div>';
+                if (returnedList) returnedList.innerHTML = '<div class="p-10 text-center text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>Error loading data</div>';
             }
         }
 
@@ -2673,20 +2880,20 @@
         function renderReturnsDisputes(disputes) {
             const el = document.getElementById('returnsDisputesList');
             if (!disputes || disputes.length === 0) {
-                el.innerHTML = '<div class="p-10 text-center text-gray-500">Chưa có khiếu nại nào</div>';
+                el.innerHTML = '<div class="p-10 text-center text-gray-500">No disputes yet</div>';
                 return;
             }
             el.innerHTML = disputes.map(d => `
                 <div class="flex items-center justify-between p-4 hover:bg-gray-50 transition">
                     <div class="flex-1 min-w-0">
-                        <p class="font-medium text-gray-800">Đơn #${(d.orderId || '').substring(0, 8)}</p>
+                        <p class="font-medium text-gray-800">Order #${(d.orderId || '').substring(0, 8)}</p>
                         <p class="text-sm text-gray-500">Buyer: ${d.buyerId || '-'}</p>
                         <p class="text-sm text-gray-600 mt-1">${d.reason || '-'}</p>
-                        <p class="text-xs text-gray-400 mt-1">${d.createdAt ? new Date(d.createdAt).toLocaleString('vi-VN') : ''}</p>
+                        <p class="text-xs text-gray-400 mt-1">${d.createdAt ? new Date(d.createdAt).toLocaleString('en-US') : ''}</p>
                     </div>
                     <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase shrink-0 ml-2 ${getReturnsDisputeStatusClass(d.status)}">${d.status}</span>
                     <button onclick="showReturnsDisputeDetail('${d.id}')" class="ml-3 px-3 py-1.5 text-orange-600 hover:bg-orange-50 rounded-lg text-sm font-medium transition">
-                        <i class="fas fa-eye mr-1"></i>Xem chi tiết
+                        <i class="fas fa-eye mr-1"></i>View Details
                     </button>
                 </div>
             `).join('');
@@ -2695,16 +2902,16 @@
         function renderReturnsRefunds(refunds) {
             const el = document.getElementById('returnsRefundsList');
             if (!refunds || refunds.length === 0) {
-                el.innerHTML = '<div class="p-10 text-center text-gray-500">Chưa có hoàn tiền nào</div>';
+                el.innerHTML = '<div class="p-10 text-center text-gray-500">No refunds yet</div>';
                 return;
             }
             el.innerHTML = refunds.map(r => `
                 <div class="flex items-center justify-between p-4 hover:bg-gray-50 transition">
                     <div class="flex-1 min-w-0">
-                        <p class="font-medium text-gray-800">Đơn #${(r.orderId || '').substring(0, 8)}</p>
+                        <p class="font-medium text-gray-800">Order #${(r.orderId || '').substring(0, 8)}</p>
                         <p class="text-sm text-gray-500">Buyer: ${r.buyerId || '-'}</p>
                         <p class="text-sm text-gray-600 mt-1">₫${Number(r.amount || 0).toLocaleString()} - ${r.reason || '-'}</p>
-                        <p class="text-xs text-gray-400 mt-1">${r.createdAt ? new Date(r.createdAt).toLocaleString('vi-VN') : ''}</p>
+                        <p class="text-xs text-gray-400 mt-1">${r.createdAt ? new Date(r.createdAt).toLocaleString('en-US') : ''}</p>
                     </div>
                     <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase shrink-0 ml-2 ${getReturnsRefundStatusClass(r.status)}">${r.status}</span>
                 </div>
@@ -2715,16 +2922,16 @@
             const el = document.getElementById('returnsReturnedList');
             const returned = (refunds || []).filter(r => ['APPROVED', 'REFUNDED'].includes((r.status || '').toUpperCase()));
             if (returned.length === 0) {
-                el.innerHTML = '<div class="p-10 text-center text-gray-500">Chưa có hàng hoàn về</div>';
+                el.innerHTML = '<div class="p-10 text-center text-gray-500">No returned items yet</div>';
                 return;
             }
             el.innerHTML = returned.map(r => `
                 <div class="flex items-center justify-between p-4 hover:bg-gray-50 transition">
                     <div class="flex-1 min-w-0">
-                        <p class="font-medium text-gray-800">Đơn #${(r.orderId || '').substring(0, 8)}</p>
+                        <p class="font-medium text-gray-800">Order #${(r.orderId || '').substring(0, 8)}</p>
                         <p class="text-sm text-gray-500">Buyer: ${r.buyerId || '-'}</p>
                         <p class="text-sm text-gray-600 mt-1">₫${Number(r.amount || 0).toLocaleString()} - ${r.reason || '-'}</p>
-                        <p class="text-xs text-gray-400 mt-1"><i class="fas fa-undo-alt mr-1 text-green-600"></i>Đã hoàn về ${r.processedAt ? new Date(r.processedAt).toLocaleString('vi-VN') : r.createdAt ? new Date(r.createdAt).toLocaleString('vi-VN') : ''}</p>
+                        <p class="text-xs text-gray-400 mt-1"><i class="fas fa-undo-alt mr-1 text-green-600"></i>Returned on ${r.processedAt ? new Date(r.processedAt).toLocaleString('en-US') : r.createdAt ? new Date(r.createdAt).toLocaleString('en-US') : ''}</p>
                     </div>
                     <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase shrink-0 ml-2 ${getReturnsRefundStatusClass(r.status)}">${r.status}</span>
                 </div>
@@ -2733,7 +2940,7 @@
 
         async function showReturnsDisputeDetail(disputeId) {
             const container = document.getElementById('returnsDisputeDetailContent');
-            container.innerHTML = '<div class="text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin text-2xl"></i> Đang tải...</div>';
+            container.innerHTML = '<div class="text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin text-2xl"></i> Loading...</div>';
             document.getElementById('returnsDisputeDetailModal').classList.remove('hidden');
 
             try {
@@ -2764,13 +2971,13 @@
                         </div>
                         <p class="font-bold text-orange-600">₫${Number((item.price || 0) * (item.quantity || 1)).toLocaleString()}</p>
                     </div>
-                `).join('') || '<p class="p-4 text-gray-500">Không có sản phẩm</p>';
+                `).join('') || '<p class="p-4 text-gray-500">No products</p>';
 
                 const imagesHtml = images.length > 0 ? images.map(img => `
                     <a href="${img.imageUrl}" target="_blank" class="block w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-200 hover:border-orange-500 transition">
                         <img src="${img.imageUrl}" alt="Minh chứng" class="w-full h-full object-cover">
                     </a>
-                `).join('') : '<p class="text-gray-500 text-sm">Không có ảnh minh chứng</p>';
+                `).join('') : '<p class="text-gray-500 text-sm">No evidence images</p>';
 
                 const formatAddr = (addr) => {
                     if (!addr) return 'N/A';
@@ -2781,42 +2988,42 @@
                 container.innerHTML = `
                     <div class="space-y-6">
                         <div>
-                            <h4 class="font-bold text-gray-800 mb-3">Thông tin khiếu nại</h4>
+                            <h4 class="font-bold text-gray-800 mb-3">Dispute Information</h4>
                             <div class="bg-gray-50 p-4 rounded-lg space-y-2">
                                 <p><span class="text-gray-600">Order ID:</span> <span class="font-mono text-sm">${dispute.orderId || '-'}</span></p>
                                 <p><span class="text-gray-600">Buyer:</span> ${dispute.buyerId || '-'}</p>
-                                <p><span class="text-gray-600">Lý do:</span> <span class="font-semibold text-orange-600">${dispute.reason || '-'}</span></p>
-                                <p><span class="text-gray-600">Mô tả:</span> ${dispute.description || '-'}</p>
-                                <p><span class="text-gray-600">Trạng thái:</span> <span class="px-2 py-1 rounded-full text-xs font-bold ${getReturnsDisputeStatusClass(dispute.status)}">${dispute.status}</span></p>
-                                ${dispute.adminNote ? `<p><span class="text-gray-600">Ghi chú Admin:</span> ${dispute.adminNote}</p>` : ''}
-                                <p><span class="text-gray-600">Ngày tạo:</span> ${dispute.createdAt ? new Date(dispute.createdAt).toLocaleString('vi-VN') : '-'}</p>
+                                <p><span class="text-gray-600">Reason:</span> <span class="font-semibold text-orange-600">${dispute.reason || '-'}</span></p>
+                                <p><span class="text-gray-600">Description:</span> ${dispute.description || '-'}</p>
+                                <p><span class="text-gray-600">Status:</span> <span class="px-2 py-1 rounded-full text-xs font-bold ${getReturnsDisputeStatusClass(dispute.status)}">${dispute.status}</span></p>
+                                ${dispute.adminNote ? `<p><span class="text-gray-600">Admin Note:</span> ${dispute.adminNote}</p>` : ''}
+                                <p><span class="text-gray-600">Created At:</span> ${dispute.createdAt ? new Date(dispute.createdAt).toLocaleString('en-US') : '-'}</p>
                             </div>
                         </div>
                         <div>
-                            <h4 class="font-bold text-gray-800 mb-3">Ảnh minh chứng (buyer gửi)</h4>
+                            <h4 class="font-bold text-gray-800 mb-3">Evidence Images (from buyer)</h4>
                             <div class="flex flex-wrap gap-3">${imagesHtml}</div>
                         </div>
                         ${order ? `
                         <div>
-                            <h4 class="font-bold text-gray-800 mb-3">Thông tin đơn hàng</h4>
+                            <h4 class="font-bold text-gray-800 mb-3">Order Information</h4>
                             <div class="bg-gray-50 p-4 rounded-lg space-y-2 mb-4">
-                                <p><span class="text-gray-600">Trạng thái đơn:</span> ${order.orderStatus || '-'}</p>
-                                <p><span class="text-gray-600">Tổng tiền:</span> <span class="font-bold text-orange-600">₫${Number(order.totalPrice || 0).toLocaleString()}</span></p>
+                                <p><span class="text-gray-600">Order Status:</span> ${order.orderStatus || '-'}</p>
+                                <p><span class="text-gray-600">Total:</span> <span class="font-bold text-orange-600">₫${Number(order.totalPrice || 0).toLocaleString()}</span></p>
                             </div>
                             <div class="border border-gray-200 rounded-lg overflow-hidden">${itemsHtml}</div>
                         </div>
                         ${order.shipping ? `
                         <div>
-                            <h4 class="font-bold text-gray-800 mb-3">Địa chỉ giao hàng</h4>
+                            <h4 class="font-bold text-gray-800 mb-3">Shipping Address</h4>
                             <div class="bg-gray-50 p-4 rounded-lg">${formatAddr(order.shipping.address)}</div>
                         </div>
                         ` : ''}
-                        ` : '<p class="text-gray-500">Không tải được thông tin đơn hàng.</p>'}
+                        ` : '<p class="text-gray-500">Failed to load order info.</p>'}
                     </div>
                 `;
             } catch (err) {
                 console.error(err);
-                container.innerHTML = '<div class="text-center py-10 text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>Không tải được chi tiết.</div>';
+                container.innerHTML = '<div class="text-center py-10 text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>Failed to load details.</div>';
             }
         }
 
@@ -2853,7 +3060,7 @@
 
             const trackingCode = trackingInput.value.trim();
             if (!trackingCode) {
-                showToast('Vui lòng nhập mã vận đơn', 'error');
+                showToast('Please enter tracking code', 'error');
                 return;
             }
 
@@ -2865,17 +3072,17 @@
                 });
 
                 if (response.ok) {
-                    showToast('Đã cập nhật mã vận đơn. Webhook sẽ tự cập nhật khi giao thành công.', 'success');
+                    showToast('Tracking code updated. Webhook will auto-update upon delivery.', 'success');
                     showOrderDetail(orderId); // Refresh modal
                     loadOrders(currentOrderStatus);
                     loadDashboardStats();
                 } else {
                     const err = await response.json().catch(() => ({}));
-                    showToast(err.message || 'Cập nhật thất bại', 'error');
+                    showToast(err.message || 'Update failed', 'error');
                 }
             } catch (err) {
                 console.error(err);
-                showToast('Lỗi kết nối', 'error');
+                showToast('Connection error', 'error');
             }
         }
 
@@ -3491,6 +3698,409 @@
             const sidebar = document.querySelector('aside');
             if (sidebar) sidebar.style.display = 'none';
         }
+
+        // ============================================
+        // CHAT FUNCTIONS
+        // ============================================
+        let activeConversationId = null;
+        let chatPollInterval = null;
+
+
+        async function loadShopConversations() {
+            // Wait for shop info if not loaded
+            if (!currentShopId) {
+                console.log('⏳ loadShopConversations: Waiting for shop info...');
+                try {
+                    await loadShopProfile();
+                } catch (e) {
+                    console.error('❌ Failed to load shop info for chat:', e);
+                    const listEl = document.getElementById('chatConversations');
+                    if (listEl) listEl.innerHTML = '<div class="p-10 text-center text-red-500">Failed to load shop info</div>';
+                    return;
+                }
+            }
+
+            if (!currentShopId) {
+                console.error('❌ loadShopConversations: currentShopId is still null after attempt');
+                const listEl = document.getElementById('chatConversations');
+                if (listEl) listEl.innerHTML = '<div class="p-10 text-center text-red-500">Could not load shop profile. Please refresh.</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${baseUrl}/chat/shop/${currentShopId}/conversations`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const conversations = await response.json();
+                    renderConversationList(conversations);
+                } else {
+                    const listEl = document.getElementById('chatConversations');
+                    if (listEl) listEl.innerHTML = '<div class="p-10 text-center text-red-500">Failed to load messages</div>';
+                }
+            } catch (error) {
+                console.error('Error loading conversations:', error);
+                const listEl = document.getElementById('chatConversations');
+                if (listEl) listEl.innerHTML = '<div class="p-10 text-center text-red-500">Connection error</div>';
+            }
+        }
+
+
+        function renderConversationList(conversations) {
+            const listEl = document.getElementById('chatConversations');
+            if (conversations.length === 0) {
+                listEl.innerHTML = '<div class="p-10 text-center text-gray-500">No messages yet</div>';
+                return;
+            }
+
+            listEl.innerHTML = conversations.map(c => `
+                <div onclick="openShopChat('${c.id}', '${c.userId}')" data-user-id="${c.userId}"
+                    class="p-4 hover:bg-orange-50 cursor-pointer transition border-l-4 group ${activeConversationId === c.id ? 'bg-orange-50 border-orange-500' : 'border-transparent'}">
+                    <div class="flex items-center gap-3">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-medium text-gray-800 truncate">Customer ${(c.userId || '').substring(0, 6)}</h4>
+                            <p class="text-xs text-gray-500 truncate">
+                                ${(c.lastMessageContent && (c.lastMessageContent.match(/\.(jpeg|jpg|gif|png|webp)$/i) || c.lastMessageContent.includes('/chat_images/')))
+                    ? '<i class="fas fa-image"></i> Sent an image'
+                    : (c.lastMessageContent || 'No messages')}
+                            </p>
+                        </div>
+                        <div class="flex flex-col items-end gap-1">
+                            <div class="text-[10px] text-gray-400 whitespace-nowrap">
+                                ${c.lastMessageTime ? new Date(c.lastMessageTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                            </div>
+                            <button onclick="event.stopPropagation(); deleteShopConversation('${c.id}')" 
+                                class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity p-1" title="Delete conversation">
+                                <i class="fas fa-trash-alt text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openShopChat(conversationId, userId) {
+            activeConversationId = conversationId;
+            document.getElementById('chatPlaceholder').classList.add('hidden');
+            document.getElementById('chatInterface').classList.remove('hidden');
+            document.getElementById('activeUserName').textContent = `Customer ${userId.substring(0, 8)}`;
+
+            // Re-render list to highlight active
+            loadShopConversations();
+
+            loadShopMessages(conversationId);
+
+            // Start Polling
+            if (chatPollInterval) clearInterval(chatPollInterval);
+            chatPollInterval = setInterval(() => loadShopMessages(conversationId, false), 3000);
+        }
+
+        async function loadShopMessages(conversationId, scroll = true) {
+            try {
+                const response = await fetch(`${baseUrl}/chat/${conversationId}/messages`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const messages = await response.json();
+                    renderShopMessages(messages, scroll);
+                }
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        }
+
+        let lastShopMessagesCount = 0;
+        function renderShopMessages(messages, scroll) {
+            const container = document.getElementById('chatMessages');
+
+            // Avoid flickering
+            if (messages.length === lastShopMessagesCount && !scroll) {
+                return;
+            }
+            lastShopMessagesCount = messages.length;
+
+            if (messages.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-400 mt-10 text-sm">No messages yet</div>';
+                return;
+            }
+
+            container.innerHTML = messages.map(msg => {
+                // Determine logic: 
+                // isShopMessage = true -> Right (Me, the Seller)
+                // isShopMessage = false -> Left (The Customer)
+                const isMe = msg.shopMessage === true;
+
+                return `
+                    <div class="flex w-full ${isMe ? 'justify-end' : 'justify-start'} group">
+                        <div class="max-w-[75%] p-3 rounded-xl text-sm relative ${isMe ? 'bg-orange-600 text-white rounded-br-sm shadow-md' : 'bg-white text-gray-800 border border-gray-200 rounded-bl-sm shadow-sm'}">
+                            ${isMe ? `<button onclick="deleteShopMessage('${msg.id || msg._id}')" class="absolute -left-10 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-red-500 opacity-40 group-hover:opacity-100 p-2 transition-all hover:scale-125 z-10" title="Delete message"><i class="fas fa-trash-alt text-[10px]"></i></button>` : ''}
+                            ${(msg.content && (msg.content.match(/\.(jpeg|jpg|gif|png|webp|bmp)$/i) || msg.content.includes('/chat_images/') || msg.content.includes('cloudinary')))
+                        ? `<img src="${msg.content}" class="max-w-full rounded-lg cursor-pointer max-h-60 h-auto w-auto object-contain hover:opacity-90 transition" onclick="window.open(this.src, '_blank')">`
+                        : msg.content}
+                            <div class="text-[10px] ${isMe ? 'text-orange-200' : 'text-gray-400'} text-right mt-1 font-medium">
+                                ${new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            if (scroll) container.scrollTop = container.scrollHeight;
+        }
+
+        async function handleChatImageUpload(input) {
+            const file = input.files[0];
+            if (!file || !activeConversationId) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('folder', 'chat_images');
+
+            try {
+                // Show a fake loading message or overlay?
+                showToast('Uploading image...', 'info');
+
+                const res = await fetch(`${baseUrl}/upload`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    // Send message with image URL
+                    await sendShopMessageRaw(data.url);
+                } else {
+                    showToast('Upload failed', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showToast('Error uploading image', 'error');
+            }
+            input.value = ''; // Reset
+        }
+
+        async function sendShopMessageRaw(content) {
+            if (!content || !activeConversationId) return;
+
+            try {
+                const response = await fetch(`${baseUrl}/chat/${activeConversationId}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ content: content })
+                });
+
+                if (response.ok) {
+                    loadShopMessages(activeConversationId, true);
+                    loadShopConversations();
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                showToast('Failed to send message', 'error');
+            }
+        }
+
+        async function sendShopMessage(e) {
+            if (e) e.preventDefault();
+            const input = document.getElementById('shopMessageInput');
+            const content = input.value.trim();
+
+            if (!content || !activeConversationId) return;
+            input.value = ''; // Clear early
+
+            await sendShopMessageRaw(content);
+        }
+
+        async function deleteShopConversation(conversationId) {
+            if (!confirm('Bạn có chắc muốn xóa hội thoại này không? Tất cả tin nhắn cũng sẽ bị xóa.')) return;
+
+            try {
+                const response = await fetch(`${baseUrl}/chat/conversations/${conversationId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    if (activeConversationId === conversationId) {
+                        activeConversationId = null;
+                        document.getElementById('chatInterface').classList.add('hidden');
+                        document.getElementById('chatPlaceholder').classList.remove('hidden');
+                    }
+                    loadShopConversations();
+                } else {
+                    const error = await response.text();
+                    showToast('Lỗi: ' + error, 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting conversation:', error);
+                showToast('Could not connect to server', 'error');
+            }
+        }
+
+        async function deleteShopMessage(messageId) {
+            if (!confirm('Are you sure you want to delete this message?')) return;
+
+            try {
+                const response = await fetch(`${baseUrl}/chat/messages/${messageId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    loadShopMessages(activeConversationId, false);
+                } else {
+                    const error = await response.text();
+                    showToast('Lỗi: ' + error, 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting message:', error);
+                showToast('Could not connect to server', 'error');
+            }
+        }
+
+        // ========================================
+        // CUSTOMER MANAGEMENT LOGIC (CHAT & FOLLOWERS)
+        // ========================================
+        function switchCustomerTab(tabName) {
+            // Update Tab UI
+            const chatTab = document.getElementById('tab-cust-chat');
+            const followersTab = document.getElementById('tab-cust-followers');
+            const chatContent = document.getElementById('cust-tab-chat');
+            const followersContent = document.getElementById('cust-tab-followers');
+
+            if (tabName === 'chat') {
+                chatTab.classList.add('border-orange-600', 'text-orange-600');
+                chatTab.classList.remove('border-transparent', 'text-gray-500');
+                followersTab.classList.add('border-transparent', 'text-gray-500');
+                followersTab.classList.remove('border-orange-600', 'text-orange-600');
+
+                chatContent.classList.remove('hidden');
+                followersContent.classList.add('hidden');
+                loadShopConversations();
+            } else if (tabName === 'followers') {
+                followersTab.classList.add('border-orange-600', 'text-orange-600');
+                followersTab.classList.remove('border-transparent', 'text-gray-500');
+                chatTab.classList.add('border-transparent', 'text-gray-500');
+                chatTab.classList.remove('border-orange-600', 'text-orange-600');
+
+                followersContent.classList.remove('hidden');
+                chatContent.classList.add('hidden');
+                loadFollowers();
+            }
+        }
+
+        async function loadFollowers() {
+            const tableBody = document.getElementById('followersTableBody');
+            const loading = document.getElementById('followersLoading');
+            const empty = document.getElementById('followersEmpty');
+            const totalCount = document.getElementById('followerTotalCount');
+
+            if (!currentShopId) {
+                // Try to get shop ID from profile if not loaded
+                await loadShopProfile();
+            }
+
+            tableBody.innerHTML = '';
+            loading.classList.remove('hidden');
+            empty.classList.add('hidden');
+
+            try {
+                const response = await fetch(`${baseUrl}/follow/shop/${currentShopId}/list`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                loading.classList.add('hidden');
+
+                if (response.ok) {
+                    const followers = await response.json();
+                    totalCount.textContent = followers.length;
+
+                    if (followers.length === 0) {
+                        empty.classList.remove('hidden');
+                        return;
+                    }
+
+                    tableBody.innerHTML = followers.map(f => `
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 border border-gray-200 overflow-hidden">
+                                        ${f.userAvatar ? `<img src="${f.userAvatar}" class="w-full h-full object-cover">` : `<i class="fas fa-user"></i>`}
+                                    </div>
+                                    <div class="text-sm font-bold text-gray-900">${f.userName || 'Shopee User'}</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                ${f.userEmail || 'N/A'}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                ${new Date(f.followedAt).toLocaleDateString()}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                                <button onclick="startChatWithFollower('${f.userId}', '${f.userName}')" class="text-orange-600 hover:text-orange-700 font-bold bg-orange-50 px-3 py-1.5 rounded-lg transition-colors">
+                                    <i class="fas fa-comment-dots mr-1"></i>Chat
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading followers:', error);
+                loading.classList.add('hidden');
+                showToast('Could not load follower list', 'error');
+            }
+        }
+
+        async function startChatWithFollower(userId, userName) {
+            // Switch to Chat tab
+            switchCustomerTab('chat');
+            showToast(`Opening chat with ${userName}...`, 'info');
+
+            // 1. Try to find in existing list (by data-user-id)
+            const convs = document.querySelectorAll('#chatConversations [data-user-id]');
+            let foundElement = null;
+            convs.forEach(c => {
+                if (c.getAttribute('data-user-id') === userId) {
+                    foundElement = c;
+                }
+            });
+
+            if (foundElement) {
+                foundElement.click();
+            } else {
+                // 2. If not found, start a new conversation via API
+                try {
+                    const response = await fetch(`${baseUrl}/chat/start/${currentShopId}?userId=${userId}`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        // Reload list and open the new chat
+                        await loadShopConversations();
+                        openShopChat(data.conversationId, userId);
+                    } else {
+                        showToast('Could not start conversation', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error starting chat:', error);
+                    showToast('Connection error', 'error');
+                }
+            }
+        }
+
+        function closeChat() {
+            document.getElementById('chatInterface').classList.add('hidden');
+            document.getElementById('chatPlaceholder').classList.remove('hidden');
+            activeConversationId = null;
+            if (chatPollInterval) clearInterval(chatPollInterval);
+        }
+
     </script>
 </body>
 

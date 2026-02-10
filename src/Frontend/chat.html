@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - Shopee Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .text-orange-500,
+        .text-orange-600 {
+            color: #AD3029 !important;
+        }
+
+        .bg-orange-500,
+        .bg-orange-600 {
+            background-color: #AD3029 !important;
+            color: white !important;
+        }
+
+        .border-orange-500 {
+            border-color: #AD3029 !important;
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            position: relative;
+            word-wrap: break-word;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .message-user {
+            background-color: #AD3029;
+            color: white;
+            border-bottom-right-radius: 4px;
+            margin-left: auto;
+        }
+
+        .message-shop {
+            background-color: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+            margin-right: auto;
+            border: 1px solid #e5e7eb;
+        }
+
+        .chat-date-separator {
+            text-align: center;
+            font-size: 11px;
+            color: #999;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .chat-date-separator::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: #eee;
+        }
+
+        .chat-date-separator::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: #eee;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm p-4 flex items-center justify-between sticky top-0 z-10">
+        <div class="flex items-center gap-3">
+            <a href="javascript:history.back()" class="text-gray-500 hover:text-orange-500">
+                <i class="fas fa-arrow-left text-xl"></i>
+            </a>
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden border border-gray-300">
+                    <img id="shopLogo" src="https://ui-avatars.com/api/?name=Shop&background=AD3029&color=fff"
+                        alt="Shop" class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <h1 id="shopName" class="font-bold text-gray-800 text-sm">Loading Shop...</h1>
+                    <p class="text-xs text-green-500 flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span> Online
+                    </p>
+                </div>
+            </div>
+        </div>
+        <button class="text-gray-500 hover:text-orange-500">
+            <i class="fas fa-ellipsis-v"></i>
+        </button>
+    </header>
+
+    <!-- Chat Area -->
+    <main id="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-4 bg-[#f5f5f5]">
+        <!-- Messages will be loaded here -->
+        <div id="loadingMsg" class="text-center text-gray-400 text-sm mt-10">
+            <i class="fas fa-spinner fa-spin"></i> Đang tải hội thoại...
+        </div>
+    </main>
+
+    <!-- Input Area -->
+    <footer class="bg-white p-3 border-t flex items-center gap-2 sticky bottom-0">
+        <input type="file" id="imageInput" class="hidden" accept="image/*" onchange="handleImageUpload(this)">
+        <button class="text-gray-400 hover:text-orange-500 p-2" onclick="document.getElementById('imageInput').click()">
+            <i class="fas fa-image text-xl"></i>
+        </button>
+        <div class="flex-1 relative">
+            <input type="text" id="messageInput" placeholder="Type a message..."
+                class="w-full bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500 border-none">
+
+        </div>
+        <button id="sendBtn" onclick="sendMessage()"
+            class="bg-orange-500 text-white p-2 rounded-full w-10 h-10 flex items-center justify-center hover:bg-orange-600 disabled:opacity-50">
+            <i class="fas fa-paper-plane text-sm"></i>
+        </button>
+    </footer>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8080/api';
+        let currentConversationId = null;
+        let shopId = null;
+        let currentUserId = null; // Need to know who I am to align messages (right/left)
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Get user info to identify own messages
+            // Actually, the API doesn't return my ID easily unless I decode token or call /me.
+            // But we know that 'senderId' in message will leverage user ID.
+            // Let's assume we can fetch user profile first.
+            await loadUserProfile(token);
+
+            console.log("Chat Page Loaded. Search Params:", window.location.search);
+            const params = new URLSearchParams(window.location.search);
+            currentConversationId = params.get('id');
+            shopId = params.get('shopId');
+
+            // Fallback from localStorage
+            if (!currentConversationId && !shopId) {
+                console.log("No URL params, checking localStorage fallback...");
+                currentConversationId = localStorage.getItem('pendingChatConversationId');
+                shopId = localStorage.getItem('pendingChatShopId');
+
+                // Clear after use to prevent stuck state
+                localStorage.removeItem('pendingChatConversationId');
+                localStorage.removeItem('pendingChatShopId');
+            }
+
+            if (currentConversationId) {
+                console.log("Found Conversation ID:", currentConversationId);
+                // Update URL if missing
+                if (!params.get('id')) {
+                    try { history.replaceState({}, '', `?id=${currentConversationId}`); } catch (e) { }
+                }
+
+                // If shopId is missing, try to fetch it from conversation
+                if (!shopId) {
+                    try {
+                        const convRes = await fetch(`${API_BASE_URL}/chat/conversation/${currentConversationId}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (convRes.ok) {
+                            const conv = await convRes.json();
+                            shopId = conv.shopId;
+                            loadShopDetails(shopId);
+                        }
+                    } catch (e) {
+                        console.error("Failed to fetch conversation details", e);
+                    }
+                } else {
+                    loadShopDetails(shopId);
+                }
+
+                loadMessages(currentConversationId);
+            } else if (shopId) {
+                console.log("Found Shop ID:", shopId);
+                // Update URL if missing
+                if (!params.get('shopId')) {
+                    try { history.replaceState({}, '', `?shopId=${shopId}`); } catch (e) { }
+                }
+                initChatWithShop(shopId);
+                loadShopDetails(shopId);
+            } else {
+                console.warn("No parameters found.");
+                // Alert with more info
+                if (!window.location.search) {
+                    alert('Chat Error: No conversation or shop specified.\nPlease go to a Shop page and click "Chat Now".');
+                } else {
+                    alert(`Chat Error: Invalid parameters (${window.location.search})`);
+                }
+                // Redirect back to index or history back
+                if (document.referrer) {
+                    window.location.href = document.referrer;
+                } else {
+                    window.location.href = 'index.html';
+                }
+            }
+
+            // Enter key to send
+            document.getElementById('messageInput').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            // Poll for new messages every 3 seconds
+            setInterval(() => {
+                if (currentConversationId) loadMessages(currentConversationId, false);
+            }, 3000);
+        });
+
+        async function loadUserProfile(token) {
+            try {
+                // This is a guess end-point. If not exists, we might need another way.
+                // Or we decode JWT if we have a library.
+                // Let's try to get profile.
+                const res = await fetch(`${API_BASE_URL}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const user = await res.json();
+                    currentUserId = user.id;
+                    console.log("Logged in as User ID:", currentUserId);
+                }
+            } catch (e) {
+                console.error("Could not load profile", e);
+            }
+        }
+
+        async function loadShopDetails(sid) {
+            try {
+                const res = await fetch(`${API_BASE_URL}/shop/${sid}`);
+                if (res.ok) {
+                    const shop = await res.json();
+                    document.getElementById('shopName').textContent = shop.name;
+                    if (shop.logoUrl) document.getElementById('shopLogo').src = shop.logoUrl;
+                    else {
+                        const initials = (shop.name || 'SH').substring(0, 2).toUpperCase();
+                        document.getElementById('shopLogo').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=AD3029&color=fff`;
+                    }
+                }
+            } catch (e) { }
+        }
+
+        async function initChatWithShop(sid) {
+            const token = localStorage.getItem('accessToken');
+            try {
+                const res = await fetch(`${API_BASE_URL}/chat/start/${sid}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    currentConversationId = data.conversationId;
+                    // Update URL without reload
+                    try { history.replaceState({}, '', `?id=${currentConversationId}`); } catch (e) { }
+                    loadMessages(currentConversationId);
+                } else {
+                    document.getElementById('loadingMsg').textContent = 'Failed to start conversation.';
+                }
+            } catch (e) {
+                console.error(e);
+                document.getElementById('loadingMsg').textContent = 'Error starting chat.';
+            }
+        }
+
+        async function loadMessages(convId, scroll = true) {
+            const token = localStorage.getItem('accessToken');
+            try {
+                const res = await fetch(`${API_BASE_URL}/chat/${convId}/messages`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const messages = await res.json();
+                    renderMessages(messages, scroll);
+                    document.getElementById('loadingMsg').style.display = 'none';
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        let lastMessagesCount = 0;
+        function renderMessages(messages, scroll) {
+            const container = document.getElementById('chatContainer');
+
+            // Avoid flickering: if count is same, don't re-render everything
+            if (messages.length === lastMessagesCount && !scroll) {
+                return;
+            }
+            lastMessagesCount = messages.length;
+
+            container.innerHTML = '';
+
+            if (messages.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-400 text-sm mt-10">No messages yet. Say hello!</div>';
+                return;
+            }
+
+            let lastDate = null;
+
+            messages.forEach(msg => {
+                // If I am the user, my messages (not from shop) are on the right.
+                // If I am the shop owner (rare in this page), shop messages are on the right.
+                // Let's use senderId comparison which is most robust.
+                // robust logic: If senderId matches Me, OR if shopMessage is false (meaning buyer sent it, and I am the buyer)
+                const isRight = (msg.senderId === currentUserId) || (msg.shopMessage === false) || (msg.isShopMessage === false);
+
+                const div = document.createElement('div');
+                div.className = `flex w-full ${isRight ? 'justify-end' : 'justify-start'} group`;
+
+                const bubble = document.createElement('div');
+                bubble.className = `message-bubble ${isRight ? 'message-user' : 'message-shop'} relative`;
+
+                // Add delete button for my own messages
+                if (isRight) {
+                    const deleteBtn = document.createElement('button');
+                    // Always show a very light icon, more visible on hover
+                    // More visible colors: gray-400 instead of 300
+                    deleteBtn.className = 'absolute -left-10 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-red-500 opacity-40 group-hover:opacity-100 p-2 transition-all hover:scale-125 z-10';
+                    deleteBtn.innerHTML = '<i class="fas fa-trash-alt text-[10px]"></i>';
+                    deleteBtn.title = 'Thu hồi tin nhắn';
+                    // Use id or _id
+                    const mid = msg.id || msg._id;
+                    deleteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        deleteMessage(mid);
+                    };
+                    bubble.appendChild(deleteBtn);
+                }
+
+                // Check if image
+                const isImage = (msg.content && (msg.content.match(/\.(jpeg|jpg|gif|png|webp|bmp)$/i) || msg.content.includes('/chat_images/') || msg.content.includes('cloudinary')));
+
+                if (isImage) {
+                    const img = document.createElement('img');
+                    img.src = msg.content;
+                    img.className = 'max-w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition shadow-sm';
+                    img.style.maxHeight = '240px';
+                    img.style.objectFit = 'contain';
+                    img.onclick = () => window.open(msg.content, '_blank');
+                    bubble.appendChild(img);
+                } else {
+                    const textNode = document.createElement('span');
+                    textNode.textContent = msg.content;
+                    bubble.appendChild(textNode);
+                }
+
+                // Time
+                const time = document.createElement('div');
+                time.className = `text-[10px] ${isRight ? 'text-orange-100' : 'text-gray-400'} text-right mt-1`;
+                const date = new Date(msg.createdAt);
+                time.textContent = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                bubble.appendChild(time);
+                div.appendChild(bubble);
+                container.appendChild(div);
+            });
+
+            if (scroll) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+
+        async function sendMessage(contentOverride) {
+            const input = document.getElementById('messageInput');
+            const content = contentOverride || input.value.trim();
+            if (!content || !currentConversationId) return;
+
+            const token = localStorage.getItem('accessToken');
+            input.value = ''; // Clear immediately
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/chat/${currentConversationId}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ content: content })
+                });
+
+                if (res.ok) {
+                    loadMessages(currentConversationId, true);
+                } else {
+                    alert('Failed to send message');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Error sending message');
+            }
+        }
+
+        async function handleImageUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('folder', 'chat_images');
+
+            try {
+                // Show uploading state?
+                // For now just alert if fails
+                const token = localStorage.getItem('accessToken');
+                const res = await fetch(`${API_BASE_URL}/upload`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    // Send message with image URL
+                    sendMessage(data.url);
+                } else {
+                    alert('Upload failed');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Error uploading image');
+            }
+            input.value = ''; // Reset
+        }
+        async function deleteMessage(messageId) {
+            if (!confirm('Bạn có chắc muốn thu hồi tin nhắn này không?')) return;
+
+            const token = localStorage.getItem('accessToken');
+            try {
+                const res = await fetch(`${API_BASE_URL}/chat/messages/${messageId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    // Update state and re-render
+                    loadMessages(currentConversationId, false);
+                } else {
+                    const error = await res.text();
+                    alert('Lỗi: ' + error);
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Lỗi kết nối khi xóa tin nhắn');
+            }
+        }
+    </script>
+</body>
+
+</html>
