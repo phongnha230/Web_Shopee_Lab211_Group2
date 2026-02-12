@@ -17310,3 +17310,82 @@ Mình đã hoàn thành tính năng xóa tin nhắn và hội thoại rồi nha!
 
 walkthrough.md
 Open
+$logEntry
+$logEntry
+$testFixEntry
+$logEntry
+$logEntry
+$logEntry
+
+2026-02-12 12:15:00 - User asked for a suggested text schedule for a 3-day Flash Sale test.
+Suggested Schedule:
+- Start Date: 13/02/2026 12:00 PM
+- End Date: 16/02/2026 12:00 PM
+- Registration Deadline: 13/02/2026 10:00 AM
+- Approval Deadline: 13/02/2026 11:00 AM
+
+2026-02-12 12:19:00 - User clarified they want a 3-day preparation window for shops.
+Revised Schedule (3 Days Prep):
+- Start Date: 16/02/2026 09:00 AM (Sale starts in 4 days)
+- End Date: 16/02/2026 12:00 PM (Sale lasts 3 hours)
+- Registration Deadline: 15/02/2026 09:00 PM (Shops have ~3.5 days to register)
+- Approval Deadline: 16/02/2026 08:00 AM (Admin approves before sale starts)
+
+2026-02-12 12:22:00 - User asked for Time Slot schedule.
+Suggested Slot:
+- Start Time: 16/02/2026 09:00 AM
+- End Time: 16/02/2026 10:00 AM (First hour of the sale)
+
+2026-02-12 12:30:00 - User asked for a 3-day Flash Sale schedule.
+Suggested Schedule:
+- Campaign Start Date: 16/02/2026 09:00 AM
+- Campaign End Date: 19/02/2026 09:00 AM (3 days)
+- Registration Deadline: 15/02/2026 09:00 PM (1 day before)
+- Approval Deadline: 16/02/2026 08:00 AM (2 hours before)
+- Time Slot: 16/02/2026 09:00 AM - 10:00 AM (First hour)
+
+2026-02-12 12:35:00 - User asked for a 3-day Flash Sale schedule.
+Suggested Schedule:
+- Campaign Start Date: 16/02/2026 09:00 AM
+- Campaign End Date: 19/02/2026 09:00 AM (3 days)
+- Registration Deadline: 15/02/2026 09:00 PM (1 day before)
+- Approval Deadline: 16/02/2026 08:00 AM (2 hours before)
+- Time Slot: 16/02/2026 09:00 AM - 10:00 AM (First hour)
+- Time Slot: 16/02/2026 09:00 AM - 10:00 AM (First hour)
+
+2026-02-12 12:34:00 - User requested to disable "Auto" Flash Sale creation.
+Action: Commented out `seedFlashSaleCampaign()` in `DataInitializer.java`.
+Note: Existing auto-campaigns persist in DB until manually deleted. Future restarts won't create new ones.
+
+2026-02-12 12:43:00 - User concerned if previously saved time is preserved.
+Response: Confirmed. The data in DB is correct (UTC 02:00), only the frontend display was confusing. Fix ensures it shows as Local Time (09:00).
+
+2026-02-12 12:45:00 - User asked for re-confirmation of time display.
+Response: Reaffirmed that the round-trip logic works. Input 09:00 -> Save as 02:00 UTC -> Load as 02:00 UTC -> Display as 09:00 Local.
+
+2026-02-12 12:51:00 - User asked if Shop will see the notification to register.
+Action: Verified `seller-dashboard.html`. Applied timezone fix to Shop view (Open Campaigns list & Registration Modal) to ensure consistency.
+Response: Confirmed. Campaign appears in 'Open Campaigns' tab for Shop. Time display is also fixed to 09:00 AM.
+
+2026-02-12 13:09:00 - User asked for final confirmation if Shop can see and register.
+Response: Yes. Confirmed based on REGISTRATION_OPEN status in screenshots. Shops can now see the "Register Now" button in their dashboard.
+
+## 2026-02-12 - Summary of Flash Sale Management Implementation
+**1. Backend (Spring Boot)**
+*   **API:** Added `GET /api/flash-sales/campaigns/open` endpoint for Sellers to view active campaigns.
+*   **Data Initializer:** Created `seedFlashSaleCampaign()` for testing, then **DISABLED** it (`// seedFlashSaleCampaign();`) per user request to prevent auto-creation of campaigns on server restart.
+
+**2. Admin Dashboard (Frontend)**
+*   **Features:** Complete CRUD for Campaigns and Time Slots.
+*   **Fixes:** Resolved timezone issue where localized time inputs were shifting by -7 hours (UTC).
+    *   Implemented `toLocalDatetime()` helper to correctly parse ISO strings for `datetime-local` inputs.
+    *   Updated `renderCampaigns` to force UTC interpretation (`+ 'Z'`), ensuring "09:00 AM" input displays as "09:00 AM" (GMT+7) instead of "02:00 AM" (UTC).
+
+**3. Seller Dashboard (Frontend)**
+*   **Features:** Implemented "Open Campaigns" tab.
+*   **Registration:** Added `openRegisterModal` allowing Shops to register products/variants for specific Time Slots.
+*   **Fixes:** Applied the same Timezone Logic Fix to the Seller view to ensure Shop sees the exact same start/end times as the Admin.
+
+**4. Verification**
+*   **Flow:** Admin Create -> Shop View -> Shop Register verified conceptually and via code review.
+*   **Status:** Admin side is **COMPLETE**. Shop side is **READY** for integration (pull code).
