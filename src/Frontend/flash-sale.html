@@ -99,11 +99,11 @@
 
     <script>
         const API_BASE_URL = 'http://localhost:8080/api';
+        let countdownInterval = null;
 
-        // Check Auth
         document.addEventListener('DOMContentLoaded', () => {
             checkLogin();
-            loadFlashSaleProducts();
+            loadFlashSaleData();
         });
 
         function checkLogin() {
@@ -112,81 +112,122 @@
                 document.getElementById('guestNav').classList.add('hidden');
                 document.getElementById('userNav').classList.remove('hidden');
                 document.getElementById('userName').textContent = user.fullName || user.username;
-                document.getElementById('userAvatar').src = user.avatarUrl || 'https://via.placeholder.com/32';
+                if (user.avatarUrl) {
+                    document.getElementById('userAvatar').src = user.avatarUrl;
+                }
             }
         }
 
-        async function loadFlashSaleProducts() {
-            const grid = document.getElementById('productsGrid');
-
+        async function loadFlashSaleData() {
             try {
-                const response = await fetch(`${API_BASE_URL}/products`);
-                if (!response.ok) throw new Error('Failed to fetch products');
+                const res = await fetch(`${API_BASE_URL}/flash-sales/current`);
+                if (!res.ok || res.status === 204) {
+                    showNoActiveSale();
+                    return;
+                }
+                const currentFs = await res.json();
+                startCountdown(currentFs.endTime);
+                loadFlashSaleItems(currentFs.id);
+            } catch (err) {
+                console.error(err);
+                showNoActiveSale();
+            }
+        }
 
-                let products = await response.json();
+        function showNoActiveSale() {
+            document.getElementById('productsGrid').innerHTML = '<div class="col-span-full text-center text-lg text-gray-500 py-20">No flash sale currently active. Check back later!</div>';
+            updateCountdownUI(0, 0, 0);
+        }
 
-                // Handle Page<Product> structure if applicable, though usually list for /products
-                if (products.content) products = products.content;
+        function startCountdown(endTime) {
+            const end = new Date(endTime);
+            const els = document.querySelectorAll('.bg-black.text-white');
 
-                // Sort by CreatedAt DESC (Newest first) - Core Flash Sale Logic
-                products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            function tick() {
+                const now = new Date();
+                const diff = end - now;
+                if (diff <= 0) {
+                    updateCountdownUI(0, 0, 0);
+                    if (countdownInterval) clearInterval(countdownInterval);
+                    return;
+                }
+                const s = Math.floor((diff / 1000) % 60);
+                const m = Math.floor((diff / 60000) % 60);
+                const h = Math.floor(diff / 3600000);
+                updateCountdownUI(h, m, s);
+            }
+            tick();
+            countdownInterval = setInterval(tick, 1000);
+        }
 
-                if (products.length === 0) {
-                    grid.innerHTML = '<div class="col-span-full text-center text-lg text-gray-500">No products currently on sale.</div>';
+        function updateCountdownUI(h, m, s) {
+            const els = document.querySelectorAll('.bg-black.text-white');
+            if (els.length >= 3) {
+                els[0].textContent = String(h).padStart(2, '0');
+                els[1].textContent = String(m).padStart(2, '0');
+                els[2].textContent = String(s).padStart(2, '0');
+            }
+        }
+
+        async function loadFlashSaleItems(slotId) {
+            const grid = document.getElementById('productsGrid');
+            try {
+                const res = await fetch(`${API_BASE_URL}/flash-sales/${slotId}/items`);
+                if (!res.ok) throw new Error('Failed to fetch items');
+                const items = await res.json();
+
+                if (items.length === 0) {
+                    grid.innerHTML = '<div class="col-span-full text-center text-lg text-gray-500 py-20">This slot has no items yet.</div>';
                     return;
                 }
 
-                grid.innerHTML = products.map(product => {
-                    // Start: Image Logic
-                    const imageUrl = (product.images && product.images.length > 0)
-                        ? product.images[0]
-                        : 'https://via.placeholder.com/400x400?text=No+Image';
+                grid.innerHTML = items.map(item => {
+                    const priceDisplay = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.salePrice);
+                    const originalPriceDisp = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.originalPrice);
 
-                    // Start: Price Logic
-                    let priceVal = 0;
-                    if (product.variants && product.variants.length > 0) priceVal = product.variants[0].price;
-                    else if (product.price) priceVal = product.price; // Fallback
+                    const total = item.saleStock || 10;
+                    const remaining = item.remainingStock || 0;
+                    const sold = total - remaining;
+                    const progressPercent = Math.max(10, Math.floor((sold / total) * 100));
+                    const isHot = progressPercent > 80;
 
-                    const priceDisplay = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(priceVal);
-
-                    // Start: Flash Sale Specifics
-                    // Random sold count for "hype"
-                    const soldCount = Math.floor(Math.random() * 90) + 10;
-                    const progressPercent = Math.min(soldCount, 100);
+                    const discountPercent = Math.round((1 - (item.salePrice / item.originalPrice)) * 100);
 
                     return `
-                    <div onclick="localStorage.setItem('lastClickedProductId', '${product.id}'); sessionStorage.setItem('lastClickedProductId', '${product.id}'); window.location.href='product-detail.html?id=${product.id}'" 
+                    <div onclick="window.location.href='product-detail.html?id=${item.productId}'" 
                          class="bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer border border-transparent hover:border-orange-500">
                         <div class="relative">
-                            <img src="${imageUrl}" alt="${product.name}" class="w-full h-48 object-cover">
-                            <!-- Flash Sale Badge -->
+                            <img src="${item.productImage}" alt="${item.productName}" class="w-full h-48 object-cover">
                             <div class="absolute top-2 right-2 bg-yellow-400 text-red-600 px-2 py-1 rounded text-xs font-bold border border-red-500 shadow-sm">
-                                <i class="fas fa-bolt mr-1"></i>50%
+                                <i class="fas fa-bolt mr-1"></i>${discountPercent}%
                             </div>
-                            <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">MALL</div>
                         </div>
                         <div class="p-3">
-                            <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2 overflow-hidden">${product.name}</p>
+                            <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2 overflow-hidden">${item.productName}</p>
                             <div class="flex items-center justify-between mb-2">
                                 <p class="text-orange-600 text-lg font-bold">${priceDisplay}</p>
-                                <span class="text-xs text-gray-400 line-through">₫999.000</span>
+                                <span class="text-xs text-gray-400 line-through">${originalPriceDisp}</span>
                             </div>
                             
-                            <!-- Flash Sale Progress Bar -->
-                            <div class="relative w-full h-4 bg-red-100 rounded-full mt-2 overflow-hidden">
-                                <div class="absolute top-0 left-0 h-full bg-gradient-to-r from-red-500 to-orange-500" style="width: ${progressPercent}%"></div>
-                                <div class="absolute top-0 left-0 w-full h-full flex items-center justify-center text-[10px] font-bold text-white uppercase tracking-wider">
-                                    Sold ${soldCount}
+                            <div class="mt-2">
+                                <div class="relative w-full bg-orange-100 h-5 rounded-full overflow-hidden border border-orange-200">
+                                    <div class="bg-gradient-to-r from-orange-500 to-red-600 h-full rounded-full transition-all duration-1000 flex items-center justify-end pr-2" style="width: ${progressPercent}%">
+                                         ${isHot ? '<i class="fas fa-fire text-white text-[10px] animate-pulse"></i>' : ''}
+                                    </div>
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <span class="text-[10px] font-bold text-orange-900 uppercase tracking-tighter">
+                                            ${remaining === 0 ? 'HẾT HÀNG' : `ĐÃ BÁN ${sold}`}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     `;
                 }).join('');
-
-            } catch (error) {
-                console.error('Error:', error);
-                grid.innerHTML = '<div class="col-span-full text-center text-red-500">Failed to load Flash Sale products.</div>';
+            } catch (err) {
+                console.error(err);
+                grid.innerHTML = '<div class="col-span-full text-center text-red-500">Failed to load Flash Sale items.</div>';
             }
         }
     </script>

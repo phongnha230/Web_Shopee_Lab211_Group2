@@ -24,7 +24,8 @@
                     <a href="cart-backend.html" class="hover:text-orange-500 transition">
                         <i class="fas fa-shopping-cart text-xl"></i>
                     </a>
-                    <a href="profile.html" class="flex items-center gap-2 cursor-pointer hover:text-orange-500 transition">
+                    <a href="profile.html"
+                        class="flex items-center gap-2 cursor-pointer hover:text-orange-500 transition">
                         <img id="userAvatar" src="" alt="User" class="w-8 h-8 rounded-full border border-gray-200">
                     </a>
                 </div>
@@ -205,7 +206,7 @@
 
         function updateUserAvatar() {
             const userName = localStorage.getItem('userName') || 'User';
-            document.getElementById('userAvatar').src = 
+            document.getElementById('userAvatar').src =
                 `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=ffedd5&color=f97316`;
         }
 

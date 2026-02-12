@@ -9,32 +9,54 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         @keyframes bounceShopee {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-10px);
+            }
+
+            60% {
+                transform: translateY(-5px);
+            }
         }
-        .bounce-shopee { animation: bounceShopee 2s infinite; }
-        
+
+        .bounce-shopee {
+            animation: bounceShopee 2s infinite;
+        }
+
         /* Star Rating Styles */
-        .star-rating { display: flex; gap: 0.5rem; }
+        .star-rating {
+            display: flex;
+            gap: 0.5rem;
+        }
+
         .star-rating i {
             font-size: 2rem;
             color: #d1d5db;
             cursor: pointer;
             transition: all 0.2s;
         }
+
         .star-rating i.active,
         .star-rating i:hover {
             color: #fbbf24;
             transform: scale(1.1);
         }
-        
+
         /* Image Preview Styles */
         .image-preview-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             gap: 1rem;
         }
+
         .image-preview {
             position: relative;
             width: 120px;
@@ -43,11 +65,13 @@
             overflow: hidden;
             border: 2px solid #e5e7eb;
         }
+
         .image-preview img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
+
         .image-preview .remove-btn {
             position: absolute;
             top: 0.25rem;
@@ -63,10 +87,11 @@
             cursor: pointer;
             font-size: 0.875rem;
         }
+
         .image-preview .remove-btn:hover {
             background: rgba(220, 38, 38, 1);
         }
-        
+
         /* Upload Button */
         .upload-btn {
             width: 120px;
@@ -76,24 +101,27 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center ;
+            justify-content: center;
             cursor: pointer;
             transition: all 0.2s;
         }
+
         .upload-btn:hover {
             border-color: #f97316;
             background: #fff7ed;
         }
+
         .upload-btn i {
             font-size: 2rem;
             color: #9ca3af;
             margin-bottom: 0.5rem;
         }
+
         .upload-btn span {
             font-size: 0.75rem;
             color: #6b7280;
         }
-        
+
         /* Modal Styles */
         .modal {
             display: none;
@@ -106,7 +134,13 @@
             background-color: rgba(0, 0, 0, 0.5);
             animation: fadeIn 0.3s;
         }
-        .modal.active { display: flex; align-items: center; justify-content: center; }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         .modal-content {
             background: white;
             border-radius: 1rem;
@@ -116,13 +150,27 @@
             overflow-y: auto;
             animation: slideUp 0.3s;
         }
+
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
+
         @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
     </style>
 </head>
@@ -171,7 +219,8 @@
                 </div>
                 <div class="text-right flex flex-col items-end gap-2">
                     <div class="flex items-center gap-3">
-                        <span id="orderStatus" class="inline-block px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+                        <span id="orderStatus"
+                            class="inline-block px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-800">
                             COMPLETED
                         </span>
                         <div id="cancelOrderBtnWrap"></div>
@@ -180,7 +229,7 @@
                     <p id="refundStatusDisplay" class="text-blue-600 text-sm font-semibold" style="display:none;"></p>
                 </div>
             </div>
-            
+
             <!-- Order Timeline (rendered by JS with real data) -->
             <div id="orderTimeline" class="border-t border-gray-200 pt-4 mt-4">
                 <div class="flex items-center justify-between text-sm" id="orderTimelineInner">
@@ -249,7 +298,7 @@
                 <!-- Comment -->
                 <div class="mb-6">
                     <label class="block text-gray-700 font-semibold mb-2">Your Review</label>
-                    <textarea id="reviewComment" rows="4" 
+                    <textarea id="reviewComment" rows="4"
                         class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
                         placeholder="Share your experience with this product..."></textarea>
                     <p class="text-sm text-gray-500 mt-1">Minimum 10 characters</p>
@@ -261,26 +310,27 @@
                         Add Photos (Optional)
                         <span class="text-sm font-normal text-gray-500">- Max 5 images, 3MB each</span>
                     </label>
-                    
+
                     <div class="image-preview-container mb-4" id="imagePreviewContainer">
                         <!-- Image previews will be added here -->
                     </div>
-                    
+
                     <div class="upload-btn" onclick="document.getElementById('imageInput').click()">
                         <i class="fas fa-camera"></i>
                         <span>Add Photo</span>
                     </div>
-                    <input type="file" id="imageInput" accept="image/*" multiple class="hidden" onchange="handleImageSelect(event)">
+                    <input type="file" id="imageInput" accept="image/*" multiple class="hidden"
+                        onchange="handleImageSelect(event)">
                     <p class="text-xs text-gray-500 mt-2">Supported formats: JPG, PNG, WEBP</p>
                 </div>
 
                 <!-- Submit Button -->
                 <div class="flex gap-3">
-                    <button onclick="closeReviewModal()" 
+                    <button onclick="closeReviewModal()"
                         class="flex-1 px-6 py-3 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition">
                         Cancel
                     </button>
-                    <button onclick="submitReview()" 
+                    <button onclick="submitReview()"
                         class="flex-1 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition">
                         Submit Review
                     </button>
@@ -302,7 +352,8 @@
                 <p class="text-sm text-gray-600 mb-4">Đơn hàng phải ở trạng thái Đã gửi hoặc Đã giao (trong 7 ngày).</p>
                 <div class="mb-4">
                     <label class="block text-gray-700 font-semibold mb-2">Lý do khiếu nại</label>
-                    <select id="disputeReason" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none">
+                    <select id="disputeReason"
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none">
                         <option value="Sản phẩm không đúng mô tả">Sản phẩm không đúng mô tả</option>
                         <option value="Sản phẩm bị hỏng/lỗi">Sản phẩm bị hỏng/lỗi</option>
                         <option value="Không nhận được hàng">Không nhận được hàng</option>
@@ -326,14 +377,16 @@
                         <i class="fas fa-camera"></i>
                         <span>Thêm ảnh</span>
                     </div>
-                    <input type="file" id="disputeImageInput" accept="image/*" multiple class="hidden" onchange="handleDisputeImageSelect(event)">
+                    <input type="file" id="disputeImageInput" accept="image/*" multiple class="hidden"
+                        onchange="handleDisputeImageSelect(event)">
                     <p class="text-xs text-gray-500 mt-2">Hỗ trợ: JPG, PNG, WEBP</p>
                 </div>
                 <div class="flex gap-3">
-                    <button onclick="closeDisputeModal()" 
+                    <button onclick="closeDisputeModal()"
                         class="flex-1 px-6 py-3 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition">Hủy</button>
-                    <button onclick="submitDispute()" 
-                        class="flex-1 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition">Gửi khiếu nại</button>
+                    <button onclick="submitDispute()"
+                        class="flex-1 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition">Gửi
+                        khiếu nại</button>
                 </div>
             </div>
         </div>
@@ -353,9 +406,11 @@
         }
 
         function getStatusClass(status) {
-            const map = { PENDING: 'bg-yellow-100 text-yellow-800', CONFIRMED: 'bg-blue-100 text-blue-800',
+            const map = {
+                PENDING: 'bg-yellow-100 text-yellow-800', CONFIRMED: 'bg-blue-100 text-blue-800',
                 SHIPPING: 'bg-purple-100 text-purple-800', SHIPPED: 'bg-indigo-100 text-indigo-800',
-                COMPLETED: 'bg-green-100 text-green-800', CANCELLED: 'bg-red-100 text-red-800' };
+                COMPLETED: 'bg-green-100 text-green-800', CANCELLED: 'bg-red-100 text-red-800'
+            };
             return map[status] || 'bg-gray-100 text-gray-800';
         }
 
@@ -380,7 +435,7 @@
             if (!orderId) {
                 orderId = localStorage.getItem('viewOrderId');
                 if (orderId) {
-                    localStorage.removeItem('viewOrderId');
+                    // localStorage.removeItem('viewOrderId'); // Keep as fallback
                     history.replaceState(null, '', 'order-detail.html?id=' + orderId);
                 }
             }
@@ -403,7 +458,7 @@
                     window.location.replace('login.html?returnUrl=' + encodeURIComponent('order-detail.html?id=' + orderId));
                     return;
                 }
-                document.getElementById('productsList').innerHTML = 
+                document.getElementById('productsList').innerHTML =
                     '<p class="text-red-500 py-4">Không tải được đơn hàng. <a href="my-orders-backend.html" class="text-orange-500 underline">Quay lại Đơn hàng</a></p>';
             }
         }
@@ -709,7 +764,7 @@
             document.getElementById('modalProductImage').src = productImage || 'https://via.placeholder.com/80';
             document.getElementById('modalProductName').textContent = productName || 'Product';
             document.getElementById('modalProductVariant').textContent = variantName || '';
-            
+
             document.getElementById('reviewComment').value = '';
             document.getElementById('imagePreviewContainer').innerHTML = '';
             resetStars();
@@ -726,7 +781,7 @@
             selectedRating = rating;
             const stars = document.querySelectorAll('#starRating i');
             const ratingTexts = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
-            
+
             stars.forEach((star, index) => {
                 if (index < rating) {
                     star.classList.add('active');
@@ -747,7 +802,7 @@
 
         function handleImageSelect(event) {
             const files = Array.from(event.target.files);
-            
+
             // Check total images limit
             if (uploadedImages.length + files.length > 5) {
                 alert('⚠️ Maximum 5 images allowed!');
