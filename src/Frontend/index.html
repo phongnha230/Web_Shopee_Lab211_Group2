@@ -335,11 +335,14 @@
                     <h2 class="text-2xl font-bold text-orange-600">FLASH SALE</h2>
                     <div class="flex items-center space-x-2" id="flashSaleCountdown">
                         <span class="text-sm font-bold text-gray-500 mr-1">Còn:</span>
-                        <div id="flashSaleHours" class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-bold">00</div>
+                        <div id="flashSaleHours" class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-bold">00
+                        </div>
                         <span class="text-gray-400">:</span>
-                        <div id="flashSaleMinutes" class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-bold">00</div>
+                        <div id="flashSaleMinutes" class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-bold">00
+                        </div>
                         <span class="text-gray-400">:</span>
-                        <div id="flashSaleSeconds" class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-bold">00</div>
+                        <div id="flashSaleSeconds" class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-bold">00
+                        </div>
                     </div>
                 </div>
                 <a href="flash-sale.html" class="text-orange-500 font-semibold hover:text-orange-600">See All →</a>
@@ -561,14 +564,22 @@
         async function loadHomepageProducts() {
             try {
                 // 1. Load Flash Sale Products
-                const fsResponse = await fetch(`${API_BASE_URL}/products/flash-sale`);
-                if (fsResponse.ok) {
-                    const fsProducts = await fsResponse.json();
-                    if (fsProducts.length > 0) {
-                        renderProductList(fsProducts.slice(0, 6), 'flashSaleList', true);
-                    } else {
-                        document.getElementById('flashSaleList').innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">No flash sale active.</div>';
+                const curFsResp = await fetch(`${API_BASE_URL}/flash-sales/current`);
+                if (curFsResp.ok && curFsResp.status !== 204) {
+                    const currentFs = await curFsResp.json();
+                    if (currentFs && currentFs.id) {
+                        const itemsResp = await fetch(`${API_BASE_URL}/flash-sales/${currentFs.id}/items`);
+                        if (itemsResp.ok) {
+                            const fsItems = await itemsResp.json();
+                            if (fsItems.length > 0) {
+                                renderProductList(fsItems.slice(0, 6), 'flashSaleList', true);
+                            } else {
+                                document.getElementById('flashSaleList').innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">No items in this flash sale.</div>';
+                            }
+                        }
                     }
+                } else {
+                    document.getElementById('flashSaleList').innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">No flash sale active.</div>';
                 }
 
                 // 2. Load All Products for Daily Discover
@@ -601,82 +612,92 @@
             container.innerHTML = '';
 
             products.forEach(product => {
-                // Determine Image
-                const imageUrl = (product.images && product.images.length > 0)
-                    ? product.images[0]
-                    : 'https://via.placeholder.com/400x400?text=No+Image';
+                // Determine Info Mapping (Standard Product vs FlashSaleItemResponse)
+                let imageUrl = 'https://via.placeholder.com/400x400?text=No+Image';
+                let productName = product.name || 'Product';
+                let priceDisplay = 'Contact';
+                let pid = product.id || product._id || product.productId;
+                let soldCount = product.sold != null ? product.sold : 0;
+                let rating = product.rating != null ? product.rating.toFixed(1) : '-';
 
-                // Determine Price
-                let priceDisplay = 'Contact'; // Default
-                if (isFlashSale && product.flashSalePrice) {
-                    priceDisplay = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.flashSalePrice);
-                } else if (product.variants && product.variants.length > 0) {
-                    const price = product.variants[0].price;
-                    priceDisplay = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+                if (isFlashSale) {
+                    // product is FlashSaleItemResponse
+                    imageUrl = product.productImage || imageUrl;
+                    productName = product.productName || productName;
+                    priceDisplay = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.salePrice);
+                    soldCount = (product.saleStock || 0) - (product.remainingStock || 0);
+                } else {
+                    // product is standard Product
+                    if (product.images && product.images.length > 0) imageUrl = product.images[0];
+                    if (product.variants && product.variants.length > 0) {
+                        priceDisplay = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.variants[0].price);
+                    }
                 }
-
-                // Use real sold & rating from API (synced from orders & reviews)
-                const sold = product.sold != null ? product.sold : 0;
-                const rating = product.rating != null ? product.rating.toFixed(1) : '-';
 
                 // Badge Logic
                 let badgeHtml = '';
                 if (isFlashSale) {
                     badgeHtml = `<div class="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold"><i class="fas fa-bolt mr-1"></i>SALE</div>`;
                 } else {
-                    // Random badge for Daily Discover
                     const badges = ['NEW', 'HOT', 'SALE', 'BEST'];
                     const randomBadge = badges[Math.floor(Math.random() * badges.length)];
                     badgeHtml = `<div class="absolute top-2 left-2 bg-orange-600 text-white px-2 py-1 rounded text-xs font-bold">${randomBadge}</div>`;
                 }
 
-                // Progress Bar for Flash Sale
+                // Progress Bar for Flash Sale (Pro refinement)
                 let progressBarHtml = '';
                 if (isFlashSale) {
-                    // Symbolic progress based on flashSaleStock
-                    const stock = product.flashSaleStock || 10;
-                    const progressPercent = Math.min(95, Math.floor((sold / (sold + stock)) * 100));
+                    const total = product.saleStock || 10;
+                    const remaining = product.remainingStock || 0;
+                    const sold = total - remaining;
+                    const progressPercent = Math.max(10, Math.floor((sold / total) * 100)); // Minimum 10% for better visibility
+                    const isHot = progressPercent > 80;
+
                     progressBarHtml = `
-                        <div class="w-full bg-orange-200 h-4 rounded-full mt-2 relative overflow-hidden">
-                            <div class="bg-gradient-to-r from-orange-500 to-red-600 h-full rounded-full transition-all duration-1000" style="width: ${progressPercent}%"></div>
-                            <span class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white uppercase">SẮP HẾT HÀNG</span>
+                        <div class="mt-2">
+                            <div class="relative w-full bg-orange-100 h-5 rounded-full overflow-hidden border border-orange-200">
+                                <div class="bg-gradient-to-r from-orange-500 to-red-600 h-full rounded-full transition-all duration-1000 flex items-center justify-end pr-2 shadow-inner" style="width: ${progressPercent}%">
+                                     ${isHot ? '<i class="fas fa-fire text-white text-[10px] animate-pulse"></i>' : ''}
+                                </div>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-[10px] font-bold text-orange-900 uppercase tracking-tighter">
+                                        ${remaining === 0 ? 'HẾT HÀNG' : `ĐÃ BÁN ${sold}`}
+                                    </span>
+                                </div>
+                            </div>
+                            ${isHot ? '<p class="text-[10px] text-red-600 font-bold mt-1 animate-bounce text-center"><i class="fas fa-fire mr-1"></i>SẮP CHÁY HÀNG</p>' : ''}
                         </div>`;
                 } else {
-                    // Sold count for Daily Discover
                     progressBarHtml = `
                         <div class="flex items-center text-xs text-gray-500 mt-1">
                             <i class="fas fa-star text-yellow-400"></i>
                             <span class="ml-1">${rating}</span>
-                            <span class="ml-2 border-l border-gray-300 pl-2">Đã bán ${sold}</span>
+                            <span class="ml-2 border-l border-gray-300 pl-2">Đã bán ${soldCount}</span>
                         </div>`;
                 }
 
                 const productCard = document.createElement('div');
                 productCard.className = 'bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer';
 
-                const pid = product.id || product._id;
                 productCard.onclick = () => {
                     if (pid) {
                         localStorage.setItem('lastClickedProductId', pid);
                         sessionStorage.setItem('lastClickedProductId', pid);
                         window.location.href = `product-detail.html?id=${pid}`;
-                    } else {
-                        console.error("Product ID missing:", product);
                     }
                 };
 
                 productCard.innerHTML = `
                     <div class="relative">
-                        <img src="${imageUrl}" alt="${product.name}" class="w-full h-48 object-cover">
+                        <img src="${imageUrl}" alt="${productName}" class="w-full h-48 object-cover">
                         ${badgeHtml}
                     </div>
                     <div class="p-3">
-                        <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2">${product.name}</p>
+                        <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2">${productName}</p>
                         <p class="text-orange-600 text-lg font-bold">${priceDisplay}</p>
                         ${progressBarHtml}
                     </div>
                 `;
-
                 container.appendChild(productCard);
             });
         }
@@ -805,7 +826,7 @@
 
             try {
                 const response = await fetch('http://localhost:8080/api/cart', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${token} ` }
                 });
 
                 if (response.ok) {
@@ -1007,13 +1028,6 @@
 
         function showCart() {
             document.getElementById('cartModal').classList.remove('hidden');
-        }
-
-        function goToProduct(id) {
-            console.log('Navigating to product:', id);
-            localStorage.setItem('lastClickedProductId', id);
-            sessionStorage.setItem('lastClickedProductId', id);
-            window.location.href = `product-detail.html?id=${id}`;
         }
 
         function checkout() {
