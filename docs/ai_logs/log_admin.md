@@ -1307,7 +1307,7 @@ Comprehensive record of all Admin Dashboard, Shop Management, and Backend System
 ### 1. Flash Sale Sold Count Implemented
 - **Feature**: Added 'Sold' count progress bar to Flash Sale items on Product Detail page.
 - **Backend**: Added lashSaleSold field to Product/Variant entities. Updated OrderService to increment this count on purchase.
-- **Frontend**: Updated product-detail.html to visualize the sold count (e.g., 'ÐÃ BÁN 5/10').
+- **Frontend**: Updated product-detail.html to visualize the sold count (e.g., 'ï¿½ï¿½ Bï¿½N 5/10').
 
 ### 2. Flash Sale Price Mismatch Fixed
 - **Issue**: prices on detail page were different from homepage.
@@ -1317,3 +1317,26 @@ Comprehensive record of all Admin Dashboard, Shop Management, and Backend System
 - **Issue**: Homepage sold count (derived from stock) wasn't updating.
 - **Fix**: Updated OrderService to decrement FlashSaleItem stock directly triggers checks.
 
+
+---
+## LOG UPDATE: 2026-02-13 - Flash Sale & Git Synchronization
+
+### 1. Flash Sale Registration Fixes
+- **Modal "Loading..." Issue**: Fixed the issue where Time Slot and Product dropdowns were perpetually loading. 
+  - Implemented `Promise.all` for parallel fetching of slots and products.
+  - Added a 5-second `AbortController` timeout to prevent UI hang on slow network/API.
+  - Improved error handling to provide specific feedback (e.g., "Shop not found").
+- **Double Submission Prevention**: 
+  - Disabled the "Register" button immediately upon click.
+  - Changed text to "Registering..." to provide visual feedback.
+  - Ensured the button is always re-enabled even if the request fails, preventing "locks".
+
+### 2. Homepage Flash Sale Display Synchronization
+- **UTC Time Alignment**: Backend was previously using local time which conflicted with Frontend ISO (UTC) strings. Reverted `FlashSaleServiceImpl.java` to use `LocalDateTime.now(ZoneOffset.UTC)` for accurate time window checking.
+- **Strict Status Filtering (Bug Fix)**: Fixed an issue where "ONGOING" slots (active sales) were hidden because the previous filter only looked for "ACTIVE" status. Updated `getCurrentFlashSale` to allow both "ACTIVE" and "ONGOING".
+
+### 3. Git Branch Management
+- **Branch Sync**: Merged `origin/main` into the local `vy` branch.
+- **Verification**: Confirmed successful fast-forward merge. Local code is now synchronized with the latest main branch without performing a push.
+
+---

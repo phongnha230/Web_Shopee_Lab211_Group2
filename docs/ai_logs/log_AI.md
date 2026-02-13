@@ -17437,10 +17437,20 @@ Response: Yes. Confirmed based on REGISTRATION_OPEN status in screenshots. Shops
 - **Fix**: Updated FlashSaleScheduler to loop through all variants of a product on sale start and apply: isFlashSale=true, lashSalePrice, lashSaleStock.
 
 #### 3. Frontend: Product Detail Page
-- **Logic**: Updated enderProduct and updatePriceDisplay to:
+- **Logic**: Updated 
+enderProduct and updatePriceDisplay to:
   - Detect Flash Sale status from variants or product.
   - Calculate sold percentage: (sold / stock) * 100.
 - **UI**: Added a progress bar component below the price section (similar to homepage style).
 
 ### Files Modified
 - ackend/.../entity/Product.java, ProductVariant.java`n- ackend/.../dto/response/ProductResponse.java, ProductVariantResponse.java`n- ackend/.../service/impl/ProductServiceImpl.java`n- ackend/.../order/service/impl/OrderServiceImpl.java`n- ackend/.../flashsale/service/impl/FlashSaleScheduler.java`n- ackend/.../flashsale/repository/FlashSaleItemRepository.java`n- rontend/product-detail.html`n
+
+---
+## LOG UPDATE: 2026-02-13 - Flash Sale & Git Management
+
+- **Flash Sale Registration**: Resolved "Loading..." and unresponsive button issues in the seller dashboard. Added parallel fetching and AbortController for reliability.
+- **Homepage Display**: Fixed timezone discrepancy by reverting to UTC logic. Updated `getCurrentFlashSale` to allow both **ACTIVE** and **ONGOING** statuses, so sales don't disappear when they start.
+- **Git Sync**: Completed merge of `origin/main` into `vy` branch.
+
+---

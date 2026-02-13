@@ -288,15 +288,18 @@ public class FlashSaleServiceImpl implements FlashSaleService {
 
     @Override
     public List<FlashSale> getActiveFlashSales() {
+        // Use UTC time as Frontend sends ISO strings
         return flashSaleRepository.findByStartTimeAfter(LocalDateTime.now(ZoneOffset.UTC).minusDays(1));
     }
 
     @Override
     public Optional<FlashSale> getCurrentFlashSale() {
+        // Use UTC time to match ISO strings from Frontend
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         List<FlashSale> all = flashSaleRepository.findAll();
         return all.stream()
                 .filter(fs -> fs.getStartTime() != null && fs.getEndTime() != null)
+                .filter(fs -> "ACTIVE".equals(fs.getStatus()) || "ONGOING".equals(fs.getStatus())) // ACTIVE or ONGOING
                 .filter(fs -> !fs.getStartTime().isAfter(now) && !fs.getEndTime().isBefore(now))
                 .findFirst();
     }
