@@ -1263,6 +1263,57 @@ Comprehensive record of all Admin Dashboard, Shop Management, and Backend System
 *   **Consistency:** Applied the same Timezone Fix to ensure Shops see the exact same times as Admin.
 
 ### Status
-*   **Admin Side:** COMPLETE.
-*   **Shop Side:** READY.
-*   **Verification:** Timezone and Data Flow verified active.
+*   **Admin Side:** COMPLETE & VERIFIED.
+*   **Shop Side:** COMPLETE & VERIFIED.
+*   **Verification:** Timezone, Data Flow, and Dashboard Integration verified active.
+
+---
+
+## 10. Flash Sale Debugging & System Synchronization (13/02/2026)
+
+### Bug Fixes & Improvements
+*   **Fix 500 Error (Registration):**
+    *   **Problem:** System crashed when products without variants were registered.
+    *   **Fix:** Updated `FlashSaleServiceImpl` to handle null `variantId` gracefully by auto-selecting the default variant and enforcing clear error messaging when no inventory is found.
+*   **Fix "Connection Error" (Admin Dashboard):**
+    *   **Problem:** Product registration list wouldn't load due to missing data for Shop Name display.
+    *   **Fix:** Added missing `shopId` field to `FlashSaleItemResponse` DTO and populated it from the entity.
+*   **Fix Missing Campaigns (Seller Dashboard):**
+    *   **Problem:** Campaigns that had already started (`ONGOING`) were hidden from Sellers, preventing late registrations for future slots.
+    *   **Fix:** Updated `getOpenCampaigns` to include both `REGISTRATION_OPEN` and `ONGOING` statuses.
+*   **Fix "My Registrations" Loading (Seller Dashboard):**
+    *   **Problem:** Registration list stuck on infinite loading.
+    *   **Fix:** Corrected legacy API endpoint path in Frontend from `/flash-sales/shop/{id}` to `/flash-sales/registrations/my`.
+*   **UX Upgrade (Price Guard):**
+    *   **Feature:** Frontend now auto-calculates "Max Allowed Sale Price" based on the Campaign's `minDiscountPercentage` rule.
+    *   **Result:** Prevents 500 Errors by blocking registrations that don't meet the discount requirements BEFORE they reach the server.
+
+### Git Synchronization
+*   **Commit & Merge:** Committed session fixes to branch `vy` and successfully merged `origin/main`.
+*   **Conflict Resolution:**
+    *   **File:** `EmailService.java`.
+    *   **Action:** Resolved conflicts in email templates, prioritizing `vy` branch's localized and detailed "Flash Sale Approved/Rejected/Invitation" templates for a professional experience.
+
+### Verification Status
+*   **Backend:** Cleanly built and restarted successfully.
+*   **Admin UI:** Flash Sale registrations/approvals are fully visible and functional.
+*   **Seller UI:** All active campaigns and personal registrations are loading correctly.
+*   **Sync:** Branch `vy` is now 100% up-to-date with `main` locally.
+
+
+
+## Session: Flash Sale Fixes (Price & Sold Count) (13/02/2026)
+
+### 1. Flash Sale Sold Count Implemented
+- **Feature**: Added 'Sold' count progress bar to Flash Sale items on Product Detail page.
+- **Backend**: Added lashSaleSold field to Product/Variant entities. Updated OrderService to increment this count on purchase.
+- **Frontend**: Updated product-detail.html to visualize the sold count (e.g., 'ÐÃ BÁN 5/10').
+
+### 2. Flash Sale Price Mismatch Fixed
+- **Issue**: prices on detail page were different from homepage.
+- **Fix**: Updated FlashSaleScheduler to auto-apply Flash Sale prices to ALL variants of a product when a sale starts.
+
+### 3. Sold Count Sync Fixed
+- **Issue**: Homepage sold count (derived from stock) wasn't updating.
+- **Fix**: Updated OrderService to decrement FlashSaleItem stock directly triggers checks.
+

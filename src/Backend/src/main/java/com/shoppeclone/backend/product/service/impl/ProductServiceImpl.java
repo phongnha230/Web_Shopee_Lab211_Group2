@@ -431,6 +431,8 @@ public class ProductServiceImpl implements ProductService {
         response.setIsFlashSale(product.getIsFlashSale());
         response.setFlashSalePrice(product.getFlashSalePrice());
         response.setFlashSaleStock(product.getFlashSaleStock());
+        response.setFlashSaleSold(product.getFlashSaleSold() != null ? product.getFlashSaleSold() : 0);
+        response.setFlashSaleEndTime(product.getFlashSaleEndTime());
 
         // Load variants
         List<ProductVariantResponse> variants = variantRepository.findByProductId(product.getId()).stream()
@@ -464,6 +466,12 @@ public class ProductServiceImpl implements ProductService {
         response.setImageUrl(variant.getImageUrl());
         response.setCreatedAt(variant.getCreatedAt());
         response.setUpdatedAt(variant.getUpdatedAt());
+
+        response.setIsFlashSale(variant.getIsFlashSale());
+        response.setFlashSalePrice(variant.getFlashSalePrice());
+        response.setFlashSaleStock(variant.getFlashSaleStock());
+        response.setFlashSaleSold(variant.getFlashSaleSold() != null ? variant.getFlashSaleSold() : 0);
+        response.setFlashSaleEndTime(variant.getFlashSaleEndTime());
         return response;
     }
 

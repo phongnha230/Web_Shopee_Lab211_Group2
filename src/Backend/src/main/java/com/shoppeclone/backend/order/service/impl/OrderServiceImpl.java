@@ -52,6 +52,8 @@ public class OrderServiceImpl implements OrderService {
     private final PaymentMethodRepository paymentMethodRepository;
     private final com.shoppeclone.backend.promotion.repository.VoucherRepository voucherRepository;
     private final ShopVoucherRepository shopVoucherRepository;
+    private final com.shoppeclone.backend.promotion.flashsale.repository.FlashSaleItemRepository flashSaleItemRepository;
+    private final com.shoppeclone.backend.promotion.flashsale.repository.FlashSaleRepository flashSaleRepository;
 
     @Override
     @Transactional
@@ -121,6 +123,26 @@ public class OrderServiceImpl implements OrderService {
             }
 
             variant.setStock(variant.getStock() - cartItem.getQuantity());
+
+            // Update Flash Sale Sold Count
+            if (Boolean.TRUE.equals(variant.getIsFlashSale())) {
+                variant.setFlashSaleSold(
+                        (variant.getFlashSaleSold() != null ? variant.getFlashSaleSold() : 0) + cartItem.getQuantity());
+
+                // Also update Product level
+                com.shoppeclone.backend.product.entity.Product product = productRepository
+                        .findById(variant.getProductId())
+                        .orElse(null);
+                if (product != null && Boolean.TRUE.equals(product.getIsFlashSale())) {
+                    product.setFlashSaleSold((product.getFlashSaleSold() != null ? product.getFlashSaleSold() : 0)
+                            + cartItem.getQuantity());
+                    productRepository.save(product);
+                }
+
+                // Update FlashSaleItem remainingStock (for Homepage display)
+                updateFlashSaleItemStock(variant.getProductId(), variant.getId(), cartItem.getQuantity());
+            }
+
             productVariantRepository.save(variant);
 
             OrderItem orderItem = new OrderItem();
@@ -158,6 +180,26 @@ public class OrderServiceImpl implements OrderService {
             }
 
             variant.setStock(variant.getStock() - itemReq.getQuantity());
+
+            // Update Flash Sale Sold Count
+            if (Boolean.TRUE.equals(variant.getIsFlashSale())) {
+                variant.setFlashSaleSold(
+                        (variant.getFlashSaleSold() != null ? variant.getFlashSaleSold() : 0) + itemReq.getQuantity());
+
+                // Also update Product level
+                com.shoppeclone.backend.product.entity.Product product = productRepository
+                        .findById(variant.getProductId())
+                        .orElse(null);
+                if (product != null && Boolean.TRUE.equals(product.getIsFlashSale())) {
+                    product.setFlashSaleSold((product.getFlashSaleSold() != null ? product.getFlashSaleSold() : 0)
+                            + itemReq.getQuantity());
+                    productRepository.save(product);
+                }
+
+                // Update FlashSaleItem remainingStock (for Homepage display)
+                updateFlashSaleItemStock(variant.getProductId(), variant.getId(), itemReq.getQuantity());
+            }
+
             productVariantRepository.save(variant);
 
             OrderItem orderItem = new OrderItem();
@@ -577,5 +619,32 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         orderRepository.deleteByUserId(userId);
+    }
+
+    private void updateFlashSaleItemStock(String productId, String variantId, int quantity) {
+        // Find active Flash Sale Item
+        List<com.shoppeclone.backend.promotion.flashsale.entity.FlashSaleItem> items = flashSaleItemRepository
+                .findByProductIdAndStatus(productId, "APPROVED");
+
+        for (com.shoppeclone.backend.promotion.flashsale.entity.FlashSaleItem item : items) {
+            // Check if parent Flash Sale is ONGOING
+            com.shoppeclone.backend.promotion.flashsale.entity.FlashSale slot = flashSaleRepository
+                    .findById(item.getFlashSaleId()).orElse(null);
+
+            if (slot != null && "ONGOING".equals(slot.getStatus())) {
+                // Check if item matches variant (or is product-level)
+                // Note: Scheduler applies product-level sale to all variants.
+                // So if item.variantId is null OR item.variantId == variantId
+                if (item.getVariantId() == null || item.getVariantId().equals(variantId)) {
+                    int currentRemaining = item.getRemainingStock() != null ? item.getRemainingStock() : 0;
+                    if (currentRemaining >= quantity) {
+                        item.setRemainingStock(currentRemaining - quantity);
+                        flashSaleItemRepository.save(item);
+                    }
+                    // Break after updating the correct active item
+                    break;
+                }
+            }
+        }
     }
 }

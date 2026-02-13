@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -53,8 +55,8 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         campaign.setRegistrationDeadline(request.getRegistrationDeadline());
         campaign.setApprovalDeadline(request.getApprovalDeadline());
         campaign.setStatus("REGISTRATION_OPEN");
-        campaign.setCreatedAt(LocalDateTime.now());
-        campaign.setUpdatedAt(LocalDateTime.now());
+        campaign.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
+        campaign.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
         FlashSaleCampaign saved = flashSaleCampaignRepository.save(campaign);
 
         // Auto-broadcast invitation to all active shops
@@ -83,7 +85,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
             campaign.setRegistrationDeadline(request.getRegistrationDeadline());
         if (request.getApprovalDeadline() != null)
             campaign.setApprovalDeadline(request.getApprovalDeadline());
-        campaign.setUpdatedAt(LocalDateTime.now());
+        campaign.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
         return flashSaleCampaignRepository.save(campaign);
     }
 
@@ -182,8 +184,8 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         registration.setSaleStock(request.getSaleStock());
         registration.setRemainingStock(request.getSaleStock());
         registration.setStatus("PENDING");
-        registration.setCreatedAt(LocalDateTime.now());
-        registration.setUpdatedAt(LocalDateTime.now());
+        registration.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
+        registration.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
 
         return flashSaleItemRepository.save(registration);
     }
@@ -286,12 +288,12 @@ public class FlashSaleServiceImpl implements FlashSaleService {
 
     @Override
     public List<FlashSale> getActiveFlashSales() {
-        return flashSaleRepository.findByStartTimeAfter(LocalDateTime.now().minusDays(1));
+        return flashSaleRepository.findByStartTimeAfter(LocalDateTime.now(ZoneOffset.UTC).minusDays(1));
     }
 
     @Override
     public Optional<FlashSale> getCurrentFlashSale() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         List<FlashSale> all = flashSaleRepository.findAll();
         return all.stream()
                 .filter(fs -> fs.getStartTime() != null && fs.getEndTime() != null)

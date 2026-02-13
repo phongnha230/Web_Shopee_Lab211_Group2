@@ -616,7 +616,10 @@
                 let imageUrl = 'https://via.placeholder.com/400x400?text=No+Image';
                 let productName = product.name || 'Product';
                 let priceDisplay = 'Contact';
-                let pid = product.id || product._id || product.productId;
+                // FIX: Prioritize productId (for FlashSaleItem) over id (FlashSaleItem ID)
+                // If it's a normal Product, id is the Product ID.
+                // If it's a FlashSaleItemResponse, productId is the Product ID, and id is the Item ID.
+                let pid = product.productId || product.id || product._id;
                 let soldCount = product.sold != null ? product.sold : 0;
                 let rating = product.rating != null ? product.rating.toFixed(1) : '-';
 

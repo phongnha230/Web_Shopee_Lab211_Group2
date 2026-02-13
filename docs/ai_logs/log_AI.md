@@ -17387,5 +17387,60 @@ Response: Yes. Confirmed based on REGISTRATION_OPEN status in screenshots. Shops
 *   **Fixes:** Applied the same Timezone Logic Fix to the Seller view to ensure Shop sees the exact same start/end times as the Admin.
 
 **4. Verification**
-*   **Flow:** Admin Create -> Shop View -> Shop Register verified conceptually and via code review.
+*   **Verification:** Admin Create -> Shop View -> Shop Register verified conceptually and via code review.
 *   **Status:** Admin side is **COMPLETE**. Shop side is **READY** for integration (pull code).
+
+---
+
+## 2026-02-13 - Session: Flash Sale Debugging & System Synchronization
+
+**1. Flash Sale Bug Fixes (Execution)**
+*   **Backend Stability:** Fixed a 500 error in product registration where products without variants (null `variantId`) caused a system crash. The service now handles these cases gracefully.
+*   **Admin Dashboard Data:** Added the missing `shopId` to the `FlashSaleItemResponse` DTO. This resolved the "Connection Error" when admins viewed the registration list.
+*   **Seller Visibility:** Updated campaign filtering logic to show `ONGOING` campaigns to sellers, allowing for late registration in future slots.
+*   **Seller Dashboard API:** Corrected the legacy API endpoint for "My Registrations" list, resolving the infinite loading issue on the seller dashboard.
+*   **Frontend Price Guard:** Implemented automatic "Max Price" calculation in the registration modal to enforce the Campaign's minimum discount rule before submission.
+
+**2. Git Synchronization**
+*   **Action:** Merged `origin/main` into the current `vy` branch.
+*   **Conflict Resolution:** Resolved merge conflicts in `EmailService.java`. We preserved the `vy` branch's specialized email templates for Flash Sale approvals, rejections, and invitations to maintain a high-quality user experience.
+*   **Stability:** Verified that the project builds and the backend restarts without errors after the merge.
+
+**3. Documentation**
+*   Updated `task.md` and `log_admin.md` to reflect all completed bug fixes and the successful sync with the main branch.
+
+**Status:**
+✅ Backend: Cleanly merged and running.
+✅ Admin UI: Registration list is fully functional.
+✅ Seller UI: Campaigns and Registrations are loading correctly.
+✅ Branch Sync: `vy` is up-to-date with `main` (Git push pending user approval).
+
+
+## Session: Flash Sale Pricing & Sold Count (13/02/2026)
+
+### User Request
+- Fix Flash Sale price display on detail page (was showing regular price).
+- Implement 'Sold' count progress bar for Flash Sale items on detail page.
+- Fix 'Sold' count updates on Homepage.
+
+### Implementation Details
+
+#### 1. Backend: Sold Count Tracking
+- **Entities**: Added lashSaleSold field to Product, ProductVariant, and corresponding DTOs.
+- **OrderService**: Updated createOrderFromItems and createOrder (cart checkout) to:
+  - Increment lashSaleSold on purchase.
+  - Decrement FlashSaleItem.remainingStock to ensure Homepage compatibility.
+- **FlashSaleScheduler**: Updated to initialize lashSaleSold to 0 when starting a sale.
+
+#### 2. Backend: Price Propagation
+- **Issue**: Detail page prioritizes variant prices. Product-level Flash Sales weren't updating variants.
+- **Fix**: Updated FlashSaleScheduler to loop through all variants of a product on sale start and apply: isFlashSale=true, lashSalePrice, lashSaleStock.
+
+#### 3. Frontend: Product Detail Page
+- **Logic**: Updated enderProduct and updatePriceDisplay to:
+  - Detect Flash Sale status from variants or product.
+  - Calculate sold percentage: (sold / stock) * 100.
+- **UI**: Added a progress bar component below the price section (similar to homepage style).
+
+### Files Modified
+- ackend/.../entity/Product.java, ProductVariant.java`n- ackend/.../dto/response/ProductResponse.java, ProductVariantResponse.java`n- ackend/.../service/impl/ProductServiceImpl.java`n- ackend/.../order/service/impl/OrderServiceImpl.java`n- ackend/.../flashsale/service/impl/FlashSaleScheduler.java`n- ackend/.../flashsale/repository/FlashSaleItemRepository.java`n- rontend/product-detail.html`n
