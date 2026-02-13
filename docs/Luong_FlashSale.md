@@ -7,10 +7,10 @@
 ## 1. Tổng quan Trạng thái Campaign (Status)
 
 ```
-REGISTRATION_OPEN → ONGOING → FINISHED
-       ↓               ↓
-   CANCELLED       CANCELLED (Dừng khẩn cấp)
+Campaign: REGISTRATION_OPEN → ONGOING → FINISHED
+Slot:     ACTIVE → ONGOING → FINISHED
 ```
+*Ghi chú: Status ONGOING của Slot là lúc sản phẩm thực sự được giảm giá trên sàn.*
 
 ---
 
@@ -33,10 +33,10 @@ flowchart TD
         A3 -.-> B1[Gửi Email & In-app Notification]
         B1 --> B2[Hiển thị Campaign trên Seller Center]
         
-        subgraph Scheduler["⏰ FlashSaleScheduler (Mỗi phút)"]
-            C1[Check StartTime] --> C2[Active Slot: Cập nhật giá Sale]
+        subgraph Scheduler["⏰ FlashSaleScheduler (Mỗi phút - Múi giờ UTC)"]
+            C1[Check StartTime] --> C2[Active Slot: Status=ONGOING + Cập nhật giá Sale]
             C2 --> C3[Check EndTime]
-            C3 --> C4[Revert giá gốc + Mở khóa kho]
+            C3 --> C4[Deactive Slot: Status=FINISHED + Revert giá + Mở kho]
         end
     end
 
@@ -59,9 +59,9 @@ flowchart TD
 | 2 | System | Broadcast | - | Tự động gửi Email & Thông báo chuông |
 | 3 | Shop | Đăng ký SP | `POST /api/flash-sales/registrations` | Kiểm tra luật Price Guard ngay lúc gửi |
 | 4 | Admin | Duyệt SP | `PUT /api/flash-sales/.../approve` | Hệ thống tự động khóa tồn kho của Shop |
-| 5 | System | Kích hoạt | Scheduler (Chạy ngầm) | Đổi giá sản phẩm thành giá sale trên Web |
+| 5 | System | Kích hoạt | Scheduler (Chạy ngầm) | Đổi Status Slot sang **ONGOING**, cập nhật giá |
 | 6 | Buyer | Mua hàng | `POST /api/orders` | Trừ tồn kho Flash Sale đã khóa |
-| 7 | System | Kết thúc | Scheduler (Chạy ngầm) | Trả lại giá gốc & hoàn tồn kho dư |
+| 7 | System | Kết thúc | Scheduler (Chạy ngầm) | Đổi Status sang **FINISHED**, trả lại giá gốc & kho dư |
 
 ---
 

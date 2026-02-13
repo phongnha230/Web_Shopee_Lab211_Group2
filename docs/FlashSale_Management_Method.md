@@ -17,6 +17,10 @@
 
 #### ⚡ Giai đoạn 2: Shop Đăng ký & Hệ thống Kiểm tra (Shop + System)
 - Shop điền biểu mẫu: Chọn **ID sản phẩm**, nhập **Giá Sale** và **Số lượng**.
+- **Tối ưu hóa UX (Frontend Resilience):**
+    - **Parallel Fetching:** Hệ thống sử dụng `Promise.all` để tải đồng thời danh sách khung giờ (Slots) và sản phẩm, giúp Modal mở nhanh hơn.
+    - **Cơ chế Timeout:** Sử dụng `AbortController` tự động ngắt kết nối sau 5 giây nếu API phản hồi chậm, tránh treo giao diện.
+    - **Chống Đăng ký trùng:** Nút "Đăng ký" được vô hiệu hóa (disable) ngay khi nhấn cho đến khi có phản hồi từ server.
 - **Cơ chế Price Guard (Động):** Hệ thống tự động kiểm tra giá dựa trên luật của từng chiến dịch (vừa thiết lập ở Bước 1) thay vì fix cứng 10%.
 
 #### ⚡ Giai đoạn 3: Xét duyệt & Khóa kho (Admin + System)
@@ -31,11 +35,15 @@ Thông báo được gửi qua 2 kênh chính: **Email** và **In-app (Dấu chu
     - *Bị từ chối:* "Sản phẩm [B] không đạt yêu cầu giá, vui lòng sửa lại".
 - **Nhắc nhở:** Gửi 15 phút trước khi phiên Flash Sale bắt đầu.
 
-#### ⚡ Giai đoạn 5: Thực thi & UX (Automation + UX)
 - **Tự động hóa (FlashSaleScheduler):** Hệ thống sử dụng Cron Job/Fixed Rate Task để tự động kiểm tra và chuyển trạng thái:
-    - `REGISTRATION_OPEN` -> `ONGOING` (Khi đến ngày bắt đầu).
-    - `ONGOING` -> `FINISHED` (Khi hết ngày kết thúc).
+    - **Đồng bộ thời gian UTC:** Toàn bộ hệ thống backend chạy theo múi giờ `ZoneOffset.UTC` để đảm bảo tính đồng nhất tuyệt đối với chuỗi ISO từ Frontend, bất kể server đặt ở đâu.
+    - `REGISTRATION_OPEN` -> `ONGOING` (Khi đến ngày bắt đầu chiến dịch).
+    - `ONGOING` -> `FINISHED` (Khi hết ngày kết thúc chiến dịch).
+    - **Vòng đời của Slot:** `ACTIVE` (Chờ đến giờ) -> `ONGOING` (Đang diễn ra) -> `FINISHED` (Kết thúc).
     - Kích hoạt/Hết hạn các **Slots** (Tự động cập nhật giá sản phẩm và khóa kho).
+- **Trưng bày Trang chủ (Home Display):**
+    - Chỉ những Slot có trạng thái **ACTIVE** (chưa đến giờ) hoặc **ONGOING** (đang diễn ra) mới được hiển thị.
+    - Sản phẩm chỉ xuất hiện khi khung giờ đạt trạng thái **ONGOING**.
 - **Giao diện Real-time & Tâm lý học (FOMO):**
     - **Countdown Timer:** Đếm ngược từng giây đến khi phiên sale kết thúc.
     - **Progress Bar "Cháy hàng":** Hiển thị "Đã bán X" kèm hiệu ứng **"Blowing Fire" 🔥** và thông báo "SẮP CHÁY HÀNG" khi tồn kho còn dưới 20% (hoặc đã bán trên 80%).
