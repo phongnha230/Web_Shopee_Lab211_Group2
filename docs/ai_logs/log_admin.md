@@ -1339,4 +1339,13 @@ Comprehensive record of all Admin Dashboard, Shop Management, and Backend System
 - **Branch Sync**: Merged `origin/main` into the local `vy` branch.
 - **Verification**: Confirmed successful fast-forward merge. Local code is now synchronized with the latest main branch without performing a push.
 
+### 4. Documentation & UX Refinement
+- **Documentation Update**: Updated `FlashSale_Management_Method.md` and `Luong_FlashSale.md` with details on **UTC clock synchronization**, professional **Slot lifecycles**, and frontend stability improvements.
+- **Git Sync (Main -> vy)**: Pulled the latest code from `main` into `vy`.
+- **Critical Fix: Homepage "Loading" Loop**: Fixed critical JavaScript syntax errors in `index.html` (duplicate variable declarations and malformed template literals) that were causing the page to hang.
+- **UX Improvement: Dynamic Stock Update**: Implemented real-time inventory calculation in Flash Sale registration modal. The "Available Stock" (Avail) now decreases instantly as the seller types the "Sale Stock" value.
+- **Critical Fix: Inventory Locking**: Implemented backend stock deduction upon Flash Sale registration in `FlashSaleServiceImpl.java`. Product inventory is now reserved immediately. Added frontend re-fetch logic in `seller-dashboard.html` to update the available stock in the dropdown after registration.
+- **Bug Fix: Persistent Stock Display**: Implemented `syncProductTotalStock` in `FlashSaleServiceImpl` to update the parent `Product.totalStock` field after registration. This ensures the frontend dropdown reflects current inventory correctly.
+- **Critical Fix: Sticky Username**: Updated `logout()` and login logic to synchronize the `user` object in `localStorage`. This ensures the navbar correctly reflects the new account's name after switching between Google and traditional accounts.
+
 ---
