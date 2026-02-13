@@ -14,6 +14,8 @@ public interface ProductService {
 
     List<ProductResponse> getProductsByShopId(String shopId);
 
+    List<ProductResponse> getProductsByShopId(String shopId, boolean includeHidden);
+
     List<ProductResponse> getAllProducts(String sort);
 
     List<ProductResponse> getProductsByCategory(String categoryId);
@@ -46,4 +48,6 @@ public interface ProductService {
     void removeImage(String imageId);
 
     void updateProductFlashSaleStatus(String id, boolean isFlashSale);
+
+    void updateProductVisibility(String id, com.shoppeclone.backend.product.entity.ProductStatus status);
 }

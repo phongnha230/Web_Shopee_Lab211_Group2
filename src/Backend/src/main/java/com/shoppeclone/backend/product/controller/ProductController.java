@@ -34,8 +34,10 @@ public class ProductController {
     }
 
     @GetMapping("/shop/{shopId}")
-    public ResponseEntity<List<ProductResponse>> getProductsByShopId(@PathVariable String shopId) {
-        return ResponseEntity.ok(productService.getProductsByShopId(shopId));
+    public ResponseEntity<List<ProductResponse>> getProductsByShopId(
+            @PathVariable String shopId,
+            @RequestParam(defaultValue = "false") boolean includeHidden) {
+        return ResponseEntity.ok(productService.getProductsByShopId(shopId, includeHidden));
     }
 
     @GetMapping
@@ -79,6 +81,17 @@ public class ProductController {
         if (updates.containsKey("isFlashSale")) {
             boolean isFlashSale = (Boolean) updates.get("isFlashSale");
             productService.updateProductFlashSaleStatus(id, isFlashSale);
+        }
+
+        if (updates.containsKey("status")) {
+            String statusStr = (String) updates.get("status");
+            try {
+                com.shoppeclone.backend.product.entity.ProductStatus status = com.shoppeclone.backend.product.entity.ProductStatus
+                        .valueOf(statusStr);
+                productService.updateProductVisibility(id, status);
+            } catch (IllegalArgumentException e) {
+                // Ignore invalid status for now
+            }
         }
 
         return ResponseEntity.ok().build();

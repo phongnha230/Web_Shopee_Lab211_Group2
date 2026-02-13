@@ -99,6 +99,10 @@ public class ReviewServiceImpl implements ReviewService {
 
         review.setCreatedAt(LocalDateTime.now());
 
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new ReviewException("Product not found"));
+        review.setShopId(product.getShopId());
+
         Review savedReview = reviewRepository.save(review);
         syncProductRatingAndCount(request.getProductId());
         return mapToResponse(savedReview);
@@ -263,9 +267,34 @@ public class ReviewServiceImpl implements ReviewService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<ReviewResponse> getReviewsByShopId(String shopId) {
+        List<Review> reviews = reviewRepository.findByShopId(shopId);
+        return reviews.stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public ReviewResponse replyToReview(String reviewId, String shopId, String replyComment) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found with id: " + reviewId));
+
+        if (!review.getShopId().equals(shopId)) {
+            throw new ReviewException("Bạn không có quyền phản hồi đánh giá của Shop khác");
+        }
+
+        review.setReplyComment(replyComment);
+        review.setReplyAt(LocalDateTime.now());
+
+        Review savedReview = reviewRepository.save(review);
+        return mapToResponse(savedReview);
+    }
+
     private void syncProductRatingAndCount(String productId) {
         Product product = productRepository.findById(productId).orElse(null);
-        if (product == null) return;
+        if (product == null)
+            return;
 
         List<Review> reviews = reviewRepository.findByProductId(productId);
         if (reviews.isEmpty()) {
@@ -294,8 +323,11 @@ public class ReviewServiceImpl implements ReviewService {
         response.setRating(review.getRating());
         response.setComment(review.getComment());
         response.setImageUrls(review.getImageUrls());
+        response.setReplyComment(review.getReplyComment());
+        response.setReplyAt(review.getReplyAt());
         response.setCreatedAt(review.getCreatedAt());
         response.setVerifiedPurchase(review.getOrderId() != null && !review.getOrderId().isBlank());
+        response.setShopId(review.getShopId());
         return response;
     }
 }

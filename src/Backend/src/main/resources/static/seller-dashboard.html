@@ -146,16 +146,19 @@
                         <h1 class="text-2xl font-bold text-gray-800">Tổng quan cửa hàng</h1>
                         <p class="text-gray-500 text-sm mt-1">Theo dõi hiệu suất và quản lý đơn hàng của bạn</p>
                     </div>
-                    <button onclick="loadDashboardStats()" class="flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium text-sm">
+                    <button onclick="loadDashboardStats()"
+                        class="flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium text-sm">
                         <i class="fas fa-sync-alt"></i> Làm mới
                     </button>
                 </div>
 
                 <!-- KPI Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition group">
+                    <div
+                        class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition group">
                         <div class="flex justify-between items-start mb-3">
-                            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition">
+                            <div
+                                class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition">
                                 <i class="fas fa-box"></i>
                             </div>
                             <span class="text-xs text-gray-400 font-medium">Sản phẩm</span>
@@ -163,19 +166,24 @@
                         <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Total Products</p>
                         <h3 id="totalProducts" class="text-2xl font-bold text-gray-800 mt-1">0</h3>
                     </div>
-                    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition group">
+                    <div
+                        class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition group">
                         <div class="flex justify-between items-start mb-3">
-                            <div class="w-12 h-12 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition">
+                            <div
+                                class="w-12 h-12 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition">
                                 <i class="fas fa-clock"></i>
                             </div>
-                            <span id="pendingOrdersBadge" class="hidden bg-orange-100 text-orange-700 text-xs font-bold px-2 py-0.5 rounded-full">!</span>
+                            <span id="pendingOrdersBadge"
+                                class="hidden bg-orange-100 text-orange-700 text-xs font-bold px-2 py-0.5 rounded-full">!</span>
                         </div>
                         <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Pending Orders</p>
                         <h3 id="pendingOrders" class="text-2xl font-bold text-gray-800 mt-1">0</h3>
                     </div>
-                    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition group">
+                    <div
+                        class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition group">
                         <div class="flex justify-between items-start mb-3">
-                            <div class="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition">
+                            <div
+                                class="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition">
                                 <i class="fas fa-coins"></i>
                             </div>
                             <span class="text-xs text-gray-400 font-medium">₫</span>
@@ -183,9 +191,11 @@
                         <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Doanh thu</p>
                         <h3 id="totalRevenue" class="text-2xl font-bold text-gray-800 mt-1">₫0</h3>
                     </div>
-                    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition group">
+                    <div
+                        class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition group">
                         <div class="flex justify-between items-start mb-3">
-                            <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition">
+                            <div
+                                class="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center text-xl group-hover:scale-110 transition">
                                 <i class="fas fa-check-circle"></i>
                             </div>
                             <span class="text-xs text-gray-400 font-medium">Đã giao</span>
@@ -225,16 +235,20 @@
 
                 <!-- Welcome + Quick Actions -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-gradient-to-br from-orange-50 to-orange-100/50 p-6 rounded-2xl border border-orange-100 shadow-sm">
+                    <div
+                        class="bg-gradient-to-br from-orange-50 to-orange-100/50 p-6 rounded-2xl border border-orange-100 shadow-sm">
                         <h3 class="text-lg font-bold text-gray-800 mb-2 flex items-center gap-2">
                             <i class="fas fa-store text-orange-600"></i> Chào mừng đến Seller Centre!
                         </h3>
-                        <p class="text-gray-600 text-sm mb-4">Quản lý sản phẩm, đơn hàng và kho hàng của bạn tại đây.</p>
+                        <p class="text-gray-600 text-sm mb-4">Quản lý sản phẩm, đơn hàng và kho hàng của bạn tại đây.
+                        </p>
                         <div class="flex flex-wrap gap-2">
-                            <button onclick="switchView('add-product')" class="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition">
+                            <button onclick="switchView('add-product')"
+                                class="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition">
                                 <i class="fas fa-plus mr-1"></i> Thêm sản phẩm
                             </button>
-                            <button onclick="switchView('orders')" class="px-4 py-2 bg-white border border-orange-300 text-orange-600 rounded-lg text-sm font-medium hover:bg-orange-50 transition">
+                            <button onclick="switchView('orders')"
+                                class="px-4 py-2 bg-white border border-orange-300 text-orange-600 rounded-lg text-sm font-medium hover:bg-orange-50 transition">
                                 <i class="fas fa-shopping-bag mr-1"></i> Xem đơn hàng
                             </button>
                         </div>
@@ -242,17 +256,35 @@
                     <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                         <h3 class="text-lg font-bold text-gray-800 mb-4">Hành động nhanh</h3>
                         <div class="space-y-3">
-                            <a href="#" onclick="switchView('products'); return false;" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition">
-                                <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-box"></i></div>
-                                <div><p class="font-medium text-gray-800">Sản phẩm của tôi</p><p class="text-xs text-gray-500">Quản lý danh sách sản phẩm</p></div>
+                            <a href="#" onclick="switchView('products'); return false;"
+                                class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition">
+                                <div
+                                    class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-box"></i></div>
+                                <div>
+                                    <p class="font-medium text-gray-800">Sản phẩm của tôi</p>
+                                    <p class="text-xs text-gray-500">Quản lý danh sách sản phẩm</p>
+                                </div>
                             </a>
-                            <a href="#" onclick="switchView('inventory'); return false;" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition">
-                                <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center"><i class="fas fa-warehouse"></i></div>
-                                <div><p class="font-medium text-gray-800">Quản lý kho</p><p class="text-xs text-gray-500">Cập nhật tồn kho</p></div>
+                            <a href="#" onclick="switchView('inventory'); return false;"
+                                class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition">
+                                <div
+                                    class="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-warehouse"></i></div>
+                                <div>
+                                    <p class="font-medium text-gray-800">Quản lý kho</p>
+                                    <p class="text-xs text-gray-500">Cập nhật tồn kho</p>
+                                </div>
                             </a>
-                            <a href="#" onclick="switchView('orders'); return false;" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition">
-                                <div class="w-10 h-10 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center"><i class="fas fa-shopping-bag"></i></div>
-                                <div><p class="font-medium text-gray-800">Đơn hàng</p><p class="text-xs text-gray-500">Xem và xử lý đơn hàng</p></div>
+                            <a href="#" onclick="switchView('orders'); return false;"
+                                class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition">
+                                <div
+                                    class="w-10 h-10 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-shopping-bag"></i></div>
+                                <div>
+                                    <p class="font-medium text-gray-800">Đơn hàng</p>
+                                    <p class="text-xs text-gray-500">Xem và xử lý đơn hàng</p>
+                                </div>
                             </a>
                         </div>
                     </div>
@@ -665,7 +697,8 @@
             <div id="view-returns" class="hidden space-y-6">
                 <div class="flex justify-between items-center">
                     <h2 class="text-2xl font-bold text-gray-800">Trả hàng / Khiếu nại</h2>
-                    <button onclick="loadReturns()" class="flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium text-sm">
+                    <button onclick="loadReturns()"
+                        class="flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium text-sm">
                         <i class="fas fa-sync-alt"></i> Làm mới
                     </button>
                 </div>
@@ -714,7 +747,8 @@
             </div>
 
             <!-- Dispute Detail Modal (Seller view - read only) -->
-            <div id="returnsDisputeDetailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div id="returnsDisputeDetailModal"
+                class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                 <div class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                     <div class="sticky top-0 bg-white border-b border-gray-100 p-6 flex justify-between items-center">
                         <h3 class="text-xl font-bold text-gray-800">Chi tiết khiếu nại</h3>
@@ -917,18 +951,6 @@
             }
         }
 
-        // Toggle Flash Sale Inputs
-        function toggleFlashSaleInputs() {
-            const isFlashSale = document.getElementById('isFlashSale').checked;
-            const container = document.getElementById('flashSaleInputs');
-            if (isFlashSale) {
-                container.classList.remove('hidden');
-                document.getElementById('flashSaleStock').setAttribute('required', 'true');
-            } else {
-                container.classList.add('hidden');
-                document.getElementById('flashSaleStock').removeAttribute('required');
-            }
-        }
 
         // 2. TOGGLE VARIATIONS & CHECKBOX LOGIC
         function toggleVariations() {
@@ -1257,9 +1279,7 @@
                 description: document.getElementById('productDescription').value,
                 categoryId: document.getElementById('productCategory').value,
                 images: [mainImageUrl, ...secondaryImageUrls].filter(url => url),
-                isFlashSale: document.getElementById('isFlashSale').checked,
-                flashSalePrice: null, // Removed as per request
-                flashSaleStock: document.getElementById('isFlashSale').checked ? parseInt(document.getElementById('flashSaleStock').value) : null
+                images: [mainImageUrl, ...secondaryImageUrls].filter(url => url)
             };
             const globalPrice = parseFloat(document.getElementById('productPrice').value) || 0;
 
@@ -1877,7 +1897,7 @@
                         const returnsData = await returnsRes.json();
                         const refunds = returnsData.refunds || [];
                         refundedIds = new Set(refunds.filter(r => ['APPROVED', 'REFUNDED'].includes((r.status || '').toUpperCase())).map(r => r.orderId));
-                    } catch (e) {}
+                    } catch (e) { }
                 }
 
                 const isCompletedAndNotReturned = o => (o.orderStatus === 'COMPLETED' || o.orderStatus === 'SHIPPED') && !refundedIds.has(o.id);
@@ -1975,7 +1995,7 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: { callback: v => '₫' + (v >= 1000000 ? (v/1000000)+'M' : v.toLocaleString()) }
+                            ticks: { callback: v => '₫' + (v >= 1000000 ? (v / 1000000) + 'M' : v.toLocaleString()) }
                         },
                         x: { grid: { display: false } }
                     }
@@ -2294,7 +2314,7 @@
                         const returnsData = await returnsRes.json();
                         const refunds = returnsData.refunds || [];
                         refundedOrderIds = new Set(refunds.filter(r => ['APPROVED', 'REFUNDED'].includes((r.status || '').toUpperCase())).map(r => r.orderId));
-                    } catch (e) {}
+                    } catch (e) { }
                 }
 
                 if (ordersRes.ok) {
@@ -2420,7 +2440,7 @@
                 if (refundRes && refundRes.ok) {
                     try {
                         refund = await refundRes.json();
-                    } catch (e) {}
+                    } catch (e) { }
                 }
 
                 renderOrderDetail(order, refund);
