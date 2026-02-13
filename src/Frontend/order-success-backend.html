@@ -4,30 +4,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Success (Backend) - Shopee Clone</title>
+    <title>Order Success - GoShop</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css"> <!-- Added style.css -->
 </head>
 
 <body class="bg-gray-50 flex flex-col min-h-screen">
     <!-- Header -->
-    <header class="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
+    <header class="bg-[#AD3029] text-white shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between py-4 gap-8">
                 <div class="flex items-center gap-4 min-w-fit">
-                    <a href="index.html" class="flex items-center gap-2 text-orange-500 hover:opacity-90">
-                        <i class="fas fa-shopping-bag text-3xl"></i>
-                        <span class="text-2xl font-bold">SHOP CLONE</span>
+                    <a href="index.html" class="flex items-center gap-2 text-white hover:opacity-90">
+                        <i class="fas fa-shopping-bag text-3xl bounce-goshop"></i>
+                        <span class="text-2xl font-bold">GoShop | Order Success</span>
                     </a>
                 </div>
-                <div class="flex items-center gap-5 text-gray-600 min-w-fit">
-                    <a href="cart-backend.html" class="hover:text-orange-500 transition">
-                        <i class="fas fa-shopping-cart text-xl"></i>
-                    </a>
-                    <a href="profile.html"
-                        class="flex items-center gap-2 cursor-pointer hover:text-orange-500 transition">
-                        <img id="userAvatar" src="" alt="User" class="w-8 h-8 rounded-full border border-gray-200">
-                    </a>
+                <div class="flex items-center gap-5 text-white min-w-fit">
+                    <div class="flex items-center gap-2 cursor-pointer hover:text-red-200 transition">
+                        <img id="userAvatar" src="" alt="User" class="w-8 h-8 rounded-full border-2 border-white/50">
+                        <span id="userName" class="font-medium hidden md:block">User</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -36,7 +34,7 @@
     <!-- Loading State -->
     <div id="loadingOrder" class="flex-grow flex items-center justify-center">
         <div class="text-center">
-            <i class="fas fa-spinner fa-spin text-4xl text-orange-500 mb-4"></i>
+            <i class="fas fa-spinner fa-spin text-4xl text-[#AD3029] mb-4"></i>
             <p class="text-gray-600">Loading order details...</p>
         </div>
     </div>
@@ -48,7 +46,7 @@
             <p class="text-gray-600 mb-2 font-semibold">Failed to load order</p>
             <p id="errorDetail" class="text-sm text-gray-500 mb-4"></p>
             <div class="flex gap-3 justify-center flex-wrap">
-                <a href="checkout-backend.html" class="bg-orange-500 text-white px-6 py-2 rounded hover:bg-orange-600">
+                <a href="checkout-backend.html" class="bg-[#AD3029] text-white px-6 py-2 rounded hover:bg-[#8f2621]">
                     Back to Checkout
                 </a>
                 <a href="index.html" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">
@@ -61,7 +59,7 @@
     <!-- Main Content -->
     <main id="successContent" class="hidden flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
         <!-- Success Card -->
-        <div class="bg-white rounded p-10 text-center shadow-sm max-w-3xl mx-auto mb-12">
+        <div class="bg-white rounded p-10 text-center shadow-sm max-w-3xl mx-auto mb-12 border-2 border-[#AD3029]">
             <!-- Success Icon -->
             <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <i class="fas fa-check text-4xl text-green-500"></i>
@@ -79,7 +77,7 @@
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-200">
                     <span class="text-gray-500">Total Amount</span>
-                    <span class="font-bold text-orange-500" id="orderTotal">₫0</span>
+                    <span class="font-bold text-[#AD3029] text-xl" id="orderTotal">₫0</span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-200">
                     <span class="text-gray-500">Payment Method</span>
@@ -87,7 +85,7 @@
                 </div>
                 <div class="flex justify-between py-2">
                     <span class="text-gray-500">Status</span>
-                    <span class="font-medium text-blue-600" id="orderStatus">-</span>
+                    <span class="font-medium text-green-600" id="orderStatus">-</span>
                 </div>
             </div>
 
@@ -102,7 +100,7 @@
             <!-- Buttons -->
             <div class="flex justify-center gap-4">
                 <button onclick="viewOrderDetails()"
-                    class="bg-orange-500 hover:bg-orange-600 text-white px-8 py-2.5 rounded shadow-sm font-semibold transition">
+                    class="bg-[#AD3029] hover:bg-[#8f2621] text-white px-8 py-2.5 rounded shadow-sm font-semibold transition">
                     View Order Details
                 </button>
                 <button onclick="window.location.href='index.html'"
@@ -116,7 +114,7 @@
     <!-- Footer -->
     <footer class="bg-white border-t py-8 mt-auto">
         <div class="max-w-7xl mx-auto px-4 text-center text-gray-500 text-sm">
-            &copy; 2026 SHOP CLONE. All Rights Reserved.
+            &copy; 2026 GoShop. All Rights Reserved.
         </div>
     </footer>
 
@@ -180,7 +178,7 @@
                         ${item.variantName ? `<div class="text-xs text-gray-500">Variant: ${item.variantName}</div>` : ''}
                         <div class="text-xs text-gray-500">Qty: ${qty}</div>
                     </div>
-                    <div class="text-orange-500 font-bold text-sm">
+                    <div class="text-[#AD3029] font-bold text-sm">
                         ₫${(price * qty).toLocaleString('vi-VN')}
                     </div>
                 </div>
@@ -205,9 +203,11 @@
         }
 
         function updateUserAvatar() {
-            const userName = localStorage.getItem('userName') || 'User';
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const userName = user.fullName || localStorage.getItem('userName') || 'User';
+            document.getElementById('userName').textContent = userName;
             document.getElementById('userAvatar').src =
-                `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=ffedd5&color=f97316`;
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=fecaca&color=AD3029`;
         }
 
         // Initialize on page load

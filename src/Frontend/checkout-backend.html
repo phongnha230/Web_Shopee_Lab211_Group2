@@ -4,9 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout (Backend Integrated) - Shopee Clone</title>
+    <title>Checkout (Backend Integrated) - GoShop</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <script>
     // AUTH GUARD - preserve FULL URL (including mode=buynow) so user returns to correct checkout after login
@@ -20,11 +21,11 @@
 
 <body class="bg-gray-50">
     <!-- Header -->
-    <header class="bg-gradient-to-r from-orange-500 to-orange-600 shadow-md">
+    <header class="header-gradient shadow-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center py-4">
                 <i class="fas fa-shopping-bag text-3xl text-white mr-3"></i>
-                <span class="text-2xl font-bold text-white">Shopee Clone</span>
+                <span class="text-2xl font-bold text-white">GoShop</span>
                 <span class="mx-4 text-white">|</span>
                 <span class="text-xl text-white">Checkout (Backend)</span>
             </div>
@@ -109,44 +110,24 @@
                         Vouchers
                     </h2>
 
-                    <!-- Shop Voucher (Mới thêm) -->
+                    <!-- Shop Voucher -->
                     <div class="mb-4">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-store text-orange-500 mr-1"></i> Shop Voucher (Merchant)
                         </label>
                         <div class="flex gap-2">
-                            <button type="button" onclick="openVoucherPicker('SHOP')"
-                                class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-all border border-gray-300"
-                                title="Select from Shop vouchers">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            <input type="text" id="inputShopVoucher"
-                                class="flex-1 bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-orange-500 transition-colors uppercase"
-                                placeholder="Enter Shop Voucher Code">
-                            <button type="button" onclick="applyShopVoucher()"
-                                class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg text-sm font-bold transition-all shadow-md active:scale-95">
-                                Apply
-                            </button>
-                        </div>
-                        <div id="shopVoucherMessage" class="h-5 mt-1 text-xs"></div>
-                    </div>
 
-                    <!-- Platform Voucher (Đổi tên từ Shop Voucher cũ) -->
-                    <div class="mb-4">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fas fa-tag text-blue-500 mr-1"></i> Platform Voucher (Shopee)
-                        </label>
-                        <div class="flex gap-2">
                             <button type="button" onclick="openVoucherPicker('PRODUCT')"
                                 class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-all border border-gray-300"
                                 title="Select from collected vouchers">
                                 <i class="fas fa-plus"></i>
                             </button>
                             <input type="text" id="inputProductVoucher"
-                                class="flex-1 bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors uppercase"
-                                placeholder="Enter Shopee Voucher Code">
+                                class="flex-1 bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-orange-500 transition-colors uppercase"
+                                placeholder="Enter Shop Voucher Code">
                             <button type="button" onclick="applyProductVoucher()"
-                                class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-bold transition-all shadow-md active:scale-95">
+                                class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg text-sm font-bold transition-all shadow-md active:scale-95">
+
                                 Apply
                             </button>
                         </div>
@@ -506,13 +487,6 @@
                 container.appendChild(row);
             }
 
-            // 3. Shop Voucher Discount
-            if (shopDiscountAmount > 0) {
-                const row = document.createElement('div');
-                row.className = 'flex justify-between text-orange-600 discount-row';
-                row.innerHTML = `<span class="flex items-center"><i class="fas fa-store mr-2"></i>Shop Discount</span><span class="font-medium">-₫${formatVND(shopDiscountAmount)}</span>`;
-                container.appendChild(row);
-            }
         }
 
         function prefillAddress() {
@@ -704,7 +678,6 @@
                         await applyShopVoucher();
                     }
                 }
-
                 console.log('✅ Vouchers restored successfully!');
             } catch (e) {
                 console.error('❌ Restore vouchers error:', e);
@@ -1060,7 +1033,6 @@
                     console.error('Error parsing stored shop voucher', e);
                 }
             }
-
             // Fallback: Check URL params (legacy support)
             const urlParams = new URLSearchParams(window.location.search);
             const voucherCode = urlParams.get('voucherCode');
@@ -1148,6 +1120,7 @@
             else if (type === 'SHOP') typeLabel = 'Shop';
 
             document.getElementById('modalVoucherType').textContent = typeLabel;
+
             modal.classList.remove('hidden');
 
             // Load vouchers

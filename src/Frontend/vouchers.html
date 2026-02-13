@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Vouchers - Shopee Clone</title>
+    <title>My Vouchers - GoShop</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -79,11 +79,12 @@
             background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
         }
     </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body class="bg-gray-50">
     <!-- Header -->
-    <header class="bg-gradient-to-r from-orange-500 to-orange-600 shadow-md sticky top-0 z-50">
+    <header class="header-gradient shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center space-x-3">
@@ -101,13 +102,16 @@
     <div class="bg-white border-b sticky top-16 z-40">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex space-x-8">
-                <button id="tab-product" onclick="switchTab('product')" class="py-4 px-2 border-b-2 border-orange-500 text-orange-600 font-semibold transition-colors">
+                <button id="tab-product" onclick="switchTab('product')"
+                    class="py-4 px-2 border-b-2 border-orange-500 text-orange-600 font-semibold transition-colors">
                     Product Discounts
                 </button>
-                <button id="tab-shipping" onclick="switchTab('shipping')" class="py-4 px-2 text-gray-600 hover:text-orange-500 transition-colors">
+                <button id="tab-shipping" onclick="switchTab('shipping')"
+                    class="py-4 px-2 text-gray-600 hover:text-orange-500 transition-colors">
                     Free Shipping
                 </button>
-                <button id="tab-collected" onclick="switchTab('collected')" class="py-4 px-2 text-gray-600 hover:text-orange-500 transition-colors">
+                <button id="tab-collected" onclick="switchTab('collected')"
+                    class="py-4 px-2 text-gray-600 hover:text-orange-500 transition-colors">
                     Collected (<span id="collectedCount">3</span>)
                 </button>
             </div>
@@ -235,21 +239,21 @@
 
         function switchTab(tab) {
             currentTab = tab;
-            
+
             // Update Tab UI
             document.querySelectorAll('button[id^="tab-"]').forEach(btn => {
                 btn.className = 'py-4 px-2 text-gray-600 hover:text-orange-500 transition-colors border-b-2 border-transparent';
             });
-            
+
             const activeBtn = document.getElementById(`tab-${tab}`);
             activeBtn.className = 'py-4 px-2 border-b-2 border-orange-500 text-orange-600 font-semibold transition-colors';
-            
+
             renderVouchers();
         }
 
         function renderVouchers() {
             const container = document.getElementById('vouchersContainer');
-            
+
             if (!vouchersLoaded) {
                 container.innerHTML = `
                     <div class="col-span-full text-center py-16 text-gray-500">
@@ -259,11 +263,11 @@
                 `;
                 return;
             }
-            
+
             // Re-map collected status from localStorage (in case it changed)
             const collectedIds = getCollectedIds();
             VOUCHERS.forEach(v => { v.collected = collectedIds.includes(v.id); });
-            
+
             // Filter Logic
             let filteredVouchers = [];
             if (currentTab === 'collected') {
@@ -321,20 +325,20 @@
                         
                         <div class="mt-2">
                             ${usedVoucherCodes.includes(v.code) ?
-                                `<button disabled class="bg-gray-300 text-gray-500 w-full py-2 rounded-lg text-sm font-bold cursor-not-allowed">
+                    `<button disabled class="bg-gray-300 text-gray-500 w-full py-2 rounded-lg text-sm font-bold cursor-not-allowed">
                                     Đã sử dụng
                                 </button>`
-                                : v.collected ? 
-                                `<button onclick="useVoucher('${v.code}')" 
+                    : v.collected ?
+                        `<button onclick="useVoucher('${v.code}')" 
                                     class="bg-white text-orange-600 hover:bg-orange-50 w-full py-2 rounded-lg text-sm font-bold transition-all transform active:scale-95 shadow-sm">
                                     Use Now
-                                </button>` 
-                                : 
-                                `<button onclick="collectVoucher('${v.id}')" 
+                                </button>`
+                        :
+                        `<button onclick="collectVoucher('${v.id}')" 
                                     class="bg-white/90 text-orange-600 hover:bg-white w-full py-2 rounded-lg text-sm font-bold transition-all transform active:scale-95 shadow-sm">
                                     Collect Now
                                 </button>`
-                            }
+                }
                         </div>
                     </div>
                 </div>
@@ -348,17 +352,17 @@
             }
             const voucher = VOUCHERS.find(v => v.code === code);
             const type = voucher && voucher.type === 'product' ? 'PRODUCT' : 'SHIPPING';
-            
+
             // Lưu vào key riêng biệt theo loại voucher để không ghi đè lên nhau
             if (type === 'PRODUCT') {
                 localStorage.setItem('autoApplyProductVoucher', JSON.stringify({ code, type }));
             } else {
                 localStorage.setItem('autoApplyShippingVoucher', JSON.stringify({ code, type }));
             }
-            
+
             // Redirect back to checkout - preserve Buy Now params (mode=buynow&productId=...) 
             // so cart doesn't become empty when user came from Buy Now flow
-            const returnUrl = sessionStorage.getItem('checkoutReturnUrl') 
+            const returnUrl = sessionStorage.getItem('checkoutReturnUrl')
                 || (document.referrer && document.referrer.includes('checkout-backend') ? document.referrer : null);
             window.location.href = returnUrl || 'checkout-backend.html';
         }
@@ -370,7 +374,7 @@
                 showToast('Voucher này đã được sử dụng trong đơn hàng trước.');
                 return;
             }
-            
+
             const ids = getCollectedIds();
             if (!ids.includes(id)) ids.push(id);
             setCollectedIds(ids);

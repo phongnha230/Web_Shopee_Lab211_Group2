@@ -4,9 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopping Cart (Backend Integrated) - Shopee Clone</title>
+    <title>Shopping Cart (Backend Integrated) - GoShop</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <script>
     // AUTH GUARD
@@ -18,43 +19,31 @@
 
 <body class="bg-gray-50">
     <!-- Header -->
-    <header class="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
+    <header class="bg-[#AD3029] text-white shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between py-4 gap-8">
                 <div class="flex items-center gap-4 min-w-fit">
-                    <a href="index.html" class="flex items-center gap-2 text-orange-500 hover:opacity-90">
-                        <i class="fas fa-shopping-bag text-3xl"></i>
-                        <span class="text-2xl font-bold">Shopee Clone</span>
+                    <a href="index.html" class="flex items-center gap-2 text-white hover:opacity-90">
+                        <i class="fas fa-shopping-bag text-3xl bounce-goshop"></i>
+                        <span class="text-2xl font-bold">GoShop | Shopping Cart</span>
                     </a>
-                    <div class="h-8 w-[1px] bg-orange-500 hidden sm:block"></div>
-                    <span class="text-xl text-gray-700 hidden sm:block">Shopping Cart (Backend)</span>
                 </div>
 
                 <div class="flex-1 max-w-2xl hidden md:block">
                     <div class="relative flex items-center">
                         <input type="text" placeholder="Search for products, brands and shops"
-                            class="w-full bg-gray-100 text-gray-700 border border-transparent focus:bg-white focus:border-orange-500 rounded-sm py-2 px-4 outline-none transition-all placeholder-gray-400">
+                            class="w-full bg-white text-gray-700 border border-transparent focus:border-red-300 rounded-sm py-2 px-4 outline-none transition-all placeholder-gray-400">
                         <button
-                            class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-sm absolute right-0 top-0 bottom-0 flex items-center justify-center transition">
+                            class="bg-[#DC2626] hover:bg-[#B91C1C] text-white px-6 py-2 rounded-sm absolute right-0 top-0 bottom-0 flex items-center justify-center transition">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-5 text-gray-600 min-w-fit">
-                    <button class="relative hover:text-orange-500 transition">
-                        <i class="fas fa-bell text-xl"></i>
-                        <span
-                            class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-                    </button>
-                    <button class="hover:text-orange-500 transition">
-                        <i class="fas fa-question-circle text-xl"></i>
-                    </button>
-
-                    <div id="userNav" class="flex items-center gap-2 cursor-pointer hover:text-orange-500 transition">
-                        <img id="userAvatar" src="" alt="User" class="w-8 h-8 rounded-full border border-gray-200">
+                <div class="flex items-center gap-5 text-white min-w-fit">
+                    <div id="userNav" class="flex items-center gap-2 cursor-pointer hover:text-red-200 transition">
+                        <img id="userAvatar" src="" alt="User" class="w-8 h-8 rounded-full border-2 border-white/50">
                         <span id="userName" class="font-medium text-sm hidden lg:block">Loading...</span>
-                        <button onclick="logout()" class="ml-2 text-sm text-red-500 hover:text-red-700">Logout</button>
                     </div>
                 </div>
             </div>
@@ -171,7 +160,7 @@
 
                 // Call backend API
                 backendCart = await CartAPI.getCart();
-                
+
                 console.log('Cart loaded from backend:', backendCart);
 
                 if (!backendCart || !backendCart.items || backendCart.items.length === 0) {
@@ -362,9 +351,10 @@
         });
 
         function updateNavbar() {
-            const userName = localStorage.getItem('userName') || 'User';
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const userName = user.fullName || localStorage.getItem('userName') || 'User';
             document.getElementById('userName').textContent = userName;
-            document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=ffedd5&color=f97316`;
+            document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=fecaca&color=AD3029`;
         }
 
         function logout() {
