@@ -8,4 +8,10 @@ public interface ShopVoucherService {
     List<ShopVoucher> getVouchersByShop(String shopId);
 
     ShopVoucher createShopVoucher(ShopVoucher shopVoucher);
+
+    ShopVoucher updateShopVoucher(String id, ShopVoucher shopVoucher);
+
+    ShopVoucher getVoucherByCode(String code);
+
+    void deleteShopVoucher(String id);
 }

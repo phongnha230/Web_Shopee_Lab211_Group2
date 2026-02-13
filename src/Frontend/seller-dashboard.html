@@ -95,8 +95,12 @@
                 <i class="fas fa-bolt w-5"></i> Flash Sale
             </a>
             <a href="#" onclick="switchView('orders'); return false;" id="nav-orders"
-                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
-                <i class="fas fa-shopping-bag w-5"></i> Orders
+                class="flex items-center justify-between px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-shopping-bag w-5"></i> Orders
+                </div>
+                <span id="navOrdersBadge"
+                    class="hidden bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">0</span>
             </a>
             <a href="#" onclick="switchView('returns'); return false;" id="nav-returns"
                 class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
@@ -108,7 +112,15 @@
             </a>
             <a href="#" onclick="switchView('customers'); return false;" id="nav-customers"
                 class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
-                <i class="fas fa-user-friends w-5"></i> Customer Mgmt
+                <i class="fas fa-user-friends w-5"></i> Customer Care
+            </a>
+            <a href="#" onclick="switchView('reviews'); return false;" id="nav-reviews"
+                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
+                <i class="fas fa-star w-5"></i> Product Reviews
+            </a>
+            <a href="#" onclick="switchView('vouchers'); return false;" id="nav-vouchers"
+                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition">
+                <i class="fas fa-tags w-5"></i> Shop Vouchers
             </a>
 
 
@@ -707,7 +719,7 @@
                             <div class="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mb-4">
                                 <i class="fas fa-comments text-3xl text-orange-600"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-gray-800 mb-2">Customer Center</h3>
+                            <h3 class="text-lg font-bold text-gray-800 mb-2">Customer Care</h3>
                             <p class="text-gray-500 max-w-xs">Select a customer to start consulting or view follower
                                 info.</p>
                         </div>
@@ -1032,6 +1044,143 @@
                 </div>
             </div>
 
+            <!-- VIEW 5: REVIEWS (QUẢN LÝ ĐÁNH GIÁ) -->
+            <div id="view-reviews" class="hidden space-y-6">
+                <h1 class="text-2xl font-bold text-gray-800">Product Reviews</h1>
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-gray-600">
+                            <thead class="bg-gray-50 text-gray-500 font-semibold uppercase text-xs">
+                                <tr>
+                                    <th class="px-6 py-4">Customer</th>
+                                    <th class="px-6 py-4">Rating</th>
+                                    <th class="px-6 py-4">Comment</th>
+                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-6 py-4 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reviewsList" class="divide-y divide-gray-100">
+                                <tr>
+                                    <td colspan="5" class="px-6 py-10 text-center text-gray-500">No reviews found</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 6: VOUCHERS (QUẢN LÝ MÃ GIẢM GIÁ) -->
+            <div id="view-vouchers" class="hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-gray-800">Shop Vouchers</h1>
+                    <button onclick="openVoucherModal()"
+                        class="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-orange-600 transition">
+                        <i class="fas fa-plus mr-2"></i>Create New Voucher
+                    </button>
+                </div>
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-gray-600">
+                            <thead class="bg-gray-50 text-gray-500 font-semibold uppercase text-xs">
+                                <tr>
+                                    <th class="px-6 py-4">Voucher Code</th>
+                                    <th class="px-6 py-4">Discount</th>
+                                    <th class="px-6 py-4">Quantity</th>
+                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-6 py-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vouchersList" class="divide-y divide-gray-100">
+                                <tr>
+                                    <td colspan="5" class="px-6 py-10 text-center text-gray-500">No vouchers found</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- Create Voucher Modal -->
+            <div id="voucherModal"
+                class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-xl max-w-md w-full overflow-hidden shadow-2xl">
+                    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                        <h3 class="text-xl font-bold text-gray-800">Create New Voucher</h3>
+                        <button onclick="closeVoucherModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    <form id="createVoucherForm" onsubmit="handleCreateVoucher(event)" class="p-6 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Voucher Code</label>
+                            <input type="text" id="vCode" required placeholder="E.g. SHOP10"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none uppercase">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Discount Amount (₫)</label>
+                            <input type="number" id="vDiscount" required min="1000" placeholder="10000"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Min. Spend (₫)</label>
+                            <input type="number" id="vMinSpend" required min="0" placeholder="50000"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                            <input type="number" id="vQuantity" required min="1" placeholder="100"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                                <input type="datetime-local" id="vStart" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                                <input type="datetime-local" id="vEnd" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-sm">
+                            </div>
+                        </div>
+                        <div class="pt-4 flex gap-3">
+                            <button type="button" onclick="closeVoucherModal()"
+                                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
+                            <button type="submit"
+                                class="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg font-bold hover:bg-orange-600 shadow-md">Create</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- Reply Review Modal -->
+            <div id="replyReviewModal"
+                class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-xl max-w-lg w-full overflow-hidden shadow-2xl">
+                    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                        <h3 class="text-xl font-bold text-gray-800">Reply to Review</h3>
+                        <button onclick="closeReplyModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-sm font-bold text-gray-700 mb-1" id="reviewCustomerName"></p>
+                            <p class="text-sm text-gray-600 italic" id="reviewCustomerComment"></p>
+                        </div>
+                        <form id="replyReviewForm" onsubmit="handleReplyReview(event)">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Your Reply</label>
+                            <textarea id="replyContent" required rows="4" placeholder="Thank you for your feedback..."
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none resize-none"></textarea>
+                            <div class="pt-4 flex gap-3">
+                                <button type="button" onclick="closeReplyModal()"
+                                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
+                                <button type="submit"
+                                    class="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg font-bold hover:bg-orange-600 shadow-md">Send
+                                    Reply</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -1047,6 +1196,8 @@
         let secondaryImageUrls = []; // Store secondary image URLs
         let currentView = 'dashboard';
         let editingProductId = null; // Track if we are editing
+        let editingVoucherId = null; // Track if we are editing voucher
+        let currentShopVouchers = []; // Cache vouchers
 
         if (!token) {
             alert('Please login first!');
@@ -1078,7 +1229,9 @@
                 'orders': 'Orders',
                 'returns': 'Return / Refund',
                 'shop-profile': 'Shop Profile',
-                'customers': 'Customer Center'
+                'customers': 'Customer Care',
+                'reviews': 'Product Reviews',
+                'vouchers': 'Shop Vouchers'
             };
             document.getElementById('pageTitle').textContent = titles[viewName] || 'Dashboard';
 
@@ -1095,6 +1248,12 @@
                     resetProductForm();
                     document.getElementById('submitProductBtn').innerHTML = '<i class="fas fa-check mr-2"></i>Create Product';
                 }
+            } else if (viewName === 'vouchers') {
+                loadVouchers();
+            } else if (viewName === 'reviews') {
+                loadReviews();
+            } else if (viewName === 'orders') {
+                // loadShopReviews();
             } else if (viewName === 'shop-profile') {
                 loadShopProfile();
             } else if (viewName === 'orders') {
@@ -2047,90 +2206,346 @@
         let revenueChartInstance = null;
         let orderStatusChartInstance = null;
 
+        async function handleCreateVoucher(e) {
+            e.preventDefault();
+            if (!currentShop) return;
+
+            const voucherData = {
+                shopId: currentShop.id,
+                code: document.getElementById('vCode').value.toUpperCase(),
+                discount: parseFloat(document.getElementById('vDiscount').value),
+                minSpend: parseFloat(document.getElementById('vMinSpend').value) || 0,
+                quantity: parseInt(document.getElementById('vQuantity').value),
+                startDate: new Date(document.getElementById('vStart').value).toISOString(),
+                endDate: new Date(document.getElementById('vEnd').value).toISOString()
+            };
+
+            const url = editingVoucherId ? `${baseUrl}/shop-vouchers/${editingVoucherId}` : `${baseUrl}/shop-vouchers`;
+            const method = editingVoucherId ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(voucherData)
+                });
+
+                if (response.ok) {
+                    showToast(editingVoucherId ? (isViewMode ? 'Voucher viewed' : 'Voucher updated successfully!') : 'Voucher created successfully!', 'success');
+                    closeVoucherModal();
+                    loadVouchers();
+                } else {
+                    const err = await response.text();
+                    showToast(`Failed: ${err}`, 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error saving voucher', 'error');
+            }
+        }
+
+        function editVoucher(id) {
+            const v = currentShopVouchers.find(item => item.id === id);
+            if (!v) return;
+
+            editingVoucherId = id;
+            document.querySelector('#voucherModal h3').textContent = 'Edit Voucher';
+            document.querySelector('#voucherModal button[type="submit"]').textContent = 'Update';
+
+            document.getElementById('vCode').value = v.code;
+            document.getElementById('vDiscount').value = v.discount;
+            document.getElementById('vMinSpend').value = v.minSpend || 0;
+            document.getElementById('vQuantity').value = v.quantity;
+
+            // Format dates for datetime-local
+            if (v.startDate) document.getElementById('vStart').value = new Date(v.startDate).toISOString().slice(0, 16);
+            if (v.endDate) document.getElementById('vEnd').value = new Date(v.endDate).toISOString().slice(0, 16);
+
+            openVoucherModal();
+        }
+
+        function viewVoucher(id) {
+            const v = currentShopVouchers.find(item => item.id === id);
+            if (!v) return;
+
+            editingVoucherId = id;
+            isViewMode = true;
+
+            document.querySelector('#voucherModal h3').textContent = 'View Voucher Details';
+            // Hide submit button in view mode or change it
+            const submitBtn = document.querySelector('#voucherModal button[type="submit"]');
+            submitBtn.classList.add('hidden');
+
+            // Populate fields
+            document.getElementById('vCode').value = v.code;
+            document.getElementById('vDiscount').value = v.discount;
+            document.getElementById('vMinSpend').value = v.minSpend || 0;
+            document.getElementById('vQuantity').value = v.quantity;
+
+            // Format dates
+            if (v.startDate) document.getElementById('vStart').value = new Date(v.startDate).toISOString().slice(0, 16);
+            if (v.endDate) document.getElementById('vEnd').value = new Date(v.endDate).toISOString().slice(0, 16);
+
+            // Disable all inputs
+            toggleVoucherInputs(true);
+
+            document.getElementById('voucherModal').classList.remove('hidden');
+        }
+
+        async function deleteVoucher(id) {
+            if (!confirm('Are you sure you want to delete this voucher? This action cannot be undone.')) return;
+
+            try {
+                const response = await fetch(`${baseUrl}/shop-vouchers/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    showToast('Voucher deleted successfully', 'success');
+                    loadVouchers();
+                } else {
+                    const err = await response.text();
+                    showToast(`Failed to delete: ${err}`, 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error deleting voucher', 'error');
+            }
+        }
+
+        function toggleVoucherInputs(disabled) {
+            const inputs = ['vCode', 'vDiscount', 'vMinSpend', 'vQuantity', 'vStart', 'vEnd'];
+            inputs.forEach(id => {
+                document.getElementById(id).disabled = disabled;
+            });
+        }
+
+        let isViewMode = false;
+        function openVoucherModal() {
+            isViewMode = false;
+            toggleVoucherInputs(false);
+            document.querySelector('#voucherModal button[type="submit"]').classList.remove('hidden');
+
+            if (!editingVoucherId) {
+                document.querySelector('#voucherModal h3').textContent = 'Create New Voucher';
+                document.querySelector('#voucherModal button[type="submit"]').textContent = 'Create';
+                document.getElementById('createVoucherForm').reset();
+            }
+            document.getElementById('voucherModal').classList.remove('hidden');
+        }
+
+        function closeVoucherModal() {
+            document.getElementById('voucherModal').classList.add('hidden');
+            editingVoucherId = null;
+        }
+
+        async function loadReviews() {
+            if (!currentShop) return;
+            const listContainer = document.getElementById('reviewsList');
+            listContainer.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center"><i class="fas fa-spinner fa-spin mr-2"></i>Loading reviews...</td></tr>';
+
+            try {
+                const response = await fetch(`${baseUrl}/reviews/shop/${currentShop.id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const reviews = await response.json();
+                    if (reviews.length === 0) {
+                        listContainer.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-gray-500">No reviews found</td></tr>';
+                        return;
+                    }
+
+                    listContainer.innerHTML = reviews.map(r => {
+                        const stars = '⭐'.repeat(r.rating);
+                        const date = new Date(r.createdAt).toLocaleDateString('vi-VN');
+                        const status = r.replyComment
+                            ? '<span class="px-2 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">Replied</span>'
+                            : '<span class="px-2 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">Pending</span>';
+
+                        const replyBtn = r.replyComment
+                            ? `<button class="text-gray-400 cursor-not-allowed" title="Already replied"><i class="fas fa-reply"></i></button>`
+                            : `<button onclick="openReplyModal('${r.id}', '${r.userName}', '${r.comment}')" class="text-blue-500 hover:text-blue-700 transition" title="Reply to this review">
+                                  <i class="fas fa-reply"></i>
+                               </button>`;
+
+                        return `
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-gray-800">${r.userName}</div>
+                                    <div class="text-xs text-gray-500">${date}</div>
+                                </td>
+                                <td class="px-6 py-4">${stars}</td>
+                                <td class="px-6 py-4">
+                                    <div class="max-w-xs truncate" title="${r.comment}">${r.comment}</div>
+                                </td>
+                                <td class="px-6 py-4">${status}</td>
+                                <td class="px-6 py-4 text-right">${replyBtn}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            } catch (err) {
+                console.error('Error loading reviews:', err);
+            }
+        }
+
+        let currentReviewId = null;
+        function openReplyModal(id, name, comment) {
+            currentReviewId = id;
+            document.getElementById('reviewCustomerName').textContent = `Customer: ${name}`;
+            document.getElementById('reviewCustomerComment').textContent = `"${comment}"`;
+            document.getElementById('replyContent').value = '';
+            document.getElementById('replyReviewModal').classList.remove('hidden');
+        }
+
+        function closeReplyModal() {
+            document.getElementById('replyReviewModal').classList.add('hidden');
+            currentReviewId = null;
+        }
+
+        async function handleReplyReview(e) {
+            e.preventDefault();
+            const replyComment = document.getElementById('replyContent').value;
+
+            try {
+                const response = await fetch(`${baseUrl}/reviews/${currentReviewId}/reply`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ replyComment })
+                });
+
+                if (response.ok) {
+                    showToast('Reply sent successfully!', 'success');
+                    closeReplyModal();
+                    loadReviews();
+                } else {
+                    showToast('Failed to send reply', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error sending reply', 'error');
+            }
+        }
+
         async function loadDashboardStats() {
             if (!currentShop) return;
             try {
-                // Fetch products, orders, and returns in parallel
-                const [productsRes, ordersAllRes, returnsRes] = await Promise.all([
-                    fetch(`${baseUrl}/products/shop/${currentShop.id}`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                    fetch(`${baseUrl}/orders/shop/${currentShop.id}`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                    fetch(`${baseUrl}/seller/returns`, { headers: { 'Authorization': `Bearer ${token}` } }).catch(() => null)
-                ]);
-
-                const products = productsRes.ok ? await productsRes.json() : [];
-                const allOrders = ordersAllRes.ok ? await ordersAllRes.json() : [];
-
-                let refundedIds = new Set();
-                if (returnsRes && returnsRes.ok) {
-                    try {
-                        const returnsData = await returnsRes.json();
-                        const refunds = returnsData.refunds || [];
-                        refundedIds = new Set(refunds.filter(r => ['APPROVED', 'REFUNDED'].includes((r.status || '').toUpperCase())).map(r => r.orderId));
-                    } catch (e) { }
-                }
-
-                const isCompletedAndNotReturned = o => (o.orderStatus === 'COMPLETED' || o.orderStatus === 'SHIPPED') && !refundedIds.has(o.id);
-
-                // Update KPI cards
-                document.getElementById('totalProducts').textContent = products.length;
-
-                const pendingOrders = allOrders.filter(o => o.orderStatus === 'PENDING').length;
-                const completedOrders = allOrders.filter(isCompletedAndNotReturned).length;
-                const revenue = allOrders
-                    .filter(isCompletedAndNotReturned)
-                    .reduce((sum, o) => sum + (Number(o.totalPrice) || 0), 0);
-
-                document.getElementById('pendingOrders').textContent = pendingOrders;
-                const pendingBadge = document.getElementById('pendingOrdersBadge');
-                if (pendingBadge) {
-                    if (pendingOrders > 0) { pendingBadge.classList.remove('hidden'); pendingBadge.textContent = pendingOrders; }
-                    else pendingBadge.classList.add('hidden');
-                }
-
-                document.getElementById('totalRevenue').textContent = '₫' + revenue.toLocaleString('en-US');
-                const completedEl = document.getElementById('completedOrders');
-                if (completedEl) completedEl.textContent = completedOrders;
-
-                // Build revenue by day (last 7 days)
-                const revenueByDay = {};
-                const now = new Date();
-                for (let i = 6; i >= 0; i--) {
-                    const d = new Date(now);
-                    d.setDate(d.getDate() - i);
-                    const key = d.toISOString().split('T')[0];
-                    revenueByDay[key] = { date: key, label: d.toLocaleDateString('en-US', { day: '2-digit', month: 'short' }), total: 0 };
-                }
-                allOrders.filter(isCompletedAndNotReturned).forEach(o => {
-                    const key = o.createdAt ? new Date(o.createdAt).toISOString().split('T')[0] : null;
-                    if (key && revenueByDay[key]) revenueByDay[key].total += Number(o.totalPrice) || 0;
+                const response = await fetch(`${baseUrl}/seller/analytics/dashboard-stats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const revenueData = Object.values(revenueByDay).sort((a, b) => a.date.localeCompare(b.date));
 
-                // Order status distribution (đơn đã return tách riêng, không tính vào COMPLETED)
-                const statusCounts = {};
-                ['PENDING', 'CONFIRMED', 'PAID', 'SHIPPING', 'SHIPPED', 'COMPLETED', 'RETURN', 'CANCELLED'].forEach(s => statusCounts[s] = 0);
-                allOrders.forEach(o => {
-                    if (refundedIds.has(o.id) && (o.orderStatus === 'COMPLETED' || o.orderStatus === 'SHIPPED')) {
-                        statusCounts['RETURN']++;
-                    } else {
-                        statusCounts[o.orderStatus] = (statusCounts[o.orderStatus] || 0) + 1;
+                if (response.ok) {
+                    const stats = await response.json();
+
+                    // Update KPI cards
+                    document.getElementById('pendingOrders').textContent = stats.pendingOrders;
+                    const pendingBadge = document.getElementById('pendingOrdersBadge');
+                    const navOrdersBadge = document.getElementById('navOrdersBadge');
+                    if (pendingBadge) {
+                        if (stats.pendingOrders > 0) {
+                            pendingBadge.classList.remove('hidden');
+                            pendingBadge.textContent = stats.pendingOrders;
+                        } else {
+                            pendingBadge.classList.add('hidden');
+                        }
                     }
-                });
-                const statusLabels = { PENDING: 'Pending', CONFIRMED: 'Confirmed', PAID: 'Paid', SHIPPING: 'Shipping', SHIPPED: 'Shipped', COMPLETED: 'Completed', RETURN: 'Returned', CANCELLED: 'Cancelled' };
-                const orderChartData = Object.entries(statusCounts)
-                    .filter(([_, v]) => v > 0)
-                    .map(([k, v]) => ({ label: statusLabels[k] || k, value: v }));
+                    if (navOrdersBadge) {
+                        if (stats.pendingOrders > 0) {
+                            navOrdersBadge.classList.remove('hidden');
+                            navOrdersBadge.textContent = stats.pendingOrders;
+                        } else {
+                            navOrdersBadge.classList.add('hidden');
+                        }
+                    }
 
-                // Update charts
-                updateRevenueChart(revenueData);
-                updateOrderStatusChart(orderChartData);
+                    document.getElementById('totalRevenue').textContent = '₫' + (stats.totalRevenue || 0).toLocaleString('en-US');
+                    const completedEl = document.getElementById('completedOrders');
+                    if (completedEl) completedEl.textContent = stats.completedOrders;
+
+                    // Update charts with server-side data
+                    const revenueData = Object.entries(stats.revenueByDay).map(([date, total]) => {
+                        const d = new Date(date);
+                        return {
+                            label: d.toLocaleDateString('en-US', { day: '2-digit', month: 'short' }),
+                            total: total
+                        };
+                    });
+                    updateRevenueChart(revenueData);
+
+                    // For order status chart, we still load all orders once for distribution OR fetch a separate stat
+                    // For now, let's just focus on the main KPIs to keep it fast
+                }
+
+                // Still need product count
+                loadTotalProductsCount();
+
             } catch (err) {
                 console.error('Error loading dashboard stats:', err);
-                document.getElementById('totalProducts').textContent = '0';
-                document.getElementById('pendingOrders').textContent = '0';
-                document.getElementById('totalRevenue').textContent = '₫0';
-                const completedEl = document.getElementById('completedOrders');
-                if (completedEl) completedEl.textContent = '0';
+            }
+        }
+
+        async function loadVouchers() {
+            if (!currentShop) return;
+            const listContainer = document.getElementById('vouchersList');
+            listContainer.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center"><i class="fas fa-spinner fa-spin mr-2"></i>Loading...</td></tr>';
+
+            try {
+                const response = await fetch(`${baseUrl}/shop-vouchers/shop/${currentShop.id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    currentShopVouchers = await response.json();
+                    if (currentShopVouchers.length === 0) {
+                        listContainer.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-gray-500">No vouchers found</td></tr>';
+                        return;
+                    }
+
+                    listContainer.innerHTML = currentShopVouchers.map(v => {
+                        const now = new Date();
+                        const startDate = new Date(v.startDate);
+                        const endDate = new Date(v.endDate);
+                        let status = '<span class="px-2 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">Active</span>';
+                        if (now < startDate) status = '<span class="px-2 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">Upcoming</span>';
+                        if (now > endDate) status = '<span class="px-2 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-700">Expired</span>';
+
+                        return `
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="px-6 py-4 font-bold text-gray-800">${v.code}</td>
+                                <td class="px-6 py-4">
+                                    <div class="text-orange-600 font-bold">₫${(v.discount || 0).toLocaleString()}</div>
+                                    <div class="text-[10px] text-gray-400">Min. Spend: ₫${(v.minSpend || 0).toLocaleString()}</div>
+                                </td>
+                                <td class="px-6 py-4">${v.quantity}</td>
+                                <td class="px-6 py-4">${status}</td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex justify-end gap-2">
+                                        <button onclick="viewVoucher('${v.id}')" class="text-gray-500 hover:text-gray-700 transition" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button onclick="editVoucher('${v.id}')" class="text-blue-500 hover:text-blue-700 transition" title="Edit Voucher">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button onclick="deleteVoucher('${v.id}')" class="text-red-500 hover:text-red-700 transition" title="Delete Voucher">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            } catch (err) {
+                console.error(err);
+                listContainer.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-red-500">Error loading vouchers</td></tr>';
             }
         }
 
@@ -2374,7 +2789,10 @@
                                             <img src="${imageUrl}" class="w-12 h-12 rounded object-cover border">
                                             <div>
                                                 <p class="font-bold text-gray-800">${p.name || 'Unnamed Product'}</p>
-                                                <p class="text-xs text-gray-400">ID: ${p.id ? p.id.substring(0, 8) : 'N/A'}...</p>
+                                                <div class="flex items-center gap-2">
+                                                    <p class="text-xs text-gray-400">ID: ${p.id ? p.id.substring(0, 8) : 'N/A'}...</p>
+                                                    ${totalStock < 10 ? '<span class="px-1.5 py-0.5 bg-red-100 text-red-600 text-[10px] font-bold rounded ring-1 ring-red-200 animate-pulse">Low Stock</span>' : ''}
+                                                </div>
                                             </div>
                                         </div>
                                     </td>

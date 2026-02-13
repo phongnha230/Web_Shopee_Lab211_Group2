@@ -39,8 +39,8 @@
 
     <!-- Empty Cart State -->
     <div id="emptyCart" class="hidden max-w-7xl mx-auto px-4 py-12 text-center">
-        <img src="https://deo.shopeemobile.com/shopee/shopee-pcmall-live-sg/cart/9bdd8040b334d31946f4.png" 
-             alt="Empty Cart" class="w-32 mx-auto mb-4">
+        <img src="https://deo.shopeemobile.com/shopee/shopee-pcmall-live-sg/cart/9bdd8040b334d31946f4.png"
+            alt="Empty Cart" class="w-32 mx-auto mb-4">
         <p class="text-gray-500 text-lg mb-6">Your cart is empty!</p>
         <a href="index.html" class="bg-orange-500 text-white px-10 py-2.5 rounded hover:bg-orange-600">
             Go Shopping
@@ -94,11 +94,11 @@
                         Shipping Options
                     </h2>
                     <div class="space-y-3">
-                    <div id="shippingOptionsContainer" class="space-y-3">
-                        <div class="text-center py-4">
-                            <i class="fas fa-spinner fa-spin text-orange-500"></i> Loading shipping options...
+                        <div id="shippingOptionsContainer" class="space-y-3">
+                            <div class="text-center py-4">
+                                <i class="fas fa-spinner fa-spin text-orange-500"></i> Loading shipping options...
+                            </div>
                         </div>
-                    </div>
                     </div>
                 </div>
 
@@ -108,23 +108,45 @@
                         <i class="fas fa-ticket-alt text-orange-500 mr-2"></i>
                         Vouchers
                     </h2>
-                    
-                    <!-- Shop Voucher -->
+
+                    <!-- Shop Voucher (Mới thêm) -->
                     <div class="mb-4">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fas fa-tag text-orange-500 mr-1"></i> Shop Voucher
+                            <i class="fas fa-store text-orange-500 mr-1"></i> Shop Voucher (Merchant)
                         </label>
                         <div class="flex gap-2">
-                            <button type="button" onclick="openVoucherPicker('PRODUCT')" 
+                            <button type="button" onclick="openVoucherPicker('SHOP')"
+                                class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-all border border-gray-300"
+                                title="Select from Shop vouchers">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <input type="text" id="inputShopVoucher"
+                                class="flex-1 bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-orange-500 transition-colors uppercase"
+                                placeholder="Enter Shop Voucher Code">
+                            <button type="button" onclick="applyShopVoucher()"
+                                class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg text-sm font-bold transition-all shadow-md active:scale-95">
+                                Apply
+                            </button>
+                        </div>
+                        <div id="shopVoucherMessage" class="h-5 mt-1 text-xs"></div>
+                    </div>
+
+                    <!-- Platform Voucher (Đổi tên từ Shop Voucher cũ) -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-tag text-blue-500 mr-1"></i> Platform Voucher (Shopee)
+                        </label>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="openVoucherPicker('PRODUCT')"
                                 class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-all border border-gray-300"
                                 title="Select from collected vouchers">
                                 <i class="fas fa-plus"></i>
                             </button>
                             <input type="text" id="inputProductVoucher"
-                                class="flex-1 bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-orange-500 transition-colors uppercase"
-                                placeholder="Enter Shop Voucher Code">
-                                <button type="button" onclick="applyProductVoucher()"
-                                class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg text-sm font-bold transition-all shadow-md active:scale-95">
+                                class="flex-1 bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors uppercase"
+                                placeholder="Enter Shopee Voucher Code">
+                            <button type="button" onclick="applyProductVoucher()"
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-bold transition-all shadow-md active:scale-95">
                                 Apply
                             </button>
                         </div>
@@ -137,15 +159,15 @@
                             <i class="fas fa-shipping-fast text-green-500 mr-1"></i> Free Shipping Voucher
                         </label>
                         <div class="flex gap-2">
-                            <button type="button" onclick="openVoucherPicker('SHIPPING')" 
+                            <button type="button" onclick="openVoucherPicker('SHIPPING')"
                                 class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-all border border-gray-300"
                                 title="Select from collected vouchers">
                                 <i class="fas fa-plus"></i>
                             </button>
-                            <input type="text" id="inputShippingVoucher" 
+                            <input type="text" id="inputShippingVoucher"
                                 class="flex-1 bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors uppercase"
                                 placeholder="Enter Free Shipping Code">
-                            <button type="button" onclick="applyShippingVoucher()" 
+                            <button type="button" onclick="applyShippingVoucher()"
                                 class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-bold transition-all shadow-md active:scale-95">
                                 Apply
                             </button>
@@ -203,7 +225,7 @@
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-lg shadow p-6 sticky top-6">
                     <h2 class="text-xl font-bold mb-4">Order Summary</h2>
-                    
+
                     <div class="space-y-3 text-sm mb-4 pb-4 border-b">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Subtotal (<span id="itemCount">0</span> items)</span>
@@ -258,7 +280,7 @@
 
                 const urlParams = new URLSearchParams(window.location.search);
                 let mode = urlParams.get('mode');
-                
+
                 // Nếu URL không có mode=buynow nhưng vừa bấm Buy Now (sessionStorage) -> redirect đúng URL
                 const buyNowPending = (() => {
                     try {
@@ -269,7 +291,7 @@
                         return d;
                     } catch (e) { return null; }
                 })();
-                
+
                 // Backup: URL mất params nhưng vừa bấm Buy Now -> redirect đúng
                 if (!mode && buyNowPending) {
                     sessionStorage.removeItem('buyNowPending');
@@ -281,27 +303,27 @@
                     return;
                 }
                 if (mode === 'buynow') sessionStorage.removeItem('buyNowPending');
-                
+
                 if (mode === 'buynow') {
                     isBuyNowMode = true;
                     // KHÔNG xóa voucher ở đây - để restoreAppliedVouchersFromStorage khôi phục sau reload
                     console.log('Buy Now mode detected');
-                    
+
                     // Get parameters - productId for API fetch, variantId for the selected variant
                     const productId = urlParams.get('productId') || urlParams.get('variantId');
                     const variantId = urlParams.get('variantId');
                     const quantity = parseInt(urlParams.get('quantity')) || 1;
                     const color = urlParams.get('color') || '';
                     const size = urlParams.get('size') || '';
-                    
+
                     if (!productId || !variantId) {
                         throw new Error('Missing product information. Please try again from the product page.');
                     }
-                    
+
                     // Fetch product by productId (API expects product ID, not variant ID)
                     const API_BASE_URL = 'http://localhost:8080/api';
                     let product = null;
-                    
+
                     try {
                         const response = await fetch(`${API_BASE_URL}/products/${productId}`);
                         if (!response.ok) {
@@ -312,13 +334,13 @@
                         console.error('API Error:', apiError);
                         throw new Error('Unable to load product details. Please check your connection and try again.');
                     }
-                    
+
                     if (!product) {
                         throw new Error('Product not found. Please return to the product page and try again.');
                     }
-                    
+
                     console.log('Product loaded for Buy Now:', product);
-                    
+
                     // Find the SELECTED variant by variantId (not first variant!)
                     const selectedVariant = product.variants?.find(v => v.id === variantId);
                     let price = Number(selectedVariant?.price ?? product.variants?.[0]?.price ?? product.price ?? 0);
@@ -330,7 +352,7 @@
                     } else if (color || size) {
                         variantName = [color, size].filter(v => v).join(' - ');
                     }
-                    
+
                     backendCart = {
                         items: [{
                             variantId: variantId,
@@ -340,10 +362,11 @@
                             variantName: variantName,
                             price: price,
                             quantity: quantity,
-                            categoryIds: product.categories || [] // Required for voucher validation (e.g. BOOKS25)
+                            categoryIds: product.categories || [], // Required for voucher validation (e.g. BOOKS25)
+                            shopId: product.shopId
                         }]
                     };
-                    
+
                     console.log('Buy Now cart constructed:', backendCart, '(sản phẩm:', productName, 'x', quantity, '= ₫' + (price * quantity) + ')');
                 } else {
                     // Normal cart mode - only when coming from cart page (no mode param)
@@ -361,7 +384,7 @@
                 }
 
                 const titleEl = document.getElementById('productsOrderedTitle');
-                if (titleEl) titleEl.innerHTML = isBuyNowMode 
+                if (titleEl) titleEl.innerHTML = isBuyNowMode
                     ? '<i class="fas fa-bolt text-orange-500 mr-2"></i> Mua ngay - Sản phẩm bạn chọn'
                     : '<i class="fas fa-box text-orange-500 mr-2"></i> Products Ordered';
                 if (isBuyNowMode) {
@@ -383,7 +406,7 @@
                 renderCheckout();
             } catch (error) {
                 console.error('Error loading checkout:', error);
-                
+
                 // Show more specific error for Buy Now mode
                 if (isBuyNowMode) {
                     document.getElementById('loadingCheckout').classList.add('hidden');
@@ -418,7 +441,7 @@
 
         function renderCheckout() {
             document.getElementById('checkoutContent').classList.remove('hidden');
-            
+
             const container = document.getElementById('checkoutItems');
             container.innerHTML = backendCart.items.map(item => `
                 <div class="flex gap-4 pb-4 border-b last:border-0">
@@ -444,17 +467,17 @@
         function updateSummary() {
             const subtotal = backendCart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const itemCount = backendCart.items.reduce((sum, item) => sum + item.quantity, 0);
-            
+
             // Calculate effective shipping fee
             let effectiveShipping = Math.max(0, shippingFee - shippingDiscountAmount);
 
             // Total calculation
-            const total = Math.max(0, subtotal + effectiveShipping - discountAmount);
+            const total = Math.max(0, subtotal + effectiveShipping - discountAmount - shopDiscountAmount);
 
             document.getElementById('itemCount').textContent = itemCount;
             document.getElementById('subtotal').textContent = `₫${formatVND(subtotal)}`;
             document.getElementById('shippingFee').textContent = `₫${formatVND(shippingFee)}`;
-            
+
             // Update Discount Rows in DOM
             updateDiscountRows();
             refreshVoucherDisplay(); // Đảm bảo cả 2 voucher luôn hiển thị
@@ -463,25 +486,33 @@
         }
 
         function updateDiscountRows() {
-             const container = document.getElementById('discountRowsContainer');
-             if (!container) return;
-             container.innerHTML = ''; // Clear & rebuild để luôn hiển thị đủ cả 2
+            const container = document.getElementById('discountRowsContainer');
+            if (!container) return;
+            container.innerHTML = ''; // Clear & rebuild để luôn hiển thị đủ cả 2
 
-             // 1. Shop Voucher (Product Discount) - luôn thêm trước
-             if (discountAmount > 0) {
-                 const row = document.createElement('div');
-                 row.className = 'flex justify-between text-orange-600 discount-row';
-                 row.innerHTML = `<span class="flex items-center"><i class="fas fa-ticket-alt mr-2"></i>Shop Voucher</span><span class="font-medium">-₫${formatVND(discountAmount)}</span>`;
-                 container.appendChild(row);
-             }
+            // 1. Shop Voucher (Product Discount) - luôn thêm trước
+            if (discountAmount > 0) {
+                const row = document.createElement('div');
+                row.className = 'flex justify-between text-orange-600 discount-row';
+                row.innerHTML = `<span class="flex items-center"><i class="fas fa-ticket-alt mr-2"></i>Shop Voucher</span><span class="font-medium">-₫${formatVND(discountAmount)}</span>`;
+                container.appendChild(row);
+            }
 
-             // 2. Shipping Discount - thêm sau
-             if (shippingDiscountAmount > 0) {
-                 const row = document.createElement('div');
-                 row.className = 'flex justify-between text-green-600 discount-row';
-                 row.innerHTML = `<span class="flex items-center"><i class="fas fa-shipping-fast mr-2"></i>Shipping Discount</span><span class="font-medium">-₫${formatVND(shippingDiscountAmount)}</span>`;
-                 container.appendChild(row);
-             }
+            // 2. Shipping Discount - thêm sau
+            if (shippingDiscountAmount > 0) {
+                const row = document.createElement('div');
+                row.className = 'flex justify-between text-green-600 discount-row';
+                row.innerHTML = `<span class="flex items-center"><i class="fas fa-shipping-fast mr-2"></i>Shipping Discount</span><span class="font-medium">-₫${formatVND(shippingDiscountAmount)}</span>`;
+                container.appendChild(row);
+            }
+
+            // 3. Shop Voucher Discount
+            if (shopDiscountAmount > 0) {
+                const row = document.createElement('div');
+                row.className = 'flex justify-between text-orange-600 discount-row';
+                row.innerHTML = `<span class="flex items-center"><i class="fas fa-store mr-2"></i>Shop Discount</span><span class="font-medium">-₫${formatVND(shopDiscountAmount)}</span>`;
+                container.appendChild(row);
+            }
         }
 
         function prefillAddress() {
@@ -522,7 +553,8 @@
                 shippingFee: shippingFee,
                 shippingProviderId: document.querySelector('input[name="shipping"]:checked').value,
                 voucherCode: appliedProductVoucherCode,
-                shippingVoucherCode: appliedShippingVoucherCode
+                shippingVoucherCode: appliedShippingVoucherCode,
+                shopVoucherCode: appliedShopVoucherCode
             };
 
             console.log('Creating order:', orderData);
@@ -546,7 +578,7 @@
                 if (paymentMethod !== 'COD') {
                     const payment = await PaymentAPI.createPayment(orderId, paymentMethod);
                     console.log('Payment created:', payment);
-                    
+
                     // If payment gateway redirect needed
                     if (payment.redirectUrl) {
                         window.location.href = payment.redirectUrl;
@@ -568,7 +600,7 @@
             } catch (error) {
                 console.error('Order placement failed:', error);
                 alert('❌ Failed to place order: ' + error.message);
-                
+
                 // Re-enable button
                 btn.disabled = false;
                 btn.innerHTML = 'Place Order';
@@ -580,33 +612,47 @@
         let discountAmount = 0;
         let appliedShippingVoucherCode = null;
         let shippingDiscountAmount = 0;
+        let appliedShopVoucherCode = null;
+        let shopDiscountAmount = 0;
         let appliedProductVoucherMsg = null;  // Lưu message để refresh khi cập nhật
         let appliedShippingVoucherMsg = null;
+        let appliedShopVoucherMsg = null;
 
         function refreshVoucherDisplay() {
-            // Đảm bảo cả 2 voucher luôn hiển thị đúng khi update summary
+            // Đảm bảo các voucher luôn hiển thị đúng khi update summary
             const pm = document.getElementById('productVoucherMessage');
             const sm = document.getElementById('shippingVoucherMessage');
+            const shm = document.getElementById('shopVoucherMessage');
             const pi = document.getElementById('inputProductVoucher');
             const si = document.getElementById('inputShippingVoucher');
+            const shi = document.getElementById('inputShopVoucher');
+
             if (pm && appliedProductVoucherMsg) { pm.textContent = appliedProductVoucherMsg; pm.className = "h-5 mt-1 text-xs text-green-600 font-bold"; }
             if (sm && appliedShippingVoucherMsg) { sm.textContent = appliedShippingVoucherMsg; sm.className = "h-5 mt-1 text-xs text-green-600 font-bold"; }
+            if (shm && appliedShopVoucherMsg) { shm.textContent = appliedShopVoucherMsg; shm.className = "h-5 mt-1 text-xs text-green-600 font-bold"; }
+
             // Khôi phục ô input nếu bị xóa mất
             if (pi && appliedProductVoucherCode && !pi.value.trim()) pi.value = appliedProductVoucherCode;
             if (si && appliedShippingVoucherCode && !si.value.trim()) si.value = appliedShippingVoucherCode;
+            if (shi && appliedShopVoucherCode && !shi.value.trim()) shi.value = appliedShopVoucherCode;
         }
 
         function saveAppliedVouchersToStorage() {
             const data = {
-                product: appliedProductVoucherCode ? { 
+                product: appliedProductVoucherCode ? {
                     code: appliedProductVoucherCode,
                     discount: discountAmount,
                     msg: appliedProductVoucherMsg
                 } : null,
-                shipping: appliedShippingVoucherCode ? { 
+                shipping: appliedShippingVoucherCode ? {
                     code: appliedShippingVoucherCode,
                     discount: shippingDiscountAmount,
                     msg: appliedShippingVoucherMsg
+                } : null,
+                shop: appliedShopVoucherCode ? {
+                    code: appliedShopVoucherCode,
+                    discount: shopDiscountAmount,
+                    msg: appliedShopVoucherMsg
                 } : null
             };
             // SỬ DỤNG localStorage THAY VÌ sessionStorage ĐỂ PERSIST QUA RELOAD
@@ -625,32 +671,43 @@
                 }
                 const data = JSON.parse(raw);
                 console.log('📦 Restoring vouchers from storage:', data);
-                
+
                 // Restore Product Voucher
                 if (data.product && data.product.code) {
                     const input = document.getElementById('inputProductVoucher');
-                    if (input) { 
-                        input.value = data.product.code; 
+                    if (input) {
+                        input.value = data.product.code;
                         input.disabled = false;
                         console.log('🏷️ Restoring Product Voucher:', data.product.code);
                         await applyVoucher_Product();
                     }
                 }
-                
+
                 // Restore Shipping Voucher
                 if (data.shipping && data.shipping.code) {
                     const input = document.getElementById('inputShippingVoucher');
-                    if (input) { 
-                        input.value = data.shipping.code; 
+                    if (input) {
+                        input.value = data.shipping.code;
                         input.disabled = false;
                         console.log('🚚 Restoring Shipping Voucher:', data.shipping.code);
                         await applyVoucher_Shipping();
                     }
                 }
-                
+
+                // Restore Shop Voucher
+                if (data.shop && data.shop.code) {
+                    const input = document.getElementById('inputShopVoucher');
+                    if (input) {
+                        input.value = data.shop.code;
+                        input.disabled = false;
+                        console.log('🏪 Restoring Shop Voucher:', data.shop.code);
+                        await applyShopVoucher();
+                    }
+                }
+
                 console.log('✅ Vouchers restored successfully!');
-            } catch (e) { 
-                console.error('❌ Restore vouchers error:', e); 
+            } catch (e) {
+                console.error('❌ Restore vouchers error:', e);
             }
         }
 
@@ -689,7 +746,7 @@
 
             try {
                 const voucher = await VoucherAPI.getByCode(code);
-                
+
                 // Validation
                 if (voucher.type && voucher.type !== 'PRODUCT') throw new Error('Not a Shop Voucher');
                 if (!voucher.active) throw new Error('Voucher is inactive');
@@ -698,7 +755,7 @@
                 if (voucher.quantity <= 0) throw new Error('Out of stock');
 
                 const subtotal = backendCart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                
+
                 let baseAmount = subtotal;
                 if (voucher.categoryIds && voucher.categoryIds.length > 0) {
                     const eligibleAmount = backendCart.items
@@ -737,7 +794,7 @@
                 appliedProductVoucherMsg = msg;
                 messageEl.className = "h-5 mt-1 text-xs text-green-600 font-bold";
                 messageEl.textContent = msg;
-                
+
                 codeInput.disabled = true;
                 saveAppliedVouchersToStorage();
                 updateSummary();
@@ -748,11 +805,71 @@
                 if (msg.includes('404')) msg = 'Voucher not found';
                 messageEl.textContent = `❌ ${msg}`;
                 messageEl.className = "h-5 mt-1 text-xs text-red-500 font-bold";
-                
+
                 // Reset chỉ Product voucher
                 discountAmount = 0;
                 appliedProductVoucherCode = null;
                 appliedProductVoucherMsg = null;
+                updateSummary();
+            }
+        }
+
+        // === SHOP VOUCHER (MERCHANT) ===
+        async function applyShopVoucher() {
+            const codeInput = document.getElementById('inputShopVoucher');
+            const messageEl = document.getElementById('shopVoucherMessage');
+            const code = codeInput.value.trim().toUpperCase();
+
+            if (!code) {
+                alert('Please enter a shop voucher code');
+                return;
+            }
+
+            try {
+                const voucher = await ShopVoucherAPI.getByCode(code);
+
+                // Find eligible items (must match shopId)
+                const eligibleItems = backendCart.items.filter(item => item.shopId === voucher.shopId);
+                if (eligibleItems.length === 0) {
+                    throw new Error('Voucher này không áp dụng cho sản phẩm của Shop này');
+                }
+
+                const eligibleSubtotal = eligibleItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+                // Basic validation
+                const now = new Date();
+                if (voucher.startDate && new Date(voucher.startDate) > now) throw new Error('Voucher chưa đến ngày sử dụng');
+                if (voucher.endDate && new Date(voucher.endDate) < now) throw new Error('Voucher đã hết hạn');
+                if (voucher.quantity <= 0) throw new Error('Voucher đã hết lượt sử dụng');
+                if (voucher.minSpend && eligibleSubtotal < voucher.minSpend) {
+                    throw new Error(`Đơn hàng tối thiểu ₫${formatVND(voucher.minSpend)} để sử dụng Voucher này`);
+                }
+
+                let calculatedDiscount = voucher.discount;
+                if (calculatedDiscount > eligibleSubtotal) calculatedDiscount = eligibleSubtotal;
+
+                // Update state
+                shopDiscountAmount = calculatedDiscount;
+                appliedShopVoucherCode = code;
+                appliedShopVoucherMsg = `✅ -₫${formatVND(calculatedDiscount)}`;
+
+                messageEl.className = "h-5 mt-1 text-xs text-green-600 font-bold";
+                messageEl.textContent = appliedShopVoucherMsg;
+                codeInput.disabled = true;
+
+                saveAppliedVouchersToStorage();
+                updateSummary();
+
+            } catch (error) {
+                console.error(error);
+                let msg = error.message;
+                if (msg.includes('Not found') || msg.includes('404')) msg = 'Voucher not found';
+                messageEl.textContent = `❌ ${msg}`;
+                messageEl.className = "h-5 mt-1 text-xs text-red-500 font-bold";
+
+                shopDiscountAmount = 0;
+                appliedShopVoucherCode = null;
+                appliedShopVoucherMsg = null;
                 updateSummary();
             }
         }
@@ -770,7 +887,7 @@
 
             try {
                 const voucher = await VoucherAPI.getByCode(code);
-                
+
                 // Validation
                 if (voucher.type && voucher.type !== 'SHIPPING') throw new Error('Not a Shipping Voucher');
                 if (!voucher.active) throw new Error('Voucher is inactive');
@@ -802,7 +919,7 @@
                 appliedShippingVoucherMsg = `✅ -₫${formatVND(calculatedDiscount)}`;
                 messageEl.className = "h-5 mt-1 text-xs text-green-600 font-bold";
                 messageEl.textContent = appliedShippingVoucherMsg;
-                
+
                 codeInput.disabled = true;
                 saveAppliedVouchersToStorage();
                 updateSummary();
@@ -813,7 +930,7 @@
                 if (msg.includes('404')) msg = 'Voucher not found';
                 messageEl.textContent = `❌ ${msg}`;
                 messageEl.className = "h-5 mt-1 text-xs text-red-500 font-bold";
-                
+
                 // Reset chỉ Shipping voucher
                 shippingDiscountAmount = 0;
                 appliedShippingVoucherCode = null;
@@ -827,7 +944,7 @@
             try {
                 const providers = await ShippingAPI.getProviders();
                 const container = document.getElementById('shippingOptionsContainer');
-                
+
                 if (!providers || providers.length === 0) {
                     container.innerHTML = '<p class="text-red-500">No shipping providers available.</p>';
                     return;
@@ -835,15 +952,15 @@
 
                 // Default checked: first one or standard
                 let defaultChecked = providers.find(p => p.id === 'standard') || providers[0];
-                
+
                 container.innerHTML = providers.map(p => {
                     // Logic to mimic price for UI matching Backend (Standard=15k, Express=30k)
-                    const price = p.id === 'express' ? 30000 : 15000; 
+                    const price = p.id === 'express' ? 30000 : 15000;
                     const time = p.id === 'express' ? '1-2 business days' : '3-5 business days';
                     const checked = p.id === defaultChecked.id ? 'checked' : '';
-                    
+
                     if (checked) {
-                         shippingFee = price; // Set initial fee
+                        shippingFee = price; // Set initial fee
                     }
 
                     return `
@@ -862,7 +979,7 @@
 
             } catch (error) {
                 console.error("Failed to load shipping providers:", error);
-                document.getElementById('shippingOptionsContainer').innerHTML = 
+                document.getElementById('shippingOptionsContainer').innerHTML =
                     '<p class="text-red-500">Failed to load shipping options.</p>';
             }
         }
@@ -881,14 +998,14 @@
             console.log('Page loaded, initializing...');
             await loadCart();
             await loadShippingProviders();
-            
+
             // 1. Restore previously applied vouchers (e.g. after returning from vouchers.html)
             await restoreAppliedVouchersFromStorage();
-            
+
             // 2. Check for new vouchers from vouchers.html - ĐỌC CẢ 2 KEYS RIÊNG BIỆT
             const storedProductVoucher = localStorage.getItem('autoApplyProductVoucher');
             const storedShippingVoucher = localStorage.getItem('autoApplyShippingVoucher');
-            
+
             // Áp dụng Product Voucher nếu có
             if (storedProductVoucher) {
                 try {
@@ -906,7 +1023,7 @@
                     console.error('Error parsing stored product voucher', e);
                 }
             }
-            
+
             // Áp dụng Shipping Voucher nếu có (KHÔNG ghi đè Product voucher đã áp)
             if (storedShippingVoucher) {
                 try {
@@ -924,12 +1041,31 @@
                     console.error('Error parsing stored shipping voucher', e);
                 }
             }
-            
+
+            // Áp dụng Shop Voucher nếu có (Merchant)
+            const storedShopVoucher = localStorage.getItem('autoApplyShopVoucher');
+            if (storedShopVoucher) {
+                try {
+                    const parsed = JSON.parse(storedShopVoucher);
+                    console.log('Found stored Shop voucher:', parsed);
+                    const input = document.getElementById('inputShopVoucher');
+                    if (input) {
+                        input.value = parsed.code;
+                        input.disabled = false;
+                        console.log('Auto-applying Shop Voucher:', parsed.code);
+                        await applyShopVoucher();
+                    }
+                    localStorage.removeItem('autoApplyShopVoucher');
+                } catch (e) {
+                    console.error('Error parsing stored shop voucher', e);
+                }
+            }
+
             // Fallback: Check URL params (legacy support)
             const urlParams = new URLSearchParams(window.location.search);
             const voucherCode = urlParams.get('voucherCode');
             const voucherType = urlParams.get('voucherType');
-            
+
             if (voucherCode && voucherType) {
                 if (voucherType === 'PRODUCT' && !appliedProductVoucherCode) {
                     const input = document.getElementById('inputProductVoucher');
@@ -957,7 +1093,8 @@
     </script>
 
     <!-- Voucher Picker Modal -->
-    <div id="voucherPickerModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div id="voucherPickerModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[85vh] overflow-hidden">
             <!-- Header -->
             <div class="flex items-center justify-between p-6 border-b bg-gradient-to-r from-orange-500 to-orange-600">
@@ -984,12 +1121,15 @@
         .voucher-orange {
             background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
         }
+
         .voucher-green {
             background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
         }
+
         .voucher-blue {
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
         }
+
         .voucher-purple {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
@@ -1002,16 +1142,32 @@
         async function openVoucherPicker(type) {
             currentVoucherType = type;
             const modal = document.getElementById('voucherPickerModal');
-            const typeLabel = type === 'PRODUCT' ? 'Shop' : 'Free Shipping';
+            let typeLabel = '';
+            if (type === 'PRODUCT') typeLabel = 'Platform';
+            else if (type === 'SHIPPING') typeLabel = 'Free Shipping';
+            else if (type === 'SHOP') typeLabel = 'Shop';
+
             document.getElementById('modalVoucherType').textContent = typeLabel;
-            
             modal.classList.remove('hidden');
 
             // Load vouchers
             try {
-                const vouchers = await VoucherAPI.getAllVouchers();
-                const filtered = vouchers.filter(v => v.type === type && v.status === 'ACTIVE');
-                
+                let filtered = [];
+                if (type === 'SHOP') {
+                    // Lấy tất cả shopId duy nhất từ giỏ hàng
+                    const shopIds = [...new Set(backendCart.items.map(item => item.shopId))];
+                    console.log('Fetching Shop vouchers for shops:', shopIds);
+
+                    const voucherPromises = shopIds.map(sid => ShopVoucherAPI.getVouchersByShop(sid));
+                    const results = await Promise.all(voucherPromises);
+
+                    // Gộp tất cả và đánh dấu là loại SHOP
+                    filtered = results.flat().map(v => ({ ...v, type: 'SHOP' }));
+                } else {
+                    const vouchers = await VoucherAPI.getAllVouchers();
+                    filtered = vouchers.filter(v => v.type === type && v.status === 'ACTIVE');
+                }
+
                 renderVoucherCards(filtered);
             } catch (error) {
                 console.error('Error loading vouchers:', error);
@@ -1042,7 +1198,7 @@
 
         function renderVoucherCards(vouchers) {
             const container = document.getElementById('voucherList');
-            
+
             if (vouchers.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-12">
@@ -1067,19 +1223,28 @@
                 }
             };
 
-            const getIcon = (type) => type === 'PRODUCT' ? '🎫' : '🚚';
+            const getIcon = (type) => {
+                if (type === 'PRODUCT') return '🎫';
+                if (type === 'SHIPPING') return '🚚';
+                return '🏪';
+            };
 
             container.innerHTML = `
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     ${vouchers.map((v, index) => {
-                        const isExpired = new Date(v.endDate) < new Date();
-                        const discountText = v.discountType === 'PERCENTAGE' 
-                            ? `${v.discountValue}% OFF` 
-                            : `₫${v.discountValue} OFF`;
-                        const colorClass = getColorClass(v.type, index);
-                        const icon = getIcon(v.type);
+                const isExpired = new Date(v.endDate) < new Date();
+                let discountText = '';
+                if (v.type === 'SHOP') {
+                    discountText = `₫${formatVND(v.discount)} OFF`;
+                } else {
+                    discountText = v.discountType === 'PERCENTAGE'
+                        ? `${v.discountValue}% OFF`
+                        : `₫${formatVND(v.discountValue)} OFF`;
+                }
+                const colorClass = getColorClass(v.type, index);
+                const icon = getIcon(v.type);
 
-                        return `
+                return `
                         <div class="voucher-card ${colorClass} rounded-lg p-4 text-white shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-1 relative ${isExpired ? 'opacity-50' : ''}">
                             <div class="relative z-10">
                                 <!-- Icon and Stock -->
@@ -1101,7 +1266,7 @@
                                 <!-- Min Spend -->
                                 ${v.minSpend ? `
                                     <div class="bg-white/20 px-2 py-1 rounded text-xs inline-block mb-2">
-                                        Min. ₫${v.minSpend}
+                                        Đơn tối thiểu ₫${formatVND(v.minSpend)}
                                     </div>
                                 ` : ''}
                                 
@@ -1120,26 +1285,32 @@
                             </div>
                         </div>
                         `;
-                    }).join('')}
+            }).join('')}
                 </div>
             `;
         }
 
         async function selectVoucher(code) {
             // Auto-fill the input based on type
-            const inputId = currentVoucherType === 'PRODUCT' ? 'inputProductVoucher' : 'inputShippingVoucher';
+            let inputId = '';
+            if (currentVoucherType === 'PRODUCT') inputId = 'inputProductVoucher';
+            else if (currentVoucherType === 'SHIPPING') inputId = 'inputShippingVoucher';
+            else if (currentVoucherType === 'SHOP') inputId = 'inputShopVoucher';
+
             const input = document.getElementById(inputId);
             input.value = code;
             input.disabled = false; // Enable để có thể apply
-            
+
             // Close modal
             closeVoucherPicker();
-            
+
             // Tự động áp dụng voucher luôn thay vì chỉ hiển thị alert
             if (currentVoucherType === 'PRODUCT') {
                 await applyProductVoucher();
-            } else {
-                await applyShippingVoucher();
+            } else if (currentVoucherType === 'SHIPPING') {
+                await applyVoucher_Shipping();
+            } else if (currentVoucherType === 'SHOP') {
+                await applyShopVoucher();
             }
         }
 

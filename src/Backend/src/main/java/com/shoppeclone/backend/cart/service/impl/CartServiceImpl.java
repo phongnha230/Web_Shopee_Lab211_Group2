@@ -124,11 +124,13 @@ public class CartServiceImpl implements CartService {
 
     private CartItemResponse toCartItemResponse(CartItem item) {
         Optional<ProductVariant> variantOpt = productVariantRepository.findById(item.getVariantId());
-        if (variantOpt.isEmpty()) return null;
+        if (variantOpt.isEmpty())
+            return null;
 
         ProductVariant variant = variantOpt.get();
         Optional<Product> productOpt = productRepository.findById(variant.getProductId());
-        if (productOpt.isEmpty()) return null;
+        if (productOpt.isEmpty())
+            return null;
 
         Product product = productOpt.get();
         List<ProductImage> images = productImageRepository.findByProductIdOrderByDisplayOrderAsc(product.getId());
@@ -137,7 +139,8 @@ public class CartServiceImpl implements CartService {
         String variantName = (variant.getColor() != null ? variant.getColor() : "")
                 + (variant.getSize() != null ? " - " + variant.getSize() : "");
         variantName = variantName.trim();
-        if (variantName.startsWith("- ")) variantName = variantName.substring(2);
+        if (variantName.startsWith("- "))
+            variantName = variantName.substring(2);
 
         List<String> categoryIds = productCategoryRepository.findByProductId(product.getId()).stream()
                 .map(ProductCategory::getCategoryId)
@@ -154,6 +157,7 @@ public class CartServiceImpl implements CartService {
                 .quantity(item.getQuantity())
                 .stock(variant.getStock())
                 .totalPrice(variant.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .shopId(product.getShopId())
                 .build();
     }
 

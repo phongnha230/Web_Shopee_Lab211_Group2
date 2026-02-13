@@ -23,8 +23,14 @@ public class Review {
     @Indexed
     private String orderId; // FK to orders.id (only create when order is DELIVERED)
 
+    @Indexed
+    private String shopId; // FK to shops.id
+
     private Integer rating; // 1-5
     private String comment;
+
+    private String replyComment; // Seller's reply
+    private LocalDateTime replyAt; // Time of seller's reply
 
     private List<String> imageUrls = new ArrayList<>(); // URLs of review images (max 5)
 

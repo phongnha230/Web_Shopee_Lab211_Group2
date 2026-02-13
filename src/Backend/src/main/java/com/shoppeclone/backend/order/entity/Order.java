@@ -10,7 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "orders")
-@Data
+@lombok.Getter
+@lombok.Setter
+@lombok.ToString
 public class Order {
     @Id
     private String id;
@@ -25,6 +27,8 @@ public class Order {
     private BigDecimal discount;
     private String voucherCode; // Applied product voucher code
     private String shippingVoucherCode; // Applied shipping voucher code
+    private String shopVoucherCode; // Applied shop voucher code
+    private BigDecimal shopDiscount; // Discount amount from shop voucher
     private BigDecimal shippingDiscount; // Discount amount for shipping
 
     private OrderStatus orderStatus = OrderStatus.PENDING;
@@ -46,7 +50,4 @@ public class Order {
     private LocalDateTime cancelledAt;
     private String cancelReason;
 
-    public String getId() {
-        return id;
-    }
 }

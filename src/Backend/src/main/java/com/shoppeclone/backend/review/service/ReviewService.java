@@ -52,4 +52,14 @@ public interface ReviewService {
      * Get all orders that the user can review
      */
     List<String> getReviewableOrderIds(String userId);
+
+    /**
+     * Get all reviews for a specific shop
+     */
+    List<ReviewResponse> getReviewsByShopId(String shopId);
+
+    /**
+     * Seller reply to a review
+     */
+    ReviewResponse replyToReview(String reviewId, String shopId, String replyComment);
 }
