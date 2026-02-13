@@ -29,7 +29,8 @@ public class DebugController {
 
     /**
      * Fix category for a product by auto-detecting from product name.
-     * Use when a product (e.g. a book) was created without correct category and voucher doesn't apply.
+     * Use when a product (e.g. a book) was created without correct category and
+     * voucher doesn't apply.
      * Example: POST /api/debug/products/6986f1fe3d133823d9e13c57/fix-category
      */
     @PostMapping("/products/{productId}/fix-category")

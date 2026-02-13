@@ -49,10 +49,10 @@ public class PaymentPromotionIntegrationTest {
     private com.shoppeclone.backend.promotion.repository.ShopVoucherRepository shopVoucherRepository;
 
     @MockBean
-    private com.shoppeclone.backend.promotion.repository.FlashSaleRepository flashSaleRepository;
+    private com.shoppeclone.backend.promotion.flashsale.repository.FlashSaleRepository flashSaleRepository;
 
     @MockBean
-    private com.shoppeclone.backend.promotion.repository.FlashSaleItemRepository flashSaleItemRepository;
+    private com.shoppeclone.backend.promotion.flashsale.repository.FlashSaleItemRepository flashSaleItemRepository;
 
     @Test
     @WithMockUser(username = "testuser", roles = { "USER" }) // Simulate logged-in user

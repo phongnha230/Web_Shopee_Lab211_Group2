@@ -100,10 +100,16 @@ public class OrderController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String orderId,
             @RequestParam OrderStatus status) {
-        String userId = getUserId(userDetails);
-        // TODO: Check if admin/seller
-        Order order = orderService.updateOrderStatus(orderId, status);
-        OrderResponse response = orderResponseService.enrichWithReviewInfo(order, userId);
+        String userEmail = userDetails.getUsername();
+        Shop shop = shopService.getMyShop(userEmail);
+        Order order = orderService.getOrder(orderId);
+
+        if (shop == null || !shop.getId().equals(order.getShopId())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        order = orderService.updateOrderStatus(orderId, status);
+        OrderResponse response = orderResponseService.enrichWithReviewInfo(order, shop.getOwnerId());
         return ResponseEntity.ok(response);
     }
 
@@ -112,8 +118,18 @@ public class OrderController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String orderId) {
         String userId = getUserId(userDetails);
-        // TODO: Check if user owns order
-        Order order = orderService.cancelOrder(orderId);
+        Order order = orderService.getOrder(orderId);
+
+        // Cả User (chủ đơn) và Shop đều có thể hủy đơn (nếu chưa giao)
+        Shop shop = shopService.getMyShop(userDetails.getUsername());
+        boolean isOwner = order.getUserId().equals(userId);
+        boolean isShop = shop != null && shop.getId().equals(order.getShopId());
+
+        if (!isOwner && !isShop) {
+            return ResponseEntity.status(403).build();
+        }
+
+        order = orderService.cancelOrder(orderId);
         OrderResponse response = orderResponseService.enrichWithReviewInfo(order, userId);
         return ResponseEntity.ok(response);
     }
@@ -124,10 +140,16 @@ public class OrderController {
             @PathVariable String orderId,
             @RequestParam(required = false) String trackingCode,
             @RequestParam(required = false) String providerId) {
-        String userId = getUserId(userDetails);
-        // TODO: Check if admin/seller
-        Order order = orderService.updateShipment(orderId, trackingCode, providerId);
-        OrderResponse response = orderResponseService.enrichWithReviewInfo(order, userId);
+        String userEmail = userDetails.getUsername();
+        Shop shop = shopService.getMyShop(userEmail);
+        Order order = orderService.getOrder(orderId);
+
+        if (shop == null || !shop.getId().equals(order.getShopId())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        order = orderService.updateShipment(orderId, trackingCode, providerId);
+        OrderResponse response = orderResponseService.enrichWithReviewInfo(order, shop.getOwnerId());
         return ResponseEntity.ok(response);
     }
 

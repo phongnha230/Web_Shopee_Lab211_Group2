@@ -22,6 +22,14 @@ public class Product {
     // Status: ACTIVE, HIDDEN
     private ProductStatus status = ProductStatus.ACTIVE;
 
+    public ProductStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ProductStatus status) {
+        this.status = status;
+    }
+
     // Aggregated data for display
     private BigDecimal minPrice;
     private BigDecimal maxPrice;

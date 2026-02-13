@@ -24,4 +24,5 @@ public class CartItemResponse {
     private int quantity;
     private int stock;
     private BigDecimal totalPrice; // price * quantity
+    private String shopId;
 }

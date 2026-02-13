@@ -419,7 +419,28 @@ const VoucherAPI = {
     }
 };
 
+// ======================
+// SHOP VOUCHER API SERVICE
+// ======================
+const ShopVoucherAPI = {
+    // Get shop voucher by code
+    getByCode: async (code) => {
+        const response = await fetch(`${API_BASE_URL}/shop-vouchers/code/${code}`, {
+            headers: getAuthHeaders()
+        });
+        return handleResponse(response);
+    },
+
+    // Get vouchers for a shop
+    getVouchersByShop: async (shopId) => {
+        const response = await fetch(`${API_BASE_URL}/shop-vouchers/shop/${shopId}`, {
+            headers: getAuthHeaders()
+        });
+        return handleResponse(response);
+    }
+};
+
 // Export for use in other files
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { CartAPI, OrderAPI, PaymentAPI, ReviewAPI, ProductAPI, VoucherAPI, ShippingAPI, RefundAPI, DisputeAPI };
+    module.exports = { CartAPI, OrderAPI, PaymentAPI, ReviewAPI, ProductAPI, VoucherAPI, ShippingAPI, RefundAPI, DisputeAPI, ShopVoucherAPI };
 }

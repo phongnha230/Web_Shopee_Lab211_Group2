@@ -19,6 +19,7 @@ public class ShopVoucher {
 
     private String code;
     private BigDecimal discount;
+    private BigDecimal minSpend; // Minimum order value to use this voucher
     private Integer quantity;
 
     private LocalDateTime startDate;

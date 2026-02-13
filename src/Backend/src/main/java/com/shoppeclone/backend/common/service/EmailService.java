@@ -112,4 +112,54 @@ public class EmailService {
         mailSender.send(message);
         System.out.println("🎉 Welcome email sent to: " + to);
     }
+
+    public void sendFlashSaleApprovalEmail(String to, String productName, String startTime) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Flash Sale Registration Approved! ⚡");
+        message.setText(
+                "Hello,\n\n" +
+                        "Great news! Your product '" + productName + "' has been APPROVED for the Flash Sale.\n\n" +
+                        "The Flash Sale is scheduled to start at: " + startTime + "\n\n" +
+                        "Please ensure your inventory is ready.\n\n" +
+                        "Best regards,\n" +
+                        "ShoppeClone Team");
+
+        mailSender.send(message);
+        System.out.println("✅ Flash Sale Approval email sent to: " + to);
+    }
+
+    public void sendFlashSaleRejectionEmail(String to, String productName, String reason) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Flash Sale Registration Update");
+        message.setText(
+                "Hello,\n\n" +
+                        "We regret to inform you that your registration for '" + productName
+                        + "' in the Flash Sale has been REJECTED.\n\n" +
+                        "Reason: " + reason + "\n\n" +
+                        "You can review the campaign criteria and try again for future campaigns.\n\n" +
+                        "Best regards,\n" +
+                        "ShoppeClone Team");
+
+        mailSender.send(message);
+        System.out.println("❌ Flash Sale Rejection email sent to: " + to);
+    }
+
+    public void sendCampaignInvitationEmail(String to, String campaignName, String regDeadline) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("New Flash Sale Campaign Invitation! ⚡");
+        message.setText(
+                "Hello Shop Owner,\n\n" +
+                        "A new Flash Sale campaign '" + campaignName + "' is now open for registration!\n\n" +
+                        "Registration Deadline: " + regDeadline + "\n\n" +
+                        "Join now to boost your sales and reach more customers.\n\n" +
+                        "Log in to your Seller Dashboard to register your products.\n\n" +
+                        "Best regards,\n" +
+                        "ShoppeClone Team");
+
+        mailSender.send(message);
+        System.out.println("📩 Campaign Invitation email sent to: " + to);
+    }
 }

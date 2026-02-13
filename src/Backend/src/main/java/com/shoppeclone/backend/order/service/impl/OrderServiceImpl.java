@@ -1,5 +1,7 @@
 package com.shoppeclone.backend.order.service.impl;
 
+// Trigger recompile
+
 import com.shoppeclone.backend.cart.entity.Cart;
 import com.shoppeclone.backend.cart.entity.CartItem;
 import com.shoppeclone.backend.cart.repository.CartRepository;
@@ -8,7 +10,9 @@ import com.shoppeclone.backend.order.dto.OrderItemRequest;
 import com.shoppeclone.backend.order.dto.OrderRequest;
 import com.shoppeclone.backend.order.dto.ShippingAddressRequest;
 import com.shoppeclone.backend.order.entity.*;
+import com.shoppeclone.backend.promotion.entity.ShopVoucher;
 import com.shoppeclone.backend.promotion.entity.Voucher;
+import com.shoppeclone.backend.promotion.repository.ShopVoucherRepository;
 import com.shoppeclone.backend.order.repository.OrderRepository;
 import com.shoppeclone.backend.order.service.OrderService;
 import com.shoppeclone.backend.product.entity.ProductCategory;
@@ -47,6 +51,7 @@ public class OrderServiceImpl implements OrderService {
     private final PaymentService paymentService;
     private final PaymentMethodRepository paymentMethodRepository;
     private final com.shoppeclone.backend.promotion.repository.VoucherRepository voucherRepository;
+    private final ShopVoucherRepository shopVoucherRepository;
 
     @Override
     @Transactional
@@ -91,7 +96,8 @@ public class OrderServiceImpl implements OrderService {
         }
 
         if (checkoutItems.isEmpty()) {
-            throw new RuntimeException("No valid items to checkout. Your cart may contain removed products. Please refresh your cart.");
+            throw new RuntimeException(
+                    "No valid items to checkout. Your cart may contain removed products. Please refresh your cart.");
         }
 
         // 5. Create Order Items and Deduct Stock
@@ -216,10 +222,16 @@ public class OrderServiceImpl implements OrderService {
                 appliedShippingVoucherCode = processVoucher(userId, request.getShippingVoucherCode(), totalPrice,
                         Voucher.VoucherType.SHIPPING, null);
                 shippingDiscount = calculateDiscount(appliedShippingVoucherCode, shippingFee); // Apply against Shipping
-                                                                                               // Fee, but minSpend
-                                                                                               // checks Subtotal
-                                                                                               // (totalPrice)
+                                                                                               // Fee
             }
+        }
+
+        // 6.b Calculate Shop Discount (Shop Voucher)
+        BigDecimal shopDiscount = BigDecimal.ZERO;
+        String appliedShopVoucherCode = null;
+        if (request.getShopVoucherCode() != null && !request.getShopVoucherCode().trim().isEmpty()) {
+            appliedShopVoucherCode = processShopVoucher(userId, request.getShopVoucherCode(), shopId, totalPrice);
+            shopDiscount = calculateShopDiscount(appliedShopVoucherCode, totalPrice);
         }
 
         // 7. Create Order
@@ -227,17 +239,14 @@ public class OrderServiceImpl implements OrderService {
         order.setUserId(userId);
         order.setShopId(shopId); // Set shopId
         order.setItems(orderItems);
-        order.setTotalPrice(totalPrice.subtract(productDiscount).add(shippingFee).subtract(shippingDiscount)); // (Subtotal
-                                                                                                               // -
-                                                                                                               // ProdDisc)
-                                                                                                               // +
-                                                                                                               // (ShipFee
-                                                                                                               // -
-                                                                                                               // ShipDisc)
-        order.setDiscount(productDiscount);
         order.setVoucherCode(appliedProductVoucherCode);
         order.setShippingDiscount(shippingDiscount);
         order.setShippingVoucherCode(appliedShippingVoucherCode);
+        order.setShopVoucherCode(appliedShopVoucherCode);
+        order.setShopDiscount(shopDiscount);
+
+        order.setTotalPrice(totalPrice.subtract(productDiscount).subtract(shopDiscount).add(shippingFee)
+                .subtract(shippingDiscount));
 
         order.setOrderStatus(OrderStatus.PENDING);
         order.setPaymentStatus(PaymentStatus.UNPAID);
@@ -336,14 +345,18 @@ public class OrderServiceImpl implements OrderService {
         return code;
     }
 
-    /** Sum of (price * quantity) for items whose product belongs to allowed categories */
+    /**
+     * Sum of (price * quantity) for items whose product belongs to allowed
+     * categories
+     */
     private BigDecimal getEligibleAmount(List<OrderItem> orderItems, List<String> categoryIds) {
         if (orderItems == null || categoryIds == null || categoryIds.isEmpty())
             return BigDecimal.ZERO;
         BigDecimal sum = BigDecimal.ZERO;
         for (OrderItem item : orderItems) {
             ProductVariant variant = productVariantRepository.findById(item.getVariantId()).orElse(null);
-            if (variant == null) continue;
+            if (variant == null)
+                continue;
             List<ProductCategory> pcs = productCategoryRepository.findByProductId(variant.getProductId());
             boolean eligible = pcs.stream().anyMatch(pc -> categoryIds.contains(pc.getCategoryId()));
             if (eligible) {
@@ -354,7 +367,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private BigDecimal calculateProductDiscount(String code, BigDecimal totalPrice, List<OrderItem> orderItems) {
-        if (code == null) return BigDecimal.ZERO;
+        if (code == null)
+            return BigDecimal.ZERO;
         Voucher voucher = voucherRepository.findByCode(code)
                 .orElseThrow(() -> new RuntimeException("Voucher not found during calc: " + code));
         BigDecimal baseAmount = totalPrice;
@@ -390,6 +404,49 @@ public class OrderServiceImpl implements OrderService {
         return discount;
     }
 
+    private String processShopVoucher(String userId, String code, String shopId, BigDecimal orderValue) {
+        ShopVoucher voucher = shopVoucherRepository.findByCode(code)
+                .orElseThrow(() -> new RuntimeException("Shop Voucher not found: " + code));
+
+        if (!voucher.getShopId().equals(shopId)) {
+            throw new RuntimeException("Voucher này không thuộc về Shop của đơn hàng này");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        if ((voucher.getStartDate() != null && now.isBefore(voucher.getStartDate()))
+                || (voucher.getEndDate() != null && now.isAfter(voucher.getEndDate()))) {
+            throw new RuntimeException("Voucher đã hết hạn hoặc chưa đến ngày áp dụng");
+        }
+
+        if (voucher.getQuantity() <= 0) {
+            throw new RuntimeException("Voucher đã hết lượt sử dụng");
+        }
+
+        if (voucher.getMinSpend() != null && orderValue.compareTo(voucher.getMinSpend()) < 0) {
+            throw new RuntimeException(
+                    "Giá trị đơn hàng tối thiểu để sử dụng Voucher này là " + voucher.getMinSpend().toString());
+        }
+
+        // Update Usage
+        voucher.setQuantity(voucher.getQuantity() - 1);
+        shopVoucherRepository.save(voucher);
+
+        return code;
+    }
+
+    private BigDecimal calculateShopDiscount(String code, BigDecimal baseAmount) {
+        if (code == null)
+            return BigDecimal.ZERO;
+        ShopVoucher voucher = shopVoucherRepository.findByCode(code)
+                .orElseThrow(() -> new RuntimeException("Shop Voucher not found during calc: " + code));
+
+        BigDecimal discount = voucher.getDiscount();
+        if (discount.compareTo(baseAmount) > 0) {
+            discount = baseAmount;
+        }
+        return discount;
+    }
+
     @Override
     public Order getOrder(String orderId) {
         return orderRepository.findById(orderId)
@@ -415,7 +472,8 @@ public class OrderServiceImpl implements OrderService {
         Order order = getOrder(orderId);
         OrderStatus previousStatus = order.getOrderStatus();
 
-        // Update timestamps based on status (dùng thời gian thực khi seller đổi trạng thái)
+        // Update timestamps based on status (dùng thời gian thực khi seller đổi trạng
+        // thái)
         if ((status == OrderStatus.SHIPPING || status == OrderStatus.SHIPPED) && order.getShippedAt() == null) {
             order.setShippedAt(LocalDateTime.now());
         }

@@ -29,6 +29,7 @@ public class ReviewController {
     private final ReviewService reviewService;
     private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
+    private final com.shoppeclone.backend.shop.service.ShopService shopService;
 
     private String getUserId(UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername())
@@ -152,5 +153,36 @@ public class ReviewController {
         String userId = getUserId(userDetails);
         List<String> orderIds = reviewService.getReviewableOrderIds(userId);
         return ResponseEntity.ok(Map.of("orderIds", orderIds));
+    }
+
+    /**
+     * Get all reviews for a shop (Seller only)
+     */
+    @GetMapping("/shop/{shopId}")
+    public ResponseEntity<List<ReviewResponse>> getReviewsByShop(@PathVariable String shopId) {
+        List<ReviewResponse> reviews = reviewService.getReviewsByShopId(shopId);
+        return ResponseEntity.ok(reviews);
+    }
+
+    /**
+     * Reply to a review (Seller only)
+     */
+    @PostMapping("/{id}/reply")
+    public ResponseEntity<ReviewResponse> replyToReview(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String id,
+            @RequestBody Map<String, String> request) {
+        String replyComment = request.get("replyComment");
+        if (replyComment == null || replyComment.isBlank()) {
+            throw new RuntimeException("Phản hồi không được để trống");
+        }
+
+        com.shoppeclone.backend.shop.entity.Shop shop = shopService.getMyShop(userDetails.getUsername());
+        if (shop == null) {
+            throw new RuntimeException("Bạn không phải là chủ sở hữu Shop");
+        }
+
+        ReviewResponse response = reviewService.replyToReview(id, shop.getId(), replyComment);
+        return ResponseEntity.ok(response);
     }
 }

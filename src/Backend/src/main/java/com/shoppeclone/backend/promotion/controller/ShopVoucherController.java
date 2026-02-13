@@ -24,4 +24,21 @@ public class ShopVoucherController {
     public ResponseEntity<ShopVoucher> createShopVoucher(@RequestBody ShopVoucher shopVoucher) {
         return ResponseEntity.ok(shopVoucherService.createShopVoucher(shopVoucher));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ShopVoucher> updateShopVoucher(@PathVariable String id,
+            @RequestBody ShopVoucher shopVoucher) {
+        return ResponseEntity.ok(shopVoucherService.updateShopVoucher(id, shopVoucher));
+    }
+
+    @GetMapping("/code/{code}")
+    public ResponseEntity<ShopVoucher> getVoucherByCode(@PathVariable String code) {
+        return ResponseEntity.ok(shopVoucherService.getVoucherByCode(code));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteShopVoucher(@PathVariable String id) {
+        shopVoucherService.deleteShopVoucher(id);
+        return ResponseEntity.ok().build();
+    }
 }
