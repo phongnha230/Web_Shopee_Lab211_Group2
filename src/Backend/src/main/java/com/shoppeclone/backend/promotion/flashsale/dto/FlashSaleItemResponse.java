@@ -17,4 +17,5 @@ public class FlashSaleItemResponse {
     private Integer saleStock;
     private Integer remainingStock;
     private String status;
+    private String shopId;
 }

@@ -30,4 +30,6 @@ public class ProductResponse {
     private Boolean isFlashSale;
     private java.math.BigDecimal flashSalePrice;
     private Integer flashSaleStock;
+    private Integer flashSaleSold;
+    private LocalDateTime flashSaleEndTime;
 }

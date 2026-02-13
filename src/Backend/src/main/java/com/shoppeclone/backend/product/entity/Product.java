@@ -42,6 +42,8 @@ public class Product {
     private Boolean isFlashSale = false;
     private BigDecimal flashSalePrice;
     private Integer flashSaleStock;
+    private Integer flashSaleSold = 0;
+    private LocalDateTime flashSaleEndTime;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

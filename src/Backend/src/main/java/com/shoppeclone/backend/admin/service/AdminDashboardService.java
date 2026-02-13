@@ -5,13 +5,14 @@ import com.shoppeclone.backend.auth.model.User;
 import com.shoppeclone.backend.auth.repository.UserRepository;
 import com.shoppeclone.backend.shop.entity.Shop;
 import com.shoppeclone.backend.shop.entity.ShopStatus;
-import com.shoppeclone.backend.shop.entity.ShopStatus;
-import com.shoppeclone.backend.shop.repository.ShopRepository;
 import com.shoppeclone.backend.shop.repository.ShopRepository;
 import com.shoppeclone.backend.product.repository.ProductRepository;
 import com.shoppeclone.backend.product.entity.Product;
 import com.shoppeclone.backend.order.entity.OrderStatus;
 import com.shoppeclone.backend.dispute.entity.DisputeStatus;
+import com.shoppeclone.backend.promotion.flashsale.entity.FlashSaleItem;
+import com.shoppeclone.backend.promotion.flashsale.repository.FlashSaleCampaignRepository;
+import com.shoppeclone.backend.promotion.flashsale.repository.FlashSaleItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +34,8 @@ public class AdminDashboardService {
     private final ShopRepository shopRepository;
     private final com.shoppeclone.backend.dispute.repository.DisputeRepository disputeRepository;
     private final ProductRepository productRepository;
+    private final com.shoppeclone.backend.promotion.flashsale.repository.FlashSaleCampaignRepository flashSaleCampaignRepository;
+    private final com.shoppeclone.backend.promotion.flashsale.repository.FlashSaleItemRepository flashSaleItemRepository;
 
     public DashboardStatsResponse getDashboardStats(int days) {
         System.out.println("Fetching dashboard stats for period: " + days + " days");
@@ -46,10 +49,24 @@ public class AdminDashboardService {
         stats.setRejectedShops(shopRepository.countByStatus(ShopStatus.REJECTED));
         stats.setRejectedShops(shopRepository.countByStatus(ShopStatus.REJECTED));
         stats.setTotalDisputes(disputeRepository.count());
+        stats.setActiveFlashSales(flashSaleCampaignRepository.countByStatus("ONGOING"));
+        stats.setUpcomingFlashSales(flashSaleCampaignRepository.countByStatus("REGISTRATION_OPEN"));
+        stats.setPendingFlashRegistrations(flashSaleItemRepository.countByStatus("PENDING"));
+        stats.setApprovedFlashSaleItems(flashSaleItemRepository.countByStatus("APPROVED"));
+
+        // Calculate Urgent Actions (e.g., Campaigns with deadline < 24h + Pending
+        // items)
+        LocalDateTime target = LocalDateTime.now().plusDays(1);
+        long nearingDeadlines = flashSaleCampaignRepository.findAll().stream()
+                .filter(c -> "REGISTRATION_OPEN".equals(c.getStatus()) &&
+                        c.getRegistrationDeadline() != null &&
+                        c.getRegistrationDeadline().isBefore(target))
+                .count();
+        stats.setUrgentActionsCount(nearingDeadlines + stats.getPendingFlashRegistrations());
 
         // Operations Summary
-        // Operations Summary
         stats.setOpenDisputes(disputeRepository.countByStatus(DisputeStatus.OPEN));
+        stats.setPendingRegs(flashSaleItemRepository.countByStatus("PENDING"));
 
         stats.setTotalOrders(0);
         stats.setTotalGMV(0.0);
@@ -68,9 +85,9 @@ public class AdminDashboardService {
         } else {
             LocalDate today = LocalDate.now();
             stats.setUserTrend(getUserRegistrationTrend(today, days));
-            stats.setUserTrend(getUserRegistrationTrend(today, days));
             stats.setShopTrend(getShopRegistrationTrend(today, days));
             stats.setDisputeTrend(getDisputeTrend(today, days));
+            stats.setFlashSaleTrend(getFlashSaleTrend(today, days));
         }
 
         // User Distribution Calculation (ROLE_USER, ROLE_SELLER, ROLE_ADMIN)
@@ -179,6 +196,20 @@ public class AdminDashboardService {
 
         return groupAndFormatTrendDaily(
                 disputes.stream().map(com.shoppeclone.backend.dispute.entity.Dispute::getCreatedAt)
+                        .collect(Collectors.toList()),
+                endDate,
+                days);
+    }
+
+    private List<DashboardStatsResponse.TrendData> getFlashSaleTrend(LocalDate endDate, int days) {
+        LocalDateTime start = endDate.minusDays(days - 1).atStartOfDay();
+        List<com.shoppeclone.backend.promotion.flashsale.entity.FlashSaleItem> regs = flashSaleItemRepository.findAll()
+                .stream()
+                .filter(r -> r.getCreatedAt() != null && r.getCreatedAt().isAfter(start))
+                .collect(Collectors.toList());
+
+        return groupAndFormatTrendDaily(
+                regs.stream().map(com.shoppeclone.backend.promotion.flashsale.entity.FlashSaleItem::getCreatedAt)
                         .collect(Collectors.toList()),
                 endDate,
                 days);

@@ -10,5 +10,7 @@ import java.util.List;
 public interface FlashSaleCampaignRepository extends MongoRepository<FlashSaleCampaign, String> {
     List<FlashSaleCampaign> findByStatus(String status);
 
+    List<FlashSaleCampaign> findByStatusIn(List<String> statuses);
+
     long countByStatus(String status);
 }

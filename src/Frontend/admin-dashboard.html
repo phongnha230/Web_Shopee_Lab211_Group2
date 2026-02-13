@@ -2354,7 +2354,10 @@
 
         async function loadCampaigns() {
             const container = document.getElementById('campaignsList');
-            container.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin text-2xl"></i> Loading...</div>';
+            // Only show loading if empty
+            if (!container.innerHTML.trim() || container.textContent.includes('No campaigns') || container.textContent.includes('Loading')) {
+                container.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin text-2xl"></i> Loading...</div>';
+            }
 
             try {
                 const response = await fetch('http://localhost:8080/api/flash-sales/campaigns', {

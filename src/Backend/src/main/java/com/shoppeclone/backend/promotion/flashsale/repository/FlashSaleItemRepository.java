@@ -19,4 +19,6 @@ public interface FlashSaleItemRepository extends MongoRepository<FlashSaleItem, 
     void deleteByFlashSaleId(String flashSaleId);
 
     long countByStatus(String status);
+
+    List<FlashSaleItem> findByProductIdAndStatus(String productId, String status);
 }

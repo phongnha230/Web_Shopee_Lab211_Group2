@@ -42,7 +42,6 @@ public class SecurityConfig {
                                                                 "/api/webhooks/**") // Allow Webhooks explicitly
                                                 .permitAll()
 
-                                                // ✅ Allow Public GET Access (View Products, Categories, Shops,
                                                 // Vouchers, Flash Sales countdown)
                                                 .requestMatchers(org.springframework.http.HttpMethod.GET,
                                                                 "/api/products/**",
@@ -55,6 +54,7 @@ public class SecurityConfig {
                                                                 "/api/vouchers/code/**",
                                                                 "/api/debug/**")
                                                 .permitAll()
+
                                                 // Allow POST fix-category for dev (fix product category so vouchers
                                                 // apply)
                                                 .requestMatchers(org.springframework.http.HttpMethod.POST,

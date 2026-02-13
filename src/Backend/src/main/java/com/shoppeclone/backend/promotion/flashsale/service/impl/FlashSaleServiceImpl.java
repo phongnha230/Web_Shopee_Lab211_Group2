@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -53,8 +55,8 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         campaign.setRegistrationDeadline(request.getRegistrationDeadline());
         campaign.setApprovalDeadline(request.getApprovalDeadline());
         campaign.setStatus("REGISTRATION_OPEN");
-        campaign.setCreatedAt(LocalDateTime.now());
-        campaign.setUpdatedAt(LocalDateTime.now());
+        campaign.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
+        campaign.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
         FlashSaleCampaign saved = flashSaleCampaignRepository.save(campaign);
 
         // Auto-broadcast invitation to all active shops
@@ -83,7 +85,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
             campaign.setRegistrationDeadline(request.getRegistrationDeadline());
         if (request.getApprovalDeadline() != null)
             campaign.setApprovalDeadline(request.getApprovalDeadline());
-        campaign.setUpdatedAt(LocalDateTime.now());
+        campaign.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
         return flashSaleCampaignRepository.save(campaign);
     }
 
@@ -94,7 +96,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
 
     @Override
     public List<FlashSaleCampaign> getOpenCampaigns() {
-        return flashSaleCampaignRepository.findByStatus("REGISTRATION_OPEN");
+        return flashSaleCampaignRepository.findByStatusIn(java.util.Arrays.asList("REGISTRATION_OPEN", "ONGOING"));
     }
 
     @Override
@@ -135,8 +137,20 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         FlashSaleCampaign campaign = flashSaleCampaignRepository.findById(slot.getCampaignId())
                 .orElseThrow(() -> new RuntimeException("Campaign not found"));
 
-        ProductVariant variant = productVariantRepository.findById(request.getVariantId())
-                .orElseThrow(() -> new RuntimeException("Product variant not found"));
+        ProductVariant variant;
+        if (request.getVariantId() != null) {
+            variant = productVariantRepository.findById(request.getVariantId())
+                    .orElseThrow(() -> new RuntimeException("Product variant not found"));
+        } else {
+            // Attempt to find the default (first) variant for the product
+            List<ProductVariant> variants = productVariantRepository.findByProductId(request.getProductId());
+            if (variants.isEmpty()) {
+                throw new RuntimeException(
+                        "Cannot register a product without inventory records (Variants). Please add a variant to your product.");
+            }
+            variant = variants.get(0);
+            request.setVariantId(variant.getId()); // Update request for later saving
+        }
 
         // Dynamic Price Guard logic
         double minDiscount = campaign.getMinDiscountPercentage() / 100.0;
@@ -149,9 +163,16 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         }
 
         // Dynamic Stock validation
+        // 1. Check against Campaign Min Requirement
         if (request.getSaleStock() < campaign.getMinStockPerProduct()) {
             throw new RuntimeException(
-                    String.format("Min stock required for this campaign is %d", campaign.getMinStockPerProduct()));
+                    String.format("Stock must be at least %d items (Admin Min Stock Requirement)",
+                            campaign.getMinStockPerProduct()));
+        }
+        // 2. Check against Actual Shop Inventory
+        if (request.getSaleStock() > variant.getStock()) {
+            throw new RuntimeException(
+                    String.format("You cannot register more than your current stock (%d items)", variant.getStock()));
         }
 
         FlashSaleItem registration = new FlashSaleItem();
@@ -163,8 +184,8 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         registration.setSaleStock(request.getSaleStock());
         registration.setRemainingStock(request.getSaleStock());
         registration.setStatus("PENDING");
-        registration.setCreatedAt(LocalDateTime.now());
-        registration.setUpdatedAt(LocalDateTime.now());
+        registration.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
+        registration.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
 
         return flashSaleItemRepository.save(registration);
     }
@@ -267,12 +288,12 @@ public class FlashSaleServiceImpl implements FlashSaleService {
 
     @Override
     public List<FlashSale> getActiveFlashSales() {
-        return flashSaleRepository.findByStartTimeAfter(LocalDateTime.now().minusDays(1));
+        return flashSaleRepository.findByStartTimeAfter(LocalDateTime.now(ZoneOffset.UTC).minusDays(1));
     }
 
     @Override
     public Optional<FlashSale> getCurrentFlashSale() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         List<FlashSale> all = flashSaleRepository.findAll();
         return all.stream()
                 .filter(fs -> fs.getStartTime() != null && fs.getEndTime() != null)
@@ -361,6 +382,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         resp.setSaleStock(item.getSaleStock());
         resp.setRemainingStock(item.getRemainingStock());
         resp.setStatus(item.getStatus());
+        resp.setShopId(item.getShopId());
 
         // Fetch Product Info
         productRepository.findById(item.getProductId()).ifPresent(p -> {

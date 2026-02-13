@@ -26,4 +26,11 @@ public class ProductVariant {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // Flash Sale fields
+    private Boolean isFlashSale = false;
+    private BigDecimal flashSalePrice;
+    private Integer flashSaleStock;
+    private Integer flashSaleSold = 0;
+    private LocalDateTime flashSaleEndTime;
 }

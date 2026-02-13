@@ -16,15 +16,23 @@ public class DashboardStatsResponse {
     private long totalOrders;
     private double totalGMV;
     private long totalDisputes;
+    private long activeFlashSales;
+    private long pendingFlashRegistrations;
+    private long approvedFlashSaleItems;
+    private long upcomingFlashSales;
+    private long urgentActionsCount;
 
     // Operations Summary
     private long pendingOrders;
     private long openDisputes;
+    private long pendingRegs; // Existing field for shops, maybe repurposed? No, let's keep separate or check
+                              // naming.
 
     // Trend Data
     private List<TrendData> userTrend;
     private List<TrendData> shopTrend;
     private List<TrendData> disputeTrend;
+    private List<TrendData> flashSaleTrend;
 
     // Distribution Data (e.g., Users by Role or Shops by Category)
     private List<DistributionData> distribution;

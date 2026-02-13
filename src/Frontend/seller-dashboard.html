@@ -1261,7 +1261,7 @@
             } else if (viewName === 'returns') {
                 loadReturns();
             } else if (viewName === 'flash-sale') {
-                loadFlashSaleDashboard();
+                loadSellerFSData();
             } else if (viewName === 'customers') {
                 switchCustomerTab('chat');
             }
@@ -3972,7 +3972,7 @@
             if (!currentShopId) return;
 
             try {
-                const response = await fetch(`${baseUrl}/flash-sales/shop/${currentShopId}`, {
+                const response = await fetch(`${baseUrl}/flash-sales/registrations/my`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (response.ok) {
@@ -4017,14 +4017,33 @@
             `).join('');
         }
 
+        let currentCampaignMinStock = 0; // Global variable to store min stock
+        let currentCampaignMinDiscount = 0; // Global variable to store min discount
+
         async function openRegisterModal(campaignId) {
             document.getElementById('reg-campaign-id').value = campaignId;
             document.getElementById('sellerFSRegModal').classList.remove('hidden');
 
-            // Load Slots
+            // Load Slots and Campaign Info (to get Min Stock & Discount)
             const slotSelect = document.getElementById('reg-slot-id');
             slotSelect.innerHTML = '<option value="">Loading slots...</option>';
             try {
+                // 1. Get Open Campaigns to find the current one and its minStock
+                const cResp = await fetch(`${baseUrl}/flash-sales/campaigns/open`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (cResp.ok) {
+                    const campaigns = await cResp.json();
+                    const campaign = campaigns.find(c => c.id === campaignId);
+                    if (campaign) {
+                        currentCampaignMinStock = campaign.minStockPerProduct || 1;
+                        currentCampaignMinDiscount = campaign.minDiscountPercentage || 0;
+                        document.getElementById('reg-sale-stock').setAttribute('min', currentCampaignMinStock);
+                        document.getElementById('reg-sale-stock').placeholder = `Min: ${currentCampaignMinStock}`;
+                    }
+                }
+
+                // 2. Get Slots
                 const sResp = await fetch(`${baseUrl}/flash-sales/slots/${campaignId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -4045,18 +4064,44 @@
                 if (pResp.ok) {
                     const products = await pResp.json();
                     prodSelect.innerHTML = '<option value="">Choose a product...</option>' +
-                        products.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+                        products.map(p => `<option value="${p.id}" data-min-price="${p.minPrice}" data-stock="${p.totalStock}">${p.name}</option>`).join('');
+
+                    // Add listener for product change
+                    prodSelect.onchange = function () {
+                        loadProductVariantsForReg(this.value);
+                    };
                 }
             } catch (e) { prodSelect.innerHTML = '<option value="">Error loading products</option>'; }
         }
 
         async function loadProductVariantsForReg(productId) {
+            const salePriceInput = document.getElementById('reg-sale-price');
+            const saleStockInput = document.getElementById('reg-sale-stock');
+
             if (!productId) {
                 document.getElementById('reg-variant-wrap').classList.add('hidden');
+                salePriceInput.value = '';
+                saleStockInput.value = '';
                 return;
             }
+
+            // Default populate from product if no variants (or while loading)
+            const prodSelect = document.getElementById('reg-product-id');
+            const selectedOption = prodSelect.options[prodSelect.selectedIndex];
+            if (selectedOption) {
+                const originalPrice = parseFloat(selectedOption.getAttribute('data-min-price')) || 0;
+                // Auto-calculate Max Allowed Price based on Min Discount
+                const maxAllowedPrice = Math.floor(originalPrice * (1 - currentCampaignMinDiscount / 100));
+
+                salePriceInput.value = maxAllowedPrice > 0 ? maxAllowedPrice : '';
+                saleStockInput.value = selectedOption.getAttribute('data-stock') || '';
+                // Set Max Stock based on current inventory
+                saleStockInput.setAttribute('max', selectedOption.getAttribute('data-stock') || '');
+            }
+
             const variantSelect = document.getElementById('reg-variant-id');
             variantSelect.innerHTML = '<option value="">Loading variants...</option>';
+
             try {
                 const vResp = await fetch(`${baseUrl}/products/${productId}/variants`, {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -4065,28 +4110,94 @@
                     const variants = await vResp.json();
                     if (variants && variants.length > 0) {
                         document.getElementById('reg-variant-wrap').classList.remove('hidden');
-                        variantSelect.innerHTML = variants.map(v => `<option value="${v.id}">${v.color || ''} ${v.size || ''} - ₫${v.price.toLocaleString()}</option>`).join('');
+                        variantSelect.innerHTML = variants.map(v =>
+                            `<option value="${v.id}" data-price="${v.price}" data-stock="${v.stock}">
+                                ${v.color || ''} ${v.size || ''} - ₫${v.price.toLocaleString()}
+                            </option>`
+                        ).join('');
+
+                        // Auto-select first variant and update fields
+                        if (variants.length > 0) {
+                            variantSelect.selectedIndex = 0;
+                            updateRegFormFromVariant();
+                        }
+
+                        // Add listener
+                        variantSelect.onchange = updateRegFormFromVariant;
                     } else {
                         document.getElementById('reg-variant-wrap').classList.add('hidden');
                         variantSelect.innerHTML = '<option value="">Default (No variants)</option>';
+                        // Keep product values (already set above)
                     }
                 }
             } catch (e) { console.error(e); }
         }
 
+        function updateRegFormFromVariant() {
+            const variantSelect = document.getElementById('reg-variant-id');
+            const selectedOption = variantSelect.options[variantSelect.selectedIndex];
+            if (selectedOption) {
+                const price = parseFloat(selectedOption.getAttribute('data-price'));
+                const stock = selectedOption.getAttribute('data-stock');
+
+                if (price) {
+                    // Auto-calculate Max Allowed Price based on Min Discount
+                    const maxAllowedPrice = Math.floor(price * (1 - currentCampaignMinDiscount / 100));
+                    document.getElementById('reg-sale-price').value = maxAllowedPrice;
+                    document.getElementById('reg-sale-price').placeholder = `Max: ${maxAllowedPrice} (-${currentCampaignMinDiscount}%)`;
+                }
+                if (stock) {
+                    document.getElementById('reg-sale-stock').value = stock;
+                    document.getElementById('reg-sale-stock').setAttribute('max', stock);
+                }
+            }
+        }
+
         document.getElementById('sellerFSRegForm').onsubmit = async (e) => {
             e.preventDefault();
+
+            // Client-side Validation (Stock)
+            const stockInput = parseInt(document.getElementById('reg-sale-stock').value);
+            const maxStock = parseInt(document.getElementById('reg-sale-stock').getAttribute('max'));
+
+            if (stockInput < currentCampaignMinStock) {
+                showToast(`Stock must be at least ${currentCampaignMinStock} (Campaign Requirement)`, 'error');
+                return;
+            }
+            if (!isNaN(maxStock) && stockInput > maxStock) {
+                showToast(`Stock cannot exceed current inventory (${maxStock})`, 'error');
+                return;
+            }
+
+            // Client-side Validation (Price)
+            const salePriceInput = parseFloat(document.getElementById('reg-sale-price').value);
+            // Re-calculate max price just in case
+            let originalPrice = 0;
+            const variantSelect = document.getElementById('reg-variant-id');
+            if (variantSelect && variantSelect.value && variantSelect.selectedIndex >= 0) {
+                originalPrice = parseFloat(variantSelect.options[variantSelect.selectedIndex].getAttribute('data-price'));
+            } else {
+                const prodSelect = document.getElementById('reg-product-id');
+                originalPrice = parseFloat(prodSelect.options[prodSelect.selectedIndex].getAttribute('data-min-price'));
+            }
+
+            const maxAllowedPrice = Math.floor(originalPrice * (1 - currentCampaignMinDiscount / 100));
+            if (salePriceInput > maxAllowedPrice) {
+                showToast(`Sale Price cannot exceed ${maxAllowedPrice} (Must act least -${currentCampaignMinDiscount}%)`, 'error');
+                return;
+            }
+
             const data = {
-                flashSaleId: document.getElementById('reg-slot-id').value,
+                slotId: document.getElementById('reg-slot-id').value,
                 productId: document.getElementById('reg-product-id').value,
                 variantId: document.getElementById('reg-variant-id').value || null,
-                shopId: currentShopId,
+                // shopId is handled by backend from auth context, but sending it doesn't hurt unless strict mode
                 salePrice: parseFloat(document.getElementById('reg-sale-price').value),
-                saleStock: parseInt(document.getElementById('reg-sale-stock').value)
+                saleStock: stockInput
             };
 
             try {
-                const response = await fetch(`${baseUrl}/flash-sales/register`, {
+                const response = await fetch(`${baseUrl}/flash-sales/registrations`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)

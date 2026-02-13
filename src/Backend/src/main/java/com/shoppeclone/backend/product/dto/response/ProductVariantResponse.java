@@ -15,4 +15,11 @@ public class ProductVariantResponse {
     private String imageUrl;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // Flash Sale fields
+    private Boolean isFlashSale;
+    private BigDecimal flashSalePrice;
+    private Integer flashSaleStock;
+    private Integer flashSaleSold;
+    private LocalDateTime flashSaleEndTime;
 }
