@@ -343,7 +343,15 @@
 
                     // Find the SELECTED variant by variantId (not first variant!)
                     const selectedVariant = product.variants?.find(v => v.id === variantId);
-                    let price = Number(selectedVariant?.price ?? product.variants?.[0]?.price ?? product.price ?? 0);
+
+                    // --- PRICE LOGIC (Handle Flash Sale) ---
+                    let price = 0;
+                    if (product.isFlashSale || (selectedVariant && selectedVariant.isFlashSale)) {
+                        price = (selectedVariant && selectedVariant.isFlashSale) ? selectedVariant.flashSalePrice : product.flashSalePrice;
+                    } else {
+                        price = Number(selectedVariant?.price ?? product.variants?.[0]?.price ?? product.price ?? 0);
+                    }
+
                     let productName = product.name || 'Unknown Product';
                     let productImage = selectedVariant?.imageUrl || product.images?.[0] || product.image || 'https://via.placeholder.com/80';
                     let variantName = '';

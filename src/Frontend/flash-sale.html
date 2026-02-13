@@ -140,7 +140,12 @@
         }
 
         function startCountdown(endTime) {
-            const end = new Date(endTime);
+            // Ensure endTime is treated as UTC
+            let dateStr = endTime;
+            if (dateStr && !dateStr.endsWith('Z') && !dateStr.includes('+')) {
+                dateStr += 'Z';
+            }
+            const end = new Date(dateStr);
             const els = document.querySelectorAll('.bg-black.text-white');
 
             function tick() {

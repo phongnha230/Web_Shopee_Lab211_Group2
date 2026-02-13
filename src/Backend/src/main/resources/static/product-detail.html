@@ -539,7 +539,7 @@
                     const rating = (isReal && product.rating != null) ? product.rating.toFixed(1) : (product.rating || 4.8);
                     const reviewCount = (isReal && product.reviewCount != null) ? product.reviewCount : (product.reviewCount ?? 0);
                     const sold = (isReal && product.sold != null) ? product.sold : (product.sold ?? 0);
-                    const formatCount = n => (n >= 1000 ? (n/1000).toFixed(1) + 'k' : String(n));
+                    const formatCount = n => (n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(n));
                     document.getElementById('ratingValue').textContent = rating;
                     const reviewCountEl = document.getElementById('reviewCount');
                     if (reviewCountEl) reviewCountEl.textContent = reviewCount > 0 ? `${formatCount(reviewCount)} Ratings` : '0 Ratings';
@@ -845,9 +845,13 @@
 
                 // Update local storage cart (clear it and add only this item for buy now experience)
                 let priceVal = 0;
-                if (window.isCurrentReal && product.variants && product.variants.length > 0) {
-                    const v = product.variants.find(v => v.id === variantId) || product.variants[0];
-                    priceVal = v.price;
+                if (window.isCurrentReal) {
+                    if (product.isFlashSale && product.flashSalePrice) {
+                        priceVal = product.flashSalePrice;
+                    } else if (product.variants && product.variants.length > 0) {
+                        const v = product.variants.find(v => v.id === variantId) || product.variants[0];
+                        priceVal = v.price;
+                    }
                 } else {
                     priceVal = product.price || 0;
                 }
