@@ -489,6 +489,12 @@
                     return;
                 }
 
+                // Ensure endTime is treated as UTC (Backend tends to omit 'Z' in some endpoints)
+                let dateStr = endTime;
+                if (!dateStr.endsWith('Z') && !dateStr.includes('+')) {
+                    dateStr += 'Z';
+                }
+                const end = new Date(dateStr);
                 const end = new Date(endTime);
 
                 function tick() {
@@ -730,7 +736,9 @@
                 } else {
                     // product is standard Product
                     if (product.images && product.images.length > 0) imageUrl = product.images[0];
-                    if (product.variants && product.variants.length > 0) {
+                    if (product.isFlashSale && product.flashSalePrice > 0) {
+                        priceDisplay = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.flashSalePrice);
+                    } else if (product.variants && product.variants.length > 0) {
                         priceDisplay = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.variants[0].price);
                     }
                 }

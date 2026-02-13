@@ -939,38 +939,43 @@
             let flashSaleEndTime = null;
             let oldPrice = 0;
 
-            if (variant) {
-                // Variant Selected: Check for Variant Flash Sale FIRST
-                if (variant.isFlashSale) {
-                    isFlashSale = true;
-                    price = variant.flashSalePrice;
-                    stock = variant.flashSaleStock;
-                    flashSaleEndTime = variant.flashSaleEndTime;
-                    oldPrice = variant.price;
-                } else {
+            // Determine if anything is on Flash Sale (Must have price > 0 and end time)
+            const productHasFs = product.isFlashSale && product.flashSalePrice > 0 && product.flashSaleEndTime;
+            const variantHasFs = variant && variant.isFlashSale && variant.flashSalePrice > 0 && variant.flashSaleEndTime;
+
+            if (productHasFs || variantHasFs) {
+                isFlashSale = true;
+                price = variantHasFs ? variant.flashSalePrice : product.flashSalePrice;
+                stock = variantHasFs ? variant.flashSaleStock : (variant ? variant.stock : product.flashSaleStock);
+                flashSaleEndTime = variantHasFs ? variant.flashSaleEndTime : product.flashSaleEndTime;
+
+                // Old price is the regular price
+                oldPrice = variant ? variant.price : (product.minPrice || product.price);
+            } else {
+                // Regular price
+                if (variant) {
                     price = variant.price;
                     stock = variant.stock;
-                    oldPrice = price * 1.2;
-                }
-            } else {
-                // No Variant Selected: Fallback to Product Level
-                if (product.isFlashSale) {
-                    isFlashSale = true;
-                    price = product.flashSalePrice;
-                    stock = product.flashSaleStock;
-                    flashSaleEndTime = product.flashSaleEndTime;
-                    // Try to find a reasonable "old price" (min price or explicit price)
-                    oldPrice = product.minPrice || product.price || (price * 1.2);
                 } else if (isReal && product.variants && product.variants.length > 0) {
                     price = product.minPrice || product.variants[0].price;
                     stock = product.totalStock || product.stock;
-                    oldPrice = price * 1.2;
                 }
+                oldPrice = price * 1.2; // Simulated
             }
 
             // --- RENDER ---
             // Timer placeholder in badge
-            let badgeHtml = isFlashSale ? `<span class="bg-yellow-400 text-black px-2 py-1 rounded text-sm font-bold ml-3">FLASH SALE <span id="fs-timer" class="ml-1 text-red-600 font-mono inline-block w-[70px] text-center"></span></span>` : (product.isFlashSale ? '' : '<span class="bg-orange-500 text-white px-2 py-1 rounded text-sm font-semibold ml-3">SALE</span>');
+            let badgeHtml = '';
+            if (isFlashSale) {
+                const discountPercent = oldPrice > price ? Math.round((1 - price / oldPrice) * 100) : 0;
+                badgeHtml = `
+                    <span class="bg-yellow-400 text-black px-2 py-1 rounded text-sm font-bold ml-3">
+                        ${discountPercent > 0 ? `-${discountPercent}% ` : ''}FLASH SALE 
+                        <span id="fs-timer" class="ml-1 text-red-600 font-mono inline-block w-[70px] text-center"></span>
+                    </span>`;
+            } else {
+                badgeHtml = '<span class="bg-orange-500 text-white px-2 py-1 rounded text-sm font-semibold ml-3">SALE</span>';
+            }
 
             const priceContainer = document.getElementById('priceContainer');
             if (priceContainer) {
@@ -1033,7 +1038,12 @@
             if (window.fsTimerInterval) clearInterval(window.fsTimerInterval);
             if (!endTimeStr) return;
 
-            const endTime = new Date(endTimeStr).getTime();
+            // Ensure endTimeStr is treated as UTC (Backend sends UTC, but sometimes omits 'Z')
+            let dateStr = endTimeStr;
+            if (!dateStr.endsWith('Z') && !dateStr.includes('+')) {
+                dateStr += 'Z';
+            }
+            const endTime = new Date(dateStr).getTime();
 
             function update() {
                 const now = Date.now();

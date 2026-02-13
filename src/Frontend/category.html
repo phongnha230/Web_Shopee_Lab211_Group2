@@ -396,10 +396,21 @@
 
                     // Price normalization
                     let priceVal = 0;
-                    if (p.variants && p.variants.length > 0) priceVal = p.variants[0].price;
-                    else if (p.price) priceVal = p.price;
+                    let oldPrice = 0;
+                    let isFlashSale = false;
+
+                    if (p.isFlashSale && p.flashSalePrice > 0) {
+                        isFlashSale = true;
+                        priceVal = p.flashSalePrice;
+                        oldPrice = (p.variants && p.variants.length > 0) ? p.variants[0].price : p.price;
+                    } else {
+                        if (p.variants && p.variants.length > 0) priceVal = p.variants[0].price;
+                        else if (p.price) priceVal = p.price;
+                        oldPrice = priceVal * 1.2;
+                    }
 
                     const priceDisplay = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(priceVal);
+                    const oldPriceDisplay = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(oldPrice);
 
                     // Stats - use real data from API
                     const sold = p.sold != null ? p.sold : 0;
@@ -410,11 +421,14 @@
                             class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer overflow-hidden group">
                             <div class="relative">
                                 <img src="${imageUrl}" alt="${p.name}" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
-                                ${p.badge ? `<div class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm shadow-sm">${p.badge}</div>` : ''}
+                                ${isFlashSale ? `<div class="absolute top-2 left-2 bg-orange-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm shadow-sm">FLASH SALE</div>` : (p.badge ? `<div class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm shadow-sm">${p.badge}</div>` : '')}
                             </div>
                             <div class="p-3">
                                 <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2">${p.name}</p>
-                                <p class="text-orange-600 text-lg font-bold">${priceDisplay}</p>
+                                <div class="flex items-center gap-1 flex-wrap">
+                                    <p class="text-orange-600 text-lg font-bold">${priceDisplay}</p>
+                                    ${isFlashSale ? `<p class="text-gray-400 text-xs line-through">${oldPriceDisplay}</p>` : ''}
+                                </div>
                                 <div class="flex items-center text-xs text-gray-500 mt-1">
                                     <i class="fas fa-star text-yellow-400 mr-1"></i>
                                     <span>${rating}</span>
