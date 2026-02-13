@@ -9,7 +9,7 @@ import com.shoppeclone.backend.product.entity.*;
 import com.shoppeclone.backend.product.repository.*;
 import com.shoppeclone.backend.product.service.ProductService;
 import com.shoppeclone.backend.product.util.CategoryDetectionUtil;
-import com.shoppeclone.backend.promotion.service.FlashSaleService;
+import com.shoppeclone.backend.promotion.flashsale.service.FlashSaleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -123,7 +123,18 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductResponse> getProductsByShopId(String shopId) {
-        return productRepository.findByShopId(shopId).stream()
+        return getProductsByShopId(shopId, false);
+    }
+
+    @Override
+    public List<ProductResponse> getProductsByShopId(String shopId, boolean includeHidden) {
+        List<Product> products;
+        if (includeHidden) {
+            products = productRepository.findByShopId(shopId);
+        } else {
+            products = productRepository.findByShopIdAndStatus(shopId, ProductStatus.ACTIVE);
+        }
+        return products.stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
@@ -137,7 +148,7 @@ public class ProductServiceImpl implements ProductService {
                     "sold");
         }
 
-        return productRepository.findAll(sorting).stream()
+        return productRepository.findByStatus(ProductStatus.ACTIVE, sorting).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
@@ -152,7 +163,7 @@ public class ProductServiceImpl implements ProductService {
         String trimmed = keyword.trim();
 
         return productRepository
-                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(trimmed, trimmed)
+                .searchByNameOrDescriptionAndStatus(trimmed, ProductStatus.ACTIVE)
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -167,6 +178,7 @@ public class ProductServiceImpl implements ProductService {
 
         // 2. Fetch products details
         return productRepository.findAllById(productIds).stream()
+                .filter(p -> p.getStatus() == ProductStatus.ACTIVE)
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
@@ -470,6 +482,16 @@ public class ProductServiceImpl implements ProductService {
         // means or it's already set.
         // But the requirement here is mainly for "Delete" which sets it to false.
 
+        product.setUpdatedAt(LocalDateTime.now());
+        productRepository.save(product);
+    }
+
+    @Override
+    @Transactional
+    public void updateProductVisibility(String id, ProductStatus status) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        product.setStatus(status);
         product.setUpdatedAt(LocalDateTime.now());
         productRepository.save(product);
     }
