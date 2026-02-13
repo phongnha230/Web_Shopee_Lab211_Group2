@@ -92,7 +92,7 @@ public class FlashSaleController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SELLER')")
     @GetMapping("/slots/{campaignId}")
     public ResponseEntity<List<FlashSale>> getSlotsByCampaignId(@PathVariable String campaignId) {
         return ResponseEntity.ok(flashSaleService.getSlotsByCampaignId(campaignId));

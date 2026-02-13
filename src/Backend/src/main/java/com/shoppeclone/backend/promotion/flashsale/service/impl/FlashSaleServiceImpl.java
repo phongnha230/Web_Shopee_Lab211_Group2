@@ -94,7 +94,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
 
     @Override
     public List<FlashSaleCampaign> getOpenCampaigns() {
-        return flashSaleCampaignRepository.findByStatus("REGISTRATION_OPEN");
+        return flashSaleCampaignRepository.findByStatusIn(java.util.Arrays.asList("REGISTRATION_OPEN", "ONGOING"));
     }
 
     @Override
@@ -135,8 +135,20 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         FlashSaleCampaign campaign = flashSaleCampaignRepository.findById(slot.getCampaignId())
                 .orElseThrow(() -> new RuntimeException("Campaign not found"));
 
-        ProductVariant variant = productVariantRepository.findById(request.getVariantId())
-                .orElseThrow(() -> new RuntimeException("Product variant not found"));
+        ProductVariant variant;
+        if (request.getVariantId() != null) {
+            variant = productVariantRepository.findById(request.getVariantId())
+                    .orElseThrow(() -> new RuntimeException("Product variant not found"));
+        } else {
+            // Attempt to find the default (first) variant for the product
+            List<ProductVariant> variants = productVariantRepository.findByProductId(request.getProductId());
+            if (variants.isEmpty()) {
+                throw new RuntimeException(
+                        "Cannot register a product without inventory records (Variants). Please add a variant to your product.");
+            }
+            variant = variants.get(0);
+            request.setVariantId(variant.getId()); // Update request for later saving
+        }
 
         // Dynamic Price Guard logic
         double minDiscount = campaign.getMinDiscountPercentage() / 100.0;
@@ -149,9 +161,16 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         }
 
         // Dynamic Stock validation
+        // 1. Check against Campaign Min Requirement
         if (request.getSaleStock() < campaign.getMinStockPerProduct()) {
             throw new RuntimeException(
-                    String.format("Min stock required for this campaign is %d", campaign.getMinStockPerProduct()));
+                    String.format("Stock must be at least %d items (Admin Min Stock Requirement)",
+                            campaign.getMinStockPerProduct()));
+        }
+        // 2. Check against Actual Shop Inventory
+        if (request.getSaleStock() > variant.getStock()) {
+            throw new RuntimeException(
+                    String.format("You cannot register more than your current stock (%d items)", variant.getStock()));
         }
 
         FlashSaleItem registration = new FlashSaleItem();
@@ -361,6 +380,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         resp.setSaleStock(item.getSaleStock());
         resp.setRemainingStock(item.getRemainingStock());
         resp.setStatus(item.getStatus());
+        resp.setShopId(item.getShopId());
 
         // Fetch Product Info
         productRepository.findById(item.getProductId()).ifPresent(p -> {

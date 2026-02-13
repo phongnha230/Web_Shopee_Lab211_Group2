@@ -9,7 +9,7 @@ import com.shoppeclone.backend.product.entity.*;
 import com.shoppeclone.backend.product.repository.*;
 import com.shoppeclone.backend.product.service.ProductService;
 import com.shoppeclone.backend.product.util.CategoryDetectionUtil;
-import com.shoppeclone.backend.promotion.service.FlashSaleService;
+import com.shoppeclone.backend.promotion.flashsale.service.FlashSaleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
