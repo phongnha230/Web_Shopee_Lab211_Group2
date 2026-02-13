@@ -1,389 +1,461 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopee Clone - Best Online Shopping Experience</title>
+    <title>GoShop - Best Online Shopping Experience</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'marquee-left': 'marquee-left 25s linear infinite',
+                        'marquee-right': 'marquee-right 25s linear infinite',
+                    },
+                    keyframes: {
+                        'marquee-left': {
+                            '0%': { transform: 'translateX(0)' },
+                            '100%': { transform: 'translateX(-50%)' }, // Move left by 50% (since we duplicated content)
+                        },
+                        'marquee-right': {
+                            '0%': { transform: 'translateX(-50%)' }, // Start pushed left
+                            '100%': { transform: 'translateX(0)' },   // Move right back to 0
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* ===== ShopeeClone Red + Beige (MATCH SIGN IN PAGE) ===== */
-
-        /* ========== BRAND COLORS ==========
-       Red   : #AD3029
-       Red H : #8f2621
-       Beige : #FEEFCD
-       Beige2: #F8E8D0
-    =================================== */
-
-        /* ===== TEXT ===== */
-        .text-orange-500,
-        .text-orange-600 {
-            color: #AD3029 !important;
-        }
-
-        /* ===== PRIMARY BACKGROUND (RED) ===== */
-        .bg-orange-500,
-        .bg-orange-600 {
-            background-color: #AD3029 !important;
-            color: white !important;
-        }
-
-        .hover\:bg-orange-600:hover,
-        .hover\:bg-orange-700:hover {
-            background-color: #8f2621 !important;
-        }
-
-        /* ===== GRADIENT (RED → RED SOFT) ===== */
-        .from-orange-500 {
-            --tw-gradient-from: #AD3029 !important;
-        }
-
-        .to-orange-600 {
-            --tw-gradient-to: #CD5252 !important;
-        }
-
-        /* ===== BORDER ===== */
-        .border-orange-500,
-        .border-orange-600 {
-            border-color: #AD3029 !important;
-        }
-
-        /* ===== ICONS ===== */
-        i.text-orange-500,
-        svg.text-orange-500 {
-            color: #AD3029 !important;
-        }
-
-        /* ===== BEIGE SURFACES ===== */
-        .bg-yellow-400,
-        .bg-yellow-300,
-        .bg-yellow-200 {
-            background-color: #FEEFCD !important;
-            color: #AD3029 !important;
-        }
-
-        .bg-yellow-100 {
-            background-color: #F8E8D0 !important;
-        }
-
-        /* ===== OUTLINE / GOOGLE STYLE BUTTON ===== */
-        .border-yellow-400,
-        .border-yellow-300 {
-            border-color: #AD3029 !important;
-        }
-
-        /* ===== SEARCH / ACTION BUTTON ===== */
-        button.bg-orange-600 {
-            background-color: #AD3029 !important;
-            color: white !important;
-        }
-
-        button.bg-orange-600:hover {
-            background-color: #8f2621 !important;
-        }
-
-
-        /* Optional: gray nền nhẹ */
-        .bg-gray-100 {
-            background-color: #F8E8D0 !important;
-        }
-
-        /* ===== HEADER RED GRADIENT ===== */
-        .header-gradient {
-            background: linear-gradient(90deg,
-                    #AD3029 0%,
-                    #C8453E 50%,
-                    #E06B5F 100%) !important;
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
     </style>
-
 
 </head>
 
 <body class="bg-gray-100">
-
     <!-- Header -->
-    <header class="bg-gradient-to-r from-orange-500 to-orange-600 shadow-md sticky top-0 z-50">
+    <header class="bg-[#AD3029] text-white shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center py-4">
-                <!-- Logo -->
-                <div class="flex items-center space-x-3">
-                    <i class="fas fa-shopping-bag text-3xl text-white bounce-shopee"></i>
-                    <h1 class="text-2xl font-bold text-white">
-                        Shopee Clone
-                    </h1>
+            <div class="flex items-center justify-between h-20 gap-8">
+                <!-- 1. Logo Section --><a href="index.html"
+                    class="flex items-center gap-2 group flex-shrink-0 hover:opacity-90 transition"><i
+                        class="fas fa-shopping-bag text-3xl text-white bounce-goshop"></i><span
+                        class="text-2xl font-bold tracking-tight">GoShop</span></a>
+                <!-- 2. Search Section (Centered & Wide) -->
+                <div class="flex-1 max-w-2xl relative">
+                    <div class="relative group"><input id="globalSearchInput" type="text"
+                            data-i18n="header.search_placeholder" placeholder="Search products..."
+                            class="w-full h-10 pl-4 pr-12 rounded-sm text-black focus:outline-none shadow-inner transition border-2 border-transparent focus:border-red-300"><button
+                            id="globalSearchButton"
+                            class="absolute right-0 top-0 h-10 w-12 bg-[#DC2626] hover:bg-[#B91C1C] flex items-center justify-center rounded-r-sm transition"><i
+                                class="fas fa-search text-white"></i></button></div>
                 </div>
-
-                <!-- Search -->
-                <div class="flex-1 max-w-2xl mx-8">
-                    <div class="relative">
-                        <input id="globalSearchInput" type="text" placeholder="Search for millions of products..."
-                            class="w-full p-3 pl-12 pr-20 rounded-full border-2 border-white focus:border-orange-300 focus:outline-none">
-                        <i
-                            class="fas fa-search absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl"></i>
-                        <button id="globalSearchButton"
-                            class="absolute right-3 top-1/2 transform -translate-y-1/2 bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-full font-semibold">
-                            Search
+                <!-- 3. Actions Section (Right) -->
+                <div class="flex items-center gap-6">
+                    <!-- Language Toggle --><button id="lang-toggle"
+                        class="text-sm font-medium hover:opacity-80 flex items-center gap-1 transition"><img
+                            src="https://flagcdn.com/24x18/gb.png" alt="English"
+                            class="inline-block mr-1.5 w-5 h-auto object-cover border border-gray-200"> <span
+                            class="uppercase">English</span></button>
+                    <!-- Notifications -->
+                    <div class="relative group h-full flex items-center"><button
+                            class="hover:opacity-80 transition relative p-2"><i class="far fa-bell text-xl"></i>
+                            <!-- Badge could go here -->
                         </button>
-                    </div>
-                </div>
-
-                <!-- User Actions -->
-                <div class="flex items-center space-x-6">
-                    <!-- Notification & Help (Addons) -->
-                    <div class="flex items-center gap-4 text-white">
-                        <!-- Notification Wrapper -->
-                        <div class="relative">
-                            <button id="notificationBtn" class="relative hover:opacity-80 transition">
-                                <i class="fas fa-bell text-xl"></i>
-                                <span id="notificationBadge"
-                                    class="hidden absolute -top-1 -right-0.5 w-2 h-2 bg-red-600 rounded-full border border-white text-[8px] flex items-center justify-center"></span>
-                            </button>
-
-                            <!-- Dropdown -->
-                            <div id="notificationDropdown"
-                                class="hidden absolute top-10 right-0 w-80 bg-white shadow-xl rounded-lg border border-gray-100 z-[9999] overflow-hidden text-gray-800">
-                                <div
-                                    class="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
-                                    <h3 class="font-semibold text-gray-700">Notifications</h3>
-                                    <button id="markAllReadBtn"
-                                        class="text-xs text-blue-600 hover:text-blue-800 font-medium">Mark all
-                                        read</button>
+                        <!-- Dropdown -->
+                        <div class="hidden group-hover:block absolute top-full right-0 pt-2 w-72 z-50">
+                            <div
+                                class="bg-white text-black shadow-xl rounded-lg border border-gray-200 overflow-hidden">
+                                <div class="p-3 border-b bg-gray-50 flex justify-between items-center">
+                                    <span class="text-sm font-semibold text-gray-700">Notifications</span><button
+                                        class="text-xs text-blue-600 hover:underline">Mark
+                                        all read</button>
                                 </div>
-                                <div id="notificationList" class="max-h-60 overflow-y-auto">
-                                    <div class="p-4 text-center text-gray-500 text-sm">Loading...</div>
+                                <div class="p-8 text-center text-sm text-gray-500 flex flex-col items-center">
+                                    <i class="far fa-bell-slash text-2xl mb-2 text-gray-300"></i>No
+                                    new notifications
                                 </div>
                             </div>
                         </div>
-                        <button class="hover:opacity-80 transition">
-                            <i class="fas fa-question-circle text-xl"></i>
-                        </button>
                     </div>
-
-                    <!-- 🔓 CHƯA LOGIN -->
-                    <div id="guestNav" class="flex items-center space-x-3">
-                        <a href="login.html" class="text-white font-semibold hover:text-orange-100 transition">
-                            Sign in
-                        </a>
-                        <a href="register.html"
-                            class="bg-white text-orange-600 hover:bg-gray-100 px-4 py-2 rounded-sm font-semibold transition">
-                            Sign up
-                        </a>
+                    <!-- Cart --><a href="cart-backend.html" class="relative hover:opacity-80 transition p-1"><i
+                            class="fas fa-shopping-cart text-xl"></i><span id="cartBadge"
+                            class="absolute -top-1 -right-1 bg-white text-[#AD3029] text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm hidden">0</span></a>
+                    <div class="h-6 w-px bg-white/30"></div>
+                    <!-- Auth Actions -->
+                    <!-- Guest -->
+                    <div id="guestNav" class="flex items-center gap-3 font-medium text-sm"><a href="register.html"
+                            class="hover:text-gray-200 transition">Sign Up</a><a href="login.html"
+                            class="hover:text-gray-200 transition">Sign in</a></div>
+                    <!-- User -->
+                    <div id="userNav" class="hidden flex items-center gap-2 cursor-pointer relative group h-full">
+                        <img src="https://ui-avatars.com/api/?name=User&background=fecaca&color=AD3029"
+                            class="w-8 h-8 rounded-full border-2 border-white/50" id="userAvatar"><span id="userName"
+                            class="font-semibold max-w-[100px] truncate hidden md:block">User</span>
+                        <!-- Dropdown -->
+                        <div class="absolute right-0 top-full pt-2 w-48 hidden group-hover:block z-50 animate-fade-in">
+                            <div class="bg-white text-black rounded-md shadow-lg py-1 border border-gray-100">
+                                <a href="profile.html" class="block px-4 py-2 text-sm hover:bg-gray-100 transition"><i
+                                        class="far fa-user mr-2 text-gray-400"></i>My
+                                    Profile</a><a href="my-orders-backend.html"
+                                    class="block px-4 py-2 text-sm hover:bg-gray-100 transition"><i
+                                        class="fas fa-box mr-2 text-gray-400"></i>My
+                                    Orders</a>
+                                <!-- Shop Link (Dynamic) --><a href="#" id="sellerChannelLink"
+                                    class="block px-4 py-2 text-sm hover:bg-gray-100 transition hidden"><i
+                                        class="fas fa-store mr-2 text-gray-400"></i>My
+                                    Shop</a>
+                                <!-- Admin Link (Dynamic) --><a href="admin-dashboard.html" id="adminPanelLink"
+                                    class="block px-4 py-2 text-sm hover:bg-gray-100 transition font-bold text-red-600 hidden"><i
+                                        class="fas fa-user-shield mr-2"></i>Admin
+                                    Panel</a>
+                                <div class="border-t border-gray-100 my-1">
+                                </div><button onclick="logout()"
+                                    class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"><i
+                                        class="fas fa-sign-out-alt mr-2"></i>Logout</button>
+                            </div>
+                        </div>
                     </div>
-
-                    <!-- Link Kênh người bán -->
-                    <a href="seller-register.html" id="sellerChannelLink"
-                        class="text-white hover:text-orange-100 text-sm font-medium mr-4 transition hidden">
-                        Seller Channel
-                    </a>
-
-                    <!-- Link Admin Panel -->
-                    <a href="admin-dashboard.html" id="adminPanelLink"
-                        class="text-white hover:text-orange-100 text-sm font-bold mr-4 transition hidden">
-                        [ADMIN PANEL]
-                    </a>
-
-                    <!-- 🔐 ĐÃ LOGIN -->
-                    <div id="userNav" class="hidden flex items-center space-x-3 text-white">
-                        <a href="profile.html" class="flex items-center space-x-2 cursor-pointer hover:opacity-90">
-                            <img src="https://ui-avatars.com/api/?name=User&background=fff&color=f97316"
-                                class="w-6 h-6 rounded-full border border-white" id="userAvatar">
-                            <span id="userName" class="font-semibold">User</span>
-                        </a>
-
-                        <button onclick="logout()" title="Logout" class="text-white hover:text-red-200 transition ml-2">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </button>
-                    </div>
-
-                    <button onclick="window.location.href='cart-backend.html'"
-                        class="relative p-2 hover:bg-orange-400 rounded-full transition">
-                        <i class="fas fa-shopping-cart text-xl text-white"></i>
-                        <span id="cartBadge"
-                            class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
-                            style="display: none;">0</span>
-                    </button>
                 </div>
-
-
-                <!-- Logout button riêng -->
-                <button onclick="logout()" id="logoutBtn"
-                    class="hidden bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full font-semibold text-sm ml-2 transition-all">
-                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
-                </button>
-
             </div>
         </div>
-        </div>
     </header>
-
     <!-- Banner Section -->
-    <section class="bg-gray-100 py-6 mb-4">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="grid grid-cols-12 gap-2">
+    <section class="bg-gray-100 py-4 mb-4">
+        <div class="max-w-[1600px] mx-auto px-0 md:px-4">
+            <div class="grid grid-cols-12 gap-2 h-[500px] md:h-[600px]">
+                <!-- Left Slider (Up) - 8 Cols -->
+                <!-- Left Slider (Up) - 8 Cols -> NOW MARQUEE -->
+                <div
+                    class="col-span-12 md:col-span-8 flex flex-col gap-2 h-full overflow-hidden rounded-lg shadow-lg group">
 
-                <!-- Main Carousel (Left - 8 Cols) -->
-                <div class="col-span-12 lg:col-span-8 relative group overflow-hidden rounded-lg shadow-sm h-[235px]">
-                    <!-- Slides Wrapper -->
-                    <div id="bannerCarousel" class="h-full w-full flex transition-transform duration-500 ease-out">
-                        <!-- Slide 1 -->
-                        <div class="w-full h-full flex-shrink-0 relative">
-                            <img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=80"
-                                class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-black/10"></div>
-                        </div>
-                        <!-- Slide 2 -->
-                        <div class="w-full h-full flex-shrink-0 relative">
-                            <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80"
-                                class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-black/10"></div>
-                        </div>
-                        <!-- Slide 3 -->
-                        <div class="w-full h-full flex-shrink-0 relative">
-                            <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80"
-                                class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-black/10"></div>
-                        </div>
-                    </div>
-
-                    <!-- Arrows -->
-                    <button onclick="moveSlide(-1)"
-                        class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <button onclick="moveSlide(1)"
-                        class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-
-                    <!-- Dots -->
-                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
-                        <button onclick="goToSlide(0)"
-                            class="w-3 h-3 rounded-full bg-white opacity-100 transition banner-dot"></button>
-                        <button onclick="goToSlide(1)"
-                            class="w-3 h-3 rounded-full bg-white/50 hover:bg-white transition banner-dot"></button>
-                        <button onclick="goToSlide(2)"
-                            class="w-3 h-3 rounded-full bg-white/50 hover:bg-white transition banner-dot"></button>
-                    </div>
-                </div>
-
-                <!-- Side Banners (Right - 4 Cols) -->
-                <div class="col-span-12 lg:col-span-4 grid grid-rows-2 gap-2 h-[235px]">
-                    <div class="rounded-lg overflow-hidden relative cursor-pointer group">
-                        <img src="https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=400&q=80"
-                            class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                        <div class="absolute top-2 left-2 text-white font-bold drop-shadow-md">
-                            <span class="bg-orange-500 px-2 py-0.5 text-xs rounded">MALL</span>
-                            <p class="mt-1">Tech Zone</p>
-                        </div>
-                    </div>
-                    <div class="rounded-lg overflow-hidden relative cursor-pointer group">
-                        <img src="https://images.unsplash.com/photo-1596462502278-27bfdd403348?w=400&q=80"
-                            class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                        <div class="absolute top-2 left-2 text-white font-bold drop-shadow-md">
-                            <div class="flex items-center gap-1">
-                                <i class="fas fa-bolt text-yellow-400"></i>
-                                <span>Flash Sale</span>
+                    <!-- Top Row: Marquee Right (->) -->
+                    <div class="relative flex-1 overflow-hidden bg-gray-900 rounded-lg">
+                        <div class="flex animate-marquee-right whitespace-nowrap h-full">
+                            <!-- Images Set 1 -->
+                            <div class="flex flex-shrink-0 h-full items-center">
+                                <img src="https://i.pinimg.com/1200x/b3/19/38/b31938d499c3df370aefb62f9b31d6ed.jpg"
+                                    class="h-full w-auto object-contain mx-1">
+                                <img src="https://i.pinimg.com/736x/33/ca/b6/33cab6b6d66c74aa25c85bf7200a175c.jpg"
+                                    class="h-full w-auto object-contain mx-1">
+                                <img src="https://i.pinimg.com/1200x/a6/e8/40/a6e8402d5ae692e6cbfdc49a8a5786b6.jpg"
+                                    class="h-full w-auto object-contain mx-1">
                             </div>
-                            <p class="mt-1 text-xs font-normal">Săn deal chớp nhoáng</p>
+                            <!-- Duplicate for Loop -->
+                            <div class="flex flex-shrink-0 h-full items-center">
+                                <img src="https://i.pinimg.com/1200x/b3/19/38/b31938d499c3df370aefb62f9b31d6ed.jpg"
+                                    class="h-full w-auto object-contain mx-1">
+                                <img src="https://i.pinimg.com/736x/33/ca/b6/33cab6b6d66c74aa25c85bf7200a175c.jpg"
+                                    class="h-full w-auto object-contain mx-1">
+                                <img src="https://i.pinimg.com/1200x/a6/e8/40/a6e8402d5ae692e6cbfdc49a8a5786b6.jpg"
+                                    class="h-full w-auto object-contain mx-1">
+                            </div>
+                            <!-- Duplicate for Loop 2 -->
+                            <div class="flex flex-shrink-0 h-full items-center">
+                                <img src="https://i.pinimg.com/1200x/b3/19/38/b31938d499c3df370aefb62f9b31d6ed.jpg"
+                                    class="h-full w-auto object-contain mx-1">
+                                <img src="https://i.pinimg.com/736x/33/ca/b6/33cab6b6d66c74aa25c85bf7200a175c.jpg"
+                                    class="h-full w-auto object-contain mx-1">
+                                <img src="https://i.pinimg.com/1200x/a6/e8/40/a6e8402d5ae692e6cbfdc49a8a5786b6.jpg"
+                                    class="h-full w-auto object-contain mx-1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Row: Marquee Left (<-) -->
+                    <div class="relative flex-1 overflow-hidden bg-gray-900 rounded-lg">
+                        <div class="flex animate-marquee-left whitespace-nowrap h-full">
+                            <!-- Images Set 2 -->
+                            <div class="flex flex-shrink-0 h-full items-center">
+                                <img src="https://i.pinimg.com/1200x/d7/5f/61/d75f619e75130a7b98d559fdab4a911e.jpg"
+                                    class="h-full w-auto object-contain mx-1">
+                                <img src="https://i.pinimg.com/1200x/29/8c/0e/298c0eacfa757315ac87451142a61b0d.jpg"
+                                    class="h-full w-auto object-contain mx-1">
+                                <img src="https://i.pinimg.com/1200x/87/1c/59/871c59a95205840c0b884d7a425b7481.jpg"
+                                    class="h-full w-auto object-contain mx-1">
+                            </div>
+                            <!-- Duplicate for Loop -->
+                            <div class="flex flex-shrink-0 h-full items-center">
+                                <img src="https://i.pinimg.com/1200x/d7/5f/61/d75f619e75130a7b98d559fdab4a911e.jpg"
+                                    class="h-full w-auto object-contain mx-1">
+                                <img src="https://i.pinimg.com/1200x/29/8c/0e/298c0eacfa757315ac87451142a61b0d.jpg"
+                                    class="h-full w-auto object-contain mx-1">
+                                <img src="https://i.pinimg.com/1200x/87/1c/59/871c59a95205840c0b884d7a425b7481.jpg"
+                                    class="h-full w-auto object-contain mx-1">
+                            </div>
+                            <!-- Duplicate for Loop 2 -->
+                            <div class="flex flex-shrink-0 h-full items-center">
+                                <img src="https://i.pinimg.com/1200x/d7/5f/61/d75f619e75130a7b98d559fdab4a911e.jpg"
+                                    class="h-full w-auto object-contain mx-1">
+                                <img src="https://i.pinimg.com/1200x/29/8c/0e/298c0eacfa757315ac87451142a61b0d.jpg"
+                                    class="h-full w-auto object-contain mx-1">
+                                <img src="https://i.pinimg.com/1200x/87/1c/59/871c59a95205840c0b884d7a425b7481.jpg"
+                                    class="h-full w-auto object-contain mx-1">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- Right Slider (Down) - 4 Cols -->
+                <div
+                    class="col-span-12 md:col-span-4 relative overflow-hidden rounded-lg shadow-lg group hidden md:block">
+                    <div id="sliderRight"
+                        class="h-full w-full flex flex-col transition-transform duration-1000 ease-in-out">
+                        <!-- CLONE OF LAST SLIDE (New 10) -->
+                        <div class="h-full w-full flex-shrink-0 relative"><img
+                                src="https://i.pinimg.com/736x/ff/17/80/ff1780bf6880821ffda706f87413ec8f.jpg"
+                                class="w-full h-full object-cover"></div>
+                        <!-- 1. Old 1 -->
+                        <div class="h-full w-full flex-shrink-0 relative"><img
+                                src="https://i.pinimg.com/736x/ac/b1/21/acb12157c7d6f733b57a03f77273e759.jpg"
+                                class="w-full h-full object-cover"></div>
+                        <!-- 2. New 1 -->
+                        <div class="h-full w-full flex-shrink-0 relative"><img
+                                src="https://i.pinimg.com/736x/c5/53/73/c553731224e59856436fd556ee961a03.jpg"
+                                class="w-full h-full object-cover"></div>
+                        <!-- 3. New 2 -->
+                        <div class="h-full w-full flex-shrink-0 relative"><img
+                                src="https://i.pinimg.com/736x/c5/44/fc/c544fcf3cbeebcd59bf04e171207b7c5.jpg"
+                                class="w-full h-full object-cover"></div>
+                        <!-- 4. Old 2 -->
+                        <div class="h-full w-full flex-shrink-0 relative"><img
+                                src="https://i.pinimg.com/736x/97/44/af/9744af37a4f6fa6627b74bbcffa69667.jpg"
+                                class="w-full h-full object-cover"></div>
+                        <!-- 5. New 3 -->
+                        <div class="h-full w-full flex-shrink-0 relative"><img
+                                src="https://i.pinimg.com/736x/ed/f5/40/edf540cbaead5221657a54303e6aab6d.jpg"
+                                class="w-full h-full object-cover"></div>
+                        <!-- 6. New 4 -->
+                        <div class="h-full w-full flex-shrink-0 relative">
+                            <img src="https://i.pinimg.com/736x/9a/79/71/9a79716c18af49ab01de42dd05bf3f17.jpg"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <!-- 7. Old 3 -->
+                        <div class="h-full w-full flex-shrink-0 relative">
+                            <img src="https://i.pinimg.com/1200x/40/e5/a3/40e5a3c38746fbff18ddc0b30e47cfc6.jpg"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <!-- 8. New 5 -->
+                        <div class="h-full w-full flex-shrink-0 relative">
+                            <img src="https://i.pinimg.com/736x/05/5a/e8/055ae8ebc1efbf24ebf48e32f0e419e8.jpg"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <!-- 9. New 6 -->
+                        <div class="h-full w-full flex-shrink-0 relative">
+                            <img src="https://i.pinimg.com/736x/7b/92/37/7b923783ef97c09db43b204b46fc3dba.jpg"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <!-- 10. Old 4 -->
+                        <div class="h-full w-full flex-shrink-0 relative">
+                            <img src="https://i.pinimg.com/736x/b0/63/5c/b0635c8450713c27452b818b974659f3.jpg"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <!-- 11. New 7 -->
+                        <div class="h-full w-full flex-shrink-0 relative">
+                            <img src="https://i.pinimg.com/1200x/66/4c/7b/664c7b6065112d1ed70271b7d58b9a42.jpg"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <!-- 12. New 8 -->
+                        <div class="h-full w-full flex-shrink-0 relative">
+                            <img src="https://i.pinimg.com/736x/56/41/8b/56418bbdf3ce32c733ecb92a9ca2e349.jpg"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <!-- 13. Old 5 -->
+                        <div class="h-full w-full flex-shrink-0 relative">
+                            <img src="https://i.pinimg.com/736x/d4/54/71/d454713b7d0301ccfe8dc7c94d3e8909.jpg"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <!-- 14. New 9 -->
+                        <div class="h-full w-full flex-shrink-0 relative">
+                            <img src="https://i.pinimg.com/1200x/a2/d5/39/a2d539b50bb9d19ba8565f061b8fc811.jpg"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <!-- 15. Old 6 -->
+                        <div class="h-full w-full flex-shrink-0 relative">
+                            <img src="https://i.pinimg.com/736x/7f/b2/8e/7fb28e360bfe82e2f63f8d7678fad318.jpg"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <!-- 16. New 10
+                                                                                                            -->
+                        <div class="h-full w-full flex-shrink-0 relative">
+                            <img src="https://i.pinimg.com/736x/ff/17/80/ff1780bf6880821ffda706f87413ec8f.jpg"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <!-- CLONE OF FIRST SLIDE (Old 1) for Seamless Upward Loop -->
+                        <div class="h-full w-full flex-shrink-0 relative">
+                            <img src="https://i.pinimg.com/736x/ac/b1/21/acb12157c7d6f733b57a03f77273e759.jpg"
+                                class="w-full h-full object-cover">
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </section>
-
     <!-- Service Icons -->
     <section class="bg-white py-4 mb-4">
         <div class="max-w-7xl mx-auto px-4">
             <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
                 <div onclick="window.location.href='freeship.html'"
                     class="flex flex-col items-center cursor-pointer hover:scale-110 transition-transform">
-                    <i class="fas fa-shipping-fast text-3xl text-orange-500 mb-2"></i>
-                    <p class="text-sm font-semibold">Free Shipping</p>
+                    <i class="fas fa-shipping-fast text-3xl text-red-700 mb-2"></i>
+                    <p class="text-sm font-semibold text-gray-700">Free Shipping</p>
                 </div>
                 <div onclick="window.location.href='vouchers.html'"
                     class="flex flex-col items-center cursor-pointer hover:scale-110 transition-transform">
-                    <i class="fas fa-gift text-3xl text-orange-500 mb-2"></i>
-                    <p class="text-sm font-semibold">Vouchers</p>
+                    <i class="fas fa-gift text-3xl text-red-700 mb-2"></i>
+                    <p class="text-sm font-semibold text-gray-700">Vouchers</p>
                 </div>
-                <div class="flex flex-col items-center">
-                    <i class="fas fa-wallet text-3xl text-orange-500 mb-2"></i>
-                    <p class="text-sm font-semibold">All Payment</p>
+                <div class="flex flex-col items-center"><i class="fas fa-wallet text-3xl text-red-700 mb-2"></i>
+                    <p class="text-sm font-semibold text-gray-700">All Payment</p>
                 </div>
-                <div class="flex flex-col items-center">
-                    <i class="fas fa-percent text-3xl text-orange-500 mb-2"></i>
-                    <p class="text-sm font-semibold">Great Deals</p>
+                <div class="flex flex-col items-center"><i class="fas fa-percent text-3xl text-red-700 mb-2"></i>
+                    <p class="text-sm font-semibold text-gray-700">Great Deals</p>
                 </div>
-                <div class="flex flex-col items-center">
-                    <i class="fas fa-tags text-3xl text-orange-500 mb-2"></i>
-                    <p class="text-sm font-semibold">Official Brands</p>
+                <div class="flex flex-col items-center"><i class="fas fa-tags text-3xl text-red-700 mb-2"></i>
+                    <p class="text-sm font-semibold text-gray-700">Official Brands</p>
                 </div>
             </div>
         </div>
     </section>
-
+    <!-- Horizontal Marquee Section (New) -->
+    <section class="bg-white py-4 mb-8 overflow-hidden">
+        <div class="max-w-[1600px] mx-auto px-0 md:px-4 space-y-4">
+            <!-- Row 1: Run Right (->) -->
+            <div class="relative flex overflow-hidden group">
+                <div class="flex animate-marquee-right whitespace-nowrap">
+                    <!-- Images Set 1 -->
+                    <div class="flex flex-shrink-0 space-x-4 mx-2"><img
+                            src="https://i.pinimg.com/1200x/4f/e7/bc/4fe7bc967257834f1e6123f68dca632f.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
+                            src="https://i.pinimg.com/1200x/ce/fa/bb/cefabbcebea8d7e10f383ba5fd81ec98.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
+                            src="https://i.pinimg.com/1200x/ab/36/c8/ab36c8f2c8471782ac83577eea7a6f96.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
+                            src="https://i.pinimg.com/1200x/59/71/78/59717826a2fbd5491e82e45f93f2c3ab.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"></div>
+                    <!-- Duplicate for Loop -->
+                    <div class="flex flex-shrink-0 space-x-4 mx-2"><img
+                            src="https://i.pinimg.com/1200x/4f/e7/bc/4fe7bc967257834f1e6123f68dca632f.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
+                            src="https://i.pinimg.com/1200x/ce/fa/bb/cefabbcebea8d7e10f383ba5fd81ec98.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
+                            src="https://i.pinimg.com/1200x/ab/36/c8/ab36c8f2c8471782ac83577eea7a6f96.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
+                            src="https://i.pinimg.com/1200x/59/71/78/59717826a2fbd5491e82e45f93f2c3ab.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"></div>
+                    <!-- Duplicate for Loop 2 -->
+                    <div class="flex flex-shrink-0 space-x-4 mx-2"><img
+                            src="https://i.pinimg.com/1200x/4f/e7/bc/4fe7bc967257834f1e6123f68dca632f.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
+                            src="https://i.pinimg.com/1200x/ce/fa/bb/cefabbcebea8d7e10f383ba5fd81ec98.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
+                            src="https://i.pinimg.com/1200x/ab/36/c8/ab36c8f2c8471782ac83577eea7a6f96.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
+                            src="https://i.pinimg.com/1200x/59/71/78/59717826a2fbd5491e82e45f93f2c3ab.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"></div>
+                </div>
+            </div>
+            <!-- Row 2: Run Left (<-) -->
+            <div class="relative flex overflow-hidden group">
+                <div class="flex animate-marquee-left whitespace-nowrap">
+                    <!-- Images Set 2 -->
+                    <div class="flex flex-shrink-0 space-x-4 mx-2"><img
+                            src="https://i.pinimg.com/1200x/64/18/e3/6418e3340d97d71b5d3e2ab7e6cc9e0d.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
+                            src="https://i.pinimg.com/1200x/72/4e/3a/724e3a3cf619e905bbbeb0c0578f7ba5.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
+                            src="https://i.pinimg.com/1200x/29/6e/30/296e302c79de338a03b81270b35897bd.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
+                            src="https://i.pinimg.com/1200x/8b/9b/f3/8b9bf305205f99438fafd681cd6d7172.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"></div>
+                    <!-- Duplicate for Loop -->
+                    <div class="flex flex-shrink-0 space-x-4 mx-2"><img
+                            src="https://i.pinimg.com/1200x/64/18/e3/6418e3340d97d71b5d3e2ab7e6cc9e0d.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
+                            src="https://i.pinimg.com/1200x/72/4e/3a/724e3a3cf619e905bbbeb0c0578f7ba5.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
+                            src="https://i.pinimg.com/1200x/29/6e/30/296e302c79de338a03b81270b35897bd.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
+                            src="https://i.pinimg.com/1200x/8b/9b/f3/8b9bf305205f99438fafd681cd6d7172.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"></div>
+                    <!-- Duplicate for Loop 2 -->
+                    <div class="flex flex-shrink-0 space-x-4 mx-2"><img
+                            src="https://i.pinimg.com/1200x/64/18/e3/6418e3340d97d71b5d3e2ab7e6cc9e0d.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
+                            src="https://i.pinimg.com/1200x/72/4e/3a/724e3a3cf619e905bbbeb0c0578f7ba5.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
+                            src="https://i.pinimg.com/1200x/29/6e/30/296e302c79de338a03b81270b35897bd.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
+                            src="https://i.pinimg.com/1200x/8b/9b/f3/8b9bf305205f99438fafd681cd6d7172.jpg"
+                            class="h-40 w-64 object-cover rounded-lg shadow-md">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
     <!-- Flash Sale -->
     <section class="bg-white py-6 mb-4">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center space-x-4">
-                    <h2 class="text-2xl font-bold text-orange-600">FLASH SALE</h2>
-                    <div class="flex items-center space-x-2" id="flashSaleCountdown">
-                        <span class="text-sm font-bold text-gray-500 mr-1">Còn:</span>
+                    <h2 class="text-2xl font-bold text-red-600" data-i18n="home.flash_sale">FLASH
+                        SALE</h2>
+                    <div class="flex items-center space-x-2" id="flashSaleCountdown"><span
+                            class="text-sm font-bold text-gray-500 mr-1">Còn:</span>
                         <div id="flashSaleHours" class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-bold">00
-                        </div>
-                        <span class="text-gray-400">:</span>
+                        </div><span class="text-gray-400">:</span>
                         <div id="flashSaleMinutes" class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-bold">00
-                        </div>
-                        <span class="text-gray-400">:</span>
+                        </div><span class="text-gray-400">:</span>
                         <div id="flashSaleSeconds" class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-bold">00
                         </div>
                     </div>
-                </div>
-                <a href="flash-sale.html" class="text-orange-500 font-semibold hover:text-orange-600">See All →</a>
+                </div><a href="flash-sale.html" class="text-red-500 font-semibold hover:text-red-600"
+                    data-i18n="home.view_all">See All →</a>
             </div>
-
             <!-- Categories & Flash Sale Products Grid -->
             <div id="flashSaleList" class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
                 <!-- Products will be loaded here -->
-                <div class="col-span-full text-center text-gray-400 py-8">Loading Flash Sale...</div>
+                <div class="col-span-full text-center text-gray-400 py-8">Loading Flash
+                    Sale...</div>
             </div>
         </div>
     </section>
-
     <!-- Categories Section -->
     <section class="bg-white py-6 mb-4">
         <div class="max-w-7xl mx-auto px-4">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">CATEGORIES</h2>
+            <h2 class="text-xl font-bold text-gray-800 mb-4" data-i18n="home.categories">
+                CATEGORIES</h2>
             <div id="categoryList" class="grid grid-cols-3 md:grid-cols-10 gap-4 text-center">
                 <!-- Categories will be loaded here -->
-                <div class="col-span-full text-center text-gray-400">Loading Categories...</div>
+                <div class="col-span-full text-center text-gray-400">Loading Categories...
+                </div>
             </div>
         </div>
     </section>
-
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 pb-12">
         <!-- Daily Discover -->
         <section id="products" class="mb-12">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-800">DAILY DISCOVER</h2>
-                <a href="daily-discover.html" class="text-orange-500 font-semibold hover:text-orange-600">See More</a>
+                <h2 class="text-2xl font-bold text-gray-800" data-i18n="home.daily_discover">DAILY DISCOVER</h2><a
+                    href="daily-discover.html" class="text-red-500 font-semibold hover:text-red-600"
+                    data-i18n="home.view_all">See More</a>
             </div>
             <div id="dailyDiscoverList" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 <!-- Products will be loaded here -->
-                <div class="col-span-full text-center text-gray-400 py-8">Loading Daily Discover...</div>
+                <div class="col-span-full text-center text-gray-400 py-8">Loading
+                    Daily Discover...</div>
             </div>
         </section>
     </main>
-
-    <script>
-        // API Base URL
+    <script> // API Base URL
         const API_BASE_URL = 'http://localhost:8080/api';
 
         // Load products & categories when page loads
@@ -401,27 +473,34 @@
             const minutesEl = document.getElementById('flashSaleMinutes');
             const secondsEl = document.getElementById('flashSaleSeconds');
             if (!hoursEl || !minutesEl || !secondsEl) return;
+
             try {
                 const res = await fetch(`${API_BASE_URL}/flash-sales/current`);
                 if (!res.ok || res.status === 204) {
                     setCountdownText(hoursEl, minutesEl, secondsEl, '--', '--', '--');
                     return;
                 }
+
                 const data = await res.json();
                 const endTime = data.endTime;
+
                 if (!endTime) {
                     setCountdownText(hoursEl, minutesEl, secondsEl, '--', '--', '--');
                     return;
                 }
+
                 const end = new Date(endTime);
+
                 function tick() {
                     const now = new Date();
                     let ms = end - now;
+
                     if (ms <= 0) {
                         setCountdownText(hoursEl, minutesEl, secondsEl, '00', '00', '00');
                         if (flashSaleCountdownInterval) clearInterval(flashSaleCountdownInterval);
                         return;
                     }
+
                     const s = Math.floor((ms / 1000) % 60);
                     const m = Math.floor((ms / 60000) % 60);
                     const h = Math.floor(ms / 3600000);
@@ -430,10 +509,13 @@
                         String(m).padStart(2, '0'),
                         String(s).padStart(2, '0'));
                 }
+
                 tick();
                 if (flashSaleCountdownInterval) clearInterval(flashSaleCountdownInterval);
                 flashSaleCountdownInterval = setInterval(tick, 1000);
-            } catch (e) {
+            }
+
+            catch (e) {
                 console.error('Flash sale countdown error:', e);
                 setCountdownText(hoursEl, minutesEl, secondsEl, '--', '--', '--');
             }
@@ -455,10 +537,14 @@
                 const keyword = searchInput.value.trim();
                 if (!keyword) return;
                 const encoded = encodeURIComponent(keyword);
+
                 window.location.href = `category.html?search=${encoded}`;
-            };
+            }
+
+                ;
 
             searchButton.addEventListener('click', redirectToSearchPage);
+
             searchInput.addEventListener('keyup', (event) => {
                 if (event.key === 'Enter') {
                     redirectToSearchPage();
@@ -490,7 +576,9 @@
                     if (lowerName.includes('shoe') || lowerName.includes('sneaker')) return 'fa-shoe-prints';
                     if (lowerName.includes('watch')) return 'fa-clock';
                     return 'fa-tags'; // Default
-                };
+                }
+
+                    ;
 
                 categories.forEach(category => {
                     // DEBUG: Log raw category object
@@ -502,7 +590,12 @@
 
                     // Safe ID Resolution
                     const catId = category.id || category._id;
-                    console.log(`🔍 Category "${displayName}" - ID: ${catId}`);
+
+                    console.log(`🔍 Category "${displayName}" - ID: $ {
+                                catId
+                            }
+
+                            `);
 
                     if (!catId) {
                         console.error('❌ Missing ID for category:', category);
@@ -513,7 +606,7 @@
 
                     // Revert to DIV + OnClick (User Requirement)
                     const div = document.createElement('div');
-                    div.className = 'flex flex-col items-center cursor-pointer hover:text-orange-500 transition group';
+                    div.className = 'flex flex-col items-center cursor-pointer hover:text-red-700 transition group';
 
                     div.onclick = function () {
                         // CRITICAL: Validate catId before navigation
@@ -526,36 +619,38 @@
                             console.error('❌ Invalid Category ID for:', displayName);
                             console.error('❌ catId value:', catId);
                             console.error('❌ Full category object:', category);
-                            alert(`Error: Cannot navigate - Category ID is invalid for "${displayName}"`);
+                            alert(`Error: Cannot navigate - Category ID is invalid for "${displayName}" `);
                             return;
                         }
 
                         // DEBUG: Log navigation details
                         // Use hash-based navigation to bypass server routing issues
                         const targetUrl = `category.html#id=${catId}&name=${encodeURIComponent(displayName || 'Category')}`;
+
                         const absoluteUrl = `${window.location.origin}/${targetUrl}`;
+
                         console.log(`🔗 TARGET URL (HASH): ${targetUrl}`);
+
                         console.log(`🔗 ABSOLUTE URL: ${absoluteUrl}`);
-                        console.log(`   Category: ${displayName}`);
-                        console.log(`   ID: ${catId}`);
+
+                        console.log(` Category: ${displayName}`);
+
+                        console.log(` ID: ${catId}`);
 
                         // Use hash-based URL to bypass server routing
                         window.location.href = absoluteUrl;
                     };
 
-                    div.innerHTML = `
-                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-orange-100 transition">
-                            <i class="fas ${iconClass} text-2xl text-orange-500"></i>
-                        </div>
-                        <p class="text-xs font-medium text-center line-clamp-2 px-1">${displayName || 'Category'}</p>
-                    `;
+                    div.innerHTML = ` <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-red-200 transition" > <i class="fas ${iconClass} text-2xl text-red-700" ></i> </div> <p class="text-xs font-medium text-center line-clamp-2 px-1 text-gray-700 group-hover:text-red-700" >${displayName || 'Category'}</p> `;
                     container.appendChild(div);
                 });
 
                 // Add "More" button if needed, or just let users scroll/see all
                 // For layout balance, if not divisible by 10, maybe we don't care.
 
-            } catch (error) {
+            }
+
+            catch (error) {
                 console.error('Error loading categories:', error);
                 document.getElementById('categoryList').innerHTML = '<div class="col-span-full text-center text-red-500">Error loading categories.</div>';
             }
@@ -563,6 +658,7 @@
 
         async function loadHomepageProducts() {
             try {
+
                 // 1. Load Flash Sale Products
                 const curFsResp = await fetch(`${API_BASE_URL}/flash-sales/current`);
                 if (curFsResp.ok && curFsResp.status !== 204) {
@@ -600,7 +696,9 @@
 
                 renderProductList(sortedProducts.slice(0, 6), 'dailyDiscoverList', false);
 
-            } catch (error) {
+            }
+
+            catch (error) {
                 console.error('Error loading products:', error);
                 document.getElementById('flashSaleList').innerHTML = '<div class="col-span-full text-center text-red-500 py-8">Error loading products.</div>';
                 document.getElementById('dailyDiscoverList').innerHTML = '<div class="col-span-full text-center text-red-500 py-8">Error loading products.</div>';
@@ -639,16 +737,20 @@
 
                 // Badge Logic
                 let badgeHtml = '';
+
                 if (isFlashSale) {
                     badgeHtml = `<div class="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold"><i class="fas fa-bolt mr-1"></i>SALE</div>`;
                 } else {
+                    // Random badge for Daily Discover (Red Theme)
                     const badges = ['NEW', 'HOT', 'SALE', 'BEST'];
                     const randomBadge = badges[Math.floor(Math.random() * badges.length)];
-                    badgeHtml = `<div class="absolute top-2 left-2 bg-orange-600 text-white px-2 py-1 rounded text-xs font-bold">${randomBadge}</div>`;
+
+                    badgeHtml = `<div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold" >${randomBadge}</div>`;
                 }
 
                 // Progress Bar for Flash Sale (Pro refinement)
                 let progressBarHtml = '';
+
                 if (isFlashSale) {
                     const total = product.saleStock || 10;
                     const remaining = product.remainingStock || 0;
@@ -658,12 +760,12 @@
 
                     progressBarHtml = `
                         <div class="mt-2">
-                            <div class="relative w-full bg-orange-100 h-5 rounded-full overflow-hidden border border-orange-200">
-                                <div class="bg-gradient-to-r from-orange-500 to-red-600 h-full rounded-full transition-all duration-1000 flex items-center justify-end pr-2 shadow-inner" style="width: ${progressPercent}%">
+                             <div class="relative w-full bg-red-100 h-5 rounded-full overflow-hidden border border-red-200">
+                                <div class="bg-gradient-to-r from-red-500 to-red-800 h-full rounded-full transition-all duration-1000 flex items-center justify-end pr-2 shadow-inner" style="width: ${progressPercent}%">
                                      ${isHot ? '<i class="fas fa-fire text-white text-[10px] animate-pulse"></i>' : ''}
                                 </div>
                                 <div class="absolute inset-0 flex items-center justify-center">
-                                    <span class="text-[10px] font-bold text-orange-900 uppercase tracking-tighter">
+                                    <span class="text-[10px] font-bold text-white uppercase tracking-tighter shadow-sm text-shadow">
                                         ${remaining === 0 ? 'HẾT HÀNG' : `ĐÃ BÁN ${sold}`}
                                     </span>
                                 </div>
@@ -686,9 +788,10 @@
                     if (pid) {
                         localStorage.setItem('lastClickedProductId', pid);
                         sessionStorage.setItem('lastClickedProductId', pid);
+
                         window.location.href = `product-detail.html?id=${pid}`;
                     }
-                };
+                }
 
                 productCard.innerHTML = `
                     <div class="relative">
@@ -697,7 +800,7 @@
                     </div>
                     <div class="p-3">
                         <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2">${productName}</p>
-                        <p class="text-orange-600 text-lg font-bold">${priceDisplay}</p>
+                        <p class="text-red-600 text-lg font-bold">${priceDisplay}</p>
                         ${progressBarHtml}
                     </div>
                 `;
@@ -708,10 +811,15 @@
         function goToProduct(id) {
             localStorage.setItem('lastClickedProductId', id);
             sessionStorage.setItem('lastClickedProductId', id);
-            window.location.href = `product-detail.html?id=${id}`;
-        }
-    </script>
 
+            window.location.href = `product-detail.html?id=$ {
+                id
+            }
+
+            `;
+        }
+
+    </script>
     <!-- Footer -->
     <footer class="bg-gray-800 text-white mt-16">
         <div class="max-w-7xl mx-auto px-4 py-12">
@@ -719,81 +827,79 @@
                 <div>
                     <h3 class="text-lg font-bold mb-4">CUSTOMER SERVICE</h3>
                     <ul class="space-y-2 text-gray-400 text-sm">
-                        <li><a href="#" class="hover:text-white transition-colors">Help Center</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">How To Buy</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Shipping</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Returns</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Help
+                                Center</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">How
+                                To Buy</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Shipping</a>
+                        </li>
+                        <li><a href="#" class="hover:text-white transition-colors">Returns</a>
+                        </li>
                     </ul>
                 </div>
                 <div>
-                    <h3 class="text-lg font-bold mb-4">ABOUT SHOPEE</h3>
+                    <h3 class="text-lg font-bold mb-4">ABOUT GOSHOP</h3>
                     <ul class="space-y-2 text-gray-400 text-sm">
-                        <li><a href="#" class="hover:text-white transition-colors">About Us</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Careers</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Terms</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">About
+                                Us</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Careers</a>
+                        </li>
+                        <li><a href="#" class="hover:text-white transition-colors">Privacy
+                                Policy</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Terms</a>
+                        </li>
                     </ul>
                 </div>
                 <div>
                     <h3 class="text-lg font-bold mb-4">PAYMENT</h3>
                     <div class="grid grid-cols-4 gap-2">
-                        <div class="bg-white rounded p-2">
-                            <i class="fab fa-cc-visa text-2xl text-blue-600"></i>
+                        <div class="bg-white rounded p-2"><i class="fab fa-cc-visa text-2xl text-blue-600"></i></div>
+                        <div class="bg-white rounded p-2"><i class="fab fa-cc-mastercard text-2xl text-red-600"></i>
                         </div>
-                        <div class="bg-white rounded p-2">
-                            <i class="fab fa-cc-mastercard text-2xl text-red-600"></i>
+                        <div class="bg-white rounded p-2"><i class="fab fa-cc-paypal text-2xl text-blue-400"></i>
                         </div>
-                        <div class="bg-white rounded p-2">
-                            <i class="fab fa-cc-paypal text-2xl text-blue-400"></i>
-                        </div>
-                        <div class="bg-white rounded p-2">
-                            <i class="fas fa-credit-card text-2xl text-gray-600"></i>
+                        <div class="bg-white rounded p-2"><i class="fas fa-credit-card text-2xl text-gray-600"></i>
                         </div>
                     </div>
                 </div>
                 <div>
                     <h3 class="text-lg font-bold mb-4">FOLLOW US</h3>
-                    <div class="flex space-x-4 mb-4">
-                        <a href="#" class="text-2xl hover:text-orange-500 transition"><i
-                                class="fab fa-facebook"></i></a>
-                        <a href="#" class="text-2xl hover:text-orange-500 transition"><i
-                                class="fab fa-instagram"></i></a>
-                        <a href="#" class="text-2xl hover:text-orange-500 transition"><i class="fab fa-youtube"></i></a>
-                        <a href="#" class="text-2xl hover:text-orange-500 transition"><i class="fab fa-twitter"></i></a>
+                    <div class="flex space-x-4 mb-4"><a href="#" class="text-2xl hover:text-red-500 transition"><i
+                                class="fab fa-facebook"></i></a><a href="#"
+                            class="text-2xl hover:text-red-500 transition"><i class="fab fa-instagram"></i></a><a
+                            href="#" class="text-2xl hover:text-red-500 transition"><i class="fab fa-youtube"></i></a><a
+                            href="#" class="text-2xl hover:text-red-500 transition"><i class="fab fa-twitter"></i></a>
                     </div>
                 </div>
             </div>
             <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400 text-sm">
-                <p>&copy; 2026 Shopee Clone. All rights reserved.</p>
+                <p>&copy;
+                    2026 GoShop. All rights reserved.</p>
             </div>
         </div>
     </footer>
-
     <!-- Cart Modal -->
     <div id="cartModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-md w-full max-h-[80vh] overflow-y-auto shadow-2xl">
             <div class="p-6 border-b">
-                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
-                    <i class="fas fa-shopping-cart mr-3 text-orange-500"></i>Your Cart
-                </h2>
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center"><i
+                        class="fas fa-shopping-cart mr-3 text-red-500"></i>Your
+                    Cart </h2>
             </div>
             <div id="cartItems" class="p-6">
                 <p class="text-gray-500 text-center py-8">Cart is empty</p>
             </div>
             <div class="p-6 border-t bg-gray-50 rounded-b-3xl">
                 <div class="flex justify-between text-xl font-bold mb-4">
-                    <span>Total:</span>
-                    <span id="cartTotal" class="text-orange-500">0đ</span>
-                </div>
-                <button onclick="checkout()"
-                    class="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-4 rounded-2xl font-bold text-lg shadow-xl transform hover:-translate-y-1 transition-all">
-                    Checkout Now
-                </button>
+                    <span>Total:</span><span id="cartTotal" class="text-red-500">0đ</span>
+                </div><button onclick="checkout()"
+                    class="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-4 rounded-2xl font-bold text-lg shadow-xl transform hover:-translate-y-1 transition-all">Checkout
+                    Now </button>
             </div>
         </div>
     </div>
-
     <script>
+
         /* ===============================
            1️⃣ GOOGLE CALLBACK (NẾU CÓ)
         ================================ */
@@ -811,7 +917,10 @@
             if (token && userName) {
                 localStorage.setItem('accessToken', token);
                 localStorage.setItem('userName', decodeURIComponent(userName));
-                window.history.replaceState({}, document.title, window.location.pathname);
+
+                window.history.replaceState({}
+
+                    , document.title, window.location.pathname);
             }
 
             updateNavbar();
@@ -821,6 +930,7 @@
         async function updateCartBadge() {
             // HIDE IF NOT LOGGED IN
             const token = localStorage.getItem('accessToken');
+
             if (!token) {
                 const badge = document.getElementById('cartBadge');
                 if (badge) badge.style.display = 'none';
@@ -829,7 +939,9 @@
 
             try {
                 const response = await fetch('http://localhost:8080/api/cart', {
-                    headers: { 'Authorization': `Bearer ${token} ` }
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
 
                 if (response.ok) {
@@ -838,12 +950,15 @@
                     const totalItems = cartData.items ? cartData.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
 
                     const badge = document.getElementById('cartBadge');
+
                     if (badge) {
                         badge.textContent = totalItems;
                         badge.style.display = totalItems > 0 ? 'inline-block' : 'none';
                     }
                 }
-            } catch (error) {
+            }
+
+            catch (error) {
                 console.error('Failed to update cart badge:', error);
             }
         }
@@ -872,8 +987,9 @@
                 guestNav.classList.add('hidden');
                 userNav.classList.remove('hidden');
                 userNameEl.textContent = userName;
+
                 if (userAvatar) {
-                    userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=fff&color=f97316`;
+                    userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=fecaca&color=AD3029`;
                 }
 
                 // CHECK SHOP STATUS
@@ -892,11 +1008,15 @@
                     if (isAdmin && adminLink) {
                         adminLink.classList.remove('hidden');
                     }
-                } catch (e) {
+                }
+
+                catch (e) {
                     console.error("Error parsing token roles", e);
                 }
 
-            } else {
+            }
+
+            else {
                 guestNav.classList.remove('hidden');
                 userNav.classList.add('hidden');
                 if (sellerLink) sellerLink.classList.add('hidden');
@@ -909,7 +1029,9 @@
 
             try {
                 const response = await fetch('http://localhost:8080/api/shop/my-shop', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
 
                 if (response.ok) {
@@ -917,13 +1039,17 @@
                     linkElement.href = "seller-dashboard.html";
                     linkElement.innerHTML = '<i class="fas fa-store mr-1"></i>My Shop';
                     linkElement.classList.remove('hidden');
-                } else if (response.status === 404) {
+                }
+
+                else if (response.status === 404) {
                     // User has NO shop -> Go to Register
                     linkElement.href = "seller-register.html";
                     linkElement.innerHTML = 'Seller Register';
                     linkElement.classList.remove('hidden');
                 }
-            } catch (err) {
+            }
+
+            catch (err) {
                 console.error("Failed to check shop status", err);
                 // Default fallback
                 linkElement.href = "seller-register.html";
@@ -940,89 +1066,84 @@
                 localStorage.removeItem('userName');
                 localStorage.removeItem('refreshToken');
 
-                document.getElementById('guestNav').classList.remove('hidden');
-                document.getElementById('userNav').classList.add('hidden');
-                document.getElementById('logoutBtn').classList.add('hidden');
+                // Toggle Authenticated UI via updateNavbar
+                // This ensures 'style.display' and classes are handled correctly
+                updateNavbar();
+                updateCartBadge();
 
-                // Hide Seller Channel link
-                const sellerLink = document.getElementById('sellerChannelLink');
-                if (sellerLink) sellerLink.classList.add('hidden');
-
-                // Check for Admin Role (Decode JWT)cart badge or other user-specific UI immediately
-                const cartBadge = document.getElementById('cartBadge');
-                if (cartBadge) cartBadge.style.display = 'none';
-
-                // No toast, no reload (or reload immediately if preferred, but UI update is smoother)
-                // window.location.reload(); 
+                // Optional: Redirect to home if on a protected page, 
+                // but since we are on index, just staying here is fine.
             }
         }
 
         /* ===============================
            4️⃣ BANNER SLIDER
         ================================ */
-        let currentSlide = 0;
-        const totalSlides = 3;
-        let slideInterval;
+        /* ===============================
+           4️⃣ DUAL VERTICAL SLIDER (Final Fixed)
+        ================================ */
+        // Configuration
+        // Left: MARQUEE (Handled by CSS)
+        // Right: 0(Clone Last) + 1..16(Real) + 17(Clone First) = 18 total
 
-        function updateSlider() {
-            const carousel = document.getElementById('bannerCarousel');
-            if (carousel) {
-                carousel.style.transform = `translateX(-${currentSlide * 100}%)`;
+        // State
+        let rightIndex = 1; // Start at 1 (First Real Slide)
 
-                // Update dots
-                document.querySelectorAll('.banner-dot').forEach((dot, index) => {
-                    if (index === currentSlide) {
-                        dot.classList.remove('bg-white/50');
-                        dot.classList.add('bg-white');
-                    } else {
-                        dot.classList.add('bg-white/50');
-                        dot.classList.remove('bg-white');
-                    }
-                });
+        function slideLoop() {
+            const rightEl = document.getElementById('sliderRight');
+
+            // --- RIGHT SLIDER (UPWARD/FORWARD) ---
+            if (rightEl) {
+                rightIndex++; // Move down the list (Image moves UP)
+                rightEl.style.transition = "transform 1000ms ease-in-out";
+                rightEl.style.transform = `translateY(-${rightIndex * 100}%)`;
             }
+
+            // CHECK RESET (After transition ends - 1000ms)
+            setTimeout(() => {
+                // Reset Right
+                if (rightEl && rightIndex >= 17) {
+                    // 17 is Clone of 1
+                    rightEl.style.transition = "none";
+                    rightIndex = 1; // Jump back to Real 1
+                    rightEl.style.transform = `translateY(-${rightIndex * 100}%)`;
+                }
+            }, 1000);
         }
 
-        function moveSlide(dir) {
-            currentSlide = (currentSlide + dir + totalSlides) % totalSlides;
-            updateSlider();
-            resetTimer();
-        }
+        // Initialize Slider
+        document.addEventListener('DOMContentLoaded', () => {
+            const rightEl = document.getElementById('sliderRight');
 
-        function goToSlide(index) {
-            currentSlide = index;
-            updateSlider();
-            resetTimer();
-        }
+            // Set initial position
+            if (rightEl) rightEl.style.transform = `translateY(-${rightIndex * 100}%)`;
 
-        function startTimer() {
-            slideInterval = setInterval(() => {
-                moveSlide(1);
-            }, 3000);
-        }
+            // Start Loop
+            setInterval(slideLoop, 3000);
+        });
 
-        function resetTimer() {
-            clearInterval(slideInterval);
-            startTimer();
-        }
-
-        document.addEventListener('DOMContentLoaded', startTimer);
         /* ===============================
            4️⃣ CART (GIỮ NGUYÊN)
         ================================ */
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
         function addToCart(productName) {
+
             // AUTH GUARD
             if (!localStorage.getItem('accessToken')) {
                 if (confirm('⚠️ You must login to buy items! Go to login?')) {
                     window.location.href = 'login.html';
                 }
+
                 return;
             }
 
             const existing = cart.find(item => item.name === productName);
             if (existing) existing.quantity += 1;
-            else cart.push({ name: productName, quantity: 1, price: 1000000 });
+
+            else cart.push({
+                name: productName, quantity: 1, price: 1000000
+            });
 
             localStorage.setItem('cart', JSON.stringify(cart));
             alert('✅ Added to cart!');
@@ -1030,20 +1151,85 @@
         }
 
         function showCart() {
-            document.getElementById('cartModal').classList.remove('hidden');
+            window.location.href = 'cart-backend.html';
         }
 
+        function goToProduct(id) {
+            console.log('Navigating to product:', id);
+            localStorage.setItem('lastClickedProductId', id);
+            sessionStorage.setItem('lastClickedProductId', id);
+
+            window.location.href = `product-detail.html?id=${id}`;
+        }
         function checkout() {
             alert('✅ Order placed successfully!');
             cart = [];
             localStorage.setItem('cart', JSON.stringify(cart));
             document.getElementById('cartModal').classList.add('hidden');
         }
+
     </script>
+    <script>
+        // --- AUTH & NAVBAR LOGIC ---
+        async function updateNavbar() {
+            const token = localStorage.getItem('accessToken');
+            const user = JSON.parse(localStorage.getItem('user') || '{}'); // Try to get full user object
+            const userName = user.fullName || localStorage.getItem('userName') || 'User';
+            const userRole = user.role || localStorage.getItem('userRole') || 'CUSTOMER';
 
+            const guestNav = document.getElementById('guestNav');
+            const userNav = document.getElementById('userNav');
+            const userNameEl = document.getElementById('userName');
+            const userAvatar = document.getElementById('userAvatar');
+            const adminPanelLink = document.getElementById('adminPanelLink');
+            const sellerChannelLink = document.getElementById('sellerChannelLink');
 
+            if (token) {
+                // LOGGED IN
+                if (guestNav) guestNav.classList.add('hidden');
+                if (userNav) userNav.classList.remove('hidden');
+                if (userNav) userNav.style.display = 'flex';
 
+                if (userNameEl) userNameEl.textContent = userName;
+                if (userAvatar) {
+                    userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=fecaca&color=AD3029`;
+                }
+
+                // CHECK SHOP STATUS (Restored)
+                // This will toggle between "My Shop" and "Seller Register" based on API
+                if (typeof checkShopStatus === 'function') {
+                    await checkShopStatus(token, sellerChannelLink);
+                }
+
+                // Check Roles (Admin)
+                if (userRole === 'ADMIN' && adminPanelLink) adminPanelLink.classList.remove('hidden');
+
+            } else {
+                // NOT LOGGED IN
+                if (guestNav) guestNav.classList.remove('hidden');
+                if (userNav) userNav.classList.add('hidden');
+                if (userNav) userNav.style.display = 'none';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateNavbar();
+            updateCartBadge(); // Ensure cart badge is also updated
+
+            // Listen for changes in other tabs/windows
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'user' || e.key === 'userName' || e.key === 'accessToken') {
+                    console.log('🔄 Storage changed, updating navbar...');
+                    updateNavbar();
+                    updateCartBadge();
+                }
+            });
+        });
+    </script>
     <script src="js/notification.js"></script>
+    < !-- Language Scripts -->
+        <script src="js/translations.js"></script>
+        <script src="js/i18n.js"></script>
 </body>
 
 </html>

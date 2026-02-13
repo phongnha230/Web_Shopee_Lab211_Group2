@@ -4,237 +4,222 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sign In | ShoppeClone</title>
+    <title>Sign In | GoShop</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        @keyframes blob {
-            0% {
-                transform: translate(0, 0) scale(1);
-            }
-
-            33% {
-                transform: translate(30px, -40px) scale(1.1);
-            }
-
-            66% {
-                transform: translate(-20px, 20px) scale(0.9);
-            }
-
-            100% {
-                transform: translate(0, 0) scale(1);
-            }
+        /* Custom Scrollbar if needed */
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
         }
     </style>
 </head>
 
-<body
-    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FEEFCD] via-[#F8E8D0] to-[#AD3029]/20 overflow-hidden">
-
-    <!-- blobs -->
-    <div
-        class="absolute w-96 h-96 bg-[#AD3029]/25 rounded-full blur-3xl top-[-120px] left-[-120px] animate-[blob_20s_infinite]">
+<!-- SHOPEE STYLE HEADER -->
+<!-- SHOPEE STYLE HEADER -->
+<header class="w-full bg-white shadow-sm py-4">
+    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <a href="index.html" class="flex items-center gap-2 text-[#AD3029] hover:opacity-90">
+                <i class="fas fa-shopping-bag text-4xl"></i>
+                <span class="text-3xl font-bold">GoShop</span>
+            </a>
+            <span class="text-xl text-gray-800 font-medium" data-i18n="auth.login.title">Log In</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <button id="lang-toggle"
+                class="text-sm font-bold text-gray-600 hover:text-[#AD3029] uppercase flex items-center">
+                <img src="https://flagcdn.com/24x18/gb.png" alt="English"
+                    class="inline-block mr-1.5 w-5 h-auto object-cover border border-gray-200"> English
+            </button>
+        </div>
     </div>
-    <div
-        class="absolute w-96 h-96 bg-[#AD3029]/20 rounded-full blur-3xl bottom-[-120px] right-[-120px] animate-[blob_25s_infinite]">
-    </div>
+</header>
 
-    <div
-        class="relative z-10 w-full max-w-5xl bg-white/60 backdrop-blur-xl rounded-3xl shadow-2xl flex overflow-hidden">
+<!-- MAIN CONTENT - RED BACKGROUND -->
+<div class="w-full bg-[#AD3029] min-h-[600px] flex items-center justify-center py-10">
+    <div class="max-w-7xl w-full mx-auto px-4 flex items-center justify-between">
 
-        <!-- LEFT LOGIN FORM -->
-        <div class="w-1/2 p-12">
-            <h2 class="text-3xl font-extrabold text-[#AD3029]">
-                ShopeeClone
-            </h2>
+        <!-- LEFT SIDE: BRANDING / LOGO (Shopee Style) -->
+        <div class="hidden lg:flex flex-col items-center justify-center w-1/2 text-white space-y-8">
+            <i class="fas fa-shopping-bag text-[150px] opacity-90 animate-bounce"></i>
+            <div class="text-center">
+                <h2 class="text-4xl font-bold mb-2" data-i18n="auth.branding.title">The Best Online Shopping</h2>
+                <p class="text-xl opacity-90" data-i18n="auth.branding.subtitle">Join GoShop today!</p>
+            </div>
+        </div>
 
-            <h3 class="text-xl font-semibold text-gray-800 mt-6">
-                Welcome back 👋
-            </h3>
-            <p class="text-gray-600 mb-8">
-                Sign in to continue shopping
-            </p>
+        <!-- RIGHT SIDE: WHITE FORM CARD -->
+        <div class="bg-white rounded-md shadow-lg p-10 w-full lg:w-[450px] mx-auto lg:mx-0">
+            <h3 class="text-2xl font-medium text-gray-800 mb-6" data-i18n="auth.login.title">Log In</h3>
 
-            <input id="loginEmail" placeholder="Email"
-                class="w-full mb-5 bg-transparent border-b-2 border-gray-400 focus:border-[#AD3029] outline-none py-2">
+            <!-- LOGIN FORM INPUTS -->
+            <div class="space-y-4">
+                <input id="loginEmail" data-i18n="auth.email_placeholder" placeholder="Email"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-sm focus:border-[#AD3029] focus:ring-1 focus:ring-[#AD3029] outline-none transition text-sm">
 
-            <input id="loginPassword" type="password" placeholder="Password"
-                class="w-full mb-3 bg-transparent border-b-2 border-gray-400 focus:border-[#AD3029] outline-none py-2">
+                <input id="loginPassword" type="password" data-i18n="auth.password_placeholder" placeholder="Password"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-sm focus:border-[#AD3029] focus:ring-1 focus:ring-[#AD3029] outline-none transition text-sm">
+            </div>
 
-            <div class="text-right mb-6">
-                <a href="/forgot-password.html" class="text-sm text-[#AD3029] hover:underline">
-                    Forgot password?
+            <div class="text-right mt-2 mb-6">
+                <a href="/forgot-password.html" class="text-xs text-[#AD3029] hover:underline"
+                    data-i18n="auth.forgot_password">
+                    Forgot Password?
                 </a>
             </div>
 
-            <button onclick="signIn()"
-                class="w-full py-3 rounded-full bg-gradient-to-r from-[#AD3029] to-[#CD5252] text-white font-semibold shadow-lg hover:opacity-90 transition">
-                Sign In
+            <!-- SIGN IN BUTTON -->
+            <button onclick="signIn()" data-i18n="auth.login_btn"
+                class="w-full py-3 bg-[#AD3029] text-white text-sm font-semibold rounded-sm hover:bg-[#8f2621] shadow-sm uppercase tracking-wide transition-colors">
+                Log In
             </button>
 
+            <!-- DIVIDER -->
             <div class="flex items-center my-6">
-                <div class="flex-1 h-px bg-gray-300"></div>
-                <span class="mx-4 text-sm text-gray-600">or</span>
-                <div class="flex-1 h-px bg-gray-300"></div>
+                <div class="flex-1 h-px bg-gray-200"></div>
+                <span class="mx-4 text-xs text-gray-400 uppercase" data-i18n="auth.or">Or</span>
+                <div class="flex-1 h-px bg-gray-200"></div>
             </div>
 
-            <!-- GOOGLE BUTTON -->
-            <a href="#" onclick="googleLogin(event)" style="text-decoration: none;">
-                <button class="w-full flex items-center justify-center gap-3 py-3 rounded-full 
-       bg-[#FEEFCD] border-2 border-[#AD3029] 
-       shadow hover:bg-[#F8E8D0] hover:shadow-md transition">
-                    <svg class="w-5 h-5" viewBox="0 0 48 48">
+            <!-- SOCIAL BUTTONS -->
+            <div class="mt-4">
+                <button onclick="googleLogin(event)"
+                    class="w-full py-2 border border-gray-300 rounded-sm flex items-center justify-center gap-2 hover:bg-gray-50 transition">
+                    <svg class="w-4 h-4" viewBox="0 0 48 48">
                         <path fill="#EA4335"
                             d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.73 17.74 9.5 24 9.5z" />
                         <path fill="#4285F4"
                             d="M46.14 24.56c0-1.64-.15-3.21-.43-4.72H24v9.02h12.45c-.54 2.91-2.18 5.38-4.64 7.04l7.49 5.82c4.38-4.04 6.84-9.99 6.84-17.16z" />
                         <path fill="#FBBC05"
-                            d="M10.53 28.77A14.5 14.5 0 0 1 9.76 24c0-1.66.29-3.27.77-4.77l-7.99-6.19A23.99 23.99 0 0 0 0 24c0 3.88.93 7.56 2.54 10.96l7.99-6.19z" />
+                            d="M10.53 28.77A14.5 14.5 0 0 1 9.76 24c0-1.66.29-3.21.77-4.77l-7.99-6.19A23.99 23.99 0 0 0 0 24c0 3.88.93 7.56 2.54 10.96l7.99-6.19z" />
                         <path fill="#34A853"
                             d="M24 48c6.48 0 11.93-2.13 15.9-5.81l-7.49-5.82c-2.08 1.4-4.73 2.23-8.41 2.23-6.26 0-11.57-4.23-13.46-9.94l-7.99 6.19C6.51 42.62 14.62 48 24 48z" />
                     </svg>
-                    <span class="text-gray-700 font-medium">
-                        Continue with Google
-                    </span>
+                    <span class="text-sm text-gray-600" data-i18n="auth.continue_google">Continue with Google</span>
                 </button>
-            </a>
-
-            <p class="text-center text-sm text-gray-700 mt-6">
-                Don't have an account?
-                <a href="/register.html" class="text-[#AD3029] font-semibold hover:underline">
-                    Sign up
-                </a>
-            </p>
-        </div>
-
-        <!-- RIGHT IMAGE SLIDER -->
-        <div class="w-1/2 relative overflow-hidden rounded-r-3xl">
-            <div id="slider" class="w-full h-full relative">
-                <img src="https://i.pinimg.com/736x/52/0d/38/520d389f4ccfb11a2e76b8ed9dfdb95a.jpg"
-                    class="slide absolute inset-0 w-full h-full object-cover opacity-100 transition-opacity duration-1000">
-                <img src="https://i.pinimg.com/736x/64/79/9d/64799db8359714f06a02dc0fe4f82fe6.jpg"
-                    class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
-                <img src="https://i.pinimg.com/736x/40/82/60/408260ea7ea27aca4ba1052f2329977a.jpg"
-                    class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
-                <img src="https://i.pinimg.com/736x/0e/05/17/0e05179f699bf2a37166cdf104ad9f17.jpg"
-                    class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
-                <img src="https://i.pinimg.com/736x/56/41/8b/56418bbdf3ce32c733ecb92a9ca2e349.jpg"
-                    class="slide absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000">
             </div>
 
-            <script>
-                const slides = document.querySelectorAll("#slider .slide");
-                let currentSlide = 0;
-                const intervalTime = 3000; // ⏱ 3000ms = 3 giây (đổi số nếu muốn)
-
-                setInterval(() => {
-                    slides[currentSlide].style.opacity = 0;
-                    currentSlide = (currentSlide + 1) % slides.length;
-                    slides[currentSlide].style.opacity = 1;
-                }, intervalTime);
-            </script>
-            <div class="absolute inset-0 bg-[#AD3029]/10"></div>
+            <div class="mt-8 text-center text-sm">
+                <span class="text-gray-400" data-i18n="auth.new_user">New to GoShop?</span>
+                <a href="register.html" class="text-[#AD3029] font-medium ml-1" data-i18n="auth.signup_link">Sign Up</a>
+            </div>
         </div>
-
     </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="bg-gray-50 py-8 border-t border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 text-center">
+        <div class="flex justify-center gap-8 mb-4 text-xs text-gray-500 uppercase">
+            <a href="#" class="hover:text-gray-800">Privacy Policy</a>
+            <a href="#" class="hover:text-gray-800">Terms of Service</a>
+            <a href="#" class="hover:text-gray-800">Help Center</a>
+        </div>
+        <p class="text-xs text-gray-400">&copy; 2026 GoShop. All rights reserved.</p>
+    </div>
+</footer>
 
 
-    <script>
-        async function signIn() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value.trim();
-            const btn = document.querySelector('button[onclick="signIn()"]');
-            const originalText = btn.innerText;
+<script src="js/translations.js"></script>
+<script src="js/i18n.js"></script>
+<script>
+    async function signIn() {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value.trim();
+        const btn = document.querySelector('button[onclick="signIn()"]');
+        const originalText = btn.innerText;
 
-            if (!email || !password) {
-                alert('⚠️ Please enter email and password!');
-                return;
-            }
+        if (!email || !password) {
+            alert('⚠️ Please enter email and password!');
+            return;
+        }
 
-            // Disable button
-            btn.disabled = true;
-            btn.innerText = 'Signing in...';
-            btn.classList.add('opacity-70', 'cursor-not-allowed');
+        // Disable button
+        btn.disabled = true;
+        btn.innerText = 'Signing in...';
+        btn.classList.add('opacity-70', 'cursor-not-allowed');
 
-            try {
-                const response = await fetch('http://localhost:8080/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
+        try {
+            const response = await fetch('http://localhost:8080/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
 
-                const data = await response.json();
+            const data = await response.json();
 
-                if (response.ok) {
-                    localStorage.setItem('accessToken', data.accessToken);
-                    localStorage.setItem('userName', data.user?.fullName || email.split('@')[0]);
-                    if (data.user?.id) localStorage.setItem('userId', data.user.id);
+            if (response.ok) {
+                localStorage.setItem('accessToken', data.accessToken);
+                localStorage.setItem('userName', data.user?.fullName || email.split('@')[0]);
+                if (data.user?.id) localStorage.setItem('userId', data.user.id);
 
-                    const roles = data.user?.roles || [];
-                    const isAdmin = roles.some(r => (typeof r === 'string' ? r : r.name) === 'ROLE_ADMIN');
+                const roles = data.user?.roles || [];
+                const isAdmin = roles.some(r => (typeof r === 'string' ? r : r.name) === 'ROLE_ADMIN');
 
-                    const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
-                    if (returnUrl) {
-                        const m = returnUrl.match(/order-detail\.html\?id=([^&]+)/);
-                        if (m) localStorage.setItem('viewOrderId', m[1]);
-                        window.location.href = returnUrl;
-                    } else if (isAdmin) {
-                        window.location.href = 'admin-dashboard.html';
-                    } else {
-                        window.location.href = 'index.html';
-                    }
+                const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
+                if (returnUrl) {
+                    const m = returnUrl.match(/order-detail\.html\?id=([^&]+)/);
+                    if (m) localStorage.setItem('viewOrderId', m[1]);
+                    window.location.href = returnUrl;
+                } else if (isAdmin) {
+                    window.location.href = 'admin-dashboard.html';
                 } else {
-                    alert('❌ ' + (data.message || 'Login failed'));
-                    // Re-enable button on error
-                    btn.disabled = false;
-                    btn.innerText = originalText;
-                    btn.classList.remove('opacity-70', 'cursor-not-allowed');
+                    window.location.href = 'index.html';
                 }
-            } catch (error) {
-                console.error(error);
-                alert('❌ Server connection error');
+            } else {
+                alert('❌ ' + (data.message || 'Login failed'));
                 // Re-enable button on error
                 btn.disabled = false;
                 btn.innerText = originalText;
                 btn.classList.remove('opacity-70', 'cursor-not-allowed');
             }
+        } catch (error) {
+            console.error(error);
+            alert('❌ Server connection error');
+            // Re-enable button on error
+            btn.disabled = false;
+            btn.innerText = originalText;
+            btn.classList.remove('opacity-70', 'cursor-not-allowed');
         }
+    }
 
-        async function googleLogin(event) {
-            event.preventDefault();
+    async function googleLogin(event) {
+        event.preventDefault();
 
-            try {
-                const res = await fetch(
-                    'http://localhost:8080/api/auth/oauth/google/url?redirect_uri=http://localhost:3000/auth/callback/google.html'
-                );
+        try {
+            const res = await fetch(
+                'http://localhost:8080/api/auth/oauth/google/url?redirect_uri=http://localhost:3000/auth/callback/google.html'
+            );
 
-                const data = await res.json();
+            const data = await res.json();
 
-                if (data.authUrl) {
-                    // 🔥 SWITCH TO GOOGLE
-                    window.location.href = data.authUrl;
-                } else {
-                    alert('❌ Could not get Google URL');
-                }
-            } catch (err) {
-                alert('❌ Google Login Error');
-                console.error(err);
+            if (data.authUrl) {
+                // 🔥 SWITCH TO GOOGLE
+                window.location.href = data.authUrl;
+            } else {
+                alert('❌ Could not get Google URL');
             }
+        } catch (err) {
+            alert('❌ Google Login Error');
+            console.error(err);
         }
+    }
 
-        // === ENTER KEY SUPPORT ===
-        document.addEventListener('DOMContentLoaded', function () {
-            const inputs = document.querySelectorAll('#loginEmail, #loginPassword');
-            inputs.forEach(input => {
-                input.addEventListener('keydown', function (event) {
-                    if (event.key === 'Enter') {
-                        event.preventDefault();
-                        signIn(); // Call function directly
-                    }
-                });
+    // === ENTER KEY SUPPORT ===
+    document.addEventListener('DOMContentLoaded', function () {
+        const inputs = document.querySelectorAll('#loginEmail, #loginPassword');
+        inputs.forEach(input => {
+            input.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    signIn(); // Call function directly
+                }
             });
         });
-    </script>
+    });
+</script>
 </body>
 
 </html>
