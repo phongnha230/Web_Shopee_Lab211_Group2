@@ -1,0 +1,118 @@
+/* ===== Global GoShop Brand Styles ===== */
+:root {
+    --brand-primary: #AD3029;
+    --brand-primary-hover: #8f2621;
+    --brand-gradient-from: #AD3029;
+    --brand-gradient-middle: #C8453E;
+    --brand-gradient-to: #E06B5F;
+}
+
+/* Header Gradient - Matches Seller Channel */
+.header-gradient {
+    background: var(--brand-primary) !important;
+    border-radius: 0 !important;
+}
+
+/* Text Colors */
+.text-brand {
+    color: var(--brand-primary) !important;
+}
+
+.text-brand-hover:hover {
+    color: var(--brand-primary-hover) !important;
+}
+
+/* Backgrounds */
+.bg-brand {
+    background-color: var(--brand-primary) !important;
+    color: white;
+}
+
+.bg-brand-hover:hover {
+    background-color: var(--brand-primary-hover) !important;
+}
+
+/* === LEGACY OVERRIDES (Orange -> Red) === */
+/* This ensures missed orange classes also turn red */
+
+/* Text */
+.text-orange-500,
+.text-orange-600 {
+    color: var(--brand-primary) !important;
+}
+
+/* Backgrounds */
+.bg-orange-500,
+.bg-orange-600 {
+    background-color: var(--brand-primary) !important;
+    color: white;
+    /* Ensure text is readable */
+}
+
+.hover\:bg-orange-600:hover,
+.hover\:bg-orange-700:hover,
+.bg-orange-600:hover {
+    background-color: var(--brand-primary-hover) !important;
+}
+
+/* Borders */
+.border-orange-500,
+.border-orange-600,
+.focus\:border-orange-600:focus {
+    border-color: var(--brand-primary) !important;
+}
+
+/* Gradients */
+.from-orange-500 {
+    --tw-gradient-from: var(--brand-primary) !important;
+}
+
+.to-orange-600 {
+    --tw-gradient-to: #CD5252 !important;
+}
+
+/* Icons */
+i.text-orange-500,
+svg.text-orange-500 {
+    color: var(--brand-primary) !important;
+}
+
+/* GoShop Animation */
+@keyframes bounceGoShop {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateY(0);
+    }
+
+    40% {
+        transform: translateY(-10px);
+    }
+
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+.bounce-goshop {
+    animation: bounceGoShop 2s infinite;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.2s ease-out forwards;
+}

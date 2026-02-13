@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Profile | ShoppeClone</title>
+    <title>Profile | GoShop</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 </head>
@@ -35,9 +35,7 @@
                 <a href="#" class="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/20">
                     <i class="fas fa-user"></i> Profile
                 </a>
-                <a href="my-orders-backend.html" class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-white/20">
-                    <i class="fas fa-box"></i> My Orders
-                </a>
+
                 <a href="addresses.html" class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-white/20">
                     <i class="fas fa-map-marker-alt"></i> Shipping Addresses
                 </a>
@@ -45,8 +43,9 @@
                     class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-white/20">
                     <i class="fas fa-lock"></i> Change Password
                 </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-white/20">
-                    <i class="fas fa-heart"></i> Wishlist
+
+                <a href="index.html" class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-white/20">
+                    <i class="fas fa-home"></i> Back to Home
                 </a>
                 <a href="#" onclick="logout()"
                     class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-white/20 text-red-200">
@@ -372,6 +371,23 @@
 
                 const result = await response.text();
                 console.log('✅ Result:', result);
+
+                // CRITICAL: Update localStorage so header refreshes
+                localStorage.setItem('userName', fullName); // Update simple name
+
+                // Update full user object if it exists
+                let userObj = JSON.parse(localStorage.getItem('user') || '{}');
+                userObj.fullName = fullName;
+                userObj.email = document.getElementById('email').value;
+                userObj.phone = phone;
+                // If backend returns updated avatar (it might not in this specific endpoint, but good practice)
+                if (currentAvatarUrl) {
+                    userObj.avatar = currentAvatarUrl;
+                }
+                localStorage.setItem('user', JSON.stringify(userObj));
+
+                // Dispatch storage event to sync across tabs
+                window.dispatchEvent(new Event('storage'));
 
                 showToast('✅ Profile updated successfully!', 'success');
 

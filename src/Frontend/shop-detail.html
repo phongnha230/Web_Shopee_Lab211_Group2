@@ -4,41 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shop - Shopee Clone</title>
+    <title>Shop - GoShop</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
     <style>
-        /* ===== ShopeeClone Red ===== */
-        .text-orange-500,
-        .text-orange-600 {
-            color: #AD3029 !important;
-        }
-
-        .bg-orange-500,
-        .bg-orange-600 {
-            background-color: #AD3029 !important;
-            color: white !important;
-        }
-
-        .hover\:bg-orange-600:hover,
-        .hover\:bg-orange-700:hover {
-            background-color: #8f2621 !important;
-        }
-
-        .border-orange-500,
-        .border-orange-600 {
-            border-color: #AD3029 !important;
-        }
-
-        .from-orange-500 {
-            --tw-gradient-from: #AD3029 !important;
-        }
-
-        .to-orange-600 {
-            --tw-gradient-to: #CD5252 !important;
-        }
-
-        @keyframes bounceShopee {
+        @keyframes bounceGoShop {
 
             0%,
             20%,
@@ -57,8 +28,8 @@
             }
         }
 
-        .bounce-shopee {
-            animation: bounceShopee 2s infinite;
+        .bounce-goshop {
+            animation: bounceGoShop 2s infinite;
         }
 
         .shop-header-bg {
@@ -69,12 +40,12 @@
 
 <body class="bg-gray-50">
     <!-- Header -->
-    <header class="bg-gradient-to-r from-orange-500 to-orange-600 shadow-md sticky top-0 z-50">
+    <header class="header-gradient shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-3">
                 <div class="flex items-center space-x-3">
-                    <i class="fas fa-shopping-bag text-2xl text-white bounce-shopee"></i>
-                    <a href="index.html" class="text-xl font-bold text-white">Shopee Clone</a>
+                    <i class="fas fa-shopping-bag text-2xl text-white bounce-goshop"></i>
+                    <a href="index.html" class="text-xl font-bold text-white">GoShop</a>
                 </div>
 
                 <div class="flex-1 max-w-2xl mx-8">
@@ -205,7 +176,7 @@
     <!-- Footer -->
     <footer class="bg-gray-800 text-white mt-12">
         <div class="max-w-7xl mx-auto px-4 py-8">
-            <p class="text-center text-gray-400 text-sm">&copy; 2026 Shopee Clone. All rights reserved.</p>
+            <p class="text-center text-gray-400 text-sm">&copy; 2026 GoShop. All rights reserved.</p>
         </div>
     </footer>
 
@@ -399,7 +370,7 @@
                     shopLogoImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=AD3029&color=fff&size=100`;
                 }
 
-                document.title = `${shop.name} - Shopee Clone`;
+                document.title = `${shop.name} - GoShop`;
 
                 // Check if current user is owner to allow logo update
                 checkOwnerAndEnableEdit(shop.ownerId);
@@ -640,7 +611,7 @@
                 if (guestNav) guestNav.classList.add('hidden');
                 if (userNav) userNav.classList.remove('hidden');
                 if (userNameEl) userNameEl.textContent = userName;
-                if (userAvatar) userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=fff&color=f97316`;
+                if (userAvatar) userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=fecaca&color=AD3029`;
             } else {
                 if (guestNav) guestNav.classList.remove('hidden');
                 if (userNav) userNav.classList.add('hidden');
