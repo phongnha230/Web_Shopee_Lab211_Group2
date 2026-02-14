@@ -31,6 +31,7 @@ public class Review {
 
     private String replyComment; // Seller's reply
     private LocalDateTime replyAt; // Time of seller's reply
+    private Boolean isReplyEdited = false;
 
     private List<String> imageUrls = new ArrayList<>(); // URLs of review images (max 5)
 

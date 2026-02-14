@@ -9,8 +9,11 @@ import com.shoppeclone.backend.product.entity.*;
 import com.shoppeclone.backend.product.repository.*;
 import com.shoppeclone.backend.product.service.ProductService;
 import com.shoppeclone.backend.product.util.CategoryDetectionUtil;
+import com.shoppeclone.backend.promotion.flashsale.entity.FlashSaleItem;
+import com.shoppeclone.backend.promotion.flashsale.repository.FlashSaleItemRepository;
 import com.shoppeclone.backend.promotion.flashsale.service.FlashSaleService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +26,7 @@ import java.util.Comparator;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
@@ -31,6 +35,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductCategoryRepository productCategoryRepository;
     private final CategoryRepository categoryRepository;
     private final FlashSaleService flashSaleService;
+    private final FlashSaleItemRepository flashSaleItemRepository;
 
     @Override
     @Transactional
@@ -431,7 +436,29 @@ public class ProductServiceImpl implements ProductService {
         response.setIsFlashSale(product.getIsFlashSale());
         response.setFlashSalePrice(product.getFlashSalePrice());
         response.setFlashSaleStock(product.getFlashSaleStock());
-        response.setFlashSaleSold(product.getFlashSaleSold() != null ? product.getFlashSaleSold() : 0);
+
+        // Single Source of Truth: Fetch real-time sold count from FlashSaleItem table
+        if (Boolean.TRUE.equals(product.getIsFlashSale())) {
+            try {
+                List<FlashSaleItem> fsItems = flashSaleItemRepository.findByProductIdAndStatus(product.getId(),
+                        "APPROVED");
+                if (!fsItems.isEmpty()) {
+                    int totalSold = fsItems.stream()
+                            .mapToInt(item -> (item.getSaleStock() != null ? item.getSaleStock() : 0)
+                                    - (item.getRemainingStock() != null ? item.getRemainingStock() : 0))
+                            .sum();
+                    response.setFlashSaleSold(totalSold);
+                } else {
+                    response.setFlashSaleSold(product.getFlashSaleSold() != null ? product.getFlashSaleSold() : 0);
+                }
+            } catch (Exception e) {
+                log.error("Error fetching real-time flash sale sold count for product: {}", product.getId(), e);
+                response.setFlashSaleSold(product.getFlashSaleSold() != null ? product.getFlashSaleSold() : 0);
+            }
+        } else {
+            response.setFlashSaleSold(product.getFlashSaleSold() != null ? product.getFlashSaleSold() : 0);
+        }
+
         response.setFlashSaleEndTime(product.getFlashSaleEndTime());
 
         // Load variants
@@ -470,7 +497,29 @@ public class ProductServiceImpl implements ProductService {
         response.setIsFlashSale(variant.getIsFlashSale());
         response.setFlashSalePrice(variant.getFlashSalePrice());
         response.setFlashSaleStock(variant.getFlashSaleStock());
-        response.setFlashSaleSold(variant.getFlashSaleSold() != null ? variant.getFlashSaleSold() : 0);
+
+        // Single Source of Truth: Fetch real-time sold count from FlashSaleItem table
+        if (Boolean.TRUE.equals(variant.getIsFlashSale())) {
+            try {
+                List<FlashSaleItem> fsItems = flashSaleItemRepository.findByVariantIdAndStatus(variant.getId(),
+                        "APPROVED");
+                if (!fsItems.isEmpty()) {
+                    int totalSold = fsItems.stream()
+                            .mapToInt(item -> (item.getSaleStock() != null ? item.getSaleStock() : 0)
+                                    - (item.getRemainingStock() != null ? item.getRemainingStock() : 0))
+                            .sum();
+                    response.setFlashSaleSold(totalSold);
+                } else {
+                    response.setFlashSaleSold(variant.getFlashSaleSold() != null ? variant.getFlashSaleSold() : 0);
+                }
+            } catch (Exception e) {
+                log.error("Error fetching real-time flash sale sold count for variant: {}", variant.getId(), e);
+                response.setFlashSaleSold(variant.getFlashSaleSold() != null ? variant.getFlashSaleSold() : 0);
+            }
+        } else {
+            response.setFlashSaleSold(variant.getFlashSaleSold() != null ? variant.getFlashSaleSold() : 0);
+        }
+
         response.setFlashSaleEndTime(variant.getFlashSaleEndTime());
         return response;
     }

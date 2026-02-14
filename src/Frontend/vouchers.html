@@ -159,6 +159,23 @@
         let currentTab = 'product';
         let usedVoucherCodes = [];
         let vouchersLoaded = false;
+        let currentShopId = null;
+
+        // Parse query params
+        const urlParams = new URLSearchParams(window.location.search);
+        currentShopId = urlParams.get('shopId');
+        const initialTab = urlParams.get('tab'); // 'shop', 'product', 'shipping'
+
+        // Init Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            // Auto-switch tab if requested via URL
+            if (initialTab && ['product', 'shipping', 'collected'].includes(initialTab)) {
+                switchTab(initialTab);
+            }
+
+            loadUsedVoucherCodes();
+            loadVouchers();
+        });
 
         function getCollectedIds() {
             try {
@@ -194,11 +211,14 @@
         function mapApiVoucherToFrontend(v) {
             const cat = v.categoryRestriction ? (COLOR_ICON_MAP[v.categoryRestriction] || { color: 'voucher-blue', icon: '🏷️' }) : { color: 'voucher-orange', icon: '🎉' };
             if (v.type === 'SHIPPING') cat.icon = v.code.includes('SUPER') ? '🚀' : v.code.includes('EXPRESS') ? '⚡' : v.code.includes('WEEKEND') ? '🌴' : v.code.includes('NEWUSER') ? '👋' : v.code.includes('FLASH') ? '🔥' : '🚚';
+            else if (v.type === 'SHOP') { cat.icon = '🏪'; cat.color = 'voucher-purple'; }
+
             const collected = getCollectedIds().includes(v.id);
             return {
                 id: v.id,
                 code: v.code,
-                type: v.type === 'SHIPPING' ? 'shipping' : 'product',
+                type: v.type === 'SHIPPING' ? 'shipping' : (v.type === 'SHOP' ? 'shop' : 'product'),
+                shopId: v.shopId, // Important for filtering
                 title: v.description,
                 discount: formatDiscount(v),
                 minOrder: formatMinSpend(v.minSpend),
@@ -213,16 +233,30 @@
 
         async function loadVouchers() {
             try {
-                const list = await VoucherAPI.getAllVouchers();
-                VOUCHERS = (list || []).map(mapApiVoucherToFrontend);
-            } catch (e) {
-                console.error('Failed to load vouchers:', e);
-                VOUCHERS = [];
-            } finally {
+                let list = [];
+                // If viewing shop vouchers, we might need a specific API or filter existing list
+                // 1. Fetch Platform Vouchers
+                let allVouchers = await VoucherAPI.getAllVouchers();
+                console.log('Platform vouchers loaded:', allVouchers.length);
+
+                VOUCHERS = allVouchers.map(mapApiVoucherToFrontend);
+                console.log('Total Vouchers mapped:', VOUCHERS.length);
+
                 vouchersLoaded = true;
+                renderVouchers();
+            } catch (error) {
+                console.error('Error loading vouchers:', error);
+                const container = document.getElementById('vouchersContainer');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="col-span-full text-center text-red-500 py-8">
+                            <i class="fas fa-exclamation-circle text-2xl mb-2"></i>
+                            <p>Failed to load vouchers. Please try again later.</p>
+                        </div>
+                    `;
+                }
             }
         }
-
         async function loadUsedVoucherCodes() {
             try {
                 // Chỉ gọi API khi user đã đăng nhập (tránh lỗi 403)
@@ -246,7 +280,9 @@
             });
 
             const activeBtn = document.getElementById(`tab-${tab}`);
-            activeBtn.className = 'py-4 px-2 border-b-2 border-orange-500 text-orange-600 font-semibold transition-colors';
+            if (activeBtn) {
+                activeBtn.className = 'py-4 px-2 border-b-2 border-orange-500 text-orange-600 font-semibold transition-colors';
+            }
 
             renderVouchers();
         }
@@ -269,17 +305,22 @@
             VOUCHERS.forEach(v => { v.collected = collectedIds.includes(v.id); });
 
             // Filter Logic
+            // Filter Logic
             let filteredVouchers = [];
-            if (currentTab === 'collected') {
+            const activeTabLower = currentTab.toLowerCase();
+
+            if (activeTabLower === 'collected') {
                 filteredVouchers = VOUCHERS.filter(v => v.collected);
             } else {
-                filteredVouchers = VOUCHERS.filter(v => v.type === currentTab);
+                filteredVouchers = VOUCHERS.filter(v => (v.type || '').toLowerCase() === activeTabLower);
             }
 
             // Update Collected Count & Banner
             const collectedCount = VOUCHERS.filter(v => v.collected).length;
-            document.getElementById('collectedCount').textContent = collectedCount;
-            const productCount = VOUCHERS.filter(v => v.type === 'product').length;
+            const collectedEl = document.getElementById('collectedCount');
+            if (collectedEl) collectedEl.textContent = collectedCount;
+
+            const productCount = VOUCHERS.filter(v => v.type === 'product' || v.type === 'shop').length;
             const availEl = document.getElementById('availableCount');
             if (availEl) availEl.textContent = productCount;
 
@@ -323,18 +364,19 @@
                         </div>
                         ${v.categoryRestriction ? `<div class="text-xs opacity-80 mb-1"><i class="fas fa-tag mr-1"></i>Chỉ áp dụng: ${v.categoryRestriction}</div>` : ''}
                         
+                        ${(() => {
+                    // Cleaner UI: No red warnings here
+                    return '';
+                })()}
+                        
                         <div class="mt-2">
-                            ${usedVoucherCodes.includes(v.code) ?
-                    `<button disabled class="bg-gray-300 text-gray-500 w-full py-2 rounded-lg text-sm font-bold cursor-not-allowed">
-                                    Đã sử dụng
-                                </button>`
-                    : v.collected ?
-                        `<button onclick="useVoucher('${v.code}')" 
+                            ${v.collected ?
+                    `<button onclick="handleClickUse('${v.code}', '${v.expiry}', ${v.stock})" 
                                     class="bg-white text-orange-600 hover:bg-orange-50 w-full py-2 rounded-lg text-sm font-bold transition-all transform active:scale-95 shadow-sm">
                                     Use Now
                                 </button>`
-                        :
-                        `<button onclick="collectVoucher('${v.id}')" 
+                    :
+                    `<button onclick="collectVoucher('${v.id}')" 
                                     class="bg-white/90 text-orange-600 hover:bg-white w-full py-2 rounded-lg text-sm font-bold transition-all transform active:scale-95 shadow-sm">
                                     Collect Now
                                 </button>`
@@ -345,17 +387,46 @@
             `).join('');
         }
 
+        function handleClickUse(code, expiry, stock) {
+            // Check validity on click
+            const isExpired = new Date(expiry) < new Date();
+            const isOutOfStock = stock <= 0;
+            const isAlreadyUsed = usedVoucherCodes.includes(code);
+
+            if (isAlreadyUsed) {
+                showToast('Bạn đã sử dụng mã này rồi!', 'info');
+                return;
+            }
+            if (isExpired) {
+                showToast('Tiếc quá, mã này đã hết hạn!', 'error');
+                return;
+            }
+            if (isOutOfStock) {
+                showToast('Mã này đã hết lượt sử dụng!', 'error');
+                return;
+            }
+
+            // If valid, proceed to use
+            useVoucher(code);
+        }
+
         function useVoucher(code) {
             if (usedVoucherCodes.includes(code)) {
                 showToast('Voucher này đã được sử dụng trong đơn hàng trước.');
                 return;
             }
             const voucher = VOUCHERS.find(v => v.code === code);
-            const type = voucher && voucher.type === 'product' ? 'PRODUCT' : 'SHIPPING';
+            let type = 'SHIPPING';
+            if (voucher) {
+                if (voucher.type === 'product') type = 'PRODUCT';
+                if (voucher.type === 'shop') type = 'SHOP';
+            }
 
             // Lưu vào key riêng biệt theo loại voucher để không ghi đè lên nhau
-            if (type === 'PRODUCT') {
-                localStorage.setItem('autoApplyProductVoucher', JSON.stringify({ code, type }));
+            if (type === 'PRODUCT' || type === 'SHOP') {
+                // Save subType so checkout knows which tab to open
+                const subType = type;
+                localStorage.setItem('autoApplyProductVoucher', JSON.stringify({ code, type, subType }));
             } else {
                 localStorage.setItem('autoApplyShippingVoucher', JSON.stringify({ code, type }));
             }

@@ -1183,7 +1183,7 @@
                 class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                 <div class="bg-white rounded-xl max-w-lg w-full overflow-hidden shadow-2xl">
                     <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                        <h3 class="text-xl font-bold text-gray-800">Reply to Review</h3>
+                        <h3 class="text-xl font-bold text-gray-800" id="replyModalTitle">Reply to Review</h3>
                         <button onclick="closeReplyModal()" class="text-gray-400 hover:text-gray-600">
                             <i class="fas fa-times text-xl"></i>
                         </button>
@@ -1200,11 +1200,65 @@
                             <div class="pt-4 flex gap-3">
                                 <button type="button" onclick="closeReplyModal()"
                                     class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
-                                <button type="submit"
+                                <button type="submit" id="replySubmitBtn"
                                     class="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg font-bold hover:bg-orange-600 shadow-md">Send
                                     Reply</button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View Review Modal -->
+            <div id="viewReviewModal"
+                class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-xl max-w-lg w-full overflow-hidden shadow-2xl">
+                    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                        <h3 class="text-xl font-bold text-gray-800">Review Details</h3>
+                        <button onclick="closeViewReviewModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Customer</label>
+                                <div id="viewReviewCustomer" class="font-bold text-gray-800"></div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Rating</label>
+                                <div id="viewReviewRating" class="text-orange-500"></div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Customer's
+                                    Comment</label>
+                                <div id="viewReviewComment"
+                                    class="p-3 bg-gray-50 rounded-lg text-gray-700 italic border border-gray-100"></div>
+                            </div>
+                            <div id="viewReviewImagesSection" class="hidden">
+                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Images</label>
+                                <div id="viewReviewImages" class="flex gap-2 flex-wrap mt-1"></div>
+                            </div>
+                            <div id="viewReviewReplySection" class="hidden">
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="block text-xs font-bold text-gray-400 uppercase">Shop's
+                                        Response <span id="viewReviewReplyEdited"
+                                            class="hidden text-orange-500 font-medium normal-case ml-1">(Edited)</span></label>
+                                    <button id="btnEditFromView"
+                                        class="text-blue-500 hover:text-blue-700 text-xs font-bold transition">
+                                        <i class="fas fa-edit mr-1"></i>Edit
+                                    </button>
+                                </div>
+                                <div id="viewReviewReply"
+                                    class="p-3 bg-orange-50 rounded-lg text-gray-800 border border-orange-100"></div>
+                            </div>
+                            <div id="viewReviewNoReply" class="hidden text-sm text-gray-400 italic">No response yet.
+                            </div>
+                        </div>
+                        <div class="pt-4">
+                            <button onclick="closeViewReviewModal()"
+                                class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-200 transition">Close</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1225,6 +1279,7 @@
         let editingProductId = null; // Track if we are editing
         let editingVoucherId = null; // Track if we are editing voucher
         let currentShopVouchers = []; // Cache vouchers
+        let currentReviews = []; // Cache reviews for viewing
 
         if (!token) {
             alert('Please login first!');
@@ -2382,6 +2437,8 @@
 
                 if (response.ok) {
                     const reviews = await response.json();
+                    currentReviews = reviews; // Cache for viewing
+
                     if (reviews.length === 0) {
                         listContainer.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-gray-500">No reviews found</td></tr>';
                         return;
@@ -2394,9 +2451,13 @@
                             ? '<span class="px-2 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">Replied</span>'
                             : '<span class="px-2 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">Pending</span>';
 
+                        const viewBtn = `<button onclick="openViewReviewModal('${r.id}')" class="text-gray-500 hover:text-orange-600 transition mr-3" title="View Detail">
+                                            <i class="fas fa-eye"></i>
+                                        </button>`;
+
                         const replyBtn = r.replyComment
-                            ? `<button class="text-gray-400 cursor-not-allowed" title="Already replied"><i class="fas fa-reply"></i></button>`
-                            : `<button onclick="openReplyModal('${r.id}', '${r.userName}', '${r.comment}')" class="text-blue-500 hover:text-blue-700 transition" title="Reply to this review">
+                            ? ''
+                            : `<button onclick="openReplyModal('${r.id}')" class="text-blue-500 hover:text-blue-700 transition" title="Reply to this review">
                                   <i class="fas fa-reply"></i>
                                </button>`;
 
@@ -2411,7 +2472,12 @@
                                     <div class="max-w-xs truncate" title="${r.comment}">${r.comment}</div>
                                 </td>
                                 <td class="px-6 py-4">${status}</td>
-                                <td class="px-6 py-4 text-right">${replyBtn}</td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex items-center justify-end">
+                                        ${viewBtn}
+                                        ${replyBtn}
+                                    </div>
+                                </td>
                             </tr>
                         `;
                     }).join('');
@@ -2422,17 +2488,35 @@
         }
 
         let currentReviewId = null;
-        function openReplyModal(id, name, comment) {
+        function openReplyModal(id) {
+            const r = currentReviews.find(item => item.id === id);
+            if (!r) return;
+
             currentReviewId = id;
-            document.getElementById('reviewCustomerName').textContent = `Customer: ${name}`;
-            document.getElementById('reviewCustomerComment').textContent = `"${comment}"`;
-            document.getElementById('replyContent').value = '';
+            document.getElementById('reviewCustomerName').textContent = `Customer: ${r.userName}`;
+            document.getElementById('reviewCustomerComment').textContent = `"${r.comment}"`;
+            document.getElementById('replyContent').value = r.replyComment || '';
+
+            const title = document.getElementById('replyModalTitle');
+            const submitBtn = document.getElementById('replySubmitBtn');
+
+            if (r.replyComment) {
+                title.textContent = 'Edit Your Reply';
+                submitBtn.textContent = 'Update Reply';
+            } else {
+                title.textContent = 'Reply to Review';
+                submitBtn.textContent = 'Send Reply';
+            }
+
             document.getElementById('replyReviewModal').classList.remove('hidden');
         }
 
         function closeReplyModal() {
             document.getElementById('replyReviewModal').classList.add('hidden');
             currentReviewId = null;
+            // Reset modal title and button to default
+            document.getElementById('replyModalTitle').textContent = 'Reply to Review';
+            document.getElementById('replySubmitBtn').textContent = 'Send Reply';
         }
 
         async function handleReplyReview(e) {
@@ -2460,6 +2544,62 @@
                 console.error(err);
                 showToast('Error sending reply', 'error');
             }
+        }
+
+        function openViewReviewModal(id) {
+            const r = currentReviews.find(item => item.id === id);
+            if (!r) return;
+
+            document.getElementById('viewReviewCustomer').textContent = r.userName;
+            document.getElementById('viewReviewRating').textContent = '⭐'.repeat(r.rating);
+            document.getElementById('viewReviewComment').textContent = r.comment || '(No comment)';
+
+            // Render Images
+            const imagesSection = document.getElementById('viewReviewImagesSection');
+            const imagesContainer = document.getElementById('viewReviewImages');
+            imagesContainer.innerHTML = '';
+            if (r.imageUrls && r.imageUrls.length > 0) {
+                imagesSection.classList.remove('hidden');
+                r.imageUrls.forEach(url => {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.className = 'w-20 h-20 object-cover rounded border border-gray-200 cursor-pointer hover:opacity-80 transition';
+                    img.onclick = () => window.open(url, '_blank');
+                    imagesContainer.appendChild(img);
+                });
+            } else {
+                imagesSection.classList.add('hidden');
+            }
+
+            if (r.replyComment) {
+                document.getElementById('viewReviewReply').textContent = r.replyComment;
+                document.getElementById('viewReviewReplySection').classList.remove('hidden');
+                document.getElementById('viewReviewNoReply').classList.add('hidden');
+
+                // Edited Label
+                const editedLabel = document.getElementById('viewReviewReplyEdited');
+                if (r.isReplyEdited) {
+                    editedLabel.classList.remove('hidden');
+                } else {
+                    editedLabel.classList.add('hidden');
+                }
+
+                // Set up Edit button to switch modals
+                const editBtn = document.getElementById('btnEditFromView');
+                editBtn.onclick = () => {
+                    closeViewReviewModal();
+                    openReplyModal(id);
+                };
+            } else {
+                document.getElementById('viewReviewReplySection').classList.add('hidden');
+                document.getElementById('viewReviewNoReply').classList.remove('hidden');
+            }
+
+            document.getElementById('viewReviewModal').classList.remove('hidden');
+        }
+
+        function closeViewReviewModal() {
+            document.getElementById('viewReviewModal').classList.add('hidden');
         }
 
         async function loadDashboardStats() {

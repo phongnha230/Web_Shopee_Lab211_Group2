@@ -284,6 +284,9 @@ public class ReviewServiceImpl implements ReviewService {
             throw new ReviewException("Bạn không có quyền phản hồi đánh giá của Shop khác");
         }
 
+        if (review.getReplyComment() != null && !review.getReplyComment().isBlank()) {
+            review.setIsReplyEdited(true);
+        }
         review.setReplyComment(replyComment);
         review.setReplyAt(LocalDateTime.now());
 
@@ -325,6 +328,7 @@ public class ReviewServiceImpl implements ReviewService {
         response.setImageUrls(review.getImageUrls());
         response.setReplyComment(review.getReplyComment());
         response.setReplyAt(review.getReplyAt());
+        response.setIsReplyEdited(review.getIsReplyEdited() != null && review.getIsReplyEdited());
         response.setCreatedAt(review.getCreatedAt());
         response.setVerifiedPurchase(review.getOrderId() != null && !review.getOrderId().isBlank());
         response.setShopId(review.getShopId());

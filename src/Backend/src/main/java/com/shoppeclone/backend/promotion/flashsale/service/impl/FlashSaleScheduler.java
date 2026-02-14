@@ -33,7 +33,6 @@ public class FlashSaleScheduler {
     private final ProductVariantRepository productVariantRepository;
 
     @Scheduled(fixedRate = 60000) // Run every minute
-    @Transactional
     public void processFlashSaleTransitions() {
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         log.debug("FlashSaleScheduler: Running transitions at UTC: {}", now);
@@ -42,11 +41,14 @@ public class FlashSaleScheduler {
         List<FlashSaleCampaign> campaigns = flashSaleCampaignRepository.findAll();
         for (FlashSaleCampaign campaign : campaigns) {
             String status = campaign.getStatus();
-            if ("REGISTRATION_OPEN".equals(status) && now.isAfter(campaign.getStartDate())) {
+            LocalDateTime start = campaign.getStartDate();
+            LocalDateTime end = campaign.getEndDate();
+
+            if ("REGISTRATION_OPEN".equals(status) && start != null && now.isAfter(start)) {
                 campaign.setStatus("ONGOING");
                 flashSaleCampaignRepository.save(campaign);
                 log.info("Campaign '{}' moved to ONGOING", campaign.getName());
-            } else if (!"FINISHED".equals(status) && now.isAfter(campaign.getEndDate())) {
+            } else if (!"FINISHED".equals(status) && end != null && now.isAfter(end)) {
                 campaign.setStatus("FINISHED");
                 flashSaleCampaignRepository.save(campaign);
                 log.info("Campaign '{}' moved to FINISHED", campaign.getName());
@@ -56,12 +58,15 @@ public class FlashSaleScheduler {
         // 2. Activate Slots and ensure items are active
         List<FlashSale> activeOrOngoingSlots = flashSaleRepository.findAll().stream()
                 .filter(s -> ("ACTIVE".equals(s.getStatus()) || "ONGOING".equals(s.getStatus()))
+                        && s.getStartTime() != null
+                        && s.getEndTime() != null
                         && !s.getStartTime().isAfter(now)
                         && s.getEndTime().isAfter(now))
                 .toList();
 
         for (FlashSale slot : activeOrOngoingSlots) {
-            if ("ACTIVE".equals(slot.getStatus())) {
+            boolean isJustStarting = "ACTIVE".equals(slot.getStatus());
+            if (isJustStarting) {
                 log.info("Activating Flash Sale Slot: {}", slot.getId());
                 slot.setStatus("ONGOING");
                 flashSaleRepository.save(slot);
@@ -70,35 +75,44 @@ public class FlashSaleScheduler {
             List<FlashSaleItem> items = flashSaleItemRepository.findByFlashSaleIdAndStatus(slot.getId(), "APPROVED");
             for (FlashSaleItem item : items) {
                 Product product = productRepository.findById(item.getProductId()).orElse(null);
-                if (product != null && !Boolean.TRUE.equals(product.getIsFlashSale())) {
-                    log.info("Enabling flash sale for product: {} in slot: {}", product.getName(), slot.getId());
+                if (product != null) {
+                    log.debug("Syncing flash sale status for product: {} in slot: {}", product.getName(), slot.getId());
                     product.setIsFlashSale(true);
                     product.setFlashSalePrice(item.getSalePrice());
                     product.setFlashSaleStock(item.getSaleStock());
-                    product.setFlashSaleSold(0);
+
+                    // ALWAYS SYNC: sold = saleStock - remainingStock
+                    int total = item.getSaleStock() != null ? item.getSaleStock() : 0;
+                    int remaining = item.getRemainingStock() != null ? item.getRemainingStock() : 0;
+                    product.setFlashSaleSold(Math.max(0, total - remaining));
+
                     product.setFlashSaleEndTime(slot.getEndTime());
                     productRepository.save(product);
 
-                    // If Product level sale, update ALL variants
+                    // Ensure ALL variants are in sync with the FlashSaleItem
                     List<ProductVariant> allVariants = productVariantRepository.findByProductId(product.getId());
                     for (ProductVariant v : allVariants) {
                         v.setIsFlashSale(true);
                         v.setFlashSalePrice(item.getSalePrice());
                         v.setFlashSaleStock(item.getSaleStock());
-                        v.setFlashSaleSold(0);
+                        v.setFlashSaleSold(product.getFlashSaleSold()); // Sync with product level
                         v.setFlashSaleEndTime(slot.getEndTime());
                         productVariantRepository.save(v);
                     }
                 }
 
-                // Update Variant
+                // Update Specific Variant if provided (granular update)
                 if (item.getVariantId() != null) {
                     ProductVariant variant = productVariantRepository.findById(item.getVariantId()).orElse(null);
                     if (variant != null) {
                         variant.setIsFlashSale(true);
                         variant.setFlashSalePrice(item.getSalePrice());
                         variant.setFlashSaleStock(item.getSaleStock());
-                        variant.setFlashSaleSold(0);
+
+                        int total = item.getSaleStock() != null ? item.getSaleStock() : 0;
+                        int remaining = item.getRemainingStock() != null ? item.getRemainingStock() : 0;
+                        variant.setFlashSaleSold(Math.max(0, total - remaining));
+
                         variant.setFlashSaleEndTime(slot.getEndTime());
                         productVariantRepository.save(variant);
                     }
@@ -106,9 +120,11 @@ public class FlashSaleScheduler {
             }
         }
 
-        // 2. Deactivate Slots
+        // 3. Deactivate Slots
         List<FlashSale> endingSlots = flashSaleRepository.findAll().stream()
-                .filter(s -> "ONGOING".equals(s.getStatus()) && !s.getEndTime().isAfter(now))
+                .filter(s -> "ONGOING".equals(s.getStatus())
+                        && s.getEndTime() != null
+                        && !s.getEndTime().isAfter(now))
                 .toList();
 
         for (FlashSale slot : endingSlots) {

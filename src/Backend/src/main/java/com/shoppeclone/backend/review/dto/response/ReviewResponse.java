@@ -16,6 +16,7 @@ public class ReviewResponse {
     private List<String> imageUrls; // URLs of review images
     private String replyComment;
     private LocalDateTime replyAt;
+    private Boolean isReplyEdited;
     private LocalDateTime createdAt;
     /** true nếu reviewer đã mua sản phẩm qua đơn hàng (orderId != null) */
     private Boolean verifiedPurchase;
