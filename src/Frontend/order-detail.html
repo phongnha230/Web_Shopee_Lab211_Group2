@@ -191,9 +191,10 @@
                             <img id="userAvatar" src="" alt="User" class="w-8 h-8 rounded-full border-2 border-white">
                             <span id="userName" class="font-semibold text-white"></span>
                         </div>
-                        <button onclick="logout()" class="text-white hover:text-red-200">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </button>
+                        <a href="my-orders-backend.html" class="text-white hover:text-red-200"
+                            title="Quay lại danh sách đơn hàng">
+                            <i class="fas fa-arrow-left"></i>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -907,7 +908,8 @@
 
         function updateNavbar() {
             const token = localStorage.getItem('accessToken');
-            const userName = localStorage.getItem('userName') || 'User';
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const userName = user.fullName || localStorage.getItem('userName') || 'User';
             if (token) {
                 document.getElementById('userName').textContent = userName;
                 document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=fecaca&color=AD3029`;
