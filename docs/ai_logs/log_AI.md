@@ -17449,8 +17449,10 @@ enderProduct and updatePriceDisplay to:
 ---
 ## LOG UPDATE: 2026-02-13 - Flash Sale & Git Management
 
-- **Flash Sale Registration**: Resolved "Loading..." and unresponsive button issues in the seller dashboard. Added parallel fetching and AbortController for reliability.
-- **Homepage Display**: Fixed timezone discrepancy by reverting to UTC logic. Updated `getCurrentFlashSale` to allow both **ACTIVE** and **ONGOING** statuses, so sales don't disappear when they start.
-- **Git Sync**: Completed merge of `origin/main` into `vy` branch.
+- **Inventory Locking & Stock Calculation**: Implemented backend stock deduction and real-time available stock calculation in the registration modal.
+- **Stock Synchronization**: Added `syncProductTotalStock` to update the parent `Product.totalStock` aggregate field during Flash Sale registration, fixing the persistent display of old stock values.
+- **Auth & Navbar Fix**: Resolved sticky username "Vy Nguyen" by ensuring all user-related `localStorage` keys (especially the `user` object) are cleared on logout and properly set during traditional login.
+- **Documentation**: Updated Phase 8 and 9 tasks in `task.md`.
+- **Git Management**: Pushed local changes to `origin/vy` and pulled `origin/main` back into `vy` to synchronize.
 
 ---

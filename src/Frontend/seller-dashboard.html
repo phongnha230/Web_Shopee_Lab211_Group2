@@ -4237,6 +4237,13 @@
             const val = parseInt(input.value) || 0;
             const errMsg = document.getElementById('stock-error-msg');
 
+            // Dynamic Stock Update: Remaining = Original - Input
+            const remaining = Math.max(0, max - val);
+            const stockDisplay = document.getElementById('current-stock-display');
+            if (stockDisplay) {
+                stockDisplay.textContent = input.value === '' ? max : remaining;
+            }
+
             if (val > max) {
                 input.classList.add('border-red-500', 'focus:ring-red-500');
                 input.classList.remove('focus:ring-orange-500');
@@ -4303,6 +4310,19 @@
                     await loadSellerRegistrations(); // Refresh list
 
                     if (keepOpen) {
+                        // RE-FETCH products to show UPDATED stock in the dropdown
+                        try {
+                            const pResp = await fetch(`${baseUrl}/products/shop/${currentShopId}`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (pResp.ok) {
+                                const products = await pResp.json();
+                                const prodSelect = document.getElementById('reg-product-id');
+                                prodSelect.innerHTML = '<option value="">Choose a product...</option>' +
+                                    products.map(p => `<option value="${p.id}" data-min-price="${p.minPrice}" data-stock="${p.totalStock}">${p.name}</option>`).join('');
+                            }
+                        } catch (e) { console.error('Error refreshing products:', e); }
+
                         // Reset Stock only (Price resets on product select)
                         document.getElementById('reg-product-id').value = '';
                         document.getElementById('reg-variant-wrap').classList.add('hidden');

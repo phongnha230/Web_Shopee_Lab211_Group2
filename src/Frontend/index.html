@@ -495,7 +495,6 @@
                     dateStr += 'Z';
                 }
                 const end = new Date(dateStr);
-                const end = new Date(endTime);
 
                 function tick() {
                     const now = new Date();
@@ -597,11 +596,7 @@
                     // Safe ID Resolution
                     const catId = category.id || category._id;
 
-                    console.log(`🔍 Category "${displayName}" - ID: $ {
-                                catId
-                            }
-
-                            `);
+                    console.log(`🔍 Category "${displayName}" - ID: ${catId}`);
 
                     if (!catId) {
                         console.error('❌ Missing ID for category:', category);
@@ -820,11 +815,7 @@
             localStorage.setItem('lastClickedProductId', id);
             sessionStorage.setItem('lastClickedProductId', id);
 
-            window.location.href = `product-detail.html?id=$ {
-                id
-            }
-
-            `;
+            window.location.href = `product-detail.html?id=${id}`;
         }
 
     </script>
@@ -1072,15 +1063,15 @@
             if (confirm('Are you sure you want to logout?')) {
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('userName');
+                localStorage.removeItem('user');
+                localStorage.removeItem('userRole');
+                localStorage.removeItem('userId');
                 localStorage.removeItem('refreshToken');
 
                 // Toggle Authenticated UI via updateNavbar
-                // This ensures 'style.display' and classes are handled correctly
                 updateNavbar();
                 updateCartBadge();
-
-                // Optional: Redirect to home if on a protected page, 
-                // but since we are on index, just staying here is fine.
+                window.location.href = 'index.html';
             }
         }
 

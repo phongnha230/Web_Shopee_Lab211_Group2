@@ -44,8 +44,9 @@ flowchart TD
         B2 --> S1[Chọn Campaign & Slot phù hợp]
         S1 --> S2[Chọn SP + Variant đăng ký]
         S2 --> S3{Thỏa Price Guard & Min Stock?}
-        S3 -->|Có| S4[Gửi đăng ký: Status = PENDING]
+        S3 -->|Có| S4[Gửi đăng ký: Khấu trừ kho + Sync Parent SP]
         S3 -->|Không| S5[Báo lỗi theo luật Admin]
+        S4 --> S6[Status = PENDING]
     end
 ```
 
@@ -57,8 +58,8 @@ flowchart TD
 |------|-----------|-----------|--------------|---------|
 | 1 | Admin | Tạo Chiến dịch | `POST /api/flash-sales/campaigns` | Thiết lập Min Discount, Deadline |
 | 2 | System | Broadcast | - | Tự động gửi Email & Thông báo chuông |
-| 3 | Shop | Đăng ký SP | `POST /api/flash-sales/registrations` | Kiểm tra luật Price Guard ngay lúc gửi |
-| 4 | Admin | Duyệt SP | `PUT /api/flash-sales/.../approve` | Hệ thống tự động khóa tồn kho của Shop |
+| 3 | Shop | Đăng ký SP | `POST /api/flash-sales/registrations` | Hệ thống trừ kho gốc & Sync `totalStock` ngay lập tức |
+| 4 | Admin | Duyệt SP | `PUT /api/flash-sales/.../approve` | Nếu Reject, hệ thống tự động hoàn trả kho |
 | 5 | System | Kích hoạt | Scheduler (Chạy ngầm) | Đổi Status Slot sang **ONGOING**, cập nhật giá |
 | 6 | Buyer | Mua hàng | `POST /api/orders` | Trừ tồn kho Flash Sale đã khóa |
 | 7 | System | Kết thúc | Scheduler (Chạy ngầm) | Đổi Status sang **FINISHED**, trả lại giá gốc & kho dư |
@@ -70,8 +71,11 @@ flowchart TD
 ### 🛡️ Price Guard (Động)
 Hệ thống không fix cứng 10%. Admin có thể thiết lập mức giảm tối thiểu riêng cho từng đợt (ví dụ: Sale 11.11 yêu cầu giảm từ 50%). Nếu Shop nhập giá cao hơn mức này, hệ thống sẽ chặn ngay lập tức.
 
-### 🔒 Inventory Locking (Khóa kho)
-Ngay khi Admin bấm **Duyệt**, số lượng hàng đăng ký sẽ bị trừ khỏi kho chính của Shop và đưa vào "Kho Flash Sale". Điều này đảm bảo Shop không thể bán hết sạch hàng trước khi phiên sale bắt đầu.
+### 🔒 Inventory Locking (Khấu trừ kho tức thì)
+Thay vì đợi đến lúc Admin duyệt, hệ thống hiện tại khấu trừ tồn kho ngay khi Shop nhấn **Đăng ký**. 
+- **Lý do:** Đảm bảo Shop không thể đăng ký vượt quá thực tế và giữ chỗ hàng ngay lập tức.
+- **Cơ chế hoàn trả:** Nếu Admin bấm **Từ chối (Reject)** hoặc Shop **Hủy đăng ký**, số lượng hàng sẽ được tự động cộng trả lại vào kho chính của Shop.
+- **Đồng bộ hóa:** Hệ thống tự động gọi hàm `syncProductTotalStock` để cập nhật tổng kho ở cấp độ sản phẩm cha, giúp hiển thị nhất quán trên toàn sàn.
 
 ### ⚠️ Emergency Stop (Dừng khẩn cấp)
 Admin có quyền ngắt mọi lúc. Khi dừng, hệ thống tự động:

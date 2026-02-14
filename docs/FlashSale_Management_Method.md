@@ -16,16 +16,17 @@
 - **Tự động mời gọi (Auto-Invitation Broadcast):** Ngay sau khi nhấn "Create Campaign", hệ thống tự động quét danh sách toàn bộ Shop và gửi Lời mời kèm Link đăng ký qua Email & In-app.
 
 #### ⚡ Giai đoạn 2: Shop Đăng ký & Hệ thống Kiểm tra (Shop + System)
-- Shop điền biểu mẫu: Chọn **ID sản phẩm**, nhập **Giá Sale** và **Số lượng**.
+- **Cơ chế Inventory Locking (Real-time):** Ngay khi Shop nhấn "Đăng ký", hệ thống lập tức trừ số lượng hàng đăng ký vào tồn kho gốc của `ProductVariant` để "giữ chỗ". Điều này ngăn chặn việc Shop đăng ký ảo hoặc bán quá số lượng thực tế hiện có.
+- **Đồng bộ Tồn kho Cha (Product Sync):** Sau khi trừ kho ở phân loại (variant), hệ thống tự động tính toán lại và cập nhật `totalStock` của sản phẩm chính để dữ liệu trên toàn sàn luôn nhất quán.
 - **Tối ưu hóa UX (Frontend Resilience):**
+    - **Dynamic Avail Display:** Trong Modal đăng ký, nhãn "Avail" (Tồn kho khả dụng) sẽ tự động giảm trừ theo số lượng Shop nhập vào thời gian thực, giúp Shop dễ dàng cân đối hàng hóa.
+    - **Auto-Refresh Dropdown:** Sau mỗi lần đăng ký thành công (Submit & Continue), danh sách sản phẩm sẽ được tải lại để cập nhật số lượng tồn kho mới nhất trong menu thả xuống.
     - **Parallel Fetching:** Hệ thống sử dụng `Promise.all` để tải đồng thời danh sách khung giờ (Slots) và sản phẩm, giúp Modal mở nhanh hơn.
-    - **Cơ chế Timeout:** Sử dụng `AbortController` tự động ngắt kết nối sau 5 giây nếu API phản hồi chậm, tránh treo giao diện.
-    - **Chống Đăng ký trùng:** Nút "Đăng ký" được vô hiệu hóa (disable) ngay khi nhấn cho đến khi có phản hồi từ server.
 - **Cơ chế Price Guard (Động):** Hệ thống tự động kiểm tra giá dựa trên luật của từng chiến dịch (vừa thiết lập ở Bước 1) thay vì fix cứng 10%.
 
-#### ⚡ Giai đoạn 3: Xét duyệt & Khóa kho (Admin + System)
+#### ⚡ Giai đoạn 3: Xét duyệt & Xử lý (Admin + System)
 - Admin duyệt danh sách dài các shop đăng ký bằng bộ lọc (ngành hàng, độ giảm giá).
-- **Khóa tồn kho ảo:** Ngay khi Admin bấm "Duyệt", hệ thống sẽ tách riêng số lượng hàng Flash Sale khỏi kho chung của Shop để đảm bảo luôn có hàng cho khách.
+- **Trạng thái Duyệt:** Nếu Admin từ chối (Reject), hệ thống sẽ tự động hoàn trả (revert) số lượng hàng đã khấu trừ về lại kho gốc của Shop.
 
 #### ⚡ Giai đoạn 4: Hệ thống Thông báo Đa kênh (Multi-channel Notification)
 Thông báo được gửi qua 2 kênh chính: **Email** và **In-app (Dấu chuông trên Web)**.

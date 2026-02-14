@@ -187,7 +187,24 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         registration.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
         registration.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
 
+        // Inventory Locking: Deduct from base stock
+        variant.setStock(variant.getStock() - request.getSaleStock());
+        productVariantRepository.save(variant);
+
+        // Sync Parent Product Total Stock
+        syncProductTotalStock(registration.getProductId());
+
         return flashSaleItemRepository.save(registration);
+    }
+
+    private void syncProductTotalStock(String productId) {
+        productRepository.findById(productId).ifPresent(product -> {
+            List<ProductVariant> variants = productVariantRepository.findByProductId(productId);
+            int total = variants.stream().mapToInt(ProductVariant::getStock).sum();
+            product.setTotalStock(total);
+            product.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
+            productRepository.save(product);
+        });
     }
 
     @Override
