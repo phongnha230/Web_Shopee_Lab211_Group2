@@ -127,174 +127,65 @@
             </div>
         </div>
     </header>
-    <!-- Banner Section -->
-    <section class="bg-gray-100 py-4 mb-4">
-        <div class="max-w-[1600px] mx-auto px-0 md:px-4">
-            <div class="grid grid-cols-12 gap-2 h-[500px] md:h-[600px]">
-                <!-- Left Slider (Up) - 8 Cols -->
-                <!-- Left Slider (Up) - 8 Cols -> NOW MARQUEE -->
-                <div
-                    class="col-span-12 md:col-span-8 flex flex-col gap-2 h-full overflow-hidden rounded-lg shadow-lg group">
-
-                    <!-- Top Row: Marquee Right (->) -->
-                    <div class="relative flex-1 overflow-hidden bg-gray-900 rounded-lg">
-                        <div class="flex animate-marquee-right whitespace-nowrap h-full">
-                            <!-- Images Set 1 -->
-                            <div class="flex flex-shrink-0 h-full items-center">
-                                <img src="https://i.pinimg.com/1200x/b3/19/38/b31938d499c3df370aefb62f9b31d6ed.jpg"
-                                    class="h-full w-auto object-contain mx-1">
-                                <img src="https://i.pinimg.com/736x/33/ca/b6/33cab6b6d66c74aa25c85bf7200a175c.jpg"
-                                    class="h-full w-auto object-contain mx-1">
-                                <img src="https://i.pinimg.com/1200x/a6/e8/40/a6e8402d5ae692e6cbfdc49a8a5786b6.jpg"
-                                    class="h-full w-auto object-contain mx-1">
-                            </div>
-                            <!-- Duplicate for Loop -->
-                            <div class="flex flex-shrink-0 h-full items-center">
-                                <img src="https://i.pinimg.com/1200x/b3/19/38/b31938d499c3df370aefb62f9b31d6ed.jpg"
-                                    class="h-full w-auto object-contain mx-1">
-                                <img src="https://i.pinimg.com/736x/33/ca/b6/33cab6b6d66c74aa25c85bf7200a175c.jpg"
-                                    class="h-full w-auto object-contain mx-1">
-                                <img src="https://i.pinimg.com/1200x/a6/e8/40/a6e8402d5ae692e6cbfdc49a8a5786b6.jpg"
-                                    class="h-full w-auto object-contain mx-1">
-                            </div>
-                            <!-- Duplicate for Loop 2 -->
-                            <div class="flex flex-shrink-0 h-full items-center">
-                                <img src="https://i.pinimg.com/1200x/b3/19/38/b31938d499c3df370aefb62f9b31d6ed.jpg"
-                                    class="h-full w-auto object-contain mx-1">
-                                <img src="https://i.pinimg.com/736x/33/ca/b6/33cab6b6d66c74aa25c85bf7200a175c.jpg"
-                                    class="h-full w-auto object-contain mx-1">
-                                <img src="https://i.pinimg.com/1200x/a6/e8/40/a6e8402d5ae692e6cbfdc49a8a5786b6.jpg"
-                                    class="h-full w-auto object-contain mx-1">
-                            </div>
-                        </div>
+    <!-- Banner Section (Carousel) -->
+    <!-- Banner Section (Carousel) -->
+    <!-- Banner Section (Carousel) -->
+    <section class="mb-4 mt-8">
+        <div class="max-w-[1200px] mx-auto">
+            <div id="heroCarousel" class="relative group w-full aspect-[21/9] overflow-hidden shadow-lg">
+                <!-- Slides Container -->
+                <div class="flex transition-transform duration-700 ease-out h-full" id="carouselSlides">
+                    <!-- Slide 1 (Master Height - Fixed Ratio) -->
+                    <div class="w-full h-full flex-shrink-0 relative">
+                        <img src="assets/banner01.png" class="absolute inset-0 w-full h-full object-cover"
+                            alt="Mã Freeship 50k Banner">
                     </div>
-
-                    <!-- Bottom Row: Marquee Left (<-) -->
-                    <div class="relative flex-1 overflow-hidden bg-gray-900 rounded-lg">
-                        <div class="flex animate-marquee-left whitespace-nowrap h-full">
-                            <!-- Images Set 2 -->
-                            <div class="flex flex-shrink-0 h-full items-center">
-                                <img src="https://i.pinimg.com/1200x/d7/5f/61/d75f619e75130a7b98d559fdab4a911e.jpg"
-                                    class="h-full w-auto object-contain mx-1">
-                                <img src="https://i.pinimg.com/1200x/29/8c/0e/298c0eacfa757315ac87451142a61b0d.jpg"
-                                    class="h-full w-auto object-contain mx-1">
-                                <img src="https://i.pinimg.com/1200x/87/1c/59/871c59a95205840c0b884d7a425b7481.jpg"
-                                    class="h-full w-auto object-contain mx-1">
-                            </div>
-                            <!-- Duplicate for Loop -->
-                            <div class="flex flex-shrink-0 h-full items-center">
-                                <img src="https://i.pinimg.com/1200x/d7/5f/61/d75f619e75130a7b98d559fdab4a911e.jpg"
-                                    class="h-full w-auto object-contain mx-1">
-                                <img src="https://i.pinimg.com/1200x/29/8c/0e/298c0eacfa757315ac87451142a61b0d.jpg"
-                                    class="h-full w-auto object-contain mx-1">
-                                <img src="https://i.pinimg.com/1200x/87/1c/59/871c59a95205840c0b884d7a425b7481.jpg"
-                                    class="h-full w-auto object-contain mx-1">
-                            </div>
-                            <!-- Duplicate for Loop 2 -->
-                            <div class="flex flex-shrink-0 h-full items-center">
-                                <img src="https://i.pinimg.com/1200x/d7/5f/61/d75f619e75130a7b98d559fdab4a911e.jpg"
-                                    class="h-full w-auto object-contain mx-1">
-                                <img src="https://i.pinimg.com/1200x/29/8c/0e/298c0eacfa757315ac87451142a61b0d.jpg"
-                                    class="h-full w-auto object-contain mx-1">
-                                <img src="https://i.pinimg.com/1200x/87/1c/59/871c59a95205840c0b884d7a425b7481.jpg"
-                                    class="h-full w-auto object-contain mx-1">
-                            </div>
-                        </div>
+                    <!-- Slide 2 (Follows Slide 1 Height - Cropped if needed) -->
+                    <div class="w-full flex-shrink-0 relative">
+                        <img src="assets/banner02.png" class="absolute inset-0 w-full h-full object-cover"
+                            alt="Thứ 5 Hàng Tuần Banner">
                     </div>
-
-                </div>
-                <!-- Right Slider (Down) - 4 Cols -->
-                <div
-                    class="col-span-12 md:col-span-4 relative overflow-hidden rounded-lg shadow-lg group hidden md:block">
-                    <div id="sliderRight"
-                        class="h-full w-full flex flex-col transition-transform duration-1000 ease-in-out">
-                        <!-- CLONE OF LAST SLIDE (New 10) -->
-                        <div class="h-full w-full flex-shrink-0 relative"><img
-                                src="https://i.pinimg.com/736x/ff/17/80/ff1780bf6880821ffda706f87413ec8f.jpg"
-                                class="w-full h-full object-cover"></div>
-                        <!-- 1. Old 1 -->
-                        <div class="h-full w-full flex-shrink-0 relative"><img
-                                src="https://i.pinimg.com/736x/ac/b1/21/acb12157c7d6f733b57a03f77273e759.jpg"
-                                class="w-full h-full object-cover"></div>
-                        <!-- 2. New 1 -->
-                        <div class="h-full w-full flex-shrink-0 relative"><img
-                                src="https://i.pinimg.com/736x/c5/53/73/c553731224e59856436fd556ee961a03.jpg"
-                                class="w-full h-full object-cover"></div>
-                        <!-- 3. New 2 -->
-                        <div class="h-full w-full flex-shrink-0 relative"><img
-                                src="https://i.pinimg.com/736x/c5/44/fc/c544fcf3cbeebcd59bf04e171207b7c5.jpg"
-                                class="w-full h-full object-cover"></div>
-                        <!-- 4. Old 2 -->
-                        <div class="h-full w-full flex-shrink-0 relative"><img
-                                src="https://i.pinimg.com/736x/97/44/af/9744af37a4f6fa6627b74bbcffa69667.jpg"
-                                class="w-full h-full object-cover"></div>
-                        <!-- 5. New 3 -->
-                        <div class="h-full w-full flex-shrink-0 relative"><img
-                                src="https://i.pinimg.com/736x/ed/f5/40/edf540cbaead5221657a54303e6aab6d.jpg"
-                                class="w-full h-full object-cover"></div>
-                        <!-- 6. New 4 -->
-                        <div class="h-full w-full flex-shrink-0 relative">
-                            <img src="https://i.pinimg.com/736x/9a/79/71/9a79716c18af49ab01de42dd05bf3f17.jpg"
-                                class="w-full h-full object-cover">
-                        </div>
-                        <!-- 7. Old 3 -->
-                        <div class="h-full w-full flex-shrink-0 relative">
-                            <img src="https://i.pinimg.com/1200x/40/e5/a3/40e5a3c38746fbff18ddc0b30e47cfc6.jpg"
-                                class="w-full h-full object-cover">
-                        </div>
-                        <!-- 8. New 5 -->
-                        <div class="h-full w-full flex-shrink-0 relative">
-                            <img src="https://i.pinimg.com/736x/05/5a/e8/055ae8ebc1efbf24ebf48e32f0e419e8.jpg"
-                                class="w-full h-full object-cover">
-                        </div>
-                        <!-- 9. New 6 -->
-                        <div class="h-full w-full flex-shrink-0 relative">
-                            <img src="https://i.pinimg.com/736x/7b/92/37/7b923783ef97c09db43b204b46fc3dba.jpg"
-                                class="w-full h-full object-cover">
-                        </div>
-                        <!-- 10. Old 4 -->
-                        <div class="h-full w-full flex-shrink-0 relative">
-                            <img src="https://i.pinimg.com/736x/b0/63/5c/b0635c8450713c27452b818b974659f3.jpg"
-                                class="w-full h-full object-cover">
-                        </div>
-                        <!-- 11. New 7 -->
-                        <div class="h-full w-full flex-shrink-0 relative">
-                            <img src="https://i.pinimg.com/1200x/66/4c/7b/664c7b6065112d1ed70271b7d58b9a42.jpg"
-                                class="w-full h-full object-cover">
-                        </div>
-                        <!-- 12. New 8 -->
-                        <div class="h-full w-full flex-shrink-0 relative">
-                            <img src="https://i.pinimg.com/736x/56/41/8b/56418bbdf3ce32c733ecb92a9ca2e349.jpg"
-                                class="w-full h-full object-cover">
-                        </div>
-                        <!-- 13. Old 5 -->
-                        <div class="h-full w-full flex-shrink-0 relative">
-                            <img src="https://i.pinimg.com/736x/d4/54/71/d454713b7d0301ccfe8dc7c94d3e8909.jpg"
-                                class="w-full h-full object-cover">
-                        </div>
-                        <!-- 14. New 9 -->
-                        <div class="h-full w-full flex-shrink-0 relative">
-                            <img src="https://i.pinimg.com/1200x/a2/d5/39/a2d539b50bb9d19ba8565f061b8fc811.jpg"
-                                class="w-full h-full object-cover">
-                        </div>
-                        <!-- 15. Old 6 -->
-                        <div class="h-full w-full flex-shrink-0 relative">
-                            <img src="https://i.pinimg.com/736x/7f/b2/8e/7fb28e360bfe82e2f63f8d7678fad318.jpg"
-                                class="w-full h-full object-cover">
-                        </div>
-                        <!-- 16. New 10
-                                                                                                            -->
-                        <div class="h-full w-full flex-shrink-0 relative">
-                            <img src="https://i.pinimg.com/736x/ff/17/80/ff1780bf6880821ffda706f87413ec8f.jpg"
-                                class="w-full h-full object-cover">
-                        </div>
-                        <!-- CLONE OF FIRST SLIDE (Old 1) for Seamless Upward Loop -->
-                        <div class="h-full w-full flex-shrink-0 relative">
-                            <img src="https://i.pinimg.com/736x/ac/b1/21/acb12157c7d6f733b57a03f77273e759.jpg"
-                                class="w-full h-full object-cover">
-                        </div>
+                    <!-- Slide 3 (Follows Slide 1 Height - Cropped if needed) -->
+                    <div class="w-full flex-shrink-0 relative">
+                        <img src="assets/banner03.png" class="absolute inset-0 w-full h-full object-cover"
+                            alt="Thương Hiệu Khao Banner">
+                    </div>
+                    <!-- Slide 4 (Follows Slide 1 Height - Cropped if needed) -->
+                    <div class="w-full flex-shrink-0 relative">
+                        <img src="assets/banner04.png" class="absolute inset-0 w-full h-full object-cover"
+                            alt="Khuyến Mãi Banner 1">
+                    </div>
+                    <!-- Slide 5 (Follows Slide 1 Height - Cropped if needed) -->
+                    <div class="w-full flex-shrink-0 relative">
+                        <img src="assets/banner05.png" class="absolute inset-0 w-full h-full object-cover"
+                            alt="Ngày Hội Flash Sale Banner">
+                    </div>
+                    <!-- Slide 6 (Follows Slide 1 Height - Cropped if needed) -->
+                    <div class="w-full flex-shrink-0 relative">
+                        <img src="assets/banner06.png" class="absolute inset-0 w-full h-full object-cover"
+                            alt="Banner 06">
                     </div>
                 </div>
+
+                <!-- Indicators (Dots) -->
+                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                    <button class="w-3 h-3 rounded-full bg-white scale-125 transition" onclick="goToSlide(0)"></button>
+                    <button class="w-3 h-3 rounded-full bg-white/50 hover:bg-white transition"
+                        onclick="goToSlide(1)"></button>
+                    <button class="w-3 h-3 rounded-full bg-white/50 hover:bg-white transition"
+                        onclick="goToSlide(2)"></button>
+                    <button class="w-3 h-3 rounded-full bg-white/50 hover:bg-white transition"
+                        onclick="goToSlide(3)"></button>
+                    <button class="w-3 h-3 rounded-full bg-white/50 hover:bg-white transition"
+                        onclick="goToSlide(4)"></button>
+                    <button class="w-3 h-3 rounded-full bg-white/50 hover:bg-white transition"
+                        onclick="goToSlide(5)"></button>
+                </div>
+
+                <!-- Navigation Arrows -->
+                <!-- Navigation Arrows Removed -->
+
+
             </div>
         </div>
     </section>
@@ -330,71 +221,64 @@
             <!-- Row 1: Run Right (->) -->
             <div class="relative flex overflow-hidden group">
                 <div class="flex animate-marquee-right whitespace-nowrap">
-                    <!-- Images Set 1 -->
-                    <div class="flex flex-shrink-0 space-x-4 mx-2"><img
-                            src="https://i.pinimg.com/1200x/4f/e7/bc/4fe7bc967257834f1e6123f68dca632f.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
-                            src="https://i.pinimg.com/1200x/ce/fa/bb/cefabbcebea8d7e10f383ba5fd81ec98.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
-                            src="https://i.pinimg.com/1200x/ab/36/c8/ab36c8f2c8471782ac83577eea7a6f96.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
-                            src="https://i.pinimg.com/1200x/59/71/78/59717826a2fbd5491e82e45f93f2c3ab.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"></div>
+                    <!-- Images Set 1 (Top Row - 11 Images) -->
+                    <div class="flex flex-shrink-0 space-x-4 mx-2">
+                        <img src="assets/promo_01.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_02.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_03.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_04.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_05.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_06.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_07.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_new_01.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_new_02.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_new_03.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_new_04.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                    </div>
                     <!-- Duplicate for Loop -->
-                    <div class="flex flex-shrink-0 space-x-4 mx-2"><img
-                            src="https://i.pinimg.com/1200x/4f/e7/bc/4fe7bc967257834f1e6123f68dca632f.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
-                            src="https://i.pinimg.com/1200x/ce/fa/bb/cefabbcebea8d7e10f383ba5fd81ec98.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
-                            src="https://i.pinimg.com/1200x/ab/36/c8/ab36c8f2c8471782ac83577eea7a6f96.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
-                            src="https://i.pinimg.com/1200x/59/71/78/59717826a2fbd5491e82e45f93f2c3ab.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"></div>
-                    <!-- Duplicate for Loop 2 -->
-                    <div class="flex flex-shrink-0 space-x-4 mx-2"><img
-                            src="https://i.pinimg.com/1200x/4f/e7/bc/4fe7bc967257834f1e6123f68dca632f.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
-                            src="https://i.pinimg.com/1200x/ce/fa/bb/cefabbcebea8d7e10f383ba5fd81ec98.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
-                            src="https://i.pinimg.com/1200x/ab/36/c8/ab36c8f2c8471782ac83577eea7a6f96.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
-                            src="https://i.pinimg.com/1200x/59/71/78/59717826a2fbd5491e82e45f93f2c3ab.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"></div>
+                    <div class="flex flex-shrink-0 space-x-4 mx-2">
+                        <img src="assets/promo_01.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_02.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_03.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_04.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_05.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_06.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_07.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_new_01.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_new_02.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_new_03.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_new_04.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                    </div>
                 </div>
             </div>
             <!-- Row 2: Run Left (<-) -->
             <div class="relative flex overflow-hidden group">
                 <div class="flex animate-marquee-left whitespace-nowrap">
-                    <!-- Images Set 2 -->
-                    <div class="flex flex-shrink-0 space-x-4 mx-2"><img
-                            src="https://i.pinimg.com/1200x/64/18/e3/6418e3340d97d71b5d3e2ab7e6cc9e0d.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
-                            src="https://i.pinimg.com/1200x/72/4e/3a/724e3a3cf619e905bbbeb0c0578f7ba5.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
-                            src="https://i.pinimg.com/1200x/29/6e/30/296e302c79de338a03b81270b35897bd.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
-                            src="https://i.pinimg.com/1200x/8b/9b/f3/8b9bf305205f99438fafd681cd6d7172.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"></div>
+                    <!-- Images Set 2 (Bottom Row - 10 Images) -->
+                    <div class="flex flex-shrink-0 space-x-4 mx-2">
+                        <img src="assets/promo_row2_01.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_row2_02.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_row2_03.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_row2_04.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_row2_05.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_row2_06.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_new_05.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_new_06.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_new_07.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_new_08.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                    </div>
                     <!-- Duplicate for Loop -->
-                    <div class="flex flex-shrink-0 space-x-4 mx-2"><img
-                            src="https://i.pinimg.com/1200x/64/18/e3/6418e3340d97d71b5d3e2ab7e6cc9e0d.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
-                            src="https://i.pinimg.com/1200x/72/4e/3a/724e3a3cf619e905bbbeb0c0578f7ba5.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
-                            src="https://i.pinimg.com/1200x/29/6e/30/296e302c79de338a03b81270b35897bd.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
-                            src="https://i.pinimg.com/1200x/8b/9b/f3/8b9bf305205f99438fafd681cd6d7172.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"></div>
-                    <!-- Duplicate for Loop 2 -->
-                    <div class="flex flex-shrink-0 space-x-4 mx-2"><img
-                            src="https://i.pinimg.com/1200x/64/18/e3/6418e3340d97d71b5d3e2ab7e6cc9e0d.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
-                            src="https://i.pinimg.com/1200x/72/4e/3a/724e3a3cf619e905bbbeb0c0578f7ba5.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
-                            src="https://i.pinimg.com/1200x/29/6e/30/296e302c79de338a03b81270b35897bd.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md"><img
-                            src="https://i.pinimg.com/1200x/8b/9b/f3/8b9bf305205f99438fafd681cd6d7172.jpg"
-                            class="h-40 w-64 object-cover rounded-lg shadow-md">
+                    <div class="flex flex-shrink-0 space-x-4 mx-2">
+                        <img src="assets/promo_row2_01.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_row2_02.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_row2_03.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_row2_04.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_row2_05.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_row2_06.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_new_05.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_new_06.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_new_07.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
+                        <img src="assets/promo_new_08.jpg" class="h-40 w-64 object-cover rounded-lg shadow-md">
                     </div>
                 </div>
             </div>
@@ -1226,9 +1110,62 @@
         });
     </script>
     <script src="js/notification.js"></script>
-    < !-- Language Scripts -->
-        <script src="js/translations.js"></script>
-        <script src="js/i18n.js"></script>
+    <!-- Language Scripts -->
+    <script src="js/translations.js"></script>
+    <script src="js/i18n.js"></script>
+    <!--    <!-- Scripts -->
+    <script>
+        const slidesContainer = document.getElementById('carouselSlides');
+        const totalSlides = 6; // Updated to 6 slides
+        let currentSlide = 0;
+        let slideInterval;
+
+        function showSlide(index) {
+            if (index >= totalSlides) currentSlide = 0;
+            else if (index < 0) currentSlide = totalSlides - 1;
+            else currentSlide = index;
+
+            slidesContainer.style.transform = `translateX(-${currentSlide * 100}%)`;
+
+            // Update dots
+            document.querySelectorAll('#heroCarousel button.w-3').forEach((dot, idx) => {
+                if (idx === currentSlide) {
+                    dot.classList.remove('bg-white/50');
+                    dot.classList.add('bg-white', 'scale-125');
+                } else {
+                    dot.classList.add('bg-white/50');
+                    dot.classList.remove('bg-white', 'scale-125');
+                }
+            });
+        }
+
+        function moveSlide(step) {
+            showSlide(currentSlide + step);
+            resetTimer();
+        }
+
+        function goToSlide(index) {
+            showSlide(index);
+            resetTimer();
+        }
+
+        function startTimer() {
+            slideInterval = setInterval(() => {
+                moveSlide(1);
+            }, 5000); // 5 seconds
+        }
+
+        function resetTimer() {
+            clearInterval(slideInterval);
+            startTimer();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            showSlide(0);
+            startTimer();
+        });
+    </script>
 </body>
 
 </html>
