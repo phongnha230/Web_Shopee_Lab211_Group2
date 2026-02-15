@@ -1347,5 +1347,10 @@ Comprehensive record of all Admin Dashboard, Shop Management, and Backend System
 - **Critical Fix: Inventory Locking**: Implemented backend stock deduction upon Flash Sale registration in `FlashSaleServiceImpl.java`. Product inventory is now reserved immediately. Added frontend re-fetch logic in `seller-dashboard.html` to update the available stock in the dropdown after registration.
 - **Bug Fix: Persistent Stock Display**: Implemented `syncProductTotalStock` in `FlashSaleServiceImpl` to update the parent `Product.totalStock` field after registration. This ensures the frontend dropdown reflects current inventory correctly.
 - **Critical Fix: Sticky Username**: Updated `logout()` and login logic to synchronize the `user` object in `localStorage`. This ensures the navbar correctly reflects the new account's name after switching between Google and traditional accounts.
+- **Project Structure: Comprehensive Cleanup**: Organized the root directory and `src/Backend`.
+    - Organized frontend backup files and non-essential tools (`admin-setup.html`, etc.) into `src/Frontend/backups/`.
+    - Centralized all maintenance and utility scripts (`.js`) into `src/Frontend/js/` to consolidate all JavaScript content.
+    - Grouped all temporary data, logs, and audit results into a new `data_dumps/` directory.
+    - Cleaned up root to focus only on mandatory project configuration and core source code.
 
 ---
