@@ -16,20 +16,23 @@
             <div class="flex items-center justify-between h-20 gap-8">
                 <div class="flex items-center gap-4 min-w-fit">
                     <a href="index.html" class="flex items-center gap-2 text-white hover:opacity-90">
-                        <i class="fas fa-shopping-bag text-3xl"></i>
-                        <span class="text-2xl font-bold">GoShop</span>
+                        <i class="fas fa-shopping-bag text-3xl bounce-goshop"></i>
+                        <span class="text-2xl font-bold">GoShop | My Orders</span>
                     </a>
                 </div>
-                <div class="flex items-center gap-5 text-white min-w-fit">
-                    <a href="cart-backend.html" class="hover:text-red-200 transition">
+                <div class="flex items-center gap-6 text-white min-w-fit">
+                    <a href="cart-backend.html" class="relative hover:opacity-80 transition p-1">
                         <i class="fas fa-shopping-cart text-xl"></i>
+                        <span id="cartBadge"
+                            class="absolute -top-1 -right-1 bg-white text-[#AD3029] text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm hidden">0</span>
                     </a>
-                    <a href="profile.html" class="flex items-center gap-2 cursor-pointer hover:text-red-200 transition">
+                    <div class="h-6 w-px bg-white/30"></div>
+                    <div class="flex items-center gap-2 cursor-pointer relative group">
                         <img id="userAvatar" src="https://ui-avatars.com/api/?name=User&background=fecaca&color=AD3029"
                             alt="User" class="w-8 h-8 rounded-full border-2 border-white/50">
                         <span id="userNameDisplay"
                             class="font-semibold max-w-[100px] truncate hidden md:block">User</span>
-                    </a>
+                    </div>
                 </div>
             </div>
         </div>

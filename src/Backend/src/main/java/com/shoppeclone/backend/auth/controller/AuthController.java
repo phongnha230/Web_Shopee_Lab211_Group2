@@ -68,6 +68,13 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Email verified successfully"));
     }
 
+    // ✅ MỚI: Check OTP Reset Password (Không mark used)
+    @PostMapping("/check-reset-otp")
+    public ResponseEntity<Map<String, String>> checkResetOtp(@Valid @RequestBody VerifyOtpRequest request) {
+        otpService.checkResetOtp(request.getEmail(), request.getCode());
+        return ResponseEntity.ok(Map.of("message", "OTP is valid"));
+    }
+
     // ✅ FORGOT PASSWORD - Send OTP
     @PostMapping("/forgot-password")
     public ResponseEntity<Map<String, String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {

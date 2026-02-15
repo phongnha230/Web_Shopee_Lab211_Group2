@@ -3185,6 +3185,110 @@ Task complete
 Đã pull code cho cả 2 nhánh main và mai-fix thành công! Em đã stash changes của anh trước khi pull và pop lại sau đó nên code đang ở trên nhánh main với các file anh đang sửa dở dang vẫn còn nguyên ạ.
 
 bạn chạy dùm mình mvn spring boot xem có lỗi gì không ạ 
+Refactoring Forgot Password Flow
+
+
+
+Thought for 20s
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Refactoring Forgot Password Flow
+I refactored the backend (
+OtpService
+, 
+AuthController
+) to add the check-reset-otp endpoint and rewrote 
+forgot-password.html
+ to use a 3-step flow (Email -> OTP -> Password). I am now marking the task as complete and notifying the user.
+
+Files Edited
+Task
+forgot-password.html
+AuthController.java
+OtpServiceImpl.java
+OtpService.java
+Progress Updates
+1
+Implementing backend support for checking Reset OTP without usage.
+
+2
+Creating checkResetOtp method in OtpService interface.
+
+3
+Updating OtpServiceImpl.java.
+
+4
+Exposing checkResetOtp in AuthController.java.
+
+5
+Refactoring forgot-password.html to split into 3 steps.
+
+6
+Re-reading forgot-password.html to retry refactoring.
+
+7
+Overwriting forgot-password.html with new 3-step flow.
+
+8
+Updating task.md and notifying user.
+
+Mình đã hoàn tất việc chỉnh sửa trang Forgot Password theo đúng yêu cầu "kiểu Shopee" của bạn:
+
+Backend (Quan trọng): Mình đã thêm API /check-reset-otp để server có thể kiểm tra mã OTP đúng hay sai trước khi đổi mật khẩu.
+⚠️ Lưu ý: Bạn cần RESTART SERVER (Backend) để code mới này có hiệu lực nhé!
+
+Frontend:
+Bước 1: Nhập Email -> Gửi OTP.
+Bước 2: Nhập 6 số OTP -> Bấm "Verify Code".
+Nếu đúng -> Chuyển sang bước 3.
+Nếu sai -> Báo lỗi đỏ ngay lập tức.
+Có nút Resend với đếm ngược 30s.
+Bước 3: Nhập Mật khẩu mới -> Hoàn tất.
+Bạn restart server và test thử nhé! cần chỉnh gì cứ bảo mình.
+
+forgot-password.html
+Open
+AuthController.java
+Open
+Good
+Bad
+Review Changes
+
+
+
+Add context
+Media
+Mentions
+Workflows
+
+
+Gemini 3 Pro (High)
+
+Model
+
+
+
+
+
+
+
+
+
+
 
 
 

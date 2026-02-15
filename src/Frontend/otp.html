@@ -8,103 +8,87 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        @keyframes blob {
-            0% {
-                transform: translate(0, 0) scale(1);
-            }
-
-            33% {
-                transform: translate(30px, -40px) scale(1.1);
-            }
-
-            66% {
-                transform: translate(-20px, 20px) scale(0.9);
-            }
-
-            100% {
-                transform: translate(0, 0) scale(1);
-            }
-        }
-
-        @keyframes pulseInput {
-
-            0%,
-            100% {
-                box-shadow: 0 0 0 0 rgba(173, 48, 41, 0.6);
-            }
-
-            50% {
-                box-shadow: 0 0 0 10px rgba(173, 48, 41, 0);
-            }
-        }
-
-        .otp-input {
-            animation: pulseInput 2s infinite;
+        /* Custom Scrollbar if needed */
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
         }
     </style>
 </head>
 
-<body
-    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FEEFCD] via-[#F8E8D0] to-[#AD3029]/20 overflow-hidden">
+<body class="bg-gray-50">
 
-    <!-- Animated blobs -->
-    <div
-        class="absolute w-96 h-96 bg-[#AD3029]/25 rounded-full blur-3xl top-[-100px] left-[-100px] animate-[blob_20s_infinite]">
-    </div>
-    <div
-        class="absolute w-96 h-96 bg-[#AD3029]/20 rounded-full blur-3xl bottom-[-100px] right-[-100px] animate-[blob_25s_infinite]">
-    </div>
-
-    <div class="relative z-10 w-full max-w-md bg-white/60 backdrop-blur-xl rounded-3xl shadow-2xl p-12">
-
-        <div class="text-center mb-8">
-            <h2 class="text-3xl font-extrabold text-[#AD3029] mb-2">GoShop</h2>
-            <h3 class="text-xl font-semibold text-gray-800 mb-2">Verify your email</h3>
-            <p class="text-gray-600">Enter the 6-digit code sent to your email</p>
+    <!-- HEADER (Match Login) -->
+    <header class="w-full bg-white shadow-sm py-4">
+        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="flex items-center gap-2 text-[#AD3029] hover:opacity-90">
+                    <i class="fas fa-shopping-bag text-4xl"></i>
+                    <span class="text-3xl font-bold">GoShop</span>
+                </a>
+                <span class="text-xl text-gray-800 font-medium">Verify Email</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="login.html" class="text-[#AD3029] font-medium hover:underline text-sm">Sign In</a>
+            </div>
         </div>
+    </header>
 
-        <!-- Countdown timer -->
-        <div class="text-center mb-8 p-4 bg-[#FEEFCD] border-2 border-[#AD3029] rounded-2xl">
-            <div id="countdown" class="text-lg font-semibold text-[#AD3029] mb-1">00:30</div>
-            <p class="text-sm text-gray-600">
-                Didn't receive code?
-                <span id="resendLink" class="text-gray-400 font-medium cursor-pointer pointer-events-none">
-                    Resend
-                </span>
-            </p>
-        </div>
+    <!-- MAIN CONTENT - RED BACKGROUND (Match Login) -->
+    <div class="w-full bg-[#AD3029] min-h-[600px] flex items-center justify-center py-10">
 
-        <form id="otpForm">
-            <!-- OTP Input Fields -->
-            <div class="flex gap-3 justify-center mb-8">
-                <input id="otp1" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
-                    class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-gray-300 focus:border-[#AD3029] focus:outline-none shadow-lg">
-                <input id="otp2" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
-                    class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-gray-300 focus:border-[#AD3029] focus:outline-none shadow-lg">
-                <input id="otp3" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
-                    class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-gray-300 focus:border-[#AD3029] focus:outline-none shadow-lg">
-                <input id="otp4" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
-                    class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-gray-300 focus:border-[#AD3029] focus:outline-none shadow-lg">
-                <input id="otp5" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
-                    class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-gray-300 focus:border-[#AD3029] focus:outline-none shadow-lg">
-                <input id="otp6" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
-                    class="otp-input w-16 h-16 text-2xl font-bold text-center bg-white rounded-2xl border-2 border-gray-300 focus:border-[#AD3029] focus:outline-none shadow-lg">
+        <!-- CARD Container -->
+        <div class="bg-white rounded-sm shadow-lg p-10 w-full max-w-lg mx-4 text-center">
+
+            <div class="mb-8">
+                <i class="fas fa-envelope-open-text text-6xl text-[#AD3029] mb-4"></i>
+                <h3 class="text-2xl font-medium text-gray-800 mb-2">Verify Your Email</h3>
+                <p class="text-gray-600 text-sm">Please enter the 6-digit code sent to your email.</p>
             </div>
 
-            <!-- Verify Button -->
-            <button type="submit"
-                class="w-full py-4 rounded-full bg-gradient-to-r from-[#AD3029] to-[#CD5252] text-white font-semibold text-lg shadow-xl hover:opacity-90 hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-200 mb-6">
-                Verify Code
-            </button>
-        </form>
+            <!-- Countdown timer (Styled) -->
+            <div class="mb-8 p-3 bg-red-50 border border-red-100 rounded-sm inline-block w-full">
+                <div id="countdown" class="text-xl font-bold text-[#AD3029] mb-1">00:30</div>
+                <p class="text-xs text-gray-500">
+                    Didn't receive code?
+                    <span id="resendLink"
+                        class="text-gray-400 font-medium cursor-pointer pointer-events-none transition-colors ml-1">
+                        Resend
+                    </span>
+                </p>
+            </div>
 
-        <!-- Back to login -->
-        <p class="text-center text-sm text-gray-700">
-            Wrong email?
-            <a href="/login.html" class="text-[#AD3029] font-semibold hover:underline">
-                Sign in instead
-            </a>
-        </p>
+            <form id="otpForm">
+                <!-- OTP Input Fields -->
+                <div class="flex gap-2 sm:gap-3 justify-center mb-8">
+                    <input id="otp1" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
+                        class="otp-input w-12 h-12 sm:w-14 sm:h-14 text-2xl font-bold text-center bg-white border border-gray-300 rounded-sm focus:border-[#AD3029] focus:ring-1 focus:ring-[#AD3029] outline-none shadow-sm transition">
+                    <input id="otp2" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
+                        class="otp-input w-12 h-12 sm:w-14 sm:h-14 text-2xl font-bold text-center bg-white border border-gray-300 rounded-sm focus:border-[#AD3029] focus:ring-1 focus:ring-[#AD3029] outline-none shadow-sm transition">
+                    <input id="otp3" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
+                        class="otp-input w-12 h-12 sm:w-14 sm:h-14 text-2xl font-bold text-center bg-white border border-gray-300 rounded-sm focus:border-[#AD3029] focus:ring-1 focus:ring-[#AD3029] outline-none shadow-sm transition">
+                    <input id="otp4" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
+                        class="otp-input w-12 h-12 sm:w-14 sm:h-14 text-2xl font-bold text-center bg-white border border-gray-300 rounded-sm focus:border-[#AD3029] focus:ring-1 focus:ring-[#AD3029] outline-none shadow-sm transition">
+                    <input id="otp5" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
+                        class="otp-input w-12 h-12 sm:w-14 sm:h-14 text-2xl font-bold text-center bg-white border border-gray-300 rounded-sm focus:border-[#AD3029] focus:ring-1 focus:ring-[#AD3029] outline-none shadow-sm transition">
+                    <input id="otp6" maxlength="1" required type="text" inputmode="numeric" autocomplete="one-time-code"
+                        class="otp-input w-12 h-12 sm:w-14 sm:h-14 text-2xl font-bold text-center bg-white border border-gray-300 rounded-sm focus:border-[#AD3029] focus:ring-1 focus:ring-[#AD3029] outline-none shadow-sm transition">
+                </div>
+
+                <!-- Verify Button -->
+                <button type="submit"
+                    class="w-full py-3 bg-[#AD3029] text-white text-sm font-semibold rounded-sm hover:bg-[#8f2621] shadow-sm uppercase tracking-wide transition-colors mb-6">
+                    Verify Code
+                </button>
+            </form>
+
+            <!-- Back to login -->
+            <p class="text-center text-xs text-gray-500">
+                Wrong email address?
+                <a href="register.html" class="text-[#AD3029] hover:underline font-medium">
+                    Register again
+                </a>
+            </p>
+        </div>
     </div>
 
 

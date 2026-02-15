@@ -23,7 +23,7 @@
                 <!-- 2. Search Section (Centered & Wide) -->
                 <div class="flex-1 max-w-2xl relative">
                     <div class="relative group"><input id="globalSearchInput" type="text"
-                            data-i18n="header.search_placeholder" placeholder="Search products..."
+                            placeholder="Search products..."
                             class="w-full h-10 pl-4 pr-12 rounded-sm text-black focus:outline-none shadow-inner transition border-2 border-transparent focus:border-red-300"><button
                             id="globalSearchButton"
                             class="absolute right-0 top-0 h-10 w-12 bg-[#DC2626] hover:bg-[#B91C1C] flex items-center justify-center rounded-r-sm transition"><i
@@ -31,11 +31,7 @@
                 </div>
                 <!-- 3. Actions Section (Right) -->
                 <div class="flex items-center gap-6">
-                    <!-- Language Toggle --><button id="lang-toggle"
-                        class="text-sm font-medium hover:opacity-80 flex items-center gap-1 transition"><img
-                            src="https://flagcdn.com/24x18/gb.png" alt="English"
-                            class="inline-block mr-1.5 w-5 h-auto object-cover border border-gray-200"> <span
-                            class="uppercase">English</span></button>
+                    <!-- Language Toggle Removed -->
                     <!-- Notifications -->
                     <div class="relative group h-full flex items-center"><button
                             class="hover:opacity-80 transition relative p-2"><i class="far fa-bell text-xl"></i>
@@ -482,7 +478,8 @@
 
         async function updateNavbar() {
             const token = localStorage.getItem('accessToken');
-            const userName = localStorage.getItem('userName') || 'User';
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const userName = user.fullName || localStorage.getItem('userName') || 'User';
 
             const guestNav = document.getElementById('guestNav');
             const userNav = document.getElementById('userNav');

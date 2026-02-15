@@ -40,49 +40,73 @@
 
 <body class="bg-gray-50">
     <!-- Header -->
-    <header class="header-gradient shadow-md sticky top-0 z-50">
+    <header class="bg-[#AD3029] text-white shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center py-3">
-                <div class="flex items-center space-x-3">
-                    <i class="fas fa-shopping-bag text-2xl text-white bounce-goshop"></i>
-                    <a href="index.html" class="text-xl font-bold text-white">GoShop</a>
-                </div>
+            <div class="flex items-center justify-between h-20 gap-8">
+                <!-- 1. Logo Section -->
+                <a href="index.html" class="flex items-center gap-2 group flex-shrink-0 hover:opacity-90 transition">
+                    <i class="fas fa-shopping-bag text-3xl text-white bounce-goshop"></i>
+                    <span class="text-2xl font-bold tracking-tight">GoShop</span>
+                </a>
 
-                <div class="flex-1 max-w-2xl mx-8">
-                    <div class="relative">
-                        <input type="text" placeholder="Search for millions of products..."
-                            class="w-full p-2.5 pl-10 pr-14 rounded-sm border-2 border-white focus:border-orange-300 focus:outline-none text-sm">
-                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <!-- 2. Search Section (Centered & Wide) -->
+                <div class="flex-1 max-w-2xl relative">
+                    <div class="relative group">
+                        <input type="text" placeholder="Search for products in this shop..."
+                            class="w-full h-10 pl-4 pr-12 rounded-sm text-black focus:outline-none shadow-inner transition border-2 border-transparent focus:border-red-300">
                         <button
-                            class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-1.5 rounded-sm font-semibold text-sm">
-                            Search
+                            class="absolute right-0 top-0 h-10 w-12 bg-[#DC2626] hover:bg-[#B91C1C] flex items-center justify-center rounded-r-sm transition">
+                            <i class="fas fa-search text-white"></i>
                         </button>
                     </div>
                 </div>
 
-                <div class="flex items-center space-x-4">
-                    <div id="guestNav" class="flex items-center space-x-3">
-                        <a href="login.html"
-                            class="text-white font-semibold hover:text-orange-200 transition text-sm">Sign in</a>
-                        <a href="register.html"
-                            class="bg-white text-orange-600 hover:bg-orange-50 px-4 py-1.5 rounded-full font-semibold transition text-sm">Sign
-                            up</a>
-                    </div>
-                    <div id="userNav" class="hidden flex items-center space-x-3">
-                        <a href="profile.html" class="flex items-center space-x-2 cursor-pointer hover:opacity-90">
-                            <img id="userAvatar" src="" alt="User" class="w-6 h-6 rounded-full border border-white">
-                            <span id="userName" class="font-semibold text-white text-sm"></span>
-                        </a>
-                        <button onclick="logout()" class="text-white hover:text-red-200 ml-2"><i
-                                class="fas fa-sign-out-alt"></i></button>
-                    </div>
-                    <button onclick="window.location.href='cart-backend.html'"
-                        class="relative p-2 hover:bg-orange-400 rounded-full transition">
-                        <i class="fas fa-shopping-cart text-lg text-white"></i>
+                <!-- 3. Actions Section (Right) -->
+                <div class="flex items-center gap-6">
+                    <!-- Cart -->
+                    <a href="cart-backend.html" class="relative hover:opacity-80 transition p-1">
+                        <i class="fas fa-shopping-cart text-xl"></i>
                         <span id="cartBadge"
-                            class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
-                            style="display: none;">0</span>
-                    </button>
+                            class="absolute -top-1 -right-1 bg-white text-[#AD3029] text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm hidden">0</span>
+                    </a>
+
+                    <div class="h-6 w-px bg-white/30"></div>
+
+                    <!-- Auth Actions -->
+                    <!-- Guest -->
+                    <div id="guestNav" class="flex items-center gap-3 font-medium text-sm">
+                        <a href="register.html" class="hover:text-gray-200 transition">Sign Up</a>
+                        <a href="login.html" class="hover:text-gray-200 transition">Sign in</a>
+                    </div>
+
+                    <!-- User -->
+                    <div id="userNav" class="hidden flex items-center gap-2 cursor-pointer relative group h-full">
+                        <img src="" class="w-8 h-8 rounded-full border-2 border-white/50" id="userAvatar">
+                        <span id="userName" class="font-semibold max-w-[100px] truncate hidden md:block">User</span>
+                        <a href="index.html" class="text-white hover:text-red-200 transition ml-1"
+                            title="Back to Home"><i class="fas fa-home"></i></a>
+                        <!-- Dropdown -->
+                        <div class="absolute right-0 top-full pt-2 w-48 hidden group-hover:block z-50 animate-fade-in">
+                            <div class="bg-white text-black rounded-md shadow-lg py-1 border border-gray-100">
+                                <a href="profile.html" class="block px-4 py-2 text-sm hover:bg-gray-100 transition">
+                                    <i class="far fa-user mr-2 text-gray-400"></i>My Profile
+                                </a>
+                                <a href="my-orders-backend.html"
+                                    class="block px-4 py-2 text-sm hover:bg-gray-100 transition">
+                                    <i class="fas fa-box mr-2 text-gray-400"></i>My Orders
+                                </a>
+                                <a href="admin-dashboard.html" id="adminPanelLink"
+                                    class="block px-4 py-2 text-sm hover:bg-gray-100 transition font-bold text-red-600 hidden">
+                                    <i class="fas fa-user-shield mr-2"></i>Admin Panel
+                                </a>
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <button onclick="logout()"
+                                    class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -192,6 +216,14 @@
 
             const params = new URLSearchParams(window.location.search);
             let shopId = params.get('id');
+            const isMyShop = params.get('myshop');
+
+            // Handle "My Shop" link
+            if (isMyShop === 'true') {
+                await loadMyShop();
+                // loadMyShop handles the rest
+                return;
+            }
 
             if (!shopId || shopId === 'null' || shopId === 'undefined') {
                 shopId = sessionStorage.getItem('lastViewedShopId') || localStorage.getItem('lastViewedShopId');
@@ -229,10 +261,169 @@
             checkFollowStatus(shopId);
         });
 
+        // =========================================
+        // NAVIGATION & AUTH
+        // =========================================
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        async function updateNavbar() {
+            const token = localStorage.getItem('accessToken');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const userName = user.fullName || localStorage.getItem('userName') || 'User';
+            const userRole = user.role || localStorage.getItem('userRole') || 'CUSTOMER';
+
+            const guestNav = document.getElementById('guestNav');
+            const userNav = document.getElementById('userNav');
+            const userNameEl = document.getElementById('userName');
+            const userAvatar = document.getElementById('userAvatar');
+            const adminPanelLink = document.getElementById('adminPanelLink');
+            const sellerChannelLink = document.getElementById('sellerChannelLink');
+
+            if (token) {
+                if (guestNav) guestNav.classList.add('hidden');
+                if (userNav) {
+                    userNav.classList.remove('hidden');
+                    userNav.style.display = 'flex';
+                }
+                if (userNameEl) userNameEl.textContent = userName;
+                if (userAvatar) {
+                    userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=fecaca&color=AD3029`;
+                }
+                if (userRole === 'ADMIN' && adminPanelLink) adminPanelLink.classList.remove('hidden');
+            } else {
+                if (guestNav) guestNav.classList.remove('hidden');
+                if (userNav) {
+                    userNav.classList.add('hidden');
+                    userNav.style.display = 'none';
+                }
+            }
+        }
+
+        async function updateCartBadge() {
+            const token = localStorage.getItem('accessToken');
+            const badge = document.getElementById('cartBadge');
+            if (!token || !badge) {
+                if (badge) badge.style.display = 'none';
+                return;
+            }
+            try {
+                const res = await fetch(`${API_BASE_URL}/cart`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (res.ok) {
+                    const data = await res.json();
+                    const total = data.items ? data.items.reduce((s, i) => s + i.quantity, 0) : 0;
+                    badge.textContent = total;
+                    if (total > 0) {
+                        badge.style.display = 'flex';
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('user');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('cart');
+            window.location.href = 'index.html';
+        }
+
+        // =========================================
+        // SHOP LOADING
+        // =========================================
+        async function loadMyShop() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            try {
+                const res = await fetch(`${API_BASE_URL}/shop/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    const shop = await res.json();
+                    // Update URL to reflect ID but keeping it clean if possible, or just load
+                    loadShopDetails(shop.id);
+                    loadShopProducts(shop.id);
+                    // Update follow status for self? usually disabled but ok
+                } else {
+                    document.getElementById('productsList').innerHTML = `
+                        <div class="col-span-full text-center py-10">
+                            <h2 class="text-xl font-bold text-gray-700">You don't have a shop yet!</h2>
+                            <a href="seller-register.html" class="inline-block mt-4 bg-orange-600 text-white px-6 py-2 rounded font-bold hover:bg-orange-700">Register Shop</a>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                console.error(err);
+                showError('Error loading your shop.');
+            }
+        }
+
+        async function loadShopDetails(shopId) {
+            try {
+                const res = await fetch(`${API_BASE_URL}/shop/${shopId}`);
+                if (!res.ok) throw new Error('Shop not found');
+                const shop = await res.json();
+
+                // Populate UI
+                document.getElementById('shopName').textContent = shop.name;
+                document.getElementById('shopAddress').textContent = shop.address || 'Vietnam';
+                document.getElementById('breadcrumbShop').textContent = shop.name;
+                document.title = `${shop.name} - GoShop`;
+
+                const shopLogoImg = document.getElementById('shopLogo');
+                if (shop.logo) {
+                    shopLogoImg.src = shop.logo;
+                } else {
+                    const initials = (shop.name || 'SH').substring(0, 2).toUpperCase();
+                    shopLogoImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=AD3029&color=fff&size=100`;
+                }
+
+                checkOwnerAndEnableEdit(shop.ownerId);
+
+            } catch (err) {
+                console.error(err);
+                showError('Shop not found.');
+            }
+        }
+
+        async function loadShopProducts(shopId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/products/shop/${shopId}`);
+                if (!response.ok) throw new Error('Failed to fetch shop products');
+                allShopProducts = await response.json();
+
+                document.getElementById('shopProductCount').textContent = `${allShopProducts.length} Products`;
+
+                if (allShopProducts.length === 0) {
+                    document.getElementById('productsList').innerHTML =
+                        '<div class="col-span-full text-center text-gray-500 py-12"><i class="fas fa-box-open text-4xl mb-3 text-gray-300"></i><p class="text-sm">This shop has no products yet.</p></div>';
+                    return;
+                }
+                renderProducts(allShopProducts);
+            } catch (error) {
+                console.error('Error loading shop products:', error);
+                document.getElementById('productsList').innerHTML =
+                    '<div class="col-span-full text-center text-red-500 py-12"><i class="fas fa-exclamation-circle text-4xl mb-3"></i><p class="text-sm">Error loading products.</p></div>';
+            }
+        }
+
+        // =========================================
+        // FOLLOW & CHAT
+        // =========================================
         async function checkFollowStatus(shopId) {
             const token = localStorage.getItem('accessToken');
             if (!token) return;
-
             try {
                 const res = await fetch(`${API_BASE_URL}/follow/check/${shopId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -241,9 +432,7 @@
                     const data = await res.json();
                     updateFollowButton(data.isFollowing);
                 }
-            } catch (e) {
-                console.error('Error checking follow status:', e);
-            }
+            } catch (e) { console.error('Error checking follow:', e); }
         }
 
         async function toggleFollow() {
@@ -255,7 +444,6 @@
 
             const params = new URLSearchParams(window.location.search);
             const shopId = params.get('id') || sessionStorage.getItem('lastViewedShopId');
-
             if (!shopId) return;
 
             try {
@@ -283,16 +471,12 @@
 
             if (isFollowing) {
                 text.textContent = 'Unfollow';
-                if (icon) {
-                    icon.className = 'fas fa-minus mr-1.5 text-xs';
-                }
+                if (icon) icon.className = 'fas fa-minus mr-1.5 text-xs';
                 btn.classList.remove('bg-orange-500', 'hover:bg-orange-600', 'text-white');
                 btn.classList.add('bg-white', 'border', 'border-gray-300', 'text-gray-700');
             } else {
                 text.textContent = 'Follow';
-                if (icon) {
-                    icon.className = 'fas fa-plus mr-1.5 text-xs';
-                }
+                if (icon) icon.className = 'fas fa-plus mr-1.5 text-xs';
                 btn.classList.add('bg-orange-500', 'hover:bg-orange-600', 'text-white');
                 btn.classList.remove('bg-white', 'border', 'border-gray-300', 'text-gray-700');
             }
@@ -307,13 +491,11 @@
 
             const params = new URLSearchParams(window.location.search);
             const shopId = params.get('id') || sessionStorage.getItem('lastViewedShopId');
-
             if (!shopId) {
-                alert("Shop ID is missing. Cannot start chat.");
+                alert("Shop ID is missing.");
                 return;
             }
 
-            // Start chat conversation
             try {
                 const res = await fetch(`${API_BASE_URL}/chat/start/${shopId}`, {
                     method: 'POST',
@@ -322,69 +504,23 @@
 
                 if (res.ok) {
                     const data = await res.json();
-                    console.log("Chat started, redirecting to:", `chat.html?id=${data.conversationId}`);
-
-                    // Saving to localStorage as fallback
-                    localStorage.setItem('pendingChatConversationId', data.conversationId);
-
                     window.location.href = `chat.html?id=${data.conversationId}`;
                 } else {
-                    console.error("Failed to start chat, status:", res.status);
-                    if (res.status === 401) {
-                        window.location.href = 'login.html';
-                        return;
-                    }
-
-                    // Fallback using shopID
-                    localStorage.setItem('pendingChatShopId', shopId);
+                    // Fallback
                     window.location.href = `chat.html?shopId=${shopId}`;
                 }
             } catch (e) {
-                console.error('Error starting chat (Network/Exception):', e);
-                // Fallback using shopID
-                localStorage.setItem('pendingChatShopId', shopId);
+                console.error('Error starting chat:', e);
                 window.location.href = `chat.html?shopId=${shopId}`;
             }
         }
 
-        async function loadShopDetails(shopId) {
-            try {
-                const response = await fetch(`${API_BASE_URL}/shop/${shopId}`);
-                if (!response.ok) throw new Error('Failed to fetch shop details');
-
-                const shop = await response.json();
-                console.log("✅ Shop details:", shop);
-
-                document.getElementById('shopName').textContent = shop.name || 'Unknown Shop';
-                document.getElementById('breadcrumbShop').textContent = shop.name || 'Shop';
-                document.getElementById('shopAddress').textContent = shop.address || 'Vietnam';
-
-                // Fix: shop.logo might be the field name, but let's check both
-                const logoUrl = shop.logo || shop.logoUrl;
-                const shopLogoImg = document.getElementById('shopLogo');
-
-                if (logoUrl) {
-                    shopLogoImg.src = logoUrl;
-                } else {
-                    const initials = (shop.name || 'SH').substring(0, 2).toUpperCase();
-                    shopLogoImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=AD3029&color=fff&size=100`;
-                }
-
-                document.title = `${shop.name} - GoShop`;
-
-                // Check if current user is owner to allow logo update
-                checkOwnerAndEnableEdit(shop.ownerId);
-
-            } catch (error) {
-                console.error('Error loading shop details:', error);
-                showError('Failed to load shop details.');
-            }
-        }
-
+        // =========================================
+        // EDIT LOGO
+        // =========================================
         async function checkOwnerAndEnableEdit(ownerId) {
             const token = localStorage.getItem('accessToken');
             if (!token) return;
-
             try {
                 const res = await fetch(`${API_BASE_URL}/auth/me`, {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -395,22 +531,10 @@
                         enableLogoEdit();
                     }
                 }
-            } catch (e) {
-                console.warn('Failed to check ownership', e);
-            }
+            } catch (e) { console.warn('Failed to check ownership', e); }
         }
 
         function enableLogoEdit() {
-            const logoContainer = document.getElementById('shopLogo').parentElement;
-            // Make container relative if not already (it is absolute in HTML but parent is relative)
-            // The HTML structure is: 
-            // <div class="shop-header-bg ... relative">
-            //    <div class="absolute ...">
-            //       <img id="shopLogo" ...>
-            //    </div>
-            // </div>
-
-            // We want to add an overlay to the img container
             const imgContainer = document.getElementById('shopLogo').parentElement;
             imgContainer.classList.add('group', 'cursor-pointer');
 
@@ -418,10 +542,8 @@
             overlay.className = 'absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity';
             overlay.innerHTML = '<i class="fas fa-camera text-white"></i>';
             overlay.onclick = () => document.getElementById('logoInput').click();
-
             imgContainer.appendChild(overlay);
 
-            // Create hidden input if not exists
             if (!document.getElementById('logoInput')) {
                 const input = document.createElement('input');
                 input.type = 'file';
@@ -440,15 +562,12 @@
             const token = localStorage.getItem('accessToken');
             if (!token) return;
 
-            // 1. Upload Image
             const formData = new FormData();
             formData.append('file', file);
             formData.append('folder', 'shop_logos');
 
             try {
-                // Show loading
                 document.getElementById('shopLogo').style.opacity = '0.5';
-
                 const uploadRes = await fetch(`${API_BASE_URL}/upload`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` },
@@ -456,11 +575,9 @@
                 });
 
                 if (!uploadRes.ok) throw new Error('Upload failed');
-
                 const uploadData = await uploadRes.json();
                 const newLogoUrl = uploadData.url;
 
-                // 2. Update Shop
                 const updateRes = await fetch(`${API_BASE_URL}/shop/my-shop`, {
                     method: 'PUT',
                     headers: {
@@ -471,73 +588,42 @@
                 });
 
                 if (!updateRes.ok) throw new Error('Update shop failed');
-
-                // 3. Update UI
                 document.getElementById('shopLogo').src = newLogoUrl;
                 alert('Shop logo updated successfully!');
-
             } catch (e) {
                 console.error(e);
                 alert('Failed to update logo');
             } finally {
                 document.getElementById('shopLogo').style.opacity = '1';
-                event.target.value = ''; // Reset input
+                event.target.value = '';
             }
         }
 
-        async function loadShopProducts(shopId) {
-            try {
-                const response = await fetch(`${API_BASE_URL}/products/shop/${shopId}`);
-                if (!response.ok) throw new Error('Failed to fetch shop products');
-
-                allShopProducts = await response.json();
-
-                console.log(`✅ Found ${allShopProducts.length} products for shop ${shopId}`);
-
-                document.getElementById('shopProductCount').textContent = `${allShopProducts.length} Products`;
-
-                if (allShopProducts.length === 0) {
-                    document.getElementById('productsList').innerHTML =
-                        '<div class="col-span-full text-center text-gray-500 py-12"><i class="fas fa-box-open text-4xl mb-3 text-gray-300"></i><p class="text-sm">This shop has no products yet.</p></div>';
-                    return;
-                }
-
-                renderProducts(allShopProducts);
-
-            } catch (error) {
-                console.error('Error loading shop products:', error);
-                document.getElementById('productsList').innerHTML =
-                    '<div class="col-span-full text-center text-red-500 py-12"><i class="fas fa-exclamation-circle text-4xl mb-3"></i><p class="text-sm">Error loading products.</p></div>';
-            }
-        }
-
+        // =========================================
+        // SORT & RENDER
+        // =========================================
         function sortProducts() {
             const sortBy = document.getElementById('sortSelect').value;
             let sorted = [...allShopProducts];
 
             switch (sortBy) {
-                case 'latest':
-                    sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                    break;
-                case 'bestselling':
-                    sorted.sort((a, b) => (b.sold || 0) - (a.sold || 0));
-                    break;
+                case 'latest': sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); break;
+                case 'bestselling': sorted.sort((a, b) => (b.sold || 0) - (a.sold || 0)); break;
                 case 'price-asc':
                     sorted.sort((a, b) => {
-                        const priceA = a.variants?.[0]?.price || 0;
-                        const priceB = b.variants?.[0]?.price || 0;
-                        return priceA - priceB;
+                        const pa = a.variants?.[0]?.price || 0;
+                        const pb = b.variants?.[0]?.price || 0;
+                        return pa - pb;
                     });
                     break;
                 case 'price-desc':
                     sorted.sort((a, b) => {
-                        const priceA = a.variants?.[0]?.price || 0;
-                        const priceB = b.variants?.[0]?.price || 0;
-                        return priceB - priceA;
+                        const pa = a.variants?.[0]?.price || 0;
+                        const pb = b.variants?.[0]?.price || 0;
+                        return pb - pa;
                     });
                     break;
             }
-
             renderProducts(sorted);
         }
 
@@ -546,31 +632,22 @@
             container.innerHTML = '';
 
             products.forEach(product => {
-                const imageUrl = (product.images && product.images.length > 0)
-                    ? product.images[0]
-                    : 'https://via.placeholder.com/300x300?text=No+Image';
-
+                const imageUrl = (product.images && product.images.length > 0) ? product.images[0] : 'https://via.placeholder.com/300x300?text=No+Image';
                 let priceDisplay = 'Contact';
                 if (product.variants && product.variants.length > 0) {
-                    const price = product.variants[0].price;
-                    priceDisplay = '₫' + new Intl.NumberFormat('vi-VN').format(price);
+                    priceDisplay = '₫' + new Intl.NumberFormat('vi-VN').format(product.variants[0].price);
                 }
-
-                const sold = product.sold != null ? product.sold : 0;
-
-                const productCard = document.createElement('div');
-                productCard.className = 'bg-white border border-gray-200 rounded-sm hover:shadow-md hover:border-orange-500 transition-all overflow-hidden group cursor-pointer';
-
+                const sold = product.sold || 0;
                 const pid = product.id || product._id;
-                productCard.onclick = () => {
-                    if (pid) {
-                        localStorage.setItem('lastClickedProductId', pid);
-                        sessionStorage.setItem('lastClickedProductId', pid);
-                        window.location.href = `product-detail.html?id=${pid}`;
-                    }
-                };
 
-                productCard.innerHTML = `
+                const card = document.createElement('div');
+                card.className = 'bg-white border border-gray-200 rounded-sm hover:shadow-md hover:border-orange-500 transition-all overflow-hidden group cursor-pointer';
+                card.onclick = () => {
+                    localStorage.setItem('lastClickedProductId', pid);
+                    sessionStorage.setItem('lastClickedProductId', pid);
+                    window.location.href = `product-detail.html?id=${pid}`;
+                };
+                card.innerHTML = `
                     <div class="relative aspect-square">
                         <img src="${imageUrl}" alt="${product.name}" class="w-full h-full object-cover">
                     </div>
@@ -578,71 +655,20 @@
                         <p class="text-xs text-gray-700 mb-1 h-8 line-clamp-2 leading-tight">${product.name}</p>
                         <p class="text-orange-600 text-sm font-semibold">${priceDisplay}</p>
                         <div class="flex items-center justify-between text-xs text-gray-500 mt-1">
-                            <span class="flex items-center">
-                                <i class="fas fa-star text-yellow-400 text-xs mr-0.5"></i>
-                                ${product.rating != null ? product.rating.toFixed(1) : '-'}
-                            </span>
-                            <span>Sold ${sold}</span>
+                             <span class="flex items-center"><i class="fas fa-star text-yellow-400 text-xs mr-0.5"></i>${product.rating != null ? product.rating.toFixed(1) : '-'}</span>
+                             <span>Sold ${sold}</span>
                         </div>
                     </div>
                 `;
-
-                container.appendChild(productCard);
+                container.appendChild(card);
             });
         }
 
         function showError(message) {
-            document.getElementById('shopName').textContent = 'Error';
             const base = (window.location.pathname || '').lastIndexOf('/') >= 0 ? window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1) : window.location.origin + '/';
+            document.getElementById('shopName').textContent = 'Error';
             document.getElementById('productsList').innerHTML =
-                `<div class="col-span-full text-center text-red-500 py-12"><i class="fas fa-exclamation-triangle text-4xl mb-3"></i><p class="text-sm">${message}</p><p class="text-gray-600 text-xs mt-2">Vào trang chủ, chọn sản phẩm, rồi bấm tên cửa hàng ở mục "Sold By".</p><a href="${base}index.html" class="text-orange-500 hover:underline mt-3 inline-block font-medium">← Về trang chủ chọn sản phẩm</a></div>`;
-        }
-
-        function updateNavbar() {
-            const token = localStorage.getItem('accessToken');
-            const userName = localStorage.getItem('userName') || 'User';
-
-            const guestNav = document.getElementById('guestNav');
-            const userNav = document.getElementById('userNav');
-            const userNameEl = document.getElementById('userName');
-            const userAvatar = document.getElementById('userAvatar');
-
-            if (token) {
-                if (guestNav) guestNav.classList.add('hidden');
-                if (userNav) userNav.classList.remove('hidden');
-                if (userNameEl) userNameEl.textContent = userName;
-                if (userAvatar) userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=fecaca&color=AD3029`;
-            } else {
-                if (guestNav) guestNav.classList.remove('hidden');
-                if (userNav) userNav.classList.add('hidden');
-            }
-        }
-
-        async function updateCartBadge() {
-            const token = localStorage.getItem('accessToken');
-            const badge = document.getElementById('cartBadge');
-            if (!token) {
-                if (badge) badge.style.display = 'none';
-                return;
-            }
-            try {
-                const res = await fetch(`${API_BASE_URL}/cart`, { headers: { 'Authorization': `Bearer ${token}` } });
-                if (res.ok) {
-                    const data = await res.json();
-                    const total = data.items ? data.items.reduce((s, i) => s + i.quantity, 0) : 0;
-                    if (badge) {
-                        badge.textContent = total;
-                        badge.style.display = total > 0 ? 'inline-block' : 'none';
-                    }
-                }
-            } catch (e) { console.error(e); }
-        }
-
-        function logout() {
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('userName');
-            localStorage.removeItem('cart');
-            window.location.reload();
+                `<div class="col-span-full text-center text-red-500 py-12"><i class="fas fa-exclamation-triangle text-4xl mb-3"></i><p class="text-sm">${message}</p><a href="${base}index.html" class="text-orange-500 hover:underline mt-3 inline-block font-medium">Back to Home</a></div>`;
         }
     </script>
 </body>
