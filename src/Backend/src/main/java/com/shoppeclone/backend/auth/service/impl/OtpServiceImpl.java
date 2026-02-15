@@ -125,6 +125,25 @@ public class OtpServiceImpl implements OtpService {
         }
     }
 
+    @Override
+    public void checkResetOtp(String email, String code) {
+        System.out.println("🔍 CHECK RESET OTP - Email: " + email + ", Code: " + code);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Tìm OTP type PASSWORD_RESET
+        OtpCode otp = otpCodeRepository.findByUserAndCodeAndTypeAndUsed(
+                user, code, "PASSWORD_RESET", false)
+                .orElseThrow(() -> new RuntimeException("Invalid OTP code"));
+
+        if (otp.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("OTP code expired");
+        }
+
+        System.out.println("✅ RESET OTP IS VALID (Not yet used)");
+    }
+
     private String generateOtpCode() {
         Random random = new Random();
         int otp = 100000 + random.nextInt(900000);

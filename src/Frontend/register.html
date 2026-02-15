@@ -23,14 +23,10 @@
                 <i class="fas fa-shopping-bag text-4xl"></i>
                 <span class="text-3xl font-bold">GoShop</span>
             </a>
-            <span class="text-xl text-gray-800 font-medium" data-i18n="auth.register.title">Sign Up</span>
+            <span class="text-xl text-gray-800 font-medium">Sign Up</span>
         </div>
         <div class="flex items-center gap-4">
-            <button id="lang-toggle"
-                class="text-sm font-bold text-gray-600 hover:text-[#AD3029] uppercase flex items-center">
-                <img src="https://flagcdn.com/24x18/gb.png" alt="English"
-                    class="inline-block mr-1.5 w-5 h-auto object-cover border border-gray-200"> English
-            </button>
+            <!-- Language Toggle Removed -->
         </div>
     </div>
 </header>
@@ -43,32 +39,32 @@
         <div class="hidden lg:flex flex-col items-center justify-center w-1/2 text-white space-y-8">
             <i class="fas fa-shopping-bag text-[150px] opacity-90 animate-bounce"></i>
             <div class="text-center">
-                <h2 class="text-4xl font-bold mb-2" data-i18n="auth.branding.title">The Best Online Shopping</h2>
-                <p class="text-xl opacity-90" data-i18n="auth.branding.subtitle">Join GoShop today!</p>
+                <h2 class="text-4xl font-bold mb-2">The Best Online Shopping</h2>
+                <p class="text-xl opacity-90">Join GoShop today!</p>
             </div>
         </div>
 
         <!-- RIGHT SIDE: WHITE FORM CARD -->
         <div class="bg-white rounded-md shadow-lg p-10 w-full lg:w-[450px] mx-auto lg:mx-0">
-            <h3 class="text-2xl font-medium text-gray-800 mb-6" data-i18n="auth.register.title">Sign Up</h3>
+            <h3 class="text-2xl font-medium text-gray-800 mb-6">Sign Up</h3>
 
             <!-- FORM INPUTS -->
             <div class="space-y-4">
-                <input id="fullName" placeholder="Full Name" type="text" data-i18n="auth.fullname_placeholder"
+                <input id="fullName" placeholder="Full Name" type="text"
                     class="w-full px-4 py-3 border border-gray-300 rounded-sm focus:border-[#AD3029] focus:ring-1 focus:ring-[#AD3029] outline-none transition text-sm">
 
-                <input id="email" placeholder="Email" type="email" data-i18n="auth.email_placeholder"
+                <input id="email" placeholder="Email" type="email"
                     class="w-full px-4 py-3 border border-gray-300 rounded-sm focus:border-[#AD3029] focus:ring-1 focus:ring-[#AD3029] outline-none transition text-sm">
 
-                <input id="phone" placeholder="Phone Number" type="text" data-i18n="auth.phone_placeholder"
+                <input id="phone" placeholder="Phone Number" type="text"
                     class="w-full px-4 py-3 border border-gray-300 rounded-sm focus:border-[#AD3029] focus:ring-1 focus:ring-[#AD3029] outline-none transition text-sm">
 
-                <input id="password" placeholder="Password" type="password" data-i18n="auth.password_placeholder"
+                <input id="password" placeholder="Password" type="password"
                     class="w-full px-4 py-3 border border-gray-300 rounded-sm focus:border-[#AD3029] focus:ring-1 focus:ring-[#AD3029] outline-none transition text-sm">
             </div>
 
             <!-- SIGN UP BUTTON -->
-            <button onclick="goToOTP()" data-i18n="auth.signup_btn"
+            <button onclick="goToOTP()"
                 class="w-full mt-8 py-3 bg-[#AD3029] text-white text-sm font-semibold rounded-sm hover:bg-[#8f2621] shadow-sm uppercase tracking-wide transition-colors">
                 Sign Up
             </button>
@@ -76,7 +72,7 @@
             <!-- DIVIDER -->
             <div class="flex items-center my-6">
                 <div class="flex-1 h-px bg-gray-200"></div>
-                <span class="mx-4 text-xs text-gray-400 uppercase" data-i18n="auth.or">Or</span>
+                <span class="mx-4 text-xs text-gray-400 uppercase">Or</span>
                 <div class="flex-1 h-px bg-gray-200"></div>
             </div>
 
@@ -94,13 +90,13 @@
                         <path fill="#34A853"
                             d="M24 48c6.48 0 11.93-2.13 15.9-5.81l-7.49-5.82c-2.08 1.4-4.73 2.23-8.41 2.23-6.26 0-11.57-4.23-13.46-9.94l-7.99 6.19C6.51 42.62 14.62 48 24 48z" />
                     </svg>
-                    <span class="text-sm text-gray-600" data-i18n="auth.continue_google">Continue with Google</span>
+                    <span class="text-sm text-gray-600">Continue with Google</span>
                 </button>
             </div>
 
             <div class="mt-8 text-center text-sm">
-                <span class="text-gray-400" data-i18n="auth.have_account">Have an account?</span>
-                <a href="login.html" class="text-[#AD3029] font-medium ml-1" data-i18n="auth.signin_link">Sign In</a>
+                <span class="text-gray-400">Have an account?</span>
+                <a href="login.html" class="text-[#AD3029] font-medium ml-1">Sign In</a>
             </div>
         </div>
     </div>
@@ -119,8 +115,7 @@
 </footer>
 
 
-<script src="js/translations.js"></script>
-<script src="js/i18n.js"></script>
+
 <script>
     async function goToOTP() {
         const fullName = document.getElementById('fullName').value;
