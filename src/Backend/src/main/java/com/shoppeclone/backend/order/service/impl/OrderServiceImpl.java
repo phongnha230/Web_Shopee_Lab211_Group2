@@ -125,33 +125,60 @@ public class OrderServiceImpl implements OrderService {
             variant.setStock(variant.getStock() - cartItem.getQuantity());
 
             // Update Flash Sale Sold Count
-            if (Boolean.TRUE.equals(variant.getIsFlashSale())) {
+            // More resilient check: If the variant is NOT explicitly marked, but the
+            // product IS in flash sale, treat it as flash sale
+            com.shoppeclone.backend.product.entity.Product product = productRepository
+                    .findById(variant.getProductId())
+                    .orElse(null);
+
+            boolean isActuallyFlashSale = Boolean.TRUE.equals(variant.getIsFlashSale()) ||
+                    (product != null && Boolean.TRUE.equals(product.getIsFlashSale()));
+
+            if (isActuallyFlashSale) {
                 variant.setFlashSaleSold(
                         (variant.getFlashSaleSold() != null ? variant.getFlashSaleSold() : 0) + cartItem.getQuantity());
 
-                // Also update Product level
-                com.shoppeclone.backend.product.entity.Product product = productRepository
-                        .findById(variant.getProductId())
-                        .orElse(null);
+                // Ensure variant flag is synced if product flag is true (self-healing)
                 if (product != null && Boolean.TRUE.equals(product.getIsFlashSale())) {
-                    product.setFlashSaleSold((product.getFlashSaleSold() != null ? product.getFlashSaleSold() : 0)
-                            + cartItem.getQuantity());
-                    productRepository.save(product);
+                    variant.setIsFlashSale(true);
                 }
 
+                // Also update Product level - removed strict product flag check to ensure
+                // consistency with variant
                 // Update FlashSaleItem remainingStock (for Homepage display)
-                updateFlashSaleItemStock(variant.getProductId(), variant.getId(), cartItem.getQuantity());
+                boolean stockUpdated = updateFlashSaleItemStock(variant.getProductId(), variant.getId(),
+                        cartItem.getQuantity());
+
+                if (stockUpdated) {
+                    variant.setFlashSaleSold(
+                            (variant.getFlashSaleSold() != null ? variant.getFlashSaleSold() : 0)
+                                    + cartItem.getQuantity());
+                    if (product != null) {
+                        product.setFlashSaleSold((product.getFlashSaleSold() != null ? product.getFlashSaleSold() : 0)
+                                + cartItem.getQuantity());
+                        productRepository.save(product);
+                    }
+                }
             }
 
             productVariantRepository.save(variant);
 
+            BigDecimal unitPrice = variant.getPrice();
+            if (isActuallyFlashSale) {
+                if (variant.getFlashSalePrice() != null) {
+                    unitPrice = variant.getFlashSalePrice();
+                } else if (product != null && product.getFlashSalePrice() != null) {
+                    unitPrice = product.getFlashSalePrice();
+                }
+            }
+
             OrderItem orderItem = new OrderItem();
             orderItem.setVariantId(variant.getId());
-            orderItem.setPrice(variant.getPrice());
+            orderItem.setPrice(unitPrice);
             orderItem.setQuantity(cartItem.getQuantity());
             orderItems.add(orderItem);
 
-            totalPrice = totalPrice.add(variant.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
+            totalPrice = totalPrice.add(unitPrice.multiply(BigDecimal.valueOf(cartItem.getQuantity())));
         }
 
         return finishOrder(userId, request, orderItems, totalPrice, shopId, resolvedAddress, checkoutItems, cart);
@@ -182,33 +209,52 @@ public class OrderServiceImpl implements OrderService {
             variant.setStock(variant.getStock() - itemReq.getQuantity());
 
             // Update Flash Sale Sold Count
-            if (Boolean.TRUE.equals(variant.getIsFlashSale())) {
-                variant.setFlashSaleSold(
-                        (variant.getFlashSaleSold() != null ? variant.getFlashSaleSold() : 0) + itemReq.getQuantity());
+            // More resilient check: If the variant is NOT explicitly marked, but the
+            // product IS in flash sale, treat it as flash sale
+            com.shoppeclone.backend.product.entity.Product product = productRepository
+                    .findById(variant.getProductId())
+                    .orElse(null);
 
-                // Also update Product level
-                com.shoppeclone.backend.product.entity.Product product = productRepository
-                        .findById(variant.getProductId())
-                        .orElse(null);
-                if (product != null && Boolean.TRUE.equals(product.getIsFlashSale())) {
-                    product.setFlashSaleSold((product.getFlashSaleSold() != null ? product.getFlashSaleSold() : 0)
-                            + itemReq.getQuantity());
-                    productRepository.save(product);
-                }
+            boolean isActuallyFlashSale = Boolean.TRUE.equals(variant.getIsFlashSale()) ||
+                    (product != null && Boolean.TRUE.equals(product.getIsFlashSale()));
 
+            if (isActuallyFlashSale) {
                 // Update FlashSaleItem remainingStock (for Homepage display)
-                updateFlashSaleItemStock(variant.getProductId(), variant.getId(), itemReq.getQuantity());
+                boolean stockUpdated = updateFlashSaleItemStock(variant.getProductId(), variant.getId(),
+                        itemReq.getQuantity());
+
+                if (stockUpdated) {
+                    variant.setFlashSaleSold(
+                            (variant.getFlashSaleSold() != null ? variant.getFlashSaleSold() : 0)
+                                    + itemReq.getQuantity());
+
+                    // Also update Product level
+                    if (product != null) {
+                        product.setFlashSaleSold((product.getFlashSaleSold() != null ? product.getFlashSaleSold() : 0)
+                                + itemReq.getQuantity());
+                        productRepository.save(product);
+                    }
+                }
             }
 
             productVariantRepository.save(variant);
 
+            BigDecimal unitPrice = variant.getPrice();
+            if (isActuallyFlashSale) {
+                if (variant.getFlashSalePrice() != null) {
+                    unitPrice = variant.getFlashSalePrice();
+                } else if (product != null && product.getFlashSalePrice() != null) {
+                    unitPrice = product.getFlashSalePrice();
+                }
+            }
+
             OrderItem orderItem = new OrderItem();
             orderItem.setVariantId(variant.getId());
-            orderItem.setPrice(variant.getPrice());
+            orderItem.setPrice(unitPrice);
             orderItem.setQuantity(itemReq.getQuantity());
             orderItems.add(orderItem);
 
-            totalPrice = totalPrice.add(variant.getPrice().multiply(BigDecimal.valueOf(itemReq.getQuantity())));
+            totalPrice = totalPrice.add(unitPrice.multiply(BigDecimal.valueOf(itemReq.getQuantity())));
         }
 
         return finishOrder(userId, request, orderItems, totalPrice, shopId, resolvedAddress, null, null);
@@ -558,6 +604,10 @@ public class OrderServiceImpl implements OrderService {
             ProductVariant variant = productVariantRepository.findById(item.getVariantId()).orElse(null);
             if (variant != null) {
                 variant.setStock(variant.getStock() + item.getQuantity());
+
+                // Restore Flash Sale Stock if applicable
+                restoreFlashSaleItemStock(variant.getProductId(), variant.getId(), item.getQuantity());
+
                 productVariantRepository.save(variant);
             }
         }
@@ -613,6 +663,7 @@ public class OrderServiceImpl implements OrderService {
                     ProductVariant variant = productVariantRepository.findById(item.getVariantId()).orElse(null);
                     if (variant != null) {
                         variant.setStock(variant.getStock() + item.getQuantity());
+                        restoreFlashSaleItemStock(variant.getProductId(), variant.getId(), item.getQuantity());
                         productVariantRepository.save(variant);
                     }
                 }
@@ -621,7 +672,7 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.deleteByUserId(userId);
     }
 
-    private void updateFlashSaleItemStock(String productId, String variantId, int quantity) {
+    private boolean updateFlashSaleItemStock(String productId, String variantId, int quantity) {
         // Find active Flash Sale Item
         List<com.shoppeclone.backend.promotion.flashsale.entity.FlashSaleItem> items = flashSaleItemRepository
                 .findByProductIdAndStatus(productId, "APPROVED");
@@ -632,16 +683,50 @@ public class OrderServiceImpl implements OrderService {
                     .findById(item.getFlashSaleId()).orElse(null);
 
             if (slot != null && "ONGOING".equals(slot.getStatus())) {
-                // Check if item matches variant (or is product-level)
-                // Note: Scheduler applies product-level sale to all variants.
-                // So if item.variantId is null OR item.variantId == variantId
                 if (item.getVariantId() == null || item.getVariantId().equals(variantId)) {
                     int currentRemaining = item.getRemainingStock() != null ? item.getRemainingStock() : 0;
                     if (currentRemaining >= quantity) {
                         item.setRemainingStock(currentRemaining - quantity);
                         flashSaleItemRepository.save(item);
+                        return true;
                     }
-                    // Break after updating the correct active item
+                }
+            }
+        }
+        return false;
+    }
+
+    private void restoreFlashSaleItemStock(String productId, String variantId, int quantity) {
+        // Find active Flash Sale Item
+        List<com.shoppeclone.backend.promotion.flashsale.entity.FlashSaleItem> items = flashSaleItemRepository
+                .findByProductIdAndStatus(productId, "APPROVED");
+
+        for (com.shoppeclone.backend.promotion.flashsale.entity.FlashSaleItem item : items) {
+            com.shoppeclone.backend.promotion.flashsale.entity.FlashSale slot = flashSaleRepository
+                    .findById(item.getFlashSaleId()).orElse(null);
+
+            if (slot != null && "ONGOING".equals(slot.getStatus())) {
+                if (item.getVariantId() == null || item.getVariantId().equals(variantId)) {
+                    // 1. Restore Campaign Remaining Stock
+                    item.setRemainingStock(
+                            (item.getRemainingStock() != null ? item.getRemainingStock() : 0) + quantity);
+                    flashSaleItemRepository.save(item);
+
+                    // 2. Decrement Persistent Sold Counters
+                    ProductVariant variant = productVariantRepository.findById(variantId).orElse(null);
+                    if (variant != null) {
+                        int currentFsSold = variant.getFlashSaleSold() != null ? variant.getFlashSaleSold() : 0;
+                        variant.setFlashSaleSold(Math.max(0, currentFsSold - quantity));
+                        productVariantRepository.save(variant);
+
+                        com.shoppeclone.backend.product.entity.Product product = productRepository.findById(productId)
+                                .orElse(null);
+                        if (product != null) {
+                            int prodFsSold = product.getFlashSaleSold() != null ? product.getFlashSaleSold() : 0;
+                            product.setFlashSaleSold(Math.max(0, prodFsSold - quantity));
+                            productRepository.save(product);
+                        }
+                    }
                     break;
                 }
             }
