@@ -1,0 +1,6 @@
+========== DATABASE INSPECTION START ==========
+Total Shops Found: 2
+Total Products Found: 23
+Shop: 'Arina' (ID: 697d92b28929569335e85fe5) has 5 products
+Shop: 'PaPaPee' (ID: 6987fca7fe6fb0680294ed8a) has 6 products
+========== DATABASE INSPECTION END ==========
