@@ -153,13 +153,13 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         }
 
         // Dynamic Price Guard logic
-        double minDiscount = campaign.getMinDiscountPercentage() / 100.0;
-        BigDecimal maxAllowedPrice = variant.getPrice().multiply(new BigDecimal(1.0 - minDiscount));
+        BigDecimal minDiscount = new BigDecimal(campaign.getMinDiscountPercentage()).divide(new BigDecimal(100));
+        BigDecimal maxAllowedPrice = variant.getPrice().multiply(BigDecimal.ONE.subtract(minDiscount));
 
         if (request.getSalePrice().compareTo(maxAllowedPrice) > 0) {
             throw new RuntimeException(
                     String.format("Sale price must be at least %d%% lower than current price (Max: %s)",
-                            campaign.getMinDiscountPercentage(), maxAllowedPrice.toString()));
+                            campaign.getMinDiscountPercentage(), maxAllowedPrice.stripTrailingZeros().toPlainString()));
         }
 
         // Dynamic Stock validation
