@@ -1124,6 +1124,7 @@
             }
             const stockEl = document.getElementById('stockCount');
             if (stockEl) stockEl.textContent = `${stock} available`;
+            updatePurchaseButtonsState(stock);
 
             // --- SOLD PROGRESS BAR ---
             const soldContainer = document.getElementById('flashSaleSoldContainer');
