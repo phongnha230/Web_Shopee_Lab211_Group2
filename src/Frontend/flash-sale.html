@@ -243,10 +243,11 @@
         <div class="flex-1">
             <div class="flex justify-between items-center mb-6">
                 <p class="text-gray-600">Showing all items on sale</p>
-                <select class="border border-gray-300 rounded px-4 py-2">
-                    <option>Sort by: Newest</option>
-                    <option>Price: Low to High</option>
-                    <option>Price: High to Low</option>
+                <select id="sortSelect" onchange="applySortAndRender()"
+                    class="border border-gray-300 rounded px-4 py-2">
+                    <option value="newest">Sort by: Newest</option>
+                    <option value="low-to-high">Price: Low to High</option>
+                    <option value="high-to-low">Price: High to Low</option>
                 </select>
             </div>
 
@@ -259,6 +260,7 @@
     <script>
         const API_BASE_URL = 'http://localhost:8080/api';
         let countdownInterval = null;
+        let currentFlashSaleItems = [];
 
         document.addEventListener('DOMContentLoaded', () => {
             updateNavbar();
@@ -392,61 +394,81 @@
             try {
                 const res = await fetch(`${API_BASE_URL}/flash-sales/${slotId}/items`);
                 if (!res.ok) throw new Error('Failed to fetch items');
-                const items = await res.json();
+                currentFlashSaleItems = await res.json();
 
-                if (items.length === 0) {
-                    grid.innerHTML = '<div class="col-span-full text-center text-lg text-gray-500 py-20">This slot has no items yet.</div>';
-                    return;
-                }
-
-                grid.innerHTML = items.map(item => {
-                    const priceDisplay = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.salePrice);
-                    const originalPriceDisp = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.originalPrice);
-
-                    const total = item.saleStock || 10;
-                    const remaining = item.remainingStock || 0;
-                    const sold = total - remaining;
-                    const progressPercent = Math.max(10, Math.floor((sold / total) * 100));
-                    const isHot = progressPercent > 80;
-
-                    const discountPercent = Math.round((1 - (item.salePrice / item.originalPrice)) * 100);
-
-                    return `
-                    <div onclick="window.location.href='product-detail.html?id=${item.productId}'" 
-                         class="bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer border border-transparent hover:border-orange-500">
-                        <div class="relative">
-                            <img src="${item.productImage}" alt="${item.productName}" class="w-full h-48 object-cover">
-                            <div class="absolute top-2 right-2 bg-yellow-400 text-red-600 px-2 py-1 rounded text-xs font-bold border border-red-500 shadow-sm">
-                                <i class="fas fa-bolt mr-1"></i>${discountPercent}%
-                            </div>
-                        </div>
-                        <div class="p-3">
-                            <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2 overflow-hidden">${item.productName}</p>
-                            <div class="flex items-center justify-between mb-2">
-                                <p class="text-orange-600 text-lg font-bold">${priceDisplay}</p>
-                                <span class="text-xs text-gray-400 line-through">${originalPriceDisp}</span>
-                            </div>
-                            
-                            <div class="mt-2">
-                                <div class="relative w-full bg-orange-100 h-5 rounded-full overflow-hidden border border-orange-200">
-                                    <div class="bg-gradient-to-r from-orange-500 to-red-600 h-full rounded-full transition-all duration-1000 flex items-center justify-end pr-2" style="width: ${progressPercent}%">
-                                         ${isHot ? '<i class="fas fa-fire text-white text-[10px] animate-pulse"></i>' : ''}
-                                    </div>
-                                    <div class="absolute inset-0 flex items-center justify-center">
-                                        <span class="text-[10px] font-bold text-orange-900 uppercase tracking-tighter">
-                                            ${remaining === 0 ? 'HẾT HÀNG' : `ĐÃ BÁN ${sold}`}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    `;
-                }).join('');
+                applySortAndRender();
             } catch (err) {
                 console.error(err);
                 grid.innerHTML = '<div class="col-span-full text-center text-red-500">Failed to load Flash Sale items.</div>';
             }
+        }
+
+        function applySortAndRender() {
+            const grid = document.getElementById('productsGrid');
+            if (currentFlashSaleItems.length === 0) {
+                grid.innerHTML = '<div class="col-span-full text-center text-lg text-gray-500 py-20">This slot has no items yet.</div>';
+                return;
+            }
+
+            let sortedItems = [...currentFlashSaleItems];
+            const sortSelect = document.getElementById('sortSelect');
+            if (sortSelect) {
+                const sortType = sortSelect.value;
+                if (sortType === 'low-to-high') {
+                    sortedItems.sort((a, b) => a.salePrice - b.salePrice);
+                } else if (sortType === 'high-to-low') {
+                    sortedItems.sort((a, b) => b.salePrice - a.salePrice);
+                }
+            }
+
+            grid.innerHTML = sortedItems.map(item => {
+                const priceDisplay = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.salePrice);
+                const originalPriceDisp = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.originalPrice);
+
+                const total = item.saleStock || 10;
+                const remaining = item.remainingStock || 0;
+                const sold = total - remaining;
+                const progressPercent = Math.max(10, Math.floor((sold / total) * 100));
+                const isHot = progressPercent > 80;
+
+                const discountPercent = Math.round((1 - (item.salePrice / item.originalPrice)) * 100);
+
+                return `
+                <div onclick="
+                        localStorage.setItem('lastClickedProductId', '${item.productId}');
+                        sessionStorage.setItem('lastClickedProductId', '${item.productId}');
+                        window.location.href='product-detail.html?id=${item.productId}'
+                     " 
+                     class="bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer border border-transparent hover:border-orange-500">
+                    <div class="relative">
+                        <img src="${item.productImage}" alt="${item.productName}" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 right-2 bg-yellow-400 text-red-600 px-2 py-1 rounded text-xs font-bold border border-red-500 shadow-sm">
+                            <i class="fas fa-bolt mr-1"></i>${discountPercent}%
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2 overflow-hidden">${item.productName}</p>
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-orange-600 text-lg font-bold">${priceDisplay}</p>
+                            <span class="text-xs text-gray-400 line-through">${originalPriceDisp}</span>
+                        </div>
+                        
+                        <div class="mt-2">
+                            <div class="relative w-full bg-orange-100 h-5 rounded-full overflow-hidden border border-orange-200">
+                                <div class="bg-gradient-to-r from-orange-500 to-red-600 h-full rounded-full transition-all duration-1000 flex items-center justify-end pr-2" style="width: ${progressPercent}%">
+                                     ${isHot ? '<i class="fas fa-fire text-white text-[10px] animate-pulse"></i>' : ''}
+                                </div>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-[10px] font-bold text-orange-900 uppercase tracking-tighter">
+                                        ${remaining === 0 ? 'HẾT HÀNG' : `ĐÃ BÁN ${sold}`}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
         }
     </script>
 </body>

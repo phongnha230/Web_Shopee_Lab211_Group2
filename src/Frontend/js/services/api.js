@@ -327,11 +327,11 @@ const ShippingAPI = {
 // REFUND API SERVICE
 // ======================
 const RefundAPI = {
-    requestRefund: async (orderId, buyerId, amount, reason) => {
+    requestRefund: async (orderId, reason, amount) => {
         const response = await fetch(`${API_BASE_URL}/refunds/${orderId}/request`, {
             method: 'POST',
             headers: getAuthHeaders(),
-            body: JSON.stringify({ buyerId, amount, reason })
+            body: JSON.stringify({ reason, amount }) // buyerId lấy từ JWT ở backend
         });
         return handleResponse(response);
     },
@@ -348,11 +348,11 @@ const RefundAPI = {
 // DISPUTE API SERVICE
 // ======================
 const DisputeAPI = {
-    createDispute: async (orderId, buyerId, reason, description) => {
+    createDispute: async (orderId, reason, description) => {
         const response = await fetch(`${API_BASE_URL}/disputes`, {
             method: 'POST',
             headers: getAuthHeaders(),
-            body: JSON.stringify({ orderId, buyerId, reason, description })
+            body: JSON.stringify({ orderId, reason, description }) // buyerId lấy từ JWT ở backend
         });
         return handleResponse(response);
     },

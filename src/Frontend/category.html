@@ -329,18 +329,22 @@
             // Read parameters from hash fragment instead of query string
             // Support both ?id=... (old) and #id=... (new hash-based)
             let params;
+            // First check search string, as global search uses ?search=keyword
+            const searchParams = new URLSearchParams(window.location.search);
+            let searchQuery = searchParams.get('search');
+
             if (window.location.hash && window.location.hash.length > 1) {
                 // Hash-based: #id=123&name=Fashion
                 const hashParams = window.location.hash.substring(1); // Remove '#'
                 params = new URLSearchParams(hashParams);
                 console.log('📍 Reading from HASH:', hashParams);
+                // Also Check hash if search query isn't in query params
+                if (!searchQuery) searchQuery = params.get('search');
             } else {
                 // Query-based: ?id=123&name=Fashion (fallback)
-                params = new URLSearchParams(window.location.search);
+                params = searchParams;
                 console.log('📍 Reading from QUERY:', window.location.search);
             }
-
-            const searchQuery = params.get('search');
 
             let categoryId = params.get('id');
             // Sanitize ID
@@ -360,13 +364,6 @@
             // Initial placeholder
             document.getElementById('categoryTitle').textContent = categoryName;
             document.getElementById('categoryName').textContent = categoryName;
-
-            // UPDATE DEBUG INFO - Show both raw and processed values
-            const rawId = params.get('id');
-            const rawName = params.get('name');
-
-            // Debug info removed - element no longer exists
-            // document.getElementById('debugText').textContent = `Raw ID: ${rawId} | Processed ID: ${categoryId} | Raw Name: ${rawName} | Processed Name: ${categoryName}`;
 
             const grid = document.getElementById('productsGrid');
             const noProducts = document.getElementById('noProducts');
@@ -407,23 +404,44 @@
 
                         // Price normalization
                         let priceVal = 0;
-                        if (p.variants && p.variants.length > 0) priceVal = p.variants[0].price;
-                        else if (p.price) priceVal = p.price;
+                        let oldPrice = 0;
+                        let isFlashSale = false;
+
+                        if (p.isFlashSale && p.flashSalePrice > 0) {
+                            isFlashSale = true;
+                            priceVal = p.flashSalePrice;
+                            oldPrice = (p.variants && p.variants.length > 0) ? p.variants[0].price : p.price;
+                        } else {
+                            if (p.variants && p.variants.length > 0) priceVal = p.variants[0].price;
+                            else if (p.price) priceVal = p.price;
+                            oldPrice = priceVal * 1.2;
+                        }
 
                         const priceDisplay = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(priceVal);
+                        const oldPriceDisplay = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(oldPrice);
 
+                        // Stats - use real data from API
                         const sold = p.sold != null ? p.sold : 0;
                         const rating = p.rating != null ? p.rating.toFixed(1) : '-';
+
+                        let oldPriceHtml = isFlashSale ? `<p class="text-gray-400 text-xs line-through">${oldPriceDisplay}</p>` : '';
+                        let flashSaleBadge = isFlashSale ? `<div class="absolute top-2 left-2 bg-orange-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm shadow-sm">FLASH SALE</div>` : '';
+                        let defaultBadge = p.badge ? `<div class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm shadow-sm">${p.badge}</div>` : '';
+                        let topBadgeHtml = isFlashSale ? flashSaleBadge : defaultBadge;
 
                         return `
                         <div onclick="goToProduct('${p.id || p._id}')"
                             class="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer overflow-hidden group">
                             <div class="relative">
                                 <img src="${imageUrl}" alt="${p.name}" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                                ${topBadgeHtml}
                             </div>
                             <div class="p-3">
                                 <p class="text-sm text-gray-700 mb-2 h-10 line-clamp-2">${p.name}</p>
-                                <p class="text-orange-600 text-lg font-bold">${priceDisplay}</p>
+                                <div class="flex items-center gap-1 flex-wrap">
+                                    <p class="text-orange-600 text-lg font-bold">${priceDisplay}</p>
+                                    ${oldPriceHtml}
+                                </div>
                                 <div class="flex items-center text-xs text-gray-500 mt-1">
                                     <i class="fas fa-star text-yellow-400 mr-1"></i>
                                     <span>${rating}</span>

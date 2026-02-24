@@ -5,18 +5,15 @@ import com.shoppeclone.backend.dispute.entity.DisputeStatus;
 import com.shoppeclone.backend.dispute.repository.DisputeRepository;
 import com.shoppeclone.backend.dispute.service.DisputeService;
 import com.shoppeclone.backend.order.entity.Order;
-import com.shoppeclone.backend.order.entity.OrderItem;
-import com.shoppeclone.backend.product.entity.Product;
-import com.shoppeclone.backend.product.entity.ProductVariant;
-import com.shoppeclone.backend.product.repository.ProductRepository;
-import com.shoppeclone.backend.product.repository.ProductVariantRepository;
 import com.shoppeclone.backend.refund.service.RefundService;
 import com.shoppeclone.backend.review.repository.ReviewRepository;
 import com.shoppeclone.backend.order.entity.OrderStatus;
 import com.shoppeclone.backend.order.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -31,8 +28,6 @@ public class DisputeServiceImpl implements DisputeService {
     private final OrderRepository orderRepository;
     private final RefundService refundService;
     private final ReviewRepository reviewRepository;
-    private final ProductVariantRepository productVariantRepository;
-    private final ProductRepository productRepository;
     private final com.shoppeclone.backend.dispute.repository.DisputeImageRepository disputeImageRepository;
 
     @Override
@@ -59,16 +54,16 @@ public class DisputeServiceImpl implements DisputeService {
     public Dispute createDispute(String orderId, String buyerId, String reason, String description) {
         // 1. Check if dispute already exists
         if (disputeRepository.findByOrderId(orderId).isPresent()) {
-            throw new RuntimeException("Dispute already exists for this order");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Dispute already exists for this order");
         }
 
         // 2. Validate Order eligibility (e.g., must be SHIPPED or DELIVERED/COMPLETED
         // within X days)
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
 
         if (!order.getUserId().equals(buyerId)) {
-            throw new RuntimeException("Unauthorized: Buyer does not own this order");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized: Buyer does not own this order");
         }
 
         // Simplistic check: Allow dispute if Shipped or Delivered.
@@ -82,7 +77,8 @@ public class DisputeServiceImpl implements DisputeService {
         } else if (order.getOrderStatus() == OrderStatus.COMPLETED) {
             if (order.getCompletedAt() == null) {
                 // Should not happen if data is consistent, but safeguard
-                throw new RuntimeException("Order is COMPLETED but has no completedAt date");
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Order is COMPLETED but has no completedAt date");
             }
             LocalDateTime deadline = order.getCompletedAt().plusDays(7);
             if (LocalDateTime.now().isBefore(deadline) || LocalDateTime.now().isEqual(deadline)) {
@@ -91,21 +87,23 @@ public class DisputeServiceImpl implements DisputeService {
         }
 
         if (!isEligible) {
-            throw new RuntimeException("Dispute not allowed. Order must be SHIPPED or COMPLETED within 7 days.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Dispute not allowed. Order must be SHIPPED or COMPLETED within 7 days.");
         }
 
         // 3. Block if buyer has already reviewed any product in this order
-        List<com.shoppeclone.backend.review.entity.Review> existingReviews = reviewRepository.findByUserIdAndOrderId(buyerId, orderId);
+        List<com.shoppeclone.backend.review.entity.Review> existingReviews = reviewRepository
+                .findByUserIdAndOrderId(buyerId, orderId);
         if (!existingReviews.isEmpty()) {
-            throw new RuntimeException("Bạn đã đánh giá sản phẩm trong đơn này, không thể khiếu nại.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Bạn đã đánh giá sản phẩm trong đơn này, không thể khiếu nại.");
         }
 
         // 4. Create Dispute
         Dispute dispute = new Dispute();
         dispute.setOrderId(orderId);
         dispute.setBuyerId(buyerId);
-        // dispute.setSellerId(order.getSellerId()); // Assuming Order has sellerId, if
-        // multi-vendor. For now omitted or null if not applicable.
+        dispute.setSellerId(order.getShopId());
         dispute.setReason(reason);
         dispute.setDescription(description);
         dispute.setStatus(DisputeStatus.OPEN);
@@ -117,6 +115,9 @@ public class DisputeServiceImpl implements DisputeService {
     public Dispute updateDisputeStatus(String disputeId, String statusStr, String adminNote) {
         Dispute dispute = disputeRepository.findById(disputeId)
                 .orElseThrow(() -> new RuntimeException("Dispute not found"));
+        if (statusStr == null || statusStr.isBlank()) {
+            throw new RuntimeException("Status is required");
+        }
 
         try {
             DisputeStatus newStatus = DisputeStatus.valueOf(statusStr.toUpperCase());
@@ -148,23 +149,12 @@ public class DisputeServiceImpl implements DisputeService {
             BigDecimal amount = refundAmount != null && refundAmount.compareTo(BigDecimal.ZERO) > 0
                     ? refundAmount
                     : order.getTotalPrice();
-            if (amount == null) amount = BigDecimal.ZERO;
+            if (amount == null)
+                amount = BigDecimal.ZERO;
             String reason = "Từ khiếu nại: " + dispute.getReason();
             refundService.createAndApproveRefund(dispute.getOrderId(), dispute.getBuyerId(), amount, reason, adminId);
 
             // Hồi hàng về kho seller (restore stock, giảm sold)
-            for (OrderItem item : order.getItems()) {
-                ProductVariant variant = productVariantRepository.findById(item.getVariantId()).orElse(null);
-                if (variant != null) {
-                    variant.setStock((variant.getStock() != null ? variant.getStock() : 0) + item.getQuantity());
-                    productVariantRepository.save(variant);
-                    Product product = productRepository.findById(variant.getProductId()).orElse(null);
-                    if (product != null && product.getSold() != null && product.getSold() > 0) {
-                        product.setSold(Math.max(0, product.getSold() - item.getQuantity()));
-                        productRepository.save(product);
-                    }
-                }
-            }
         }
 
         return dispute;

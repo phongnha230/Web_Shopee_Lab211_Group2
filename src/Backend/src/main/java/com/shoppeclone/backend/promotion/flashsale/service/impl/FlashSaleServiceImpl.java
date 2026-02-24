@@ -137,6 +137,17 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         FlashSaleCampaign campaign = flashSaleCampaignRepository.findById(slot.getCampaignId())
                 .orElseThrow(() -> new RuntimeException("Campaign not found"));
 
+        // --- DEADLINE VALIDATION ---
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+
+        // Only check registration deadline (not status, because campaign may
+        // auto-transition to ONGOING while deadline is still valid)
+        if (campaign.getRegistrationDeadline() != null && now.isAfter(campaign.getRegistrationDeadline())) {
+            throw new RuntimeException(
+                    "Registration deadline has passed. Deadline was: " + campaign.getRegistrationDeadline() + " UTC");
+        }
+        // --- END VALIDATION ---
+
         ProductVariant variant;
         if (request.getVariantId() != null) {
             variant = productVariantRepository.findById(request.getVariantId())
@@ -153,13 +164,13 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         }
 
         // Dynamic Price Guard logic
-        double minDiscount = campaign.getMinDiscountPercentage() / 100.0;
-        BigDecimal maxAllowedPrice = variant.getPrice().multiply(new BigDecimal(1.0 - minDiscount));
+        BigDecimal minDiscount = new BigDecimal(campaign.getMinDiscountPercentage()).divide(new BigDecimal(100));
+        BigDecimal maxAllowedPrice = variant.getPrice().multiply(BigDecimal.ONE.subtract(minDiscount));
 
         if (request.getSalePrice().compareTo(maxAllowedPrice) > 0) {
             throw new RuntimeException(
                     String.format("Sale price must be at least %d%% lower than current price (Max: %s)",
-                            campaign.getMinDiscountPercentage(), maxAllowedPrice.toString()));
+                            campaign.getMinDiscountPercentage(), maxAllowedPrice.stripTrailingZeros().toPlainString()));
         }
 
         // Dynamic Stock validation
@@ -209,18 +220,63 @@ public class FlashSaleServiceImpl implements FlashSaleService {
 
     @Override
     public List<FlashSaleItem> getRegistrationsByShopId(String shopId) {
-        return flashSaleItemRepository.findByShopId(shopId);
+        List<FlashSaleItem> registrations = flashSaleItemRepository.findByShopId(shopId);
+        registrations.sort((a, b) -> {
+            java.util.Map<String, Integer> statusPriority = java.util.Map.of(
+                    "PENDING", 0,
+                    "APPROVED", 1,
+                    "REJECTED", 2
+            );
+            String aStatus = a != null && a.getStatus() != null ? a.getStatus().toUpperCase() : "";
+            String bStatus = b != null && b.getStatus() != null ? b.getStatus().toUpperCase() : "";
+            int aPriority = statusPriority.getOrDefault(aStatus, 99);
+            int bPriority = statusPriority.getOrDefault(bStatus, 99);
+            if (aPriority != bPriority) {
+                return Integer.compare(aPriority, bPriority);
+            }
+
+            java.time.LocalDateTime aTime = a != null ? a.getCreatedAt() : null;
+            java.time.LocalDateTime bTime = b != null ? b.getCreatedAt() : null;
+
+            if (aTime == null && bTime == null) {
+                String aId = (a != null && a.getId() != null) ? a.getId() : "";
+                String bId = (b != null && b.getId() != null) ? b.getId() : "";
+                return bId.compareTo(aId);
+            }
+            if (aTime == null) return 1;
+            if (bTime == null) return -1;
+
+            int timeCompare = bTime.compareTo(aTime); // newest first
+            if (timeCompare != 0) return timeCompare;
+
+            String aId = (a != null && a.getId() != null) ? a.getId() : "";
+            String bId = (b != null && b.getId() != null) ? b.getId() : "";
+            return bId.compareTo(aId);
+        });
+        return registrations;
     }
 
     @Override
     public List<FlashSaleItemResponse> getCampaignItems(String campaignId) {
         List<FlashSale> slots = flashSaleRepository.findByCampaignId(campaignId);
-        List<String> slotIds = slots.stream().map(FlashSale::getId).collect(Collectors.toList());
-        List<FlashSaleItem> allItems = flashSaleItemRepository.findAll().stream()
-                .filter(item -> slotIds.contains(item.getFlashSaleId()) && "APPROVED".equals(item.getStatus()))
+
+        // Only include slots that are currently ACTIVE
+        List<String> activeSlotIds = slots.stream()
+                .filter(slot -> "ACTIVE".equals(slot.getStatus()))
+                .map(FlashSale::getId)
                 .collect(Collectors.toList());
 
-        return allItems.stream().map(this::convertToResponse).collect(Collectors.toList());
+        if (activeSlotIds.isEmpty()) {
+            return List.of(); // No active slots → nothing to show
+        }
+
+        // Only return APPROVED items belonging to active slots
+        List<FlashSaleItem> items = flashSaleItemRepository.findAll().stream()
+                .filter(item -> activeSlotIds.contains(item.getFlashSaleId())
+                        && "APPROVED".equals(item.getStatus()))
+                .collect(Collectors.toList());
+
+        return items.stream().map(this::convertToResponse).collect(Collectors.toList());
     }
 
     @Override
@@ -228,6 +284,23 @@ public class FlashSaleServiceImpl implements FlashSaleService {
     public FlashSaleItem approveRegistration(String registrationId, ApproveRegistrationRequest request) {
         FlashSaleItem registration = flashSaleItemRepository.findById(registrationId)
                 .orElseThrow(() -> new RuntimeException("Registration not found"));
+
+        // --- APPROVAL DEADLINE VALIDATION (only blocks APPROVE action) ---
+        if ("APPROVED".equals(request.getStatus())) {
+            FlashSale slot = flashSaleRepository.findById(registration.getFlashSaleId()).orElse(null);
+            if (slot != null) {
+                FlashSaleCampaign campaign = flashSaleCampaignRepository.findById(slot.getCampaignId()).orElse(null);
+                if (campaign != null && campaign.getApprovalDeadline() != null) {
+                    LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+                    if (now.isAfter(campaign.getApprovalDeadline())) {
+                        throw new RuntimeException(
+                                "Approval deadline has passed. You can no longer approve registrations for this campaign. Deadline was: "
+                                        + campaign.getApprovalDeadline() + " UTC");
+                    }
+                }
+            }
+        }
+        // --- END VALIDATION ---
 
         com.shoppeclone.backend.shop.entity.Shop shop = shopService.getShopById(registration.getShopId());
         Product product = productRepository.findById(registration.getProductId())
@@ -413,11 +486,20 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                     .ifPresent(img -> resp.setProductImage(img.getImageUrl()));
         });
 
-        // Fetch Variant Info
-        productVariantRepository.findById(item.getVariantId()).ifPresent(v -> {
-            resp.setVariantName(
-                    (v.getColor() != null ? v.getColor() : "") + " " + (v.getSize() != null ? v.getSize() : ""));
-            resp.setOriginalPrice(v.getPrice());
+        // Fetch Variant Info (guard against null variantId)
+        if (item.getVariantId() != null) {
+            productVariantRepository.findById(item.getVariantId()).ifPresent(v -> {
+                resp.setVariantName(
+                        (v.getColor() != null ? v.getColor() : "") + " " + (v.getSize() != null ? v.getSize() : ""));
+                resp.setOriginalPrice(v.getPrice());
+            });
+        }
+
+        // Fetch Approval Deadline from Campaign (via Slot)
+        flashSaleRepository.findById(item.getFlashSaleId()).ifPresent(slot -> {
+            flashSaleCampaignRepository.findById(slot.getCampaignId()).ifPresent(campaign -> {
+                resp.setApprovalDeadline(campaign.getApprovalDeadline());
+            });
         });
 
         return resp;

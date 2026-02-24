@@ -1456,8 +1456,6 @@
                 loadVouchers();
             } else if (viewName === 'reviews') {
                 loadReviews();
-            } else if (viewName === 'orders') {
-                // loadShopReviews();
             } else if (viewName === 'shop-profile') {
                 loadShopProfile();
             } else if (viewName === 'orders') {
@@ -3225,7 +3223,7 @@
                 }
 
                 if (ordersRes.ok) {
-                    const orders = await ordersRes.json();
+                    const orders = sortOrdersNewestFirst(await ordersRes.json());
                     allOrders = orders;
                     currentOrderStatus = status;
                     renderOrders(orders);
@@ -3251,6 +3249,15 @@
             }
 
             loadOrders(status);
+        }
+
+        function sortOrdersNewestFirst(orders) {
+            return [...(orders || [])].sort((a, b) => {
+                const aTime = a?.createdAt ? new Date(a.createdAt).getTime() : 0;
+                const bTime = b?.createdAt ? new Date(b.createdAt).getTime() : 0;
+                if (bTime !== aTime) return bTime - aTime;
+                return String(b?.id || '').localeCompare(String(a?.id || ''));
+            });
         }
 
         function renderOrders(orders) {
@@ -4236,22 +4243,34 @@
                 return;
             }
 
-            container.innerHTML = campaigns.map(c => `
-                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition">
+            const now = new Date();
+            container.innerHTML = campaigns.map(c => {
+                const regDeadline = c.registrationDeadline ? new Date(c.registrationDeadline.endsWith('Z') ? c.registrationDeadline : c.registrationDeadline + 'Z') : null;
+                const isExpired = regDeadline && now > regDeadline;
+                const deadlineText = regDeadline
+                    ? `<div class="flex justify-between"><span>Register by:</span><span class="${isExpired ? 'text-red-600 font-bold' : 'text-gray-600 font-medium'}">${regDeadline.toLocaleString()}${isExpired ? ' (Expired)' : ''}</span></div>`
+                    : '';
+
+                return `
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition ${isExpired ? 'opacity-70' : ''}">
                     <div class="flex justify-between items-start mb-4">
                         <h3 class="text-lg font-bold text-gray-800">${c.name}</h3>
                         <span class="bg-green-50 text-green-700 text-[10px] font-bold px-2 py-1 rounded uppercase">OPEN</span>
                     </div>
-                    <p class="text-sm text-gray-500 mb-6">${c.description || 'Boost your sales with this exclusive event!'}</p>
+                    <p class="text-sm text-gray-500 mb-4">${c.description || 'Boost your sales with this exclusive event!'}</p>
                     <div class="space-y-2 mb-6 text-xs text-gray-400">
                         <div class="flex justify-between">
                             <span>Ends on:</span>
                             <span class="text-gray-600 font-medium">${new Date(c.endDate.endsWith('Z') ? c.endDate : c.endDate + 'Z').toLocaleDateString()}</span>
                         </div>
+                        ${deadlineText}
                     </div>
-                    <button onclick="openRegisterModal('${c.id}')" class="w-full bg-orange-500 text-white py-2 rounded-lg font-bold hover:bg-orange-600 transition">Register Now</button>
+                    ${isExpired
+                        ? `<div class="w-full bg-gray-100 text-gray-400 py-2 rounded-lg font-bold text-center text-sm cursor-not-allowed"><i class="fas fa-lock mr-2"></i>Registration Closed</div>`
+                        : `<button onclick="openRegisterModal('${c.id}')" class="w-full bg-orange-500 text-white py-2 rounded-lg font-bold hover:bg-orange-600 transition">Register Now</button>`
+                    }
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         async function loadSellerRegistrations() {
@@ -4265,10 +4284,24 @@
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
                 if (response.ok) {
-                    const registrations = await response.json();
+                    const registrations = sortSellerRegistrationsForSellerView(await response.json());
                     renderSellerRegistrations(registrations);
                 }
             } catch (err) { console.error(err); }
+        }
+
+        function sortSellerRegistrationsForSellerView(registrations) {
+            return [...(registrations || [])].sort((a, b) => {
+                const statusPriority = { PENDING: 0, APPROVED: 1, REJECTED: 2 };
+                const aPriority = statusPriority[String(a?.status || '').toUpperCase()] ?? 99;
+                const bPriority = statusPriority[String(b?.status || '').toUpperCase()] ?? 99;
+                if (aPriority !== bPriority) return aPriority - bPriority;
+
+                const aTime = a?.createdAt ? new Date(a.createdAt).getTime() : 0;
+                const bTime = b?.createdAt ? new Date(b.createdAt).getTime() : 0;
+                if (bTime !== aTime) return bTime - aTime;
+                return String(b?.id || '').localeCompare(String(a?.id || ''));
+            });
         }
 
         function renderSellerRegistrations(registrations) {
@@ -4364,6 +4397,15 @@
                     const campaigns = await cResp.json();
                     const campaign = campaigns.find(c => c.id === campaignId);
                     if (campaign) {
+                        // --- Check Registration Deadline ---
+                        if (campaign.registrationDeadline) {
+                            const deadline = new Date(campaign.registrationDeadline.endsWith('Z') ? campaign.registrationDeadline : campaign.registrationDeadline + 'Z');
+                            if (new Date() > deadline) {
+                                document.getElementById('sellerFSRegModal').classList.add('hidden');
+                                showToast(`Registration deadline has passed (${deadline.toLocaleString()})`, 'error');
+                                return;
+                            }
+                        }
                         currentCampaignMinStock = campaign.minStockPerProduct || 10;
                         currentCampaignMinDiscount = campaign.minDiscountPercentage || 0;
                         document.getElementById('reg-sale-stock').setAttribute('min', currentCampaignMinStock);

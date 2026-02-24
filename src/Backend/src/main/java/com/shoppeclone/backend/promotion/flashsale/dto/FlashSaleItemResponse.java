@@ -2,6 +2,7 @@ package com.shoppeclone.backend.promotion.flashsale.dto;
 
 import lombok.Data;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 public class FlashSaleItemResponse {
@@ -18,4 +19,5 @@ public class FlashSaleItemResponse {
     private Integer remainingStock;
     private String status;
     private String shopId;
+    private LocalDateTime approvalDeadline; // from campaign, for frontend deadline check
 }

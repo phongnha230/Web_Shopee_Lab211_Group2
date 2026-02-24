@@ -1108,7 +1108,7 @@
 
                 const subtotal = backendCart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
                 if (voucher.minSpend && subtotal < voucher.minSpend) {
-                    throw new Error(`Min spend ₫${voucher.minSpend}`);
+                            throw new Error(`Min spend ₫${formatVND(voucher.minSpend)}`);
                 }
 
                 // Calculation
