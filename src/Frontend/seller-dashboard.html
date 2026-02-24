@@ -3101,7 +3101,7 @@
                 }
 
                 if (ordersRes.ok) {
-                    const orders = await ordersRes.json();
+                    const orders = sortOrdersNewestFirst(await ordersRes.json());
                     allOrders = orders;
                     currentOrderStatus = status;
                     renderOrders(orders);
@@ -3127,6 +3127,15 @@
             }
 
             loadOrders(status);
+        }
+
+        function sortOrdersNewestFirst(orders) {
+            return [...(orders || [])].sort((a, b) => {
+                const aTime = a?.createdAt ? new Date(a.createdAt).getTime() : 0;
+                const bTime = b?.createdAt ? new Date(b.createdAt).getTime() : 0;
+                if (bTime !== aTime) return bTime - aTime;
+                return String(b?.id || '').localeCompare(String(a?.id || ''));
+            });
         }
 
         function renderOrders(orders) {
@@ -4141,10 +4150,24 @@
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (response.ok) {
-                    const registrations = await response.json();
+                    const registrations = sortSellerRegistrationsForSellerView(await response.json());
                     renderSellerRegistrations(registrations);
                 }
             } catch (err) { console.error(err); }
+        }
+
+        function sortSellerRegistrationsForSellerView(registrations) {
+            return [...(registrations || [])].sort((a, b) => {
+                const statusPriority = { PENDING: 0, APPROVED: 1, REJECTED: 2 };
+                const aPriority = statusPriority[String(a?.status || '').toUpperCase()] ?? 99;
+                const bPriority = statusPriority[String(b?.status || '').toUpperCase()] ?? 99;
+                if (aPriority !== bPriority) return aPriority - bPriority;
+
+                const aTime = a?.createdAt ? new Date(a.createdAt).getTime() : 0;
+                const bTime = b?.createdAt ? new Date(b.createdAt).getTime() : 0;
+                if (bTime !== aTime) return bTime - aTime;
+                return String(b?.id || '').localeCompare(String(a?.id || ''));
+            });
         }
 
         function renderSellerRegistrations(registrations) {
