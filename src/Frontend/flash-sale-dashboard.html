@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ Flash Sale Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        :root {
+            --bg:    #0a0a0f;
+            --card:  #12121a;
+            --card2: #1a1a26;
+            --border:#2a2a3d;
+            --accent:#f97316;
+            --green: #22c55e;
+            --red:   #ef4444;
+            --blue:  #3b82f6;
+            --yellow:#eab308;
+            --text:  #e5e7eb;
+            --muted: #6b7280;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── BACKGROUND ANIMATION ── */
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 0;
+            background:
+                radial-gradient(ellipse 60% 40% at 20% 20%, rgba(249,115,22,.08) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 50% at 80% 80%, rgba(59,130,246,.06) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .container { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+        /* ── HEADER ── */
+        .header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 32px; flex-wrap: wrap; gap: 12px;
+        }
+        .header-title { display: flex; align-items: center; gap: 12px; }
+        .header h1 { font-size: 1.8rem; font-weight: 800; background: linear-gradient(90deg,#f97316,#fb923c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .badge { background: rgba(249,115,22,.15); border: 1px solid rgba(249,115,22,.3); color: #f97316; padding: 4px 12px; border-radius: 20px; font-size: .75rem; font-weight: 600; }
+
+        .role-tabs { display: flex; gap: 8px; }
+        .role-tab  { padding: 8px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--muted); cursor: pointer; font-size: .85rem; font-weight: 500; transition: all .2s; }
+        .role-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+        .role-tab:hover:not(.active) { border-color: var(--accent); color: var(--text); }
+
+        /* ── CONFIG PANEL ── */
+        .config-card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+            padding: 24px; margin-bottom: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 16px;
+        }
+        .config-card h2 { font-size: 1rem; font-weight: 700; color: var(--accent); margin-bottom: 4px; grid-column: 1/-1; }
+
+        .input-group { display: flex; flex-direction: column; gap: 6px; }
+        .input-group label { font-size: .78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+        .input-group input, .input-group select {
+            background: var(--card2); border: 1px solid var(--border); border-radius: 8px;
+            padding: 10px 14px; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: .85rem;
+            outline: none; transition: border-color .2s;
+        }
+        .input-group input:focus, .input-group select:focus { border-color: var(--accent); }
+        .input-group input::placeholder { color: var(--muted); }
+
+        .btn-area { grid-column: 1/-1; display: flex; gap: 12px; flex-wrap: wrap; }
+        .btn { padding: 12px 24px; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; font-size: .9rem; transition: all .2s; display: flex; align-items: center; gap: 8px; }
+        .btn-primary { background: linear-gradient(135deg, #f97316, #ea580c); color: #fff; box-shadow: 0 4px 20px rgba(249,115,22,.3); }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(249,115,22,.4); }
+        .btn-secondary { background: var(--card2); border: 1px solid var(--border); color: var(--text); }
+        .btn-secondary:hover:not(:disabled) { border-color: var(--blue); }
+        .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+        /* ── STATS GRID ── */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+            padding: 20px; position: relative; overflow: hidden; transition: transform .2s;
+        }
+        .stat-card:hover { transform: translateY(-2px); }
+        .stat-card .glow {
+            position: absolute; top: -30px; right: -30px; width: 100px; height: 100px;
+            border-radius: 50%; opacity: .15; filter: blur(20px);
+        }
+        .stat-label { font-size: .78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; }
+        .stat-value { font-size: 2.2rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; line-height: 1; }
+        .stat-sub { font-size: .78rem; color: var(--muted); margin-top: 6px; }
+
+        /* ── Simulator Live ── */
+        .sim-section { display: none; }
+        .sim-section.active { display: block; }
+
+        .progress-card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+            padding: 24px; margin-bottom: 24px;
+        }
+        .progress-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; }
+        .progress-bar-wrap { background: var(--card2); border-radius: 100px; height: 12px; overflow: hidden; margin-bottom: 8px; }
+        .progress-bar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, #f97316, #22c55e); transition: width .3s; width: 0%; }
+        .progress-label { font-size: .85rem; color: var(--muted); display: flex; justify-content: space-between; }
+
+        /* ── Flash Sale Monitor (Admin/Seller) ── */
+        .monitor-section { display: none; }
+        .monitor-section.active { display: block; }
+
+        .item-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+        .item-table th { text-align: left; padding: 10px 16px; background: var(--card2); color: var(--muted); font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+        .item-table th:first-child { border-radius: 8px 0 0 8px; }
+        .item-table th:last-child { border-radius: 0 8px 8px 0; }
+        .item-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+        .item-table tr:last-child td { border-bottom: none; }
+        .item-table tr:hover td { background: rgba(255,255,255,.02); }
+
+        .mini-bar-wrap { background: var(--card2); border-radius: 100px; height: 8px; width: 100px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 6px; }
+        .mini-bar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, #f97316, #22c55e); }
+
+        .status-badge { padding: 3px 10px; border-radius: 100px; font-size: .72rem; font-weight: 700; }
+        .status-APPROVED  { background: rgba(34,197,94,.15); color: #22c55e; }
+        .status-PENDING   { background: rgba(234,179,8,.15);  color: #eab308; }
+        .status-REJECTED  { background: rgba(239,68,68,.15);  color: #ef4444; }
+
+        .table-card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+            padding: 24px; margin-bottom: 24px; overflow-x: auto;
+        }
+        .table-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+        /* ── LOG ── */
+        .log-card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+            padding: 20px; margin-bottom: 24px;
+        }
+        .log-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 12px; }
+        .log-body {
+            background: #050508; border-radius: 10px; padding: 16px;
+            font-family: 'JetBrains Mono', monospace; font-size: .8rem; color: #94a3b8;
+            height: 200px; overflow-y: auto; display: flex; flex-direction: column-reverse;
+        }
+        .log-line { line-height: 1.6; }
+        .log-ok   { color: #22c55e; }
+        .log-fail { color: #ef4444; }
+        .log-info { color: #f97316; }
+
+        .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .section-title .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+        .refresh-btn { padding: 6px 14px; font-size: .8rem; border-radius: 6px; border: 1px solid var(--border); background: var(--card2); color: var(--text); cursor: pointer; margin-left: auto; transition: border-color .2s; }
+        .refresh-btn:hover { border-color: var(--blue); }
+
+        .flashsale-id-input { font-family: 'JetBrains Mono', monospace; }
+
+        .overall-bar { margin-bottom: 24px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+        .overall-bar h3 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; }
+        .overall-bar .pct { font-size: 2.5rem; font-weight: 800; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+
+        .error-msg { color: var(--red); font-size: .85rem; padding: 12px 16px; background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.2); border-radius: 8px; margin-bottom: 16px; display: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-title">
+            <span style="font-size:2rem">⚡</span>
+            <div>
+                <h1>Flash Sale Dashboard</h1>
+                <p style="color:var(--muted);font-size:.85rem">Giám sát chiến dịch & kiểm tra tính toàn vẹn kho</p>
+            </div>
+        </div>
+        <div class="role-tabs">
+            <button class="role-tab active" onclick="switchView('simulator')">🔧 Simulator Test</button>
+            <button class="role-tab" onclick="switchView('monitor')">📊 Live Monitor</button>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         VIEW 1: SIMULATOR
+    ══════════════════════════════════════════════════════ -->
+    <div id="view-simulator" class="sim-section active">
+
+        <!-- Config -->
+        <div class="config-card">
+            <h2>⚙️ Cấu hình Simulator</h2>
+
+            <div class="input-group">
+                <label>Backend URL</label>
+                <input id="baseUrl" type="text" value="http://localhost:8080" placeholder="http://localhost:8080">
+            </div>
+            <div class="input-group">
+                <label>Variant ID</label>
+                <input id="variantId" type="text" placeholder="Dán variantId từ MongoDB vào đây">
+            </div>
+            <div class="input-group">
+                <label>Số request (users)</label>
+                <input id="totalReqs" type="number" value="200" min="1" max="2000">
+            </div>
+            <div class="input-group">
+                <label>Đồng thời (batch size)</label>
+                <input id="batchSize" type="number" value="20" min="1" max="100">
+            </div>
+            <div class="input-group">
+                <label>Stock ban đầu (kiểm kho)</label>
+                <input id="initialStock" type="number" value="50" min="0">
+            </div>
+            <div class="input-group">
+                <label>Delay giữa batch (ms)</label>
+                <input id="delayMs" type="number" value="0" min="0" max="5000">
+            </div>
+
+            <div class="btn-area">
+                <button class="btn btn-primary" id="startBtn" onclick="startSimulation()">🔥 Bắt đầu Flash Sale</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetSimulation()">🔁 Reset</button>
+            </div>
+        </div>
+
+        <!-- Error -->
+        <div id="errorMsg" class="error-msg"></div>
+
+        <!-- Progress -->
+        <div class="progress-card">
+            <h3>⏳ Tiến trình</h3>
+            <div class="progress-bar-wrap">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+            <div class="progress-label">
+                <span id="progressText">Chưa bắt đầu</span>
+                <span id="progressPct">0%</span>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="glow" style="background:#f97316"></div>
+                <div class="stat-label">Tổng gửi</div>
+                <div class="stat-value" id="statTotal" style="color:#f97316">0</div>
+                <div class="stat-sub">/ <span id="statTotalTarget">0</span> request</div>
+            </div>
+            <div class="stat-card">
+                <div class="glow" style="background:#22c55e"></div>
+                <div class="stat-label">✅ Thành công</div>
+                <div class="stat-value" id="statSuccess" style="color:#22c55e">0</div>
+                <div class="stat-sub" id="statSuccessPct">0%</div>
+            </div>
+            <div class="stat-card">
+                <div class="glow" style="background:#ef4444"></div>
+                <div class="stat-label">❌ Hết hàng</div>
+                <div class="stat-value" id="statOOS" style="color:#ef4444">0</div>
+                <div class="stat-sub" id="statOOSPct">0%</div>
+            </div>
+            <div class="stat-card">
+                <div class="glow" style="background:#3b82f6"></div>
+                <div class="stat-label">⏱ Avg Response</div>
+                <div class="stat-value" id="statAvg" style="color:#3b82f6; font-size:1.6rem">—</div>
+                <div class="stat-sub">milliseconds</div>
+            </div>
+            <div class="stat-card">
+                <div class="glow" style="background:#eab308"></div>
+                <div class="stat-label">📦 Stock còn lại</div>
+                <div class="stat-value" id="statStock" style="color:#eab308">—</div>
+                <div class="stat-sub" id="statStockCheck"></div>
+            </div>
+            <div class="stat-card">
+                <div class="glow" style="background:#8b5cf6"></div>
+                <div class="stat-label">🕐 Tổng thời gian</div>
+                <div class="stat-value" id="statTime" style="color:#8b5cf6; font-size:1.6rem">—</div>
+                <div class="stat-sub">giây</div>
+            </div>
+        </div>
+
+        <!-- Log -->
+        <div class="log-card">
+            <h3>📋 Request Log (100 dòng cuối)</h3>
+            <div class="log-body" id="logBody">
+                <div class="log-line log-info">— Chưa có hoạt động —</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         VIEW 2: LIVE MONITOR (Admin / Seller)
+    ══════════════════════════════════════════════════════ -->
+    <div id="view-monitor" class="monitor-section">
+
+        <!-- Config -->
+        <div class="config-card">
+            <h2>🔍 Tìm Flash Sale để xem thống kê</h2>
+
+            <div class="input-group">
+                <label>Backend URL</label>
+                <input id="monitorUrl" type="text" value="http://localhost:8080">
+            </div>
+            <div class="input-group">
+                <label>JWT Token (Admin hoặc Seller)</label>
+                <input id="jwtToken" type="text" placeholder="Bearer eyJ...">
+            </div>
+            <div class="input-group" style="grid-column: span 2">
+                <label>Flash Sale ID (Admin: xem cụ thể) — để trống = Seller xem của mình</label>
+                <input id="flashSaleId" type="text" class="flashsale-id-input" placeholder="Để trống nếu là Seller (tự load của shop)">
+            </div>
+
+            <div class="btn-area">
+                <button class="btn btn-primary" onclick="loadMonitor()">📊 Load thống kê</button>
+                <button class="btn btn-secondary" onclick="autoRefreshToggle()" id="autoRefreshBtn">🔄 Auto-refresh: OFF</button>
+            </div>
+        </div>
+
+        <!-- Overall Summary -->
+        <div class="overall-bar" id="overallCard" style="display:none">
+            <h3>Tổng quan chiến dịch</h3>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap:20px; margin-top:12px">
+                <div>
+                    <div class="stat-label">Đã bán</div>
+                    <div class="pct" id="monTotalSold">—</div>
+                    <div class="stat-sub" id="monTotalSoldSub"></div>
+                </div>
+                <div>
+                    <div class="stat-label">Còn lại</div>
+                    <div class="stat-value" style="color:var(--green)" id="monRemaining">—</div>
+                    <div class="stat-sub">sản phẩm</div>
+                </div>
+                <div>
+                    <div class="stat-label">Trạng thái</div>
+                    <div class="stat-value" style="font-size:1.2rem" id="monStatus">—</div>
+                </div>
+                <div>
+                    <div class="stat-label">% Đã bán</div>
+                    <div style="margin-top:8px">
+                        <div class="progress-bar-wrap">
+                            <div class="progress-bar-fill" id="monProgressBar"></div>
+                        </div>
+                        <div style="font-size:.85rem;color:var(--accent);font-weight:700;margin-top:4px" id="monPct">0%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items table -->
+        <div class="table-card" id="itemsCard" style="display:none">
+            <h3>
+                <span>📦 Chi tiết sản phẩm</span>
+                <button class="refresh-btn" onclick="loadMonitor()">↻ Refresh</button>
+            </h3>
+            <table class="item-table">
+                <thead>
+                    <tr>
+                        <th>Variant ID</th>
+                        <th>Giá Flash Sale</th>
+                        <th>Stock phân bổ</th>
+                        <th>Đã bán</th>
+                        <th>Còn lại</th>
+                        <th>% Bán</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody id="itemsTableBody"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let running = false;
+let stats = { sent:0, success:0, oos:0, error:0, totalMs:0, times:[], lastStock:-1 };
+let wallStart = 0;
+let autoRefreshInterval = null;
+const LOG_MAX = 100;
+
+// ═══════════════════════════════════════════════════════════
+// VIEW SWITCH
+// ═══════════════════════════════════════════════════════════
+function switchView(view) {
+    document.getElementById('view-simulator').classList.toggle('active', view === 'simulator');
+    document.getElementById('view-monitor').classList.toggle('active', view === 'monitor');
+    document.querySelectorAll('.role-tab').forEach((t,i) => {
+        t.classList.toggle('active', (i===0 && view==='simulator') || (i===1 && view==='monitor'));
+    });
+}
+
+// ═══════════════════════════════════════════════════════════
+// SIMULATOR
+// ═══════════════════════════════════════════════════════════
+async function startSimulation() {
+    const baseUrl    = document.getElementById('baseUrl').value.trim().replace(/\/$/, '');
+    const variantId  = document.getElementById('variantId').value.trim();
+    const totalReqs  = parseInt(document.getElementById('totalReqs').value) || 200;
+    const batchSize  = parseInt(document.getElementById('batchSize').value) || 20;
+    const delayMs    = parseInt(document.getElementById('delayMs').value) || 0;
+
+    if (!variantId) { showError('Vui lòng nhập Variant ID!'); return; }
+    hideError();
+
+    running = true;
+    stats = { sent:0, success:0, oos:0, error:0, totalMs:0, times:[], lastStock:-1 };
+    wallStart = Date.now();
+
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('statTotalTarget').textContent = totalReqs;
+    clearLog();
+    addLog(`🚀 Bắt đầu bắn ${totalReqs} request | batch=${batchSize} | delay=${delayMs}ms`, 'info');
+
+    const endpoint = `${baseUrl}/api/flash-sales/order`;
+    const body = JSON.stringify({ variantId, quantity: 1 });
+
+    for (let i = 0; i < totalReqs && running; i += batchSize) {
+        const batch = Math.min(batchSize, totalReqs - i);
+        const promises = [];
+
+        for (let j = 0; j < batch; j++) {
+            promises.push(sendOrder(endpoint, body, i + j + 1));
+        }
+
+        await Promise.all(promises);
+        updateUI(totalReqs);
+
+        if (delayMs > 0 && i + batchSize < totalReqs) {
+            await sleep(delayMs);
+        }
+    }
+
+    running = false;
+    const elapsed = ((Date.now() - wallStart) / 1000).toFixed(2);
+    document.getElementById('statTime').textContent = elapsed;
+    document.getElementById('startBtn').disabled = false;
+    updateUI(totalReqs);
+    finalCheck(totalReqs);
+    addLog(`✅ XONG! Tổng thời gian: ${elapsed}s`, 'info');
+}
+
+async function sendOrder(endpoint, body, num) {
+    const t0 = Date.now();
+    try {
+        const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body,
+            signal: AbortSignal.timeout(10000)
+        });
+        const elapsed = Date.now() - t0;
+        const data = await res.json().catch(() => ({}));
+
+        stats.sent++;
+        stats.totalMs += elapsed;
+        stats.times.push(elapsed);
+
+        if (data.success) {
+            stats.success++;
+            if (data.remainingStock !== undefined) stats.lastStock = data.remainingStock;
+            if (num % 10 === 0) addLog(`#${num} ✅ SUCCESS — còn ${data.remainingStock} | ${elapsed}ms`, 'ok');
+        } else if (data.status === 'OUT_OF_STOCK') {
+            stats.oos++;
+            if (num % 50 === 0) addLog(`#${num} ❌ HẾT HÀNG | ${elapsed}ms`, 'fail');
+        } else {
+            stats.error++;
+            addLog(`#${num} 💥 LỖI: ${data.message || res.status} | ${elapsed}ms`, 'fail');
+        }
+    } catch (e) {
+        stats.sent++;
+        stats.error++;
+        stats.times.push(Date.now() - t0);
+        addLog(`#${num} 💥 NETWORK ERROR: ${e.message}`, 'fail');
+    }
+}
+
+function updateUI(totalReqs) {
+    const pct = totalReqs > 0 ? Math.round(stats.sent / totalReqs * 100) : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressText').textContent = `${stats.sent} / ${totalReqs}`;
+    document.getElementById('progressPct').textContent = pct + '%';
+
+    document.getElementById('statTotal').textContent   = stats.sent;
+    document.getElementById('statSuccess').textContent = stats.success;
+    document.getElementById('statOOS').textContent     = stats.oos;
+
+    const s = stats.sent;
+    document.getElementById('statSuccessPct').textContent = s > 0 ? `${(stats.success/s*100).toFixed(1)}%` : '0%';
+    document.getElementById('statOOSPct').textContent     = s > 0 ? `${(stats.oos/s*100).toFixed(1)}%` : '0%';
+
+    const avg = stats.times.length > 0
+        ? Math.round(stats.times.reduce((a,b)=>a+b,0) / stats.times.length)
+        : 0;
+    document.getElementById('statAvg').textContent = avg + 'ms';
+
+    if (stats.lastStock >= 0) {
+        document.getElementById('statStock').textContent = stats.lastStock;
+    }
+
+    if (!running) {
+        document.getElementById('statTime').textContent =
+            ((Date.now() - wallStart) / 1000).toFixed(2) + 's';
+    }
+}
+
+function finalCheck(totalReqs) {
+    const initStock = parseInt(document.getElementById('initialStock').value) || 0;
+    if (initStock > 0) {
+        const ok = stats.success <= initStock;
+        const el = document.getElementById('statStockCheck');
+        el.textContent = ok
+            ? `✅ OK: ${stats.success} đơn ≤ ${initStock} stock`
+            : `❌ ÂM KHO! ${stats.success} đơn > ${initStock} stock`;
+        el.style.color = ok ? '#22c55e' : '#ef4444';
+    }
+}
+
+function resetSimulation() {
+    running = false;
+    stats = { sent:0, success:0, oos:0, error:0, totalMs:0, times:[], lastStock:-1 };
+    ['statTotal','statSuccess','statOOS'].forEach(id => document.getElementById(id).textContent = '0');
+    ['statAvg','statStock','statTime'].forEach(id => document.getElementById(id).textContent = '—');
+    document.getElementById('statSuccessPct').textContent = '0%';
+    document.getElementById('statOOSPct').textContent = '0%';
+    document.getElementById('statStockCheck').textContent = '';
+    document.getElementById('progressBar').style.width = '0%';
+    document.getElementById('progressText').textContent = 'Chưa bắt đầu';
+    document.getElementById('progressPct').textContent = '0%';
+    document.getElementById('startBtn').disabled = false;
+    clearLog();
+}
+
+// ═══════════════════════════════════════════════════════════
+// MONITOR (Admin / Seller)
+// ═══════════════════════════════════════════════════════════
+async function loadMonitor() {
+    const baseUrl    = document.getElementById('monitorUrl').value.trim().replace(/\/$/, '');
+    const jwt        = document.getElementById('jwtToken').value.trim();
+    const fsId       = document.getElementById('flashSaleId').value.trim();
+
+    if (!jwt) { alert('Cần nhập JWT token!'); return; }
+
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': jwt.startsWith('Bearer ') ? jwt : `Bearer ${jwt}`
+    };
+
+    try {
+        let data;
+        if (fsId) {
+            // Admin: xem flash sale cụ thể
+            const res = await fetch(`${baseUrl}/api/flash-sales/stats/${fsId}`, { headers });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            data = await res.json();
+            renderMonitorSingle(data);
+        } else {
+            // Seller: xem flash sale của shop mình
+            const res = await fetch(`${baseUrl}/api/flash-sales/stats/shop/my`, { headers });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const list = await res.json();
+            if (list.length === 0) { alert('Shop chưa có sản phẩm trong Flash Sale nào.'); return; }
+            renderMonitorSingle(list[0]); // Hiển thị flash sale đầu tiên
+        }
+    } catch (e) {
+        alert('Lỗi load: ' + e.message);
+    }
+}
+
+function renderMonitorSingle(data) {
+    document.getElementById('overallCard').style.display = '';
+    document.getElementById('itemsCard').style.display = '';
+
+    document.getElementById('monTotalSold').textContent = data.totalSold;
+    document.getElementById('monTotalSoldSub').textContent = `/ ${data.totalSaleStock} sản phẩm`;
+    document.getElementById('monRemaining').textContent = data.totalRemainingStock;
+    document.getElementById('monStatus').textContent = data.flashSaleStatus || '—';
+    document.getElementById('monProgressBar').style.width = (data.soldPercentage || 0) + '%';
+    document.getElementById('monPct').textContent = (data.soldPercentage || 0) + '%';
+
+    const tbody = document.getElementById('itemsTableBody');
+    tbody.innerHTML = '';
+    (data.items || []).forEach(item => {
+        const pct = item.soldPercentage || 0;
+        tbody.innerHTML += `
+        <tr>
+            <td><code style="font-size:.75rem;color:#94a3b8">${(item.variantId||'—').substring(0,16)}…</code></td>
+            <td style="color:#f97316;font-weight:600">${item.salePrice ? Number(item.salePrice).toLocaleString('vi-VN') + '₫' : '—'}</td>
+            <td>${item.saleStock}</td>
+            <td style="color:#22c55e;font-weight:600">${item.sold}</td>
+            <td style="color:#ef4444;font-weight:600">${item.remainingStock}</td>
+            <td>
+                <div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:${pct}%"></div></div>
+                ${pct}%
+            </td>
+            <td><span class="status-badge status-${item.status}">${item.status}</span></td>
+        </tr>`;
+    });
+}
+
+let autoRefreshOn = false;
+function autoRefreshToggle() {
+    autoRefreshOn = !autoRefreshOn;
+    document.getElementById('autoRefreshBtn').textContent = `🔄 Auto-refresh: ${autoRefreshOn ? 'ON (5s)' : 'OFF'}`;
+    if (autoRefreshOn) {
+        autoRefreshInterval = setInterval(loadMonitor, 5000);
+    } else {
+        clearInterval(autoRefreshInterval);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// LOG HELPERS
+// ═══════════════════════════════════════════════════════════
+let logLines = [];
+function addLog(msg, type = '') {
+    const ts = new Date().toLocaleTimeString('vi-VN');
+    logLines.unshift({ ts, msg, type });
+    if (logLines.length > LOG_MAX) logLines.pop();
+    renderLog();
+}
+function clearLog() { logLines = []; renderLog(); }
+function renderLog() {
+    document.getElementById('logBody').innerHTML = logLines
+        .map(l => `<div class="log-line log-${l.type}">[${l.ts}] ${l.msg}</div>`)
+        .join('') || '<div class="log-line log-info">— Chưa có hoạt động —</div>';
+}
+
+// ═══════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = '⚠️ ' + msg;
+    el.style.display = 'block';
+}
+function hideError() { document.getElementById('errorMsg').style.display = 'none'; }
+</script>
+</body>
+</html>

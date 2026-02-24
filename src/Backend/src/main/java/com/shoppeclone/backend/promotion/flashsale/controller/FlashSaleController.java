@@ -4,6 +4,7 @@ import com.shoppeclone.backend.promotion.flashsale.dto.*;
 import com.shoppeclone.backend.promotion.flashsale.entity.FlashSale;
 import com.shoppeclone.backend.promotion.flashsale.entity.FlashSaleCampaign;
 import com.shoppeclone.backend.promotion.flashsale.entity.FlashSaleItem;
+import com.shoppeclone.backend.promotion.flashsale.service.FlashSaleOrderService;
 import com.shoppeclone.backend.promotion.flashsale.service.FlashSaleService;
 import com.shoppeclone.backend.shop.entity.Shop;
 import com.shoppeclone.backend.shop.service.ShopService;
@@ -21,6 +22,7 @@ import java.util.List;
 public class FlashSaleController {
 
     private final FlashSaleService flashSaleService;
+    private final FlashSaleOrderService flashSaleOrderService;
     private final ShopService shopService;
 
     // --- PUBLIC ENDPOINTS ---
@@ -155,5 +157,49 @@ public class FlashSaleController {
     public ResponseEntity<Void> deleteFlashSale(@PathVariable String id) {
         flashSaleService.deleteFlashSale(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // =========================================================================
+    // FLASH SALE ORDER — Dùng cho Simulator Tool bắn request
+    // =========================================================================
+
+    /**
+     * PUBLIC endpoint — Không cần JWT để Simulator Tool có thể bắn trực tiếp.
+     * Dùng MongoDB atomic findAndModify → đảm bảo không âm kho.
+     *
+     * Body: { "variantId": "xxx", "quantity": 1 }
+     */
+    @PostMapping("/order")
+    public ResponseEntity<FlashSaleOrderResult> placeFlashSaleOrder(
+            @RequestBody FlashSaleOrderRequest request) {
+        FlashSaleOrderResult result = flashSaleOrderService.placeOrder(request);
+        return ResponseEntity.ok(result);
+    }
+
+    // =========================================================================
+    // STATS ENDPOINTS — Admin & Seller xem dashboard
+    // =========================================================================
+
+    /**
+     * ADMIN: Xem thống kê toàn bộ flash sale slot.
+     * GET /api/flash-sales/stats/{flashSaleId}
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/stats/{flashSaleId}")
+    public ResponseEntity<FlashSaleStatsResponse> getFlashSaleStats(
+            @PathVariable String flashSaleId) {
+        return ResponseEntity.ok(flashSaleOrderService.getStatsByFlashSaleId(flashSaleId));
+    }
+
+    /**
+     * SELLER: Xem thống kê sản phẩm của shop mình trong flash sale.
+     * GET /api/flash-sales/stats/shop/my
+     */
+    @PreAuthorize("hasRole('SELLER')")
+    @GetMapping("/stats/shop/my")
+    public ResponseEntity<java.util.List<FlashSaleStatsResponse>> getMyShopFlashSaleStats(
+            Authentication auth) {
+        Shop shop = shopService.getMyShop(auth.getName());
+        return ResponseEntity.ok(flashSaleOrderService.getStatsByShopId(shop.getId()));
     }
 }
