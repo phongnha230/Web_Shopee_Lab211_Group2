@@ -368,24 +368,25 @@
                 <div id="quantitySection" class="mb-6">
                     <p class="text-gray-700 font-semibold mb-3">Quantity</p>
                     <div class="flex items-center gap-3">
-                        <button onclick="decreaseQty()"
+                        <button id="decreaseQtyBtn" onclick="decreaseQty()"
                             class="w-10 h-10 border-2 border-gray-300 rounded hover:border-orange-500 transition"><i
                                 class="fas fa-minus text-gray-600"></i></button>
                         <input type="number" id="quantity" value="1" min="1"
                             class="w-20 h-10 text-center border-2 border-gray-300 rounded focus:border-orange-500 focus:outline-none">
-                        <button onclick="increaseQty()"
+                        <button id="increaseQtyBtn" onclick="increaseQty()"
                             class="w-10 h-10 border-2 border-gray-300 rounded hover:border-orange-500 transition"><i
                                 class="fas fa-plus text-gray-600"></i></button>
                         <span class="text-gray-600 ml-2" id="stockCount">Checking stock...</span>
                     </div>
+                    <p id="quantityError" class="text-sm text-red-500 mt-2 hidden"></p>
                 </div>
 
                 <div id="actionButtons" class="flex gap-4 mb-4">
-                    <button onclick="addToCart()"
+                    <button id="addToCartBtn" onclick="addToCart()"
                         class="flex-1 border-2 border-orange-500 text-orange-500 py-3 px-6 rounded-lg font-semibold hover:bg-orange-50 transition flex items-center justify-center">
                         <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
                     </button>
-                    <button type="button" onclick="buyNow()"
+                    <button id="buyNowBtn" type="button" onclick="buyNow()"
                         class="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-lg font-semibold transition">Buy
                         Now</button>
                 </div>
@@ -504,6 +505,7 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             console.log("Initializing Product Page...");
+            setupQuantityGuards();
 
             // 1. UPDATE NAVBAR FIRST (Sync Header)
             updateNavbar();
@@ -1022,6 +1024,74 @@
             updatePriceDisplay();
         }
 
+        function getCurrentAvailableStock() {
+            const stock = Number(window.currentAvailableStock);
+            if (!Number.isFinite(stock)) return 0;
+            return Math.max(0, Math.floor(stock));
+        }
+
+        function setButtonDisabled(button, disabled) {
+            if (!button) return;
+            button.disabled = !!disabled;
+            button.classList.toggle('opacity-50', !!disabled);
+            button.classList.toggle('cursor-not-allowed', !!disabled);
+        }
+
+        function setQuantityError(message) {
+            const errorEl = document.getElementById('quantityError');
+            if (!errorEl) return;
+            if (message) {
+                errorEl.textContent = message;
+                errorEl.classList.remove('hidden');
+            } else {
+                errorEl.textContent = '';
+                errorEl.classList.add('hidden');
+            }
+        }
+
+        function syncQuantityUi(options = {}) {
+            const qInput = document.getElementById('quantity');
+            if (!qInput) return true;
+
+            const stock = getCurrentAvailableStock();
+            let q = parseInt(qInput.value, 10);
+            if (!Number.isFinite(q) || q < 1) q = 1;
+
+            if (stock <= 0) {
+                qInput.value = 1;
+                setQuantityError('Out of stock');
+                setButtonDisabled(document.getElementById('decreaseQtyBtn'), true);
+                setButtonDisabled(document.getElementById('increaseQtyBtn'), true);
+                setButtonDisabled(document.getElementById('addToCartBtn'), true);
+                setButtonDisabled(document.getElementById('buyNowBtn'), true);
+                return false;
+            }
+
+            if (options.clampToStock && q > stock) {
+                q = stock;
+            }
+
+            qInput.value = q;
+            const invalid = q > stock;
+
+            setQuantityError(invalid ? `Insufficient stock. Only ${stock} item(s) available.` : '');
+            setButtonDisabled(document.getElementById('decreaseQtyBtn'), q <= 1);
+            setButtonDisabled(document.getElementById('increaseQtyBtn'), q >= stock);
+            setButtonDisabled(document.getElementById('addToCartBtn'), invalid);
+            setButtonDisabled(document.getElementById('buyNowBtn'), invalid);
+
+            return !invalid;
+        }
+
+        function setupQuantityGuards() {
+            const qInput = document.getElementById('quantity');
+            if (!qInput || qInput.dataset.guardBound === '1') return;
+
+            qInput.addEventListener('input', () => syncQuantityUi());
+            qInput.addEventListener('blur', () => syncQuantityUi({ clampToStock: true }));
+            qInput.dataset.guardBound = '1';
+        }
+
         function updatePriceDisplay() {
             const product = window.currentProduct;
             if (!product) return;
@@ -1103,6 +1173,8 @@
             }
             const stockEl = document.getElementById('stockCount');
             if (stockEl) stockEl.textContent = `${stock} available`;
+            window.currentAvailableStock = stock;
+            syncQuantityUi();
 
             // --- SOLD PROGRESS BAR ---
             const soldContainer = document.getElementById('flashSaleSoldContainer');
@@ -1187,11 +1259,16 @@
         function decreaseQty() {
             let q = parseInt(document.getElementById('quantity').value) || 1;
             if (q > 1) document.getElementById('quantity').value = q - 1;
+            syncQuantityUi();
         }
 
         function increaseQty() {
             let q = parseInt(document.getElementById('quantity').value) || 1;
-            document.getElementById('quantity').value = q + 1;
+            const stock = getCurrentAvailableStock();
+            if (stock > 0 && q < stock) {
+                document.getElementById('quantity').value = q + 1;
+            }
+            syncQuantityUi();
         }
 
         async function addToCart(isBuyNow = false) {
@@ -1202,6 +1279,10 @@
             }
             const product = window.currentProduct;
             if (!product) return false;
+            if (!syncQuantityUi()) {
+                alert('Số lượng tồn kho không đủ.');
+                return false;
+            }
 
             const quantity = parseInt(document.getElementById('quantity').value) || 1;
             const selectedColorBtn = document.querySelector('#colorContainer button.border-orange-500');
@@ -1247,6 +1328,10 @@
             const product = window.currentProduct;
             if (!product) {
                 alert('Product data not loaded yet!');
+                return;
+            }
+            if (!syncQuantityUi()) {
+                alert('Số lượng tồn kho không đủ.');
                 return;
             }
             // Ensure productId - fallback to URL id (for mock products or edge cases)
