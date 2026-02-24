@@ -2,6 +2,7 @@ package com.shoppeclone.backend.dispute.entity;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 
@@ -11,6 +12,7 @@ public class Dispute {
     @Id
     private String id;
 
+    @Indexed(unique = true)
     private String orderId;
     private String buyerId;
     private String sellerId;

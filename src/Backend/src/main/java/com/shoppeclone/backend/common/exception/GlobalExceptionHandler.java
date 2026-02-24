@@ -3,16 +3,59 @@ package com.shoppeclone.backend.common.exception;
 import com.shoppeclone.backend.review.exception.ReviewException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    // ── Validation errors (@Valid) ──────────────────────────────────────────────
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Object> handleValidationException(
+            MethodArgumentNotValidException ex, WebRequest request) {
+
+        List<String> fieldErrors = ex.getBindingResult().getFieldErrors().stream()
+                .map(FieldError::getDefaultMessage)
+                .collect(Collectors.toList());
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Validation Failed");
+        body.put("messages", fieldErrors);
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    // ── ResponseStatusException (4xx từ controller) ─────────────────────────────
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Object> handleResponseStatusException(
+            ResponseStatusException ex, WebRequest request) {
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", ex.getStatusCode().value());
+        body.put("error", ex.getReason() != null ? ex.getReason() : ex.getStatusCode().toString());
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+
+        return new ResponseEntity<>(body, ex.getStatusCode());
+    }
+
+    // ── Domain/business exceptions ───────────────────────────────────────────────
 
     @ExceptionHandler(ReviewException.class)
     public ResponseEntity<Object> handleReviewException(ReviewException ex, WebRequest request) {
