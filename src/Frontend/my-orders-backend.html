@@ -227,6 +227,7 @@
             const token = localStorage.getItem('accessToken');
             if (!token) {
                 if (confirm('Phiên đăng nhập hết hạn. Đăng nhập lại?')) {
+                    localStorage.setItem('viewOrderId', orderId);
                     window.location.href = 'login.html?returnUrl=' + encodeURIComponent('order-detail.html?id=' + orderId);
                 }
                 return;

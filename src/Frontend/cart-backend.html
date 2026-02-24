@@ -153,6 +153,7 @@
 
     <script>
         let backendCart = null;
+        const formatVND = (n) => new Intl.NumberFormat('vi-VN').format(n);
 
         // Load cart from backend on page load
         async function loadCart() {
@@ -219,7 +220,7 @@
 
                     <!-- Unit Price -->
                     <div class="col-span-2 text-center text-sm">
-                        <div class="text-gray-800 font-medium">₫${item.price}</div>
+                        <div class="text-gray-800 font-medium">₫${formatVND(item.price)}</div>
                     </div>
 
                     <!-- Quantity -->
@@ -233,7 +234,7 @@
 
                     <!-- Total Price -->
                     <div class="col-span-1 text-center font-bold text-orange-500 text-sm">
-                        ₫${itemTotal.toFixed(2)}
+                        ₫${formatVND(itemTotal)}
                     </div>
 
                     <!-- Actions -->
@@ -298,7 +299,6 @@
             const shipping = itemCount > 0 ? 15000 : 0;
             const total = subtotal + shipping;
 
-            const formatVND = (n) => new Intl.NumberFormat('vi-VN').format(n);
             document.getElementById('summaryItemCount').textContent = itemCount;
             document.getElementById('subtotal').textContent = `₫${formatVND(subtotal)}`;
             document.getElementById('shippingFee').textContent = `₫${formatVND(shipping)}`;

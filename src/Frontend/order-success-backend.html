@@ -196,6 +196,7 @@
 
         function viewOrderDetails() {
             if (currentOrderId) {
+                localStorage.setItem('viewOrderId', currentOrderId);
                 window.location.href = `order-detail.html?id=${currentOrderId}`;
             } else {
                 window.location.href = 'my-orders-backend.html';
