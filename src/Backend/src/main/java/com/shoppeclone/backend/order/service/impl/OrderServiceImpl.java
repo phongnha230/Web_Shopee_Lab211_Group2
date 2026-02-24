@@ -548,10 +548,32 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<Order> getOrdersByShopId(String shopId, OrderStatus status) {
-        if (status == null) {
-            return orderRepository.findByShopId(shopId);
-        }
-        return orderRepository.findByShopIdAndOrderStatus(shopId, status);
+        List<Order> orders = (status == null)
+                ? orderRepository.findByShopId(shopId)
+                : orderRepository.findByShopIdAndOrderStatus(shopId, status);
+
+        // Seller dashboard nghiệp vụ: đơn mới tạo hiển thị trước.
+        orders.sort((a, b) -> {
+            java.time.LocalDateTime aTime = a != null ? a.getCreatedAt() : null;
+            java.time.LocalDateTime bTime = b != null ? b.getCreatedAt() : null;
+
+            if (aTime == null && bTime == null) {
+                String aId = (a != null && a.getId() != null) ? a.getId() : "";
+                String bId = (b != null && b.getId() != null) ? b.getId() : "";
+                return bId.compareTo(aId);
+            }
+            if (aTime == null) return 1;
+            if (bTime == null) return -1;
+
+            int timeCompare = bTime.compareTo(aTime); // newest first
+            if (timeCompare != 0) return timeCompare;
+
+            String aId = (a != null && a.getId() != null) ? a.getId() : "";
+            String bId = (b != null && b.getId() != null) ? b.getId() : "";
+            return bId.compareTo(aId);
+        });
+
+        return orders;
     }
 
     @Override

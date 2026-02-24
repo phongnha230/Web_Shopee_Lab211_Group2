@@ -209,7 +209,40 @@ public class FlashSaleServiceImpl implements FlashSaleService {
 
     @Override
     public List<FlashSaleItem> getRegistrationsByShopId(String shopId) {
-        return flashSaleItemRepository.findByShopId(shopId);
+        List<FlashSaleItem> registrations = flashSaleItemRepository.findByShopId(shopId);
+        registrations.sort((a, b) -> {
+            java.util.Map<String, Integer> statusPriority = java.util.Map.of(
+                    "PENDING", 0,
+                    "APPROVED", 1,
+                    "REJECTED", 2
+            );
+            String aStatus = a != null && a.getStatus() != null ? a.getStatus().toUpperCase() : "";
+            String bStatus = b != null && b.getStatus() != null ? b.getStatus().toUpperCase() : "";
+            int aPriority = statusPriority.getOrDefault(aStatus, 99);
+            int bPriority = statusPriority.getOrDefault(bStatus, 99);
+            if (aPriority != bPriority) {
+                return Integer.compare(aPriority, bPriority);
+            }
+
+            java.time.LocalDateTime aTime = a != null ? a.getCreatedAt() : null;
+            java.time.LocalDateTime bTime = b != null ? b.getCreatedAt() : null;
+
+            if (aTime == null && bTime == null) {
+                String aId = (a != null && a.getId() != null) ? a.getId() : "";
+                String bId = (b != null && b.getId() != null) ? b.getId() : "";
+                return bId.compareTo(aId);
+            }
+            if (aTime == null) return 1;
+            if (bTime == null) return -1;
+
+            int timeCompare = bTime.compareTo(aTime); // newest first
+            if (timeCompare != 0) return timeCompare;
+
+            String aId = (a != null && a.getId() != null) ? a.getId() : "";
+            String bId = (b != null && b.getId() != null) ? b.getId() : "";
+            return bId.compareTo(aId);
+        });
+        return registrations;
     }
 
     @Override

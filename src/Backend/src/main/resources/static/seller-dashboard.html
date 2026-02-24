@@ -2318,7 +2318,7 @@
                 }
 
                 if (ordersRes.ok) {
-                    const orders = await ordersRes.json();
+                    const orders = sortOrdersNewestFirst(await ordersRes.json());
                     allOrders = orders;
                     currentOrderStatus = status;
                     renderOrders(orders);
@@ -2344,6 +2344,15 @@
             }
 
             loadOrders(status);
+        }
+
+        function sortOrdersNewestFirst(orders) {
+            return [...(orders || [])].sort((a, b) => {
+                const aTime = a?.createdAt ? new Date(a.createdAt).getTime() : 0;
+                const bTime = b?.createdAt ? new Date(b.createdAt).getTime() : 0;
+                if (bTime !== aTime) return bTime - aTime;
+                return String(b?.id || '').localeCompare(String(a?.id || ''));
+            });
         }
 
         function renderOrders(orders) {
