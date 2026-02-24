@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/webhooks/shipping")
@@ -26,7 +28,7 @@ public class WebhookController {
     }
 
     @PostMapping("/update")
-    public ResponseEntity<String> receiveShippingUpdate(@RequestBody ShippingUpdatePayload payload) {
+    public ResponseEntity<Map<String, Object>> receiveShippingUpdate(@RequestBody ShippingUpdatePayload payload) {
         // 1. Find Order by Tracking Code
         Order order = orderRepository.findByTrackingCode(payload.getTrackingCode())
                 .orElseThrow(() -> new RuntimeException("Tracking code not found: " + payload.getTrackingCode()));
@@ -56,6 +58,16 @@ public class WebhookController {
         order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
 
-        return ResponseEntity.ok("Received");
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("success", true);
+        response.put("orderId", order.getId());
+        response.put("trackingCode", order.getShipping() != null ? order.getShipping().getTrackingCode() : null);
+        response.put("orderStatus", order.getOrderStatus());
+        response.put("shippingStatus", payload.getStatus());
+        response.put("cancelReason", order.getCancelReason());
+        response.put("message", "Shipping status updated successfully");
+        response.put("updatedAt", order.getUpdatedAt());
+
+        return ResponseEntity.ok(response);
     }
 }

@@ -58,7 +58,9 @@ public class SecurityConfig {
                                                 // Allow POST fix-category for dev (fix product category so vouchers
                                                 // apply)
                                                 .requestMatchers(org.springframework.http.HttpMethod.POST,
-                                                                "/api/debug/products/*/fix-category")
+                                                                "/api/debug/products/*/fix-category",
+                                                                "/api/flash-sales/order") // ✅ Flash Sale Simulator (no
+                                                                                          // JWT needed)
                                                 .permitAll()
                                                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**")
                                                 .permitAll() // ✅ Allow CORS
