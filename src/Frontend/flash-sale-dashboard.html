@@ -1,6 +1,82 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+
+    <!-- Global Fetch Interceptor for Token Refresh -->
+    <script>
+        (function() {
+            const originalFetch = window.fetch;
+            let isRefreshing = false;
+            let refreshPromise = null;
+
+            window.fetch = async function(...args) {
+                let response;
+                try {
+                    response = await originalFetch(...args);
+                } catch (error) {
+                    throw error;
+                }
+                
+                if (response.status === 401 && typeof args[0] === 'string' && !args[0].includes('/auth/login') && !args[0].includes('/auth/refresh-token')) {
+                    const refreshToken = localStorage.getItem('refreshToken');
+                    if (refreshToken) {
+                        if (!isRefreshing) {
+                            isRefreshing = true;
+                            refreshPromise = (async () => {
+                                try {
+                                    const refreshResponse = await originalFetch('http://localhost:8080/api/auth/refresh-token', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Refresh-Token': refreshToken
+                                        }
+                                    });
+                                    
+                                    if (refreshResponse.ok) {
+                                        const data = await refreshResponse.json();
+                                        localStorage.setItem('accessToken', data.accessToken);
+                                        localStorage.setItem('refreshToken', data.refreshToken);
+                                        return data.accessToken;
+                                    } else {
+                                        localStorage.clear();
+                                        window.location.href = 'login.html';
+                                        return new Promise(() => {});
+                                    }
+                                } catch (e) {
+                                    localStorage.clear();
+                                    window.location.href = 'login.html';
+                                    return new Promise(() => {});
+                                } finally {
+                                    isRefreshing = false;
+                                }
+                            })();
+                        }
+
+                        try {
+                            const newAccessToken = await refreshPromise;
+                            if (args[1]) {
+                                args[1].headers = args[1].headers || {};
+                                if (args[1].headers instanceof Headers) {
+                                    args[1].headers.set('Authorization', 'Bearer ' + newAccessToken);
+                                } else {
+                                    args[1].headers['Authorization'] = 'Bearer ' + newAccessToken;
+                                }
+                            }
+                            return originalFetch(...args);
+                        } catch (e) {
+                            return new Promise(() => {});
+                        }
+                    } else {
+                        localStorage.clear();
+                        window.location.href = 'login.html';
+                        return new Promise(() => {});
+                    }
+                }
+                return response;
+            };
+        })();
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⚡ Flash Sale Dashboard</title>
