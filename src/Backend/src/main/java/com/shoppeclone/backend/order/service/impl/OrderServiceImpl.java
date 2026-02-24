@@ -18,6 +18,7 @@ import com.shoppeclone.backend.order.service.OrderService;
 import com.shoppeclone.backend.product.entity.ProductCategory;
 import com.shoppeclone.backend.product.entity.ProductVariant;
 import com.shoppeclone.backend.product.repository.ProductCategoryRepository;
+import com.shoppeclone.backend.product.repository.ProductImageRepository;
 import com.shoppeclone.backend.product.repository.ProductRepository;
 import com.shoppeclone.backend.product.repository.ProductVariantRepository;
 import com.shoppeclone.backend.shipping.entity.ShippingProvider;
@@ -46,6 +47,7 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
     private final ProductCategoryRepository productCategoryRepository;
+    private final ProductImageRepository productImageRepository;
     private final ShippingProviderRepository shippingProviderRepository;
     private final ShippingService shippingService;
     private final PaymentService paymentService;
@@ -176,6 +178,11 @@ public class OrderServiceImpl implements OrderService {
             orderItem.setVariantId(variant.getId());
             orderItem.setPrice(unitPrice);
             orderItem.setQuantity(cartItem.getQuantity());
+            // Snapshot product info at order time
+            if (product != null)
+                orderItem.setProductName(product.getName());
+            orderItem.setVariantName(buildVariantName(variant));
+            orderItem.setProductImage(resolveProductImage(variant, product));
             orderItems.add(orderItem);
 
             totalPrice = totalPrice.add(unitPrice.multiply(BigDecimal.valueOf(cartItem.getQuantity())));
@@ -252,6 +259,11 @@ public class OrderServiceImpl implements OrderService {
             orderItem.setVariantId(variant.getId());
             orderItem.setPrice(unitPrice);
             orderItem.setQuantity(itemReq.getQuantity());
+            // Snapshot product info at order time
+            if (product != null)
+                orderItem.setProductName(product.getName());
+            orderItem.setVariantName(buildVariantName(variant));
+            orderItem.setProductImage(resolveProductImage(variant, product));
             orderItems.add(orderItem);
 
             totalPrice = totalPrice.add(unitPrice.multiply(BigDecimal.valueOf(itemReq.getQuantity())));
@@ -562,11 +574,14 @@ public class OrderServiceImpl implements OrderService {
                 String bId = (b != null && b.getId() != null) ? b.getId() : "";
                 return bId.compareTo(aId);
             }
-            if (aTime == null) return 1;
-            if (bTime == null) return -1;
+            if (aTime == null)
+                return 1;
+            if (bTime == null)
+                return -1;
 
             int timeCompare = bTime.compareTo(aTime); // newest first
-            if (timeCompare != 0) return timeCompare;
+            if (timeCompare != 0)
+                return timeCompare;
 
             String aId = (a != null && a.getId() != null) ? a.getId() : "";
             String bId = (b != null && b.getId() != null) ? b.getId() : "";
@@ -692,6 +707,29 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         orderRepository.deleteByUserId(userId);
+    }
+
+    /** Build a human-readable variant name, e.g. "Red - L" or "Default" */
+    private String buildVariantName(ProductVariant variant) {
+        if (variant == null)
+            return "Default";
+        String name = ((variant.getColor() != null ? variant.getColor() : "")
+                + (variant.getSize() != null && !variant.getSize().isEmpty() ? " - " + variant.getSize() : "")).trim();
+        return name.isEmpty() ? "Default" : name;
+    }
+
+    /** Resolve the best image URL: variant image → first product image */
+    private String resolveProductImage(ProductVariant variant, com.shoppeclone.backend.product.entity.Product product) {
+        if (variant != null && variant.getImageUrl() != null && !variant.getImageUrl().isEmpty()) {
+            return variant.getImageUrl();
+        }
+        if (product != null) {
+            List<com.shoppeclone.backend.product.entity.ProductImage> images = productImageRepository
+                    .findByProductIdOrderByDisplayOrderAsc(product.getId());
+            if (!images.isEmpty())
+                return images.get(0).getImageUrl();
+        }
+        return null;
     }
 
     private boolean updateFlashSaleItemStock(String productId, String variantId, int quantity) {

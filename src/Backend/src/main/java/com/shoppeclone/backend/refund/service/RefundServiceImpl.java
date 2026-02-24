@@ -52,12 +52,23 @@ public class RefundServiceImpl implements RefundService {
     @Override
     public Refund createAndApproveRefund(String orderId, String buyerId, BigDecimal amount, String reason,
             String adminId) {
-        if (refundRepository.findByOrderId(orderId).isPresent()) {
-            throw new RuntimeException("Refund already exists for this order");
+
+        Optional<Refund> existingRefundOpt = refundRepository.findByOrderId(orderId);
+        Refund refund;
+
+        if (existingRefundOpt.isPresent()) {
+            refund = existingRefundOpt.get();
+            // If already approved, maybe we shouldn't restore stock again, but assume it's
+            // safe to update status
+            if (refund.getStatus() == RefundStatus.APPROVED || refund.getStatus() == RefundStatus.REFUNDED) {
+                return refund; // Already handled
+            }
+        } else {
+            refund = new Refund();
+            refund.setOrderId(orderId);
+            refund.setBuyerId(buyerId);
         }
-        Refund refund = new Refund();
-        refund.setOrderId(orderId);
-        refund.setBuyerId(buyerId);
+
         refund.setAmount(amount);
         refund.setReason(reason);
         refund.setStatus(RefundStatus.APPROVED);

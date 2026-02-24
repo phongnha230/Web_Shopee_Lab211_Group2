@@ -456,9 +456,11 @@
             loadHomepageCategories();
             loadFlashSaleCountdown();
             setupGlobalSearch();
+            startHomepageFlashSaleAutoRefresh();
         });
 
         let flashSaleCountdownInterval = null;
+        let homepageFlashSaleRefreshInterval = null;
 
         async function loadFlashSaleCountdown() {
             const hoursEl = document.getElementById('flashSaleHours');
@@ -649,10 +651,10 @@
             }
         }
 
-        async function loadHomepageProducts() {
+        async function refreshHomepageFlashSaleSection() {
+            const flashSaleListEl = document.getElementById('flashSaleList');
+            if (!flashSaleListEl) return;
             try {
-
-                // 1. Load Flash Sale Products
                 const curFsResp = await fetch(`${API_BASE_URL}/flash-sales/current`);
                 if (curFsResp.ok && curFsResp.status !== 204) {
                     const currentFs = await curFsResp.json();
@@ -662,14 +664,32 @@
                             const fsItems = await itemsResp.json();
                             if (fsItems.length > 0) {
                                 renderProductList(fsItems.slice(0, 6), 'flashSaleList', true);
-                            } else {
-                                document.getElementById('flashSaleList').innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">No items in this flash sale.</div>';
+                                return;
                             }
+                            flashSaleListEl.innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">No items in this flash sale.</div>';
+                            return;
                         }
                     }
-                } else {
-                    document.getElementById('flashSaleList').innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">No flash sale active.</div>';
                 }
+                flashSaleListEl.innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">No flash sale active.</div>';
+            } catch (error) {
+                console.error('Error refreshing flash sale section:', error);
+                flashSaleListEl.innerHTML = '<div class="col-span-full text-center text-red-500 py-8">Error loading flash sale.</div>';
+            }
+        }
+
+        function startHomepageFlashSaleAutoRefresh() {
+            if (homepageFlashSaleRefreshInterval) clearInterval(homepageFlashSaleRefreshInterval);
+            homepageFlashSaleRefreshInterval = setInterval(() => {
+                if (document.visibilityState !== 'visible') return;
+                refreshHomepageFlashSaleSection();
+            }, 5000);
+        }
+
+        async function loadHomepageProducts() {
+            try {
+                // 1. Load Flash Sale Products
+                await refreshHomepageFlashSaleSection();
 
                 // 2. Load All Products for Daily Discover
                 const response = await fetch(`${API_BASE_URL}/products`);

@@ -241,12 +241,20 @@
     <script>
         const API_BASE_URL = 'http://localhost:8080/api';
         let countdownInterval = null;
+        let flashSaleItemsRefreshInterval = null;
+        let currentFlashSaleId = null;
         let currentFlashSaleItems = [];
 
         document.addEventListener('DOMContentLoaded', () => {
             updateNavbar();
             updateCartBadge();
             loadFlashSaleData();
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && currentFlashSaleId) {
+                loadFlashSaleItems(currentFlashSaleId);
+            }
         });
 
         async function updateNavbar() {
@@ -318,15 +326,35 @@
             try {
                 const res = await fetch(`${API_BASE_URL}/flash-sales/current`);
                 if (!res.ok || res.status === 204) {
+                    stopFlashSaleItemsAutoRefresh();
                     showNoActiveSale();
                     return;
                 }
                 const currentFs = await res.json();
+                currentFlashSaleId = currentFs.id || null;
                 startCountdown(currentFs.endTime);
                 loadFlashSaleItems(currentFs.id);
+                startFlashSaleItemsAutoRefresh(currentFs.id);
             } catch (err) {
                 console.error(err);
+                stopFlashSaleItemsAutoRefresh();
                 showNoActiveSale();
+            }
+        }
+
+        function startFlashSaleItemsAutoRefresh(slotId) {
+            stopFlashSaleItemsAutoRefresh();
+            if (!slotId) return;
+            flashSaleItemsRefreshInterval = setInterval(() => {
+                if (document.visibilityState !== 'visible') return;
+                loadFlashSaleItems(slotId);
+            }, 3000);
+        }
+
+        function stopFlashSaleItemsAutoRefresh() {
+            if (flashSaleItemsRefreshInterval) {
+                clearInterval(flashSaleItemsRefreshInterval);
+                flashSaleItemsRefreshInterval = null;
             }
         }
 

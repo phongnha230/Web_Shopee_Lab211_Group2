@@ -18,7 +18,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import java.math.BigDecimal;
@@ -55,6 +59,7 @@ public class ProductServiceImpl implements ProductService {
 
         // 1. Save Variants
         if (request.getVariants() != null && !request.getVariants().isEmpty()) {
+            validateNoDuplicateVariantBusinessKeys(request.getVariants());
             hasVariants = true;
             for (CreateProductVariantRequest vReq : request.getVariants()) {
                 ProductVariant variant = new ProductVariant();
@@ -246,23 +251,73 @@ public class ProductServiceImpl implements ProductService {
             }
         }
 
-        // Update Variants
+        // Update Variants (GIỮ NGUYÊN ID CŨ để không hỏng liên kết đơn hàng)
         if (request.getVariants() != null && !request.getVariants().isEmpty()) {
-            // Remove old variants
-            variantRepository.deleteByProductId(id);
+            validateNoDuplicateVariantBusinessKeys(request.getVariants());
+            List<ProductVariant> existingVariants = variantRepository.findByProductId(id);
+            Map<String, ProductVariant> existingById = new HashMap<>();
+            Set<String> usedVariantIds = new HashSet<>();
+            for (ProductVariant existing : existingVariants) {
+                if (existing != null && existing.getId() != null && !existing.getId().isBlank()) {
+                    existingById.put(existing.getId(), existing);
+                }
+            }
 
-            // Add new variants
-            for (CreateProductVariantRequest vReq : request.getVariants()) {
-                ProductVariant variant = new ProductVariant();
-                variant.setProductId(id);
-                variant.setSize(vReq.getSize());
-                variant.setColor(vReq.getColor());
-                variant.setPrice(vReq.getPrice());
-                variant.setStock(vReq.getStock());
-                variant.setImageUrl(vReq.getImageUrl());
-                variant.setCreatedAt(LocalDateTime.now());
-                variant.setUpdatedAt(LocalDateTime.now());
-                variantRepository.save(variant);
+            int newSize = request.getVariants().size();
+            int oldSize = existingVariants.size();
+
+            for (int i = 0; i < newSize; i++) {
+                CreateProductVariantRequest vReq = request.getVariants().get(i);
+                ProductVariant matched = null;
+
+                String requestVariantId = trimToNull(vReq.getId());
+                if (requestVariantId != null) {
+                    ProductVariant byId = existingById.get(requestVariantId);
+                    if (byId != null && !usedVariantIds.contains(byId.getId())) {
+                        matched = byId;
+                    }
+                }
+
+                if (matched == null) {
+                    String reqKey = buildVariantBusinessKey(vReq.getColor(), vReq.getSize());
+                    for (ProductVariant existing : existingVariants) {
+                        if (existing == null || existing.getId() == null || usedVariantIds.contains(existing.getId())) {
+                            continue;
+                        }
+                        if (buildVariantBusinessKey(existing.getColor(), existing.getSize()).equals(reqKey)) {
+                            matched = existing;
+                            break;
+                        }
+                    }
+                }
+
+                if (matched == null && i < oldSize) {
+                    ProductVariant byIndex = existingVariants.get(i);
+                    if (byIndex != null && byIndex.getId() != null && !usedVariantIds.contains(byIndex.getId())) {
+                        matched = byIndex;
+                    }
+                }
+
+                if (matched != null) {
+                    applyVariantChanges(matched, vReq);
+                    variantRepository.save(matched);
+                    usedVariantIds.add(matched.getId());
+                } else {
+                    ProductVariant variant = new ProductVariant();
+                    variant.setProductId(id);
+                    applyVariantChanges(variant, vReq);
+                    variant.setCreatedAt(LocalDateTime.now());
+                    variantRepository.save(variant);
+                }
+            }
+
+            for (ProductVariant existing : existingVariants) {
+                if (existing == null || existing.getId() == null) {
+                    continue;
+                }
+                if (!usedVariantIds.contains(existing.getId())) {
+                    variantRepository.deleteById(existing.getId());
+                }
             }
 
             // Recalculate Min/Max Price and Total Stock
@@ -328,6 +383,42 @@ public class ProductServiceImpl implements ProductService {
             throw new RuntimeException("Variant not found");
         }
         variantRepository.deleteById(variantId);
+    }
+
+    private void applyVariantChanges(ProductVariant variant, CreateProductVariantRequest request) {
+        variant.setSize(request.getSize());
+        variant.setColor(request.getColor());
+        variant.setPrice(request.getPrice());
+        variant.setStock(request.getStock());
+        variant.setImageUrl(request.getImageUrl());
+        variant.setUpdatedAt(LocalDateTime.now());
+    }
+
+    private String buildVariantBusinessKey(String color, String size) {
+        String normalizedColor = trimToNull(color);
+        String normalizedSize = trimToNull(size);
+        return (normalizedColor == null ? "" : normalizedColor.toLowerCase()) + "|"
+                + (normalizedSize == null ? "" : normalizedSize.toLowerCase());
+    }
+
+    private String trimToNull(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private void validateNoDuplicateVariantBusinessKeys(List<CreateProductVariantRequest> variants) {
+        Set<String> seenKeys = new HashSet<>();
+        for (CreateProductVariantRequest variant : variants) {
+            String key = buildVariantBusinessKey(
+                    variant != null ? variant.getColor() : null,
+                    variant != null ? variant.getSize() : null);
+            if (!seenKeys.add(key)) {
+                throw new RuntimeException("Duplicate variant attributes detected (color + size must be unique)");
+            }
+        }
     }
 
     @Override

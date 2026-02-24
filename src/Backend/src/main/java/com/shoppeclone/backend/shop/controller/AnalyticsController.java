@@ -54,11 +54,19 @@ public class AnalyticsController {
             }
         }
 
+        // Order Status Distribution
+        Map<String, Long> orderStatusDistribution = new HashMap<>();
+        for (Order order : allOrders) {
+            String status = order.getOrderStatus() != null ? order.getOrderStatus().name() : "UNKNOWN";
+            orderStatusDistribution.put(status, orderStatusDistribution.getOrDefault(status, 0L) + 1);
+        }
+
         Map<String, Object> stats = new HashMap<>();
         stats.put("pendingOrders", pendingOrders);
         stats.put("completedOrders", completedOrders);
         stats.put("totalRevenue", totalRevenue);
         stats.put("revenueByDay", revenueByDay);
+        stats.put("orderStatusDistribution", orderStatusDistribution);
 
         return ResponseEntity.ok(stats);
     }

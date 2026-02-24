@@ -798,7 +798,6 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Trạng thái</label>
                     <select id="disputeReviewStatus" onchange="toggleRefundOption()"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#AD3029]/20 outline-none">
-                        <option value="IN_REVIEW">IN_REVIEW - Đang xem xét</option>
                         <option value="RESOLVED">RESOLVED - Đã giải quyết</option>
                         <option value="REJECTED">REJECTED - Từ chối</option>
                     </select>
@@ -2106,6 +2105,130 @@
 
 
         // --- DISPUTES LOGIC ---
+        const disputeBuyerNameCache = new Map();
+        const disputeSellerShopCache = new Map();
+        const disputeOrderShopIdCache = new Map();
+
+        function shortenId(id, head = 8, tail = 4) {
+            const s = String(id || '').trim();
+            if (!s) return '—';
+            if (s.length <= head + tail + 3) return s;
+            return `${s.slice(0, head)}...${s.slice(-tail)}`;
+        }
+
+        async function fetchBuyerDisplayName(userId) {
+            const key = String(userId || '').trim();
+            if (!key) return null;
+            if (disputeBuyerNameCache.has(key)) return disputeBuyerNameCache.get(key);
+
+            try {
+                const res = await fetch(`http://localhost:8080/api/admin/users/${encodeURIComponent(key)}`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
+                });
+                if (!res.ok) throw new Error('buyer fetch failed');
+                const user = await res.json();
+                const name = (user.fullName || user.email || '').trim() || null;
+                disputeBuyerNameCache.set(key, name);
+                return name;
+            } catch (e) {
+                disputeBuyerNameCache.set(key, null);
+                return null;
+            }
+        }
+
+        async function fetchSellerShopName(shopId) {
+            const key = String(shopId || '').trim();
+            if (!key) return null;
+            if (disputeSellerShopCache.has(key)) return disputeSellerShopCache.get(key);
+
+            try {
+                const res = await fetch(`http://localhost:8080/api/shop/${encodeURIComponent(key)}`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
+                });
+                if (!res.ok) throw new Error('shop fetch failed');
+                const shop = await res.json();
+                const name = (shop.name || '').trim() || null;
+                disputeSellerShopCache.set(key, name);
+                return name;
+            } catch (e) {
+                disputeSellerShopCache.set(key, null);
+                return null;
+            }
+        }
+
+        async function fetchOrderShopId(orderId) {
+            const key = String(orderId || '').trim();
+            if (!key) return null;
+            if (disputeOrderShopIdCache.has(key)) return disputeOrderShopIdCache.get(key);
+
+            try {
+                const res = await fetch(`http://localhost:8080/api/orders/${encodeURIComponent(key)}`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
+                });
+                if (!res.ok) throw new Error('order fetch failed');
+                const order = await res.json();
+                const shopId = (order?.shopId || order?.shop?.id || '').trim() || null;
+                disputeOrderShopIdCache.set(key, shopId);
+                return shopId;
+            } catch (e) {
+                disputeOrderShopIdCache.set(key, null);
+                return null;
+            }
+        }
+
+        async function enrichDisputePartyNames(disputes) {
+            const buyerIds = [...new Set(disputes.map(d => d?.buyerId).filter(Boolean))];
+            const sellerIds = [...new Set(disputes.map(d => d?.sellerId).filter(Boolean))];
+            const missingSellerOrderIds = [...new Set(
+                disputes
+                    .filter(d => !d?.sellerId && d?.orderId)
+                    .map(d => d.orderId)
+                    .filter(Boolean)
+            )];
+
+            await Promise.all([
+                ...buyerIds.map(id => fetchBuyerDisplayName(id)),
+                ...sellerIds.map(id => fetchSellerShopName(id)),
+                ...missingSellerOrderIds.map(id => fetchOrderShopId(id))
+            ]);
+
+            const fallbackSellerIds = [...new Set(
+                missingSellerOrderIds
+                    .map(orderId => disputeOrderShopIdCache.get(String(orderId || '').trim()))
+                    .filter(Boolean)
+            )];
+
+            await Promise.all(fallbackSellerIds.map(id => fetchSellerShopName(id)));
+
+            return disputes.map(d => ({
+                ...(() => {
+                    const originalSellerId = String(d.sellerId || '').trim() || null;
+                    const fallbackSellerId = !originalSellerId
+                        ? (disputeOrderShopIdCache.get(String(d.orderId || '').trim()) || null)
+                        : null;
+                    const resolvedSellerId = originalSellerId || fallbackSellerId;
+                    return {
+                        resolvedSellerId,
+                        sellerDisplayName: resolvedSellerId
+                            ? (disputeSellerShopCache.get(String(resolvedSellerId).trim()) || null)
+                            : null
+                    };
+                })(),
+                ...d,
+                buyerDisplayName: disputeBuyerNameCache.get(String(d.buyerId || '').trim()) || null,
+                sellerDisplayName: (() => {
+                    const originalSellerId = String(d.sellerId || '').trim() || null;
+                    const fallbackSellerId = !originalSellerId
+                        ? (disputeOrderShopIdCache.get(String(d.orderId || '').trim()) || null)
+                        : null;
+                    const resolvedSellerId = originalSellerId || fallbackSellerId;
+                    return resolvedSellerId
+                        ? (disputeSellerShopCache.get(String(resolvedSellerId).trim()) || null)
+                        : null;
+                })()
+            }));
+        }
+
         async function loadDisputes() {
             const tableBody = document.getElementById('disputeTableBody');
             const loading = document.getElementById('disputeLoading');
@@ -2123,7 +2246,8 @@
 
                 if (response.ok) {
                     const disputes = await response.json();
-                    renderDisputes(disputes);
+                    const disputesWithNames = await enrichDisputePartyNames(disputes);
+                    renderDisputes(disputesWithNames);
                 } else {
                     showToast('Failed to load disputes', 'error');
                 }
@@ -2148,14 +2272,17 @@
                 <tr class="hover:bg-gray-50 transition">
                     <td class="px-6 py-4 font-mono text-xs text-gray-500">#${dispute.id.substring(0, 8)}</td>
                     <td class="px-6 py-4 font-medium text-gray-800">${dispute.orderId}</td>
-                    <td class="px-6 py-4">
-                        <div class="text-xs text-gray-500">B: ${dispute.buyerId}</div>
-                        <div class="text-xs text-gray-500">S: ${dispute.sellerId}</div>
+                    <td class="px-6 py-4 group">
+                        <div class="text-sm text-gray-800 font-medium">Buyer: ${dispute.buyerDisplayName || 'Người mua không xác định'}</div>
+                        <div class="text-sm text-gray-800 font-medium">Seller: ${dispute.sellerDisplayName || 'Chưa có shop'}</div>
+                        <div class="text-xs text-gray-400 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            ID: B ${shortenId(dispute.buyerId)} | S ${shortenId(dispute.resolvedSellerId || dispute.sellerId)}
+                        </div>
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-600">${dispute.reason}</td>
                     <td class="px-6 py-4">
                         <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusBadgeClass(dispute.status)}">
-                            ${dispute.status}
+                            ${dispute.status === 'OPEN' ? 'IN_REVIEW' : dispute.status}
                         </span>
                     </td>
                     <td class="px-6 py-4 text-right flex gap-2 justify-end">
@@ -2250,7 +2377,7 @@
                             <p><span class="text-gray-600">Buyer:</span> ${dispute.buyerId || '-'}</p>
                             <p><span class="text-gray-600">Lý do:</span> <span class="font-semibold text-[#AD3029]">${dispute.reason || '-'}</span></p>
                             <p><span class="text-gray-600">Mô tả:</span> ${dispute.description || '-'}</p>
-                            <p><span class="text-gray-600">Trạng thái:</span> <span class="px-2 py-1 rounded-full text-xs font-bold ${getStatusBadgeClass(dispute.status)}">${dispute.status}</span></p>
+                            <p><span class="text-gray-600">Trạng thái:</span> <span class="px-2 py-1 rounded-full text-xs font-bold ${getStatusBadgeClass(dispute.status)}">${dispute.status === 'OPEN' ? 'IN_REVIEW' : dispute.status}</span></p>
                             ${dispute.adminNote ? `<p><span class="text-gray-600">Ghi chú Admin:</span> ${dispute.adminNote}</p>` : ''}
                             <p><span class="text-gray-600">Ngày tạo:</span> ${dispute.createdAt ? new Date(dispute.createdAt).toLocaleString('vi-VN') : '-'}</p>
                         </div>

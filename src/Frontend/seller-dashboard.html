@@ -1382,6 +1382,7 @@
         let editingVoucherId = null; // Track if we are editing voucher
         let currentShopVouchers = []; // Cache vouchers
         let currentReviews = []; // Cache reviews for viewing
+        let categoryMap = {}; // Cache category ID to Name mapping
 
         if (!localStorage.getItem("accessToken")) {
             alert('Please login first!');
@@ -2034,6 +2035,13 @@
                 const response = await fetch(`${baseUrl}/categories`);
                 if (response.ok) {
                     const categories = await response.json();
+                    
+                    // Build category map for product table
+                    categoryMap = {};
+                    categories.forEach(cat => {
+                        categoryMap[cat.id] = cat.name;
+                    });
+
                     const select = document.getElementById('productCategory');
                     select.innerHTML = '<option value="">Select a category</option>';
                     categories.forEach(cat => {
@@ -2754,8 +2762,14 @@
                     });
                     updateRevenueChart(revenueData);
 
-                    // For order status chart, we still load all orders once for distribution OR fetch a separate stat
-                    // For now, let's just focus on the main KPIs to keep it fast
+                    // Update Order Status Chart
+                    if (stats.orderStatusDistribution) {
+                        const orderChartData = Object.entries(stats.orderStatusDistribution).map(([status, count]) => {
+                            const label = status.charAt(0) + status.slice(1).toLowerCase();
+                            return { label: label, value: count };
+                        });
+                        updateOrderStatusChart(orderChartData);
+                    }
                 }
 
                 // Still need product count
@@ -3044,7 +3058,7 @@
                         <thead class="bg-gray-50 text-gray-500 font-semibold uppercase text-xs">
                             <tr>
                                 <th class="px-6 py-4">Product</th>
-                                <th class="px-6 py-4">Category ID</th>
+                                <th class="px-6 py-4">Category</th>
                                 <th class="px-6 py-4">Price</th>
                                 <th class="px-6 py-4">Total Stock</th>
                                 <th class="px-6 py-4">Status</th>
@@ -3057,7 +3071,8 @@
                 const totalStock = p.variants ? p.variants.reduce((sum, v) => sum + (v.stock || 0), 0) : 0;
                 const displayPrice = (p.variants && p.variants.length > 0) ? p.variants[0].price : 0;
                 const imageUrl = (p.images && p.images.length > 0) ? p.images[0] : 'https://placehold.co/60x60?text=No+Img';
-                const categoryText = (p.categories && p.categories.length > 0) ? p.categories[0] : 'N/A';
+                const categoryId = (p.categories && p.categories.length > 0) ? p.categories[0] : null;
+                const categoryText = categoryId && categoryMap[categoryId] ? categoryMap[categoryId] : 'Uncategorized';
 
                 return `
                                 <tr class="hover:bg-gray-50 transition ${p.status === 'HIDDEN' ? 'bg-gray-50 opacity-75' : ''}">
@@ -3068,14 +3083,13 @@
                                                  class="w-12 h-12 rounded object-cover border">
                                             <div>
                                                 <p class="font-bold text-gray-800">${p.name || 'Unnamed Product'}</p>
-                                                <div class="flex items-center gap-2">
-                                                    <p class="text-xs text-gray-400">ID: ${p.id ? p.id.substring(0, 8) : 'N/A'}...</p>
+                                                <div class="flex items-center gap-2 mt-1">
                                                     ${totalStock < 10 ? '<span class="px-1.5 py-0.5 bg-red-100 text-red-600 text-[10px] font-bold rounded ring-1 ring-red-200 animate-pulse">Low Stock</span>' : ''}
                                                 </div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-xs font-mono">${categoryText}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-700 font-medium">${categoryText}</td>
                                     <td class="px-6 py-4 font-medium text-orange-600">₫${Number(displayPrice || 0).toLocaleString()}</td>
                                     <td class="px-6 py-4 font-semibold">${totalStock}</td>
                                     <td class="px-6 py-4">
@@ -3397,9 +3411,9 @@
                 // Fallback for raw items (backup loop)
                 for (const item of order.items) {
                     try {
-                        let name = `Item (ID: ${item.variantId.substring(0, 8)}...)`;
-                        let variantDesc = '';
-                        let imgUrl = 'https://via.placeholder.com/80';
+                        let name = item.productName || `Sản phẩm đã bị xóa`;
+                        let variantDesc = item.variantName || 'Phân loại đã bị xóa';
+                        let imgUrl = item.productImage || 'https://via.placeholder.com/80';
 
                         const variantResp = await fetch(`${baseUrl}/products/variant/${item.variantId}`, {
                             headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }

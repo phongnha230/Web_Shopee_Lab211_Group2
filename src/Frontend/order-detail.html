@@ -497,51 +497,6 @@
         </div>
     </div>
 
-    <!-- Refund Modal -->
-    <div id="refundModal" class="modal">
-        <div class="modal-content">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800">Yêu cầu trả hàng & hoàn tiền</h2>
-                    <button onclick="closeRefundModal()" class="text-gray-400 hover:text-gray-600 text-2xl">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <p class="text-sm text-gray-500 mb-4 bg-orange-50 border border-orange-200 rounded-lg p-3">
-                    <i class="fas fa-info-circle text-orange-500 mr-1"></i>
-                    Admin sẽ xét duyệt yêu cầu. Sau khi duyệt, đơn hàng sẽ được đánh dấu <b>Đã trả hàng</b>
-                    và số lượng tồn kho sẽ được hoàn lại. Đánh giá của bạn <b>vẫn được giữ nguyên</b>.
-                </p>
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-semibold mb-2">Lý do trả hàng</label>
-                    <select id="refundReason"
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-[#AD3029] focus:outline-none">
-                        <option value="Hàng lỗi / không đúng mô tả">Hàng lỗi / không đúng mô tả</option>
-                        <option value="Sản phẩm bị hỏng khi nhận">Sản phẩm bị hỏng khi nhận</option>
-                        <option value="Thiếu hàng trong đơn">Thiếu hàng trong đơn</option>
-                        <option value="Không muốn mua nữa (đổi ý)">Không muốn mua nữa (đổi ý)</option>
-                        <option value="Khác">Khác</option>
-                    </select>
-                </div>
-                <div class="mb-6">
-                    <label class="block text-gray-700 font-semibold mb-2">Mô tả chi tiết</label>
-                    <textarea id="refundDescription" rows="4"
-                        placeholder="Mô tả rõ vấn đề để admin xét duyệt nhanh hơn..."
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-[#AD3029] focus:outline-none"></textarea>
-                    <p class="text-xs text-gray-500 mt-1">Tối thiểu 10 ký tự</p>
-                </div>
-                <div class="flex gap-3">
-                    <button onclick="closeRefundModal()"
-                        class="flex-1 px-6 py-3 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition">Hủy</button>
-                    <button onclick="submitRefund()"
-                        class="flex-1 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition">
-                        <i class="fas fa-paper-plane mr-2"></i>Gửi yêu cầu
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
         let currentOrder = null;
         let currentReviewProduct = null;
@@ -645,42 +600,22 @@
                 deadline.setDate(deadline.getDate() + 7);
                 if (new Date() > deadline) return false;
             }
-            // ÐÃ cho phép khiêu nại kể cả sau khi đã đánh giá (yêu cầu của thầy)
             return true;
-        }
-
-        function canRefund(order) {
-            if (!order) return false;
-            const status = (order.orderStatus || '').toUpperCase();
-            // Chỉ cho trả hàng khi đã COMPLETED và chưa RETURNED
-            return status === 'COMPLETED';
         }
 
         function renderDisputeActions(order) {
             const wrap = document.getElementById('disputeActions');
             let html = '';
-
-            // --- Khối REFUND ---
-            if (orderRefund) {
-                const refStatus = (orderRefund.status || '').toUpperCase();
-                const refLabel = { REQUESTED: 'Chờ duyệt', APPROVED: 'Đã duyệt', REJECTED: 'Bị từ chối', REFUNDED: 'Đã hoàn tiền' }[refStatus] || refStatus;
-                html += `<span class="px-4 py-2 rounded-lg font-semibold bg-orange-100 text-orange-800">
-                    <i class="fas fa-undo-alt mr-2"></i>Yêu cầu trả hàng: ${refLabel}${orderRefund.amount ? ' (₫' + formatVND(orderRefund.amount) + ')' : ''}</span>`;
-            } else if (canRefund(order)) {
-                html += `<button onclick="openRefundModal()" class="px-4 py-2 border-2 border-orange-500 text-orange-600 rounded-lg font-semibold hover:bg-orange-50 transition">
-                    <i class="fas fa-undo-alt mr-2"></i>Yêu cầu trả hàng &amp; hoàn tiền</button>`;
-            }
-
-            // --- Khối DISPUTE ---
             if (orderDispute) {
-                html += `<span class="px-4 py-2 rounded-lg font-semibold bg-amber-100 text-amber-800">
-                    <i class="fas fa-exclamation-circle mr-2"></i>Khiếu nại: ${orderDispute.status || 'OPEN'}</span>`;
+                const displayStatus = orderDispute.status === 'OPEN' ? 'IN_REVIEW' : orderDispute.status || 'IN_REVIEW';
+                html = `<span class="px-4 py-2 rounded-lg font-semibold bg-amber-100 text-amber-800">
+                    <i class="fas fa-exclamation-circle mr-2"></i>Khiếu nại: ${displayStatus}</span>`;
             } else if (canDispute(order)) {
-                html += `<button onclick="openDisputeModal()" class="px-4 py-2 border-2 border-red-500 text-red-500 rounded-lg font-semibold hover:bg-red-50 transition">
+                html = `<button onclick="openDisputeModal()" class="px-4 py-2 border-2 border-red-500 text-red-500 rounded-lg font-semibold hover:bg-red-50 transition">
                     <i class="fas fa-exclamation-circle mr-2"></i>Khiếu nại (hàng hỏng, sai mô tả...)</button>`;
+            } else {
+                html = '<span class="text-gray-400 text-sm">Không có thao tác</span>';
             }
-
-            if (!html) html = '<span class="text-gray-400 text-sm">Không có thao tác</span>';
             wrap.innerHTML = html;
         }
 
@@ -774,38 +709,6 @@
                 renderDisputeActions(currentOrder);
             } catch (e) {
                 alert('❌ ' + (e.message || 'Không thể gửi khiếu nại.'));
-            }
-        }
-
-        // ─── Refund Modal ────────────────────────────────────────────────────────
-        function openRefundModal() {
-            if (!currentOrder) return;
-            document.getElementById('refundReason').value = 'Hàng lỗi / không đúng mô tả';
-            document.getElementById('refundDescription').value = '';
-            document.getElementById('refundModal').classList.add('active');
-        }
-
-        function closeRefundModal() {
-            document.getElementById('refundModal').classList.remove('active');
-        }
-
-        async function submitRefund() {
-            if (!currentOrder) return;
-            const reason = document.getElementById('refundReason').value;
-            const description = document.getElementById('refundDescription').value.trim();
-            const fullReason = description ? `${reason} — ${description}` : reason;
-            if (!description || description.length < 10) {
-                alert('Vui lòng mô tả lý do trả hàng tối thiểu 10 ký tự.');
-                return;
-            }
-            try {
-                await RefundAPI.requestRefund(currentOrder.id, fullReason);
-                showToast('✅ Đã gửi yêu cầu trả hàng. Admin sẽ xác nhận và hoàn tiền cho bạn.');
-                closeRefundModal();
-                await loadRefundStatus(currentOrder.id);
-                renderDisputeActions(currentOrder);
-            } catch (e) {
-                alert('❌ ' + (e.message || 'Không thể gửi yêu cầu trả hàng.'));
             }
         }
 
@@ -1133,9 +1036,6 @@
         });
         document.getElementById('disputeModal').addEventListener('click', (e) => {
             if (e.target.id === 'disputeModal') closeDisputeModal();
-        });
-        document.getElementById('refundModal').addEventListener('click', (e) => {
-            if (e.target.id === 'refundModal') closeRefundModal();
         });
     </script>
 </body>

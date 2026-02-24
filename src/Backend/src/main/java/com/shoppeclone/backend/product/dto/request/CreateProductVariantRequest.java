@@ -9,6 +9,8 @@ import java.math.BigDecimal;
 public class CreateProductVariantRequest {
     // Product ID is set from URL path parameter, not from request body
     private String productId;
+    // Optional on update: lets backend preserve the correct existing variant ID
+    private String id;
 
     private String size;
     private String color;

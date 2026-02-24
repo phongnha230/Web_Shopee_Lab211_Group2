@@ -65,7 +65,7 @@ public class AdminDashboardService {
         stats.setUrgentActionsCount(nearingDeadlines + stats.getPendingFlashRegistrations());
 
         // Operations Summary
-        stats.setOpenDisputes(disputeRepository.countByStatus(DisputeStatus.OPEN));
+        stats.setOpenDisputes(disputeRepository.countByStatus(DisputeStatus.IN_REVIEW));
         stats.setPendingRegs(flashSaleItemRepository.countByStatus("PENDING"));
 
         stats.setTotalOrders(0);

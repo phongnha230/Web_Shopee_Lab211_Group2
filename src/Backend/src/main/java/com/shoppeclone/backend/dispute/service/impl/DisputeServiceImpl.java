@@ -91,13 +91,7 @@ public class DisputeServiceImpl implements DisputeService {
                     "Dispute not allowed. Order must be SHIPPED or COMPLETED within 7 days.");
         }
 
-        // 3. Block if buyer has already reviewed any product in this order
-        List<com.shoppeclone.backend.review.entity.Review> existingReviews = reviewRepository
-                .findByUserIdAndOrderId(buyerId, orderId);
-        if (!existingReviews.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Bạn đã đánh giá sản phẩm trong đơn này, không thể khiếu nại.");
-        }
+        // (Check removed: Users are now allowed to dispute even if they have reviewed)
 
         // 4. Create Dispute
         Dispute dispute = new Dispute();
@@ -106,7 +100,7 @@ public class DisputeServiceImpl implements DisputeService {
         dispute.setSellerId(order.getShopId());
         dispute.setReason(reason);
         dispute.setDescription(description);
-        dispute.setStatus(DisputeStatus.OPEN);
+        dispute.setStatus(DisputeStatus.IN_REVIEW);
 
         return disputeRepository.save(dispute);
     }

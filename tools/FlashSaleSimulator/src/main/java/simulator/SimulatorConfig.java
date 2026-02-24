@@ -14,8 +14,10 @@ public class SimulatorConfig {
     // TODO: Điền danh sách các variantId thật từ bảng flash_sale_items trong
     // MongoDB
     public static final String[] VARIANT_IDS = {
-            "REPLACE_WITH_REAL_VARIANT_ID_1",
-            "REPLACE_WITH_REAL_VARIANT_ID_2"
+            "699d2182371bf842b00a7164",
+            "699c234900573656b4ee4654",
+            "699d208d6420a004013b8c3b",
+            "699bd2ee9b7f4e08c7210171"
     };
 
     // ─── Tham số bắn request ────────────────────────────────────────────────

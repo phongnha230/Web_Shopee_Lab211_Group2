@@ -12,3 +12,6 @@ annotations/
 mcp_config.json
 onboarding.json
 onboarding.json.lock
+
+# Build artifacts
+tools/FlashSaleSimulator/target/

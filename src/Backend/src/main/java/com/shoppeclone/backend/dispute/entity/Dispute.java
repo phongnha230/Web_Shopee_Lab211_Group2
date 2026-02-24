@@ -20,7 +20,7 @@ public class Dispute {
     private String reason; // Enum or String as per requirement, using String for flexibility
     private String description;
 
-    private DisputeStatus status = DisputeStatus.OPEN;
+    private DisputeStatus status = DisputeStatus.IN_REVIEW;
 
     private String adminNote;
 

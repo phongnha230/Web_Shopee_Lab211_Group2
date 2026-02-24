@@ -60,9 +60,10 @@ public class OrderResponseService {
             ProductVariant variant = productVariantRepository.findById(item.getVariantId()).orElse(null);
             Product product = variant != null ? productRepository.findById(variant.getProductId()).orElse(null) : null;
 
-            String imageUrl = "https://placehold.co/80x80?text=Not+Found";
-            String productName = "Deleted Product";
-            String variantName = "Unknown Variant";
+            // ── Use live DB data first, then fall back to snapshot stored in the order ──
+            String imageUrl;
+            String productName;
+            String variantName;
             String productId = null;
 
             if (product != null) {
@@ -70,11 +71,19 @@ public class OrderResponseService {
                 productId = product.getId();
                 List<ProductImage> images = productImageRepository
                         .findByProductIdOrderByDisplayOrderAsc(product.getId());
-                if (!images.isEmpty()) {
-                    imageUrl = images.get(0).getImageUrl();
-                } else {
-                    imageUrl = "https://placehold.co/80x80?text=No+Img";
-                }
+                imageUrl = !images.isEmpty()
+                        ? images.get(0).getImageUrl()
+                        : "https://placehold.co/80x80?text=No+Img";
+            } else if (item.getProductName() != null && !item.getProductName().trim().isEmpty()) {
+                // Product deleted but we have a snapshot
+                productName = item.getProductName();
+                imageUrl = item.getProductImage() != null
+                        ? item.getProductImage()
+                        : "https://placehold.co/80x80?text=No+Img";
+            } else {
+                // No snapshot — variant link broken (product may still exist)
+                productName = "Sản phẩm không xác định";
+                imageUrl = "https://placehold.co/80x80?text=N%2FA";
             }
 
             if (variant != null) {
@@ -86,9 +95,11 @@ public class OrderResponseService {
                 variantName = variantName.trim();
                 if (variantName.isEmpty())
                     variantName = "Default";
+            } else if (item.getVariantName() != null && !item.getVariantName().trim().isEmpty()) {
+                // Use snapshot variant name
+                variantName = item.getVariantName();
             } else {
-                productName = "Item (ID: " + item.getVariantId().substring(0, Math.min(8, item.getVariantId().length()))
-                        + "...)";
+                variantName = "Không xác định";
             }
 
             displayItems.add(OrderItemDisplayDto.builder()

@@ -225,8 +225,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
             java.util.Map<String, Integer> statusPriority = java.util.Map.of(
                     "PENDING", 0,
                     "APPROVED", 1,
-                    "REJECTED", 2
-            );
+                    "REJECTED", 2);
             String aStatus = a != null && a.getStatus() != null ? a.getStatus().toUpperCase() : "";
             String bStatus = b != null && b.getStatus() != null ? b.getStatus().toUpperCase() : "";
             int aPriority = statusPriority.getOrDefault(aStatus, 99);
@@ -243,11 +242,14 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                 String bId = (b != null && b.getId() != null) ? b.getId() : "";
                 return bId.compareTo(aId);
             }
-            if (aTime == null) return 1;
-            if (bTime == null) return -1;
+            if (aTime == null)
+                return 1;
+            if (bTime == null)
+                return -1;
 
             int timeCompare = bTime.compareTo(aTime); // newest first
-            if (timeCompare != 0) return timeCompare;
+            if (timeCompare != 0)
+                return timeCompare;
 
             String aId = (a != null && a.getId() != null) ? a.getId() : "";
             String bId = (b != null && b.getId() != null) ? b.getId() : "";
