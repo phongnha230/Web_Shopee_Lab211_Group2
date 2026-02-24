@@ -27,6 +27,7 @@ public class RefundController {
     private final RefundService refundService;
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
+    private final com.shoppeclone.backend.shop.repository.ShopRepository shopRepository;
 
     private User getCurrentUser(UserDetails userDetails) {
         if (userDetails == null) {
@@ -57,11 +58,13 @@ public class RefundController {
                 .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
 
         if (order.getOrderStatus() != OrderStatus.COMPLETED) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Chi co the yeu cau tra hang khi don da COMPLETED.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Chi co the yeu cau tra hang khi don da COMPLETED.");
         }
 
         if (!buyerId.equals(order.getUserId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Ban khong co quyen yeu cau hoan tien cho don hang nay.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Ban khong co quyen yeu cau hoan tien cho don hang nay.");
         }
 
         BigDecimal amount;
@@ -84,7 +87,11 @@ public class RefundController {
 
         boolean isOwner = currentUser.getId().equals(order.getUserId());
         boolean isAdmin = hasRole(currentUser, "ROLE_ADMIN");
-        if (!isOwner && !isAdmin) {
+        boolean isSeller = shopRepository.findByOwnerId(currentUser.getId())
+                .map(shop -> shop.getId().equals(order.getShopId()))
+                .orElse(false);
+
+        if (!isOwner && !isAdmin && !isSeller) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No permission to access this refund");
         }
 

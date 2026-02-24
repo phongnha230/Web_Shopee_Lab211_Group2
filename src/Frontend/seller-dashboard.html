@@ -18,7 +18,7 @@
                     throw error;
                 }
 
-                if ((response.status === 401 || response.status === 403) && typeof args[0] === 'string' && !args[0].includes('/auth/login') && !args[0].includes('/auth/refresh-token')) {
+                if (response.status === 401 && typeof args[0] === 'string' && !args[0].includes('/auth/login') && !args[0].includes('/auth/refresh-token')) {
                     const refreshToken = localStorage.getItem('refreshToken');
                     if (refreshToken) {
                         if (!isRefreshing) {
@@ -32,7 +32,6 @@
                                             'Refresh-Token': refreshToken
                                         }
                                     });
-
                                     if (refreshResponse.ok) {
                                         const data = await refreshResponse.json();
                                         localStorage.setItem('accessToken', data.accessToken);
@@ -77,6 +76,9 @@
             };
         })();
     </script>
+
+
+
 
 
 
@@ -2290,7 +2292,9 @@
                                     <tr class="${rowClass} hover:bg-gray-50 transition">
                                         <td class="px-6 py-4">
                                             <div class="flex items-center gap-3">
-                                                <img src="${p.images?.[0] || 'https://via.placeholder.com/40'}" class="w-10 h-10 rounded object-cover border">
+                                                <img src="${p.images?.[0] || 'https://placehold.co/40x40?text=No+Img'}" 
+                                                     onerror="this.src='https://placehold.co/40x40?text=Err'"
+                                                     class="w-10 h-10 rounded object-cover border">
                                                 <div>
                                                     <p class="font-bold text-gray-800 text-sm">${p.name}</p>
                                                     <p class="text-xs text-gray-400">ID: ${p.id.substring(0, 8)}</p>
@@ -3052,14 +3056,16 @@
                 // Calculate total stock and display price from variants
                 const totalStock = p.variants ? p.variants.reduce((sum, v) => sum + (v.stock || 0), 0) : 0;
                 const displayPrice = (p.variants && p.variants.length > 0) ? p.variants[0].price : 0;
-                const imageUrl = (p.images && p.images.length > 0) ? p.images[0] : 'https://via.placeholder.com/60';
+                const imageUrl = (p.images && p.images.length > 0) ? p.images[0] : 'https://placehold.co/60x60?text=No+Img';
                 const categoryText = (p.categories && p.categories.length > 0) ? p.categories[0] : 'N/A';
 
                 return `
                                 <tr class="hover:bg-gray-50 transition ${p.status === 'HIDDEN' ? 'bg-gray-50 opacity-75' : ''}">
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
-                                            <img src="${imageUrl}" class="w-12 h-12 rounded object-cover border">
+                                            <img src="${imageUrl}" 
+                                                 onerror="this.src='https://placehold.co/60x60?text=Err'"
+                                                 class="w-12 h-12 rounded object-cover border">
                                             <div>
                                                 <p class="font-bold text-gray-800">${p.name || 'Unnamed Product'}</p>
                                                 <div class="flex items-center gap-2">
@@ -3343,8 +3349,9 @@
                     } catch (e) { }
                 }
 
-                renderOrderDetail(order, refund);
+                await renderOrderDetail(order, refund);
                 document.getElementById('orderDetailModal').classList.remove('hidden');
+
             } catch (err) {
                 console.error(err);
                 showToast('Error loading order details', 'error');
@@ -3370,40 +3377,82 @@
 
             // Load product details for order items
             let itemsHtml = '';
-            if (order.items && order.items.length > 0) {
+
+            // Prefer using pre-enriched displayItems from the backend
+            if (order.displayItems && order.displayItems.length > 0) {
+                itemsHtml = order.displayItems.map(item => `
+                    <div class="flex gap-4 p-4 border-b border-gray-100 items-center">
+                        <img src="${item.productImage || 'https://placehold.co/80x80?text=No+Image'}" 
+                             onerror="this.src='https://placehold.co/80x80?text=Image+Error'"
+                             class="w-20 h-20 object-cover rounded border">
+                        <div class="flex-1">
+                            <p class="font-bold text-gray-800">${item.productName || 'Product Title Missing'}</p>
+                            <p class="text-sm text-gray-500">${item.variantName || 'Default'}</p>
+                            <p class="text-sm text-gray-600">Qty: ${item.quantity}</p>
+                        </div>
+                        <p class="font-bold text-orange-600">₫${Number(item.price || 0).toLocaleString()}</p>
+                    </div>
+                `).join('');
+            } else if (order.items && order.items.length > 0) {
+                // Fallback for raw items (backup loop)
                 for (const item of order.items) {
                     try {
+                        let name = `Item (ID: ${item.variantId.substring(0, 8)}...)`;
+                        let variantDesc = '';
+                        let imgUrl = 'https://via.placeholder.com/80';
+
                         const variantResp = await fetch(`${baseUrl}/products/variant/${item.variantId}`, {
                             headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                         });
 
                         if (variantResp.ok) {
                             const variant = await variantResp.json();
+                            variantDesc = (variant.color || '') + (variant.size ? ' - ' + variant.size : '');
+                            imgUrl = variant.imageUrl || imgUrl;
+
                             const productResp = await fetch(`${baseUrl}/products/${variant.productId}`, {
                                 headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                             });
 
                             if (productResp.ok) {
                                 const product = await productResp.json();
-                                const imgUrl = variant.imageUrl || (product.images && product.images[0]) || 'https://via.placeholder.com/80';
-                                itemsHtml += `
-                                    <div class="flex gap-4 p-4 border-b border-gray-100">
-                                        <img src="${imgUrl}" class="w-20 h-20 object-cover rounded border">
-                                        <div class="flex-1">
-                                            <p class="font-bold text-gray-800">${product.name}</p>
-                                            <p class="text-sm text-gray-500">${variant.color || ''} ${variant.size || ''}</p>
-                                            <p class="text-sm text-gray-600">Qty: ${item.quantity}</p>
-                                        </div>
-                                        <p class="font-bold text-orange-600">₫${Number(item.price || 0).toLocaleString()}</p>
-                                    </div>
-                                `;
+                                name = product.name;
+                                if (!variant.imageUrl && product.images && product.images.length > 0) {
+                                    imgUrl = product.images[0];
+                                }
                             }
+                        } else {
+                            // Variant not found in DB
+                            imgUrl = 'https://placehold.co/80x80?text=Not+Found';
                         }
+
+                        itemsHtml += `
+                            <div class="flex gap-4 p-4 border-b border-gray-100 items-center">
+                                <img src="${imgUrl}" 
+                                     onerror="this.src='https://placehold.co/80x80?text=Error'"
+                                     class="w-20 h-20 object-cover rounded border">
+                                <div class="flex-1">
+                                    <p class="font-bold text-gray-800">${name}</p>
+                                    <p class="text-sm text-gray-500">${variantDesc}</p>
+                                    <p class="text-sm text-gray-600">Qty: ${item.quantity}</p>
+                                </div>
+                                <p class="font-bold text-orange-600">₫${Number(item.price || 0).toLocaleString()}</p>
+                            </div>
+                        `;
                     } catch (e) {
-                        itemsHtml += `<div class="p-4 text-gray-500">Unable to load item details</div>`;
+                        itemsHtml += `
+                            <div class="flex gap-4 p-4 border-b border-gray-100 italic text-gray-500">
+                                <div class="flex-1">
+                                    <p>Item ID: ${item.variantId}</p>
+                                    <p class="text-sm">Qty: ${item.quantity} | Error loading details</p>
+                                </div>
+                                <p class="font-bold">₫${Number(item.price || 0).toLocaleString()}</p>
+                            </div>
+                        `;
                     }
                 }
             }
+
 
             container.innerHTML = `
                 <div class="space-y-6">
@@ -5136,7 +5185,9 @@
                 try {
                     const response = await fetch(`${baseUrl}/chat/start/${currentShopId}?userId=${userId}`, {
                         method: 'POST',
-                        headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
+                        }
                     });
                     if (response.ok) {
                         const data = await response.json();

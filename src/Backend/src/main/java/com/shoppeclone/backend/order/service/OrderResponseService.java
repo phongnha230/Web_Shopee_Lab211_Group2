@@ -38,7 +38,8 @@ public class OrderResponseService {
     private static final int REVIEW_TIMEFRAME_DAYS = 30;
 
     /**
-     * Enrich OrderResponse with review information, display items, and payment method
+     * Enrich OrderResponse with review information, display items, and payment
+     * method
      */
     public OrderResponse enrichWithReviewInfo(Order order, String userId) {
         OrderResponse response = OrderResponse.fromOrder(order);
@@ -57,25 +58,45 @@ public class OrderResponseService {
         List<OrderItemDisplayDto> displayItems = new ArrayList<>();
         for (var item : order.getItems()) {
             ProductVariant variant = productVariantRepository.findById(item.getVariantId()).orElse(null);
-            if (variant == null) continue;
-            Product product = productRepository.findById(variant.getProductId()).orElse(null);
-            if (product == null) continue;
+            Product product = variant != null ? productRepository.findById(variant.getProductId()).orElse(null) : null;
 
-            String imageUrl = variant.getImageUrl();
-            if (imageUrl == null || imageUrl.isEmpty()) {
-                List<ProductImage> images = productImageRepository.findByProductIdOrderByDisplayOrderAsc(product.getId());
-                imageUrl = images.isEmpty() ? "https://via.placeholder.com/80" : images.get(0).getImageUrl();
+            String imageUrl = "https://placehold.co/80x80?text=Not+Found";
+            String productName = "Deleted Product";
+            String variantName = "Unknown Variant";
+            String productId = null;
+
+            if (product != null) {
+                productName = product.getName();
+                productId = product.getId();
+                List<ProductImage> images = productImageRepository
+                        .findByProductIdOrderByDisplayOrderAsc(product.getId());
+                if (!images.isEmpty()) {
+                    imageUrl = images.get(0).getImageUrl();
+                } else {
+                    imageUrl = "https://placehold.co/80x80?text=No+Img";
+                }
             }
-            String variantName = (variant.getColor() != null ? variant.getColor() : "")
-                    + (variant.getSize() != null && !variant.getSize().isEmpty() ? " - " + variant.getSize() : "");
-            variantName = variantName.trim();
+
+            if (variant != null) {
+                if (variant.getImageUrl() != null && !variant.getImageUrl().isEmpty()) {
+                    imageUrl = variant.getImageUrl();
+                }
+                variantName = (variant.getColor() != null ? variant.getColor() : "")
+                        + (variant.getSize() != null && !variant.getSize().isEmpty() ? " - " + variant.getSize() : "");
+                variantName = variantName.trim();
+                if (variantName.isEmpty())
+                    variantName = "Default";
+            } else {
+                productName = "Item (ID: " + item.getVariantId().substring(0, Math.min(8, item.getVariantId().length()))
+                        + "...)";
+            }
 
             displayItems.add(OrderItemDisplayDto.builder()
                     .variantId(item.getVariantId())
-                    .productId(product.getId())
-                    .productName(product.getName())
+                    .productId(productId) // Can be null if deleted
+                    .productName(productName)
                     .productImage(imageUrl)
-                    .variantName(variantName.isEmpty() ? "Default" : variantName)
+                    .variantName(variantName)
                     .quantity(item.getQuantity())
                     .price(item.getPrice())
                     .build());
