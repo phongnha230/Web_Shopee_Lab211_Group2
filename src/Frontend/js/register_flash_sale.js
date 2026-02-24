@@ -124,7 +124,7 @@ async function createCampaign(token) {
 
     return await fetchJson(`${BASE_URL}/flash-sales/campaigns`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
             name: `Auto Campaign ${Date.now()}`,
             description: "Automated Test Campaign",
@@ -144,7 +144,7 @@ async function createSlot(token, campaignId) {
     const end = new Date(now.getTime() + 3500000);
     return await fetchJson(`${BASE_URL}/flash-sales/slots`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
             campaignId,
             startTime: start.toISOString(),
@@ -156,7 +156,7 @@ async function createSlot(token, campaignId) {
 async function registerShop(token, name, email) {
     return await fetchJson(`${BASE_URL}/shop/register`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
             name,
             address: "123 Test St, Ward, District, City",
@@ -170,7 +170,7 @@ async function registerShop(token, name, email) {
 async function getPendingShops(token) {
     // CORRECTED ENDPOINT
     return await fetchJson(`${BASE_URL}/shop/admin/pending`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
     });
 }
 
@@ -178,13 +178,13 @@ async function approveShop(token, id) {
     // CORRECTED ENDPOINT
     return await fetchJson(`${BASE_URL}/shop/admin/approve/${id}`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
     });
 }
 
 async function createProduct(token) {
     // Need category ID -> fetch categories first
-    const catsBuffer = await fetch(`${BASE_URL}/categories`, { headers: { 'Authorization': `Bearer ${token}` } });
+    const catsBuffer = await fetch(`${BASE_URL}/categories`, { headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` } });
     let catId = 1;
     if (catsBuffer.ok) {
         const cats = await catsBuffer.json();
@@ -193,7 +193,7 @@ async function createProduct(token) {
 
     return await fetchJson(`${BASE_URL}/products`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
             name: `Test Product ${Date.now()}`,
             description: "Test Desc",
@@ -207,7 +207,7 @@ async function createProduct(token) {
 
 async function getVariants(token, productId) {
     const res = await fetch(`${BASE_URL}/products/${productId}/variants`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
     });
     if (res.ok) return await res.json();
     return [];
@@ -217,7 +217,7 @@ async function registerFlashSale(token, flashSaleId, productId, variantId, saleP
     // CORRECTED ENDPOINT
     return await fetchJson(`${BASE_URL}/flash-sales/registrations`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
             flashSaleId,
             productId,
@@ -231,14 +231,14 @@ async function registerFlashSale(token, flashSaleId, productId, variantId, saleP
 
 async function getPendingRegistrations(token) {
     return await fetchJson(`${BASE_URL}/flash-sales/registrations/status/PENDING`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
     });
 }
 
 async function approveRegistration(token, id) {
     return await fetchJson(`${BASE_URL}/flash-sales/registrations/${id}/approve`, {
         method: 'PUT',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'APPROVED', adminNote: "Auto Approved" })
     });
 }

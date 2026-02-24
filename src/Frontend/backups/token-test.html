@@ -76,14 +76,14 @@
             const content = document.getElementById('resultContent');
 
             // Get all relevant localStorage items
-            const accessToken = localStorage.getItem('accessToken');
+            
             const oldToken = localStorage.getItem('token');
             const userName = localStorage.getItem('userName');
 
             let html = '';
 
             // Check accessToken (CORRECT)
-            if (accessToken) {
+            if (localStorage.getItem("accessToken")) {
                 html += `
                     <div class="p-4 bg-green-50 border-2 border-green-500 rounded-xl">
                         <div class="flex items-center gap-2 mb-2">
@@ -141,7 +141,7 @@
             }
 
             // Summary
-            const status = accessToken && !oldToken ? 'success' : (accessToken ? 'warning' : 'error');
+            const status = localStorage.getItem("accessToken") && !oldToken ? 'success' : (accessToken ? 'warning' : 'error');
             const statusConfig = {
                 success: {
                     color: 'green',

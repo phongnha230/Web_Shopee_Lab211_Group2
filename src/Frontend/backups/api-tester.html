@@ -73,8 +73,8 @@
         let currentShopId = null;
 
         function loadTokenFromStorage() {
-            const token = localStorage.getItem('accessToken');
-            if (token) {
+            
+            if (localStorage.getItem("accessToken")) {
                 document.getElementById('tokenInput').value = token;
                 addResult('✅ Token loaded from localStorage', 'success');
             } else {
@@ -121,7 +121,7 @@
 
         async function testMyShop() {
             const token = getToken();
-            if (!token) {
+            if (!localStorage.getItem("accessToken")) {
                 addResult('❌ Please enter access token first', 'error');
                 return;
             }
@@ -130,7 +130,7 @@
 
             try {
                 const response = await fetch(`${getBaseUrl()}/shop/my-shop`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
                 if (response.ok) {
@@ -153,7 +153,7 @@
 
         async function testAllProducts() {
             const token = getToken();
-            if (!token) {
+            if (!localStorage.getItem("accessToken")) {
                 addResult('❌ Please enter access token first', 'error');
                 return;
             }
@@ -162,7 +162,7 @@
 
             try {
                 const response = await fetch(`${getBaseUrl()}/products`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
                 if (response.ok) {
@@ -217,7 +217,7 @@
 
         async function testShopProducts() {
             const token = getToken();
-            if (!token) {
+            if (!localStorage.getItem("accessToken")) {
                 addResult('❌ Please enter access token first', 'error');
                 return;
             }
@@ -231,7 +231,7 @@
 
             try {
                 const response = await fetch(`${getBaseUrl()}/products/shop/${currentShopId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
                 if (response.ok) {
@@ -268,8 +268,8 @@
 
         // Auto-load token on page load
         window.addEventListener('load', () => {
-            const token = localStorage.getItem('accessToken');
-            if (token) {
+            
+            if (localStorage.getItem("accessToken")) {
                 document.getElementById('tokenInput').value = token;
             }
         });

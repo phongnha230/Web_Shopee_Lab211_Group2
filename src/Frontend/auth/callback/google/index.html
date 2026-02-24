@@ -16,7 +16,7 @@
 
         if (!code) {
             alert("❌ ERROR: 'code' not found in URL!\nCurrent Link: " + window.location.href);
-            window.location.href = "/login.html"; // Quay lại login
+            console.warn('Redirect prevented by script'); // Quay lại login
         } else {
             // 2. Gửi code về Backend
             fetch("http://localhost:8080/api/auth/oauth/google/exchange", {
@@ -34,6 +34,9 @@
                     // 3. Đăng nhập thành công
                     console.log("Login Success:", data);
                     localStorage.setItem("accessToken", data.accessToken);
+                    if (data.refreshToken) {
+                        localStorage.setItem("refreshToken", data.refreshToken);
+                    }
                     // Lưu user info nếu có
                     if (data.user) {
                         localStorage.setItem("user", JSON.stringify(data.user));
@@ -45,7 +48,7 @@
                 .catch(err => {
                     console.error("Login Error:", err);
                     alert("❌ Login Failed: " + err.message);
-                    window.location.href = "/login.html";
+                    console.warn('Redirect prevented by script');
                 });
         }
     </script>
