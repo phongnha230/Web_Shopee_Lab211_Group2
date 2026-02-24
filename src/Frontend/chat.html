@@ -284,6 +284,7 @@
                         if (convRes.ok) {
                             const conv = await convRes.json();
                             shopId = conv.shopId;
+                            if (shopId) localStorage.setItem('pendingChatShopId', shopId);
                             loadShopDetails(shopId);
                         }
                     } catch (e) {
@@ -293,6 +294,9 @@
                     loadShopDetails(shopId);
                 }
 
+                localStorage.setItem('pendingChatConversationId', currentConversationId);
+                if (shopId) localStorage.setItem('pendingChatShopId', shopId);
+
                 loadMessages(currentConversationId);
             } else if (shopId) {
                 console.log("Found Shop ID:", shopId);
@@ -300,6 +304,7 @@
                 if (!params.get('shopId')) {
                     try { history.replaceState({}, '', `?shopId=${shopId}`); } catch (e) { }
                 }
+                localStorage.setItem('pendingChatShopId', shopId);
                 initChatWithShop(shopId);
                 loadShopDetails(shopId);
             } else {
@@ -374,6 +379,8 @@
                 if (res.ok) {
                     const data = await res.json();
                     currentConversationId = data.conversationId;
+                    localStorage.setItem('pendingChatConversationId', currentConversationId);
+                    localStorage.setItem('pendingChatShopId', sid);
                     // Update URL without reload
                     try { history.replaceState({}, '', `?id=${currentConversationId}`); } catch (e) { }
                     loadMessages(currentConversationId);
