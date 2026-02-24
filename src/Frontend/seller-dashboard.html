@@ -5,19 +5,19 @@
 
     <!-- Global Fetch Interceptor for Token Refresh -->
     <script>
-        (function() {
+        (function () {
             const originalFetch = window.fetch;
             let isRefreshing = false;
             let refreshPromise = null;
 
-            window.fetch = async function(...args) {
+            window.fetch = async function (...args) {
                 let response;
                 try {
                     response = await originalFetch(...args);
                 } catch (error) {
                     throw error;
                 }
-                
+
                 if ((response.status === 401 || response.status === 403) && typeof args[0] === 'string' && !args[0].includes('/auth/login') && !args[0].includes('/auth/refresh-token')) {
                     const refreshToken = localStorage.getItem('refreshToken');
                     if (refreshToken) {
@@ -32,7 +32,7 @@
                                             'Refresh-Token': refreshToken
                                         }
                                     });
-                                    
+
                                     if (refreshResponse.ok) {
                                         const data = await refreshResponse.json();
                                         localStorage.setItem('accessToken', data.accessToken);
@@ -41,12 +41,12 @@
                                     } else {
                                         localStorage.clear();
                                         window.location.href = 'login.html';
-                                        return new Promise(() => {});
+                                        return new Promise(() => { });
                                     }
                                 } catch (e) {
                                     localStorage.clear();
                                     window.location.href = 'login.html';
-                                    return new Promise(() => {});
+                                    return new Promise(() => { });
                                 } finally {
                                     isRefreshing = false;
                                 }
@@ -65,12 +65,12 @@
                             }
                             return originalFetch(...args);
                         } catch (e) {
-                            return new Promise(() => {});
+                            return new Promise(() => { });
                         }
                     } else {
                         localStorage.clear();
                         window.location.href = 'login.html';
-                        return new Promise(() => {});
+                        return new Promise(() => { });
                     }
                 }
                 return response;
@@ -79,7 +79,7 @@
     </script>
 
 
-    
+
 
 
 
@@ -2226,12 +2226,6 @@
                     console.log('📊 Loading dashboard stats...');
                     loadDashboardStats();
 
-                    // Re-trigger view-specific loads once shop is ready
-                    if (currentView === 'products') {
-                        console.log('📦 Current view is products, loading products...');
-                        loadProducts();
-                    }
-
                     console.log('✅ loadShopInfo() completed successfully');
 
                     // --- RACE CONDITION FIX ---
@@ -2912,7 +2906,8 @@
 
             console.log('✅ Shop Name:', currentShop.name);
             console.log('✅ Shop ID:', currentShop.id);
-            console.log('✅ Token exists:', !!token);
+            const accessToken = localStorage.getItem("accessToken");
+            console.log('✅ Token exists:', !!accessToken);
 
             const listContainer = document.getElementById('productList');
             listContainer.innerHTML = `
@@ -2924,7 +2919,8 @@
             try {
                 const apiUrl = `${baseUrl}/products/shop/${currentShop.id}?includeHidden=true`;
                 console.log('🌐 API URL:', apiUrl);
-                console.log('🔑 Authorization:', `Bearer ${token.substring(0, 20)}...`);
+                const accessToken = localStorage.getItem("accessToken");
+                console.log('🔑 Authorization:', `Bearer ${accessToken ? accessToken.substring(0, 20) : 'MISSING'}...`);
 
                 const response = await fetch(apiUrl, {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
