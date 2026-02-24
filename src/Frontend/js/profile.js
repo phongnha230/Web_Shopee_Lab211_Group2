@@ -1,10 +1,10 @@
 const API_URL = "http://localhost:8080/api";
-const token = localStorage.getItem("accessToken");
+
 
 // ================= LOAD PROFILE =================
 fetch(`${API_URL}/user/profile`, {
     headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
 })
     .then(res => {
@@ -26,7 +26,7 @@ document.getElementById("profileForm").addEventListener("submit", function (e) {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
         body: JSON.stringify({
             fullName: document.getElementById("fullName").value,
@@ -45,7 +45,7 @@ document.getElementById("passwordForm").addEventListener("submit", function (e) 
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
         body: JSON.stringify({
             currentPassword: document.getElementById("currentPassword").value,
@@ -60,5 +60,5 @@ document.getElementById("passwordForm").addEventListener("submit", function (e) 
 // ================= LOGOUT =================
 function logout() {
     localStorage.removeItem("accessToken");
-    window.location.href = "login.html";
+    console.warn('Redirect prevented by script');
 }

@@ -35,13 +35,13 @@ function setupNotificationUI() {
 
 // Fetch notifications
 async function loadNotifications() {
-    const accessToken = localStorage.getItem('accessToken');
-    if (!accessToken) return;
+    
+    if (!localStorage.getItem("accessToken")) return;
 
     try {
         const response = await fetch(`${NOTIFICATION_API}/notifications`, {
             headers: {
-                'Authorization': `Bearer ${accessToken}`
+                'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
             }
         });
 
@@ -108,14 +108,14 @@ function renderNotifications(notifications) {
 
 // Mark single as read
 async function markAsRead(id, element) {
-    const accessToken = localStorage.getItem('accessToken');
-    if (!accessToken) return;
+    
+    if (!localStorage.getItem("accessToken")) return;
 
     try {
         await fetch(`${NOTIFICATION_API}/notifications/${id}/read`, {
             method: 'PUT',
             headers: {
-                'Authorization': `Bearer ${accessToken}`
+                'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
             }
         });
 
@@ -142,14 +142,14 @@ async function markAsRead(id, element) {
 
 // Mark all as read
 async function markAllAsRead() {
-    const accessToken = localStorage.getItem('accessToken');
-    if (!accessToken) return;
+    
+    if (!localStorage.getItem("accessToken")) return;
 
     try {
         await fetch(`${NOTIFICATION_API}/notifications/read-all`, {
             method: 'PUT',
             headers: {
-                'Authorization': `Bearer ${accessToken}`
+                'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
             }
         });
         loadNotifications(); // Reload to refresh UI

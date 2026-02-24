@@ -3,6 +3,128 @@
 
 
 <head>
+
+    <!-- Global Fetch Interceptor for Token Refresh -->
+    <script>
+        (function() {
+            const originalFetch = window.fetch;
+            let isRefreshing = false;
+            let refreshPromise = null;
+
+            window.fetch = async function(...args) {
+                let response;
+                try {
+                    response = await originalFetch(...args);
+                } catch (error) {
+                    throw error;
+                }
+                
+                // If unauthorized or forbidden (Spring defaults to 403 for expired tokens)
+                if ((response.status === 401 || response.status === 403) && typeof args[0] === 'string' && !args[0].includes('/auth/login') && !args[0].includes('/auth/refresh-token')) {
+                    const refreshToken = localStorage.getItem('refreshToken');
+                    if (refreshToken) {
+                        if (!isRefreshing) {
+                            isRefreshing = true;
+                            refreshPromise = (async () => {
+                                try {
+                                    const refreshResponse = await originalFetch('http://localhost:8080/api/auth/refresh-token', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Refresh-Token': refreshToken
+                                        }
+                                    });
+                                    
+                                    if (refreshResponse.ok) {
+                                        const data = await refreshResponse.json();
+                                        localStorage.setItem('accessToken', data.accessToken);
+                                        localStorage.setItem('refreshToken', data.refreshToken);
+                                        return data.accessToken;
+                                    } else {
+                                        const errText = await refreshResponse.text();
+                                        
+                                        // HIỆN BẢNG LỖI TO ĐÙNG, KHÔNG CHO REDIRECT
+                                        const div = document.createElement('div');
+                                        div.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.95); color:white; z-index:9999999; display:flex; flex-direction:column; justify-content:center; align-items:center; padding: 20px; text-align:center; font-family: monospace; overflow-y:auto;';
+                                        div.innerHTML = '<h1 style="color:#ff4444; font-size:30px; margin-bottom:20px;">LỖI TỪ BACKEND KHI GIA HẠN TOKEN</h1><p style="font-size:20px; margin-bottom:10px;">HTTP Status Code: <b style="color:yellow">' + refreshResponse.status + '</b></p><p style="margin-bottom:10px;">Vui lòng chụp màn hình cái bảng này đưa cho AI xem nha!</p><textarea readonly style="width:80%; max-width:800px; height:400px; background:#222; color:#00ff00; padding:15px; border:2px solid red; border-radius:10px; font-size:16px;">' + errText + '</textarea>';
+                                        document.body.appendChild(div);
+
+                                        localStorage.removeItem('accessToken');
+                                        localStorage.removeItem('refreshToken');
+                                        localStorage.removeItem('user');
+                                        
+                                        // NEVER RESOLVE SO OTHER SCRIPTS HANG FOREVER
+                                        return new Promise(() => {});
+                                    }
+                                } catch (e) {
+                                    console.error('Error during token refresh', e);
+                                    return new Promise(() => {});
+                                } finally {
+                                    isRefreshing = false;
+                                }
+                            })();
+                        }
+
+                        try {
+                            const newAccessToken = await refreshPromise;
+                            // If it hangs, we never reach here
+                            
+                            // Retry the original request with the new token
+                            if (args[1]) {
+                                args[1].headers = args[1].headers || {};
+                                if (args[1].headers instanceof Headers) {
+                                    args[1].headers.set('Authorization', 'Bearer ' + newAccessToken);
+                                } else {
+                                    args[1].headers['Authorization'] = 'Bearer ' + newAccessToken;
+                                }
+                            } else {
+                                args[1] = {
+                                    headers: {
+                                        'Authorization': 'Bearer ' + newAccessToken
+                                    }
+                                };
+                            }
+                            
+                            // Return the retried request
+                            return originalFetch(...args);
+                        } catch (e) {
+                            // If promise rejects? We made it never resolve/reject on error, so it hangs.
+                            return new Promise(() => {});
+                        }
+                    } else {
+                        // No refresh token available
+                        localStorage.removeItem('accessToken');
+                        localStorage.removeItem('user');
+                        window.location.href = 'login.html';
+                        return new Promise(() => {});
+                    }
+                }
+                return response;
+            };
+        })();
+    </script>
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - GoShop</title>
@@ -1072,11 +1194,11 @@
         </div>
     </div>
     <script>
-        const token = localStorage.getItem('accessToken');
+        
         const user = localStorage.getItem('userName') || 'Admin';
 
 
-        if (!token) window.location.href = 'login.html';
+        if (!localStorage.getItem("accessToken")) console.warn('Redirect prevented by script');
 
 
         // Update Sidebar Profile
@@ -1266,7 +1388,7 @@
         async function loadPendingShops() {
             try {
                 const response = await fetch('http://localhost:8080/api/shop/admin/pending', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1371,7 +1493,7 @@
             try {
                 const response = await fetch(endpoint, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1487,7 +1609,7 @@
         async function loadActiveShops() {
             try {
                 const response = await fetch('http://localhost:8080/api/shop/admin/active', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1573,7 +1695,7 @@
         async function loadRejectedShops() {
             try {
                 const response = await fetch('http://localhost:8080/api/shop/admin/rejected', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1658,7 +1780,7 @@
             try {
                 // Fetch first 100 users (Paged API)
                 const response = await fetch('http://localhost:8080/api/admin/users?page=0&size=100', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1764,7 +1886,7 @@
         async function openEditModal(userId) {
             try {
                 const response = await fetch(`http://localhost:8080/api/admin/users/${userId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1808,7 +1930,7 @@
                 const response = await fetch(`http://localhost:8080/api/admin/users/${userId}`, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        'Authorization': `Bearer ${localStorage.getItem("accessToken")}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(data)
@@ -1840,7 +1962,7 @@
             try {
                 const response = await fetch(`http://localhost:8080/api/admin/users/${userId}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1862,7 +1984,7 @@
         async function loadDashboardStats(days = 1) {
             try {
                 const response = await fetch(`http://localhost:8080/api/admin/dashboard/stats?days=${days}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -2010,7 +2132,7 @@
 
             try {
                 const response = await fetch('http://localhost:8080/api/admin/disputes', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -2081,8 +2203,8 @@
 
             try {
                 const [disputeRes, imagesRes] = await Promise.all([
-                    fetch(`http://localhost:8080/api/disputes/${disputeId}`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                    fetch(`http://localhost:8080/api/disputes/${disputeId}/images`, { headers: { 'Authorization': `Bearer ${token}` } })
+                    fetch(`http://localhost:8080/api/disputes/${disputeId}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` } }),
+                    fetch(`http://localhost:8080/api/disputes/${disputeId}/images`, { headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` } })
                 ]);
                 if (!disputeRes.ok) throw new Error('Failed to load dispute');
                 const dispute = await disputeRes.json();
@@ -2091,7 +2213,7 @@
                 let order = null;
                 if (dispute.orderId) {
                     try {
-                        const orderRes = await fetch(`http://localhost:8080/api/orders/${dispute.orderId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                        const orderRes = await fetch(`http://localhost:8080/api/orders/${dispute.orderId}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` } });
                         if (orderRes.ok) order = await orderRes.json();
                     } catch (e) { console.warn('Order fetch failed:', e); }
                 }
@@ -2244,7 +2366,7 @@
             try {
                 const response = await fetch(`http://localhost:8080/api/admin/disputes/${currentReviewDisputeId}/review`, {
                     method: 'PUT',
-                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)
                 });
                 if (response.ok) {
@@ -2279,7 +2401,7 @@
                 if (sortBy) url += `?sort=${sortBy}`;
 
                 const response = await fetch(url, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -2362,7 +2484,7 @@
 
             try {
                 const response = await fetch('http://localhost:8080/api/flash-sales/campaigns', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
                 if (response.ok) {
                     const campaigns = await response.json();
@@ -2389,7 +2511,7 @@
                 let slotsHtml = '<p class="text-xs text-gray-400">Loading slots...</p>';
                 try {
                     const sResp = await fetch(`http://localhost:8080/api/flash-sales/slots/${campaign.id}`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
+                        headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                     });
                     if (sResp.ok) {
                         const slots = await sResp.json();
@@ -2467,7 +2589,7 @@
 
             try {
                 const response = await fetch('http://localhost:8080/api/flash-sales/registrations/status/PENDING', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
                 if (response.ok) {
                     const registrations = await response.json();
@@ -2542,7 +2664,7 @@
             try {
                 const response = await fetch(`http://localhost:8080/api/flash-sales/registrations/${id}/approve`, {
                     method: 'PUT',
-                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status, adminNote: note })
                 });
                 if (response.ok) {
@@ -2588,7 +2710,7 @@
             try {
                 const response = await fetch('http://localhost:8080/api/flash-sales/campaigns', {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
                 if (response.ok) {
@@ -2613,7 +2735,7 @@
             try {
                 const response = await fetch('http://localhost:8080/api/flash-sales/slots', {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
                 if (response.ok) {
@@ -2629,7 +2751,7 @@
             try {
                 const response = await fetch(`http://localhost:8080/api/flash-sales/campaigns/${id}/emergency-stop`, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
                 if (response.ok) {
                     showToast('Emergency Stop executed for Campaign', 'success');
@@ -2648,7 +2770,7 @@
             try {
                 const response = await fetch(`http://localhost:8080/api/flash-sales/slots/${id}/emergency-stop`, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
                 if (response.ok) {
                     showToast('Emergency Stop executed for Slot', 'success');
@@ -2668,7 +2790,7 @@
             try {
                 const res = await fetch(`http://localhost:8080/api/flash-sales/campaigns/${id}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
                 if (res.ok) {
                     showToast('Campaign deleted', 'success');
@@ -2682,7 +2804,7 @@
             try {
                 const res = await fetch(`http://localhost:8080/api/flash-sales/slots/${id}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
                 if (res.ok) {
                     showToast('Slot deleted', 'success');
@@ -2731,7 +2853,7 @@
             try {
                 const res = await fetch(`http://localhost:8080/api/flash-sales/campaigns/${id}`, {
                     method: 'PUT',
-                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
                 if (res.ok) {
@@ -2750,7 +2872,7 @@
 
             try {
                 const res = await fetch(`http://localhost:8080/api/flash-sales/campaigns/${id}/items`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
                 if (res.ok) {
                     const items = await res.json();

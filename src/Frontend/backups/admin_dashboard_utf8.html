@@ -662,11 +662,11 @@
 
     <!-- MAIN SCRIPT -->
     <script>
-        const token = localStorage.getItem('accessToken');
+        
         const user = localStorage.getItem('userName') || 'Admin';
 
 
-        if (!token) window.location.href = 'login.html';
+        if (!localStorage.getItem("accessToken")) window.location.href = 'login.html';
 
 
         // Update Sidebar Profile
@@ -820,7 +820,7 @@
         async function loadPendingShops() {
             try {
                 const response = await fetch('http://localhost:8080/api/shop/admin/pending', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -925,7 +925,7 @@
             try {
                 const response = await fetch(endpoint, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1041,7 +1041,7 @@
         async function loadActiveShops() {
             try {
                 const response = await fetch('http://localhost:8080/api/shop/admin/active', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1118,7 +1118,7 @@
         async function loadRejectedShops() {
             try {
                 const response = await fetch('http://localhost:8080/api/shop/admin/rejected', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1203,7 +1203,7 @@
             try {
                 // Fetch first 100 users (Paged API)
                 const response = await fetch('http://localhost:8080/api/admin/users?page=0&size=100', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1309,7 +1309,7 @@
         async function openEditModal(userId) {
             try {
                 const response = await fetch(`http://localhost:8080/api/admin/users/${userId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1353,7 +1353,7 @@
                 const response = await fetch(`http://localhost:8080/api/admin/users/${userId}`, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        'Authorization': `Bearer ${localStorage.getItem("accessToken")}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(data)
@@ -1385,7 +1385,7 @@
             try {
                 const response = await fetch(`http://localhost:8080/api/admin/users/${userId}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1407,7 +1407,7 @@
         async function loadDashboardStats(days = 1) {
             try {
                 const response = await fetch(`http://localhost:8080/api/admin/dashboard/stats?days=${days}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1542,7 +1542,7 @@
 
             try {
                 const response = await fetch('http://localhost:8080/api/admin/disputes', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1616,7 +1616,7 @@
                 const response = await fetch(`http://localhost:8080/api/admin/disputes/${id}/review`, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        'Authorization': `Bearer ${localStorage.getItem("accessToken")}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ status, adminNote })
@@ -1651,7 +1651,7 @@
 
             try {
                 const response = await fetch('http://localhost:8080/api/products', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 

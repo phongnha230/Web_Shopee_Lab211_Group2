@@ -2,6 +2,107 @@
 <html lang="en">
 
 <head>
+
+    <!-- Global Fetch Interceptor for Token Refresh -->
+    <script>
+        (function () {
+            const originalFetch = window.fetch;
+            let isRefreshing = false;
+            let refreshPromise = null;
+
+            window.fetch = async function (...args) {
+                let response;
+                try {
+                    response = await originalFetch(...args);
+                } catch (error) {
+                    throw error;
+                }
+
+                // If unauthorized or forbidden (Spring defaults to 403 for expired tokens)
+                if ((response.status === 401 || response.status === 403) && typeof args[0] === 'string' && !args[0].includes('/auth/login') && !args[0].includes('/auth/refresh-token')) {
+                    const refreshToken = localStorage.getItem('refreshToken');
+                    if (refreshToken) {
+                        if (!isRefreshing) {
+                            isRefreshing = true;
+                            refreshPromise = (async () => {
+                                try {
+                                    const refreshResponse = await originalFetch('http://localhost:8080/api/auth/refresh-token', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Refresh-Token': refreshToken
+                                        }
+                                    });
+
+                                    if (refreshResponse.ok) {
+                                        const data = await refreshResponse.json();
+                                        localStorage.setItem('accessToken', data.accessToken);
+                                        localStorage.setItem('refreshToken', data.refreshToken);
+                                        return data.accessToken;
+                                    } else {
+                                        const errText = await refreshResponse.text();
+
+                                        // HIỆN BẢNG LỖI TO ĐÙNG, KHÔNG CHO REDIRECT
+                                        const div = document.createElement('div');
+                                        div.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.95); color:white; z-index:9999999; display:flex; flex-direction:column; justify-content:center; align-items:center; padding: 20px; text-align:center; font-family: monospace; overflow-y:auto;';
+                                        div.innerHTML = '<h1 style="color:#ff4444; font-size:30px; margin-bottom:20px;">LỖI TỪ BACKEND KHI GIA HẠN TOKEN</h1><p style="font-size:20px; margin-bottom:10px;">HTTP Status Code: <b style="color:yellow">' + refreshResponse.status + '</b></p><p style="margin-bottom:10px;">Vui lòng chụp màn hình cái bảng này đưa cho AI xem nha!</p><textarea readonly style="width:80%; max-width:800px; height:400px; background:#222; color:#00ff00; padding:15px; border:2px solid red; border-radius:10px; font-size:16px;">' + errText + '</textarea>';
+                                        document.body.appendChild(div);
+
+                                        localStorage.removeItem('accessToken');
+                                        localStorage.removeItem('refreshToken');
+                                        localStorage.removeItem('user');
+
+                                        // NEVER RESOLVE SO OTHER SCRIPTS HANG FOREVER
+                                        return new Promise(() => { });
+                                    }
+                                } catch (e) {
+                                    console.error('Error during token refresh', e);
+                                    return new Promise(() => { });
+                                } finally {
+                                    isRefreshing = false;
+                                }
+                            })();
+                        }
+
+                        try {
+                            const newAccessToken = await refreshPromise;
+                            // If it hangs, we never reach here
+
+                            // Retry the original request with the new token
+                            if (args[1]) {
+                                args[1].headers = args[1].headers || {};
+                                if (args[1].headers instanceof Headers) {
+                                    args[1].headers.set('Authorization', 'Bearer ' + newAccessToken);
+                                } else {
+                                    args[1].headers['Authorization'] = 'Bearer ' + newAccessToken;
+                                }
+                            } else {
+                                args[1] = {
+                                    headers: {
+                                        'Authorization': 'Bearer ' + newAccessToken
+                                    }
+                                };
+                            }
+
+                            // Return the retried request
+                            return originalFetch(...args);
+                        } catch (e) {
+                            // If promise rejects? We made it never resolve/reject on error, so it hangs.
+                            return new Promise(() => { });
+                        }
+                    } else {
+                        // No refresh token available
+                        localStorage.removeItem('accessToken');
+                        localStorage.removeItem('user');
+                        window.location.href = 'login.html';
+                        return new Promise(() => { });
+                    }
+                }
+                return response;
+            };
+        })();
+    </script>
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Profile | GoShop</title>
@@ -124,30 +225,10 @@
                                 placeholder="+84 123 456 789" />
                         </div>
 
-                        <h2 class="text-lg font-semibold text-[#AD3029] pt-4">Shipping Address</h2>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="text-sm font-medium">City / Province</label>
-                                <input type="text" id="city"
-                                    class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-red-500 focus:outline-none"
-                                    placeholder="Hanoi" />
-                            </div>
-                            <div>
-                                <label class="text-sm font-medium">District</label>
-                                <input type="text" id="district"
-                                    class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-red-500 focus:outline-none"
-                                    placeholder="Cau Giay" />
-                            </div>
+                        <div class="pt-4 border-t">
+                            <p class="text-xs text-gray-500 italic">To manage more addresses, please visit the Shipping
+                                Addresses page in the sidebar.</p>
                         </div>
-
-                        <div>
-                            <label class="text-sm font-medium">Detailed Address</label>
-                            <input type="text" id="address"
-                                class="w-full mt-1 px-4 py-2 rounded-xl border focus:border-red-500 focus:outline-none"
-                                placeholder="House number, street name..." />
-                        </div>
-
                     </form>
                 </div>
             </div>
@@ -224,17 +305,17 @@
 
     <script>
         const API_URL = 'http://localhost:8080/api';
-        let accessToken = localStorage.getItem('accessToken');
+
         let currentAvatarUrl = null;
 
         // LOGIN NOT REQUIRED - just warning
-        if (!accessToken) {
+        if (!localStorage.getItem("accessToken")) {
             console.warn('⚠️ Not logged in - Some features may not work');
         }
 
         // === STEP 1: AUTO LOAD PROFILE ===
         async function loadProfile() {
-            if (!accessToken) {
+            if (!localStorage.getItem("accessToken")) {
                 showToast('⚠️ Please login to view profile', 'warning');
                 return;
             }
@@ -242,7 +323,7 @@
             try {
                 const response = await fetch(`${API_URL}/user/profile`, {
                     headers: {
-                        'Authorization': `Bearer ${accessToken}`
+                        'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
                     }
                 });
 
@@ -269,7 +350,6 @@
                 document.getElementById('lastName').value = lastName;
                 document.getElementById('firstName').value = firstName;
                 document.getElementById('email').value = data.email || '';
-                document.getElementById('email').value = data.email || '';
                 document.getElementById('phone').value = data.phone || '';
 
                 // Handle Avatar
@@ -288,45 +368,18 @@
                     sideAvatar.classList.add('border-2', 'border-white');
                 }
 
-                // Load default address
-                loadAddress();
-
             } catch (error) {
                 console.error('Error loading profile:', error);
                 showToast('❌ ' + error.message, 'error');
             }
         }
 
-        // Load địa chỉ mặc định
-        async function loadAddress() {
-            try {
-                const response = await fetch(`${API_URL}/user/addresses`, {
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`
-                    }
-                });
-
-                if (response.ok) {
-                    const addresses = await response.json();
-                    const defaultAddr = addresses.find(a => a.default) || addresses[0];
-
-                    if (defaultAddr) {
-                        document.getElementById('city').value = defaultAddr.city || '';
-                        document.getElementById('district').value = defaultAddr.district || '';
-                        document.getElementById('address').value = defaultAddr.address || '';
-                    }
-                }
-            } catch (error) {
-                console.log('No address found');
-            }
-        }
-
         // === STEP 2: SAVE PROFILE ===
         async function saveProfile() {
-            if (!accessToken) {
+            if (!localStorage.getItem("accessToken")) {
                 showToast('⚠️ Please login first!', 'warning');
                 setTimeout(() => {
-                    window.location.href = 'login.html';
+                    console.warn('Redirect prevented by script');
                 }, 1500);
                 return;
             }
@@ -355,7 +408,7 @@
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${accessToken}`
+                        'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
                     },
                     body: JSON.stringify({
                         fullName: fullName,
@@ -425,7 +478,7 @@
 
         // Show change password modal
         function showChangePasswordModal() {
-            if (!accessToken) {
+            if (!localStorage.getItem("accessToken")) {
                 showToast('⚠️ Please login!', 'warning');
                 return;
             }
@@ -524,7 +577,7 @@
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${accessToken}`
+                        'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
                     },
                     body: JSON.stringify({
                         currentPassword,
@@ -571,7 +624,7 @@
                 const response = await fetch(`${API_URL}/upload`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${accessToken}`
+                        'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
                     },
                     body: formData
                 });
@@ -608,7 +661,7 @@
                 localStorage.clear();
                 showToast('👋 Logged out!', 'info');
                 setTimeout(() => {
-                    window.location.href = 'login.html';
+                    console.warn('Redirect prevented by script');
                 }, 1000);
             }
         }

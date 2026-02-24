@@ -146,7 +146,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // Tìm session
-        UserSession session = sessionRepository.findByRefreshToken(refreshToken)
+        UserSession session = sessionRepository.findFirstByRefreshToken(refreshToken)
                 .orElseThrow(() -> new RuntimeException("Session does not exist"));
 
         User user = session.getUser();

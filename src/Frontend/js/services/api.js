@@ -3,10 +3,9 @@ const API_BASE_URL = 'http://localhost:8080/api';
 
 // Helper function to get auth headers
 function getAuthHeaders() {
-    const token = localStorage.getItem('accessToken');
     return {
         'Content-Type': 'application/json',
-        ...(token && { 'Authorization': `Bearer ${token}` })
+        ...(localStorage.getItem("accessToken") && { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` })
     };
 }
 
@@ -167,8 +166,8 @@ const ReviewAPI = {
     uploadReviewImage: async (file) => {
         const formData = new FormData();
         formData.append('file', file);
-        const token = localStorage.getItem('accessToken');
-        const headers = { ...(token && { 'Authorization': `Bearer ${token}` }) };
+
+        const headers = { ...(localStorage.getItem("accessToken") && { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }) };
         const response = await fetch(`${API_BASE_URL}/reviews/upload-image`, {
             method: 'POST',
             headers,

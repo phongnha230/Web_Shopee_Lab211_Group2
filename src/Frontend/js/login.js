@@ -11,10 +11,22 @@ document.getElementById("loginForm").addEventListener("submit", function (e) {
             password: document.getElementById("password").value,
         }),
     })
-        .then(res => res.json())
+        .then(async res => {
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.message || "Login failed");
+            }
+            return data;
+        })
         .then(data => {
-            localStorage.setItem("accessToken", data.accessToken);
+            if (data.accessToken) localStorage.setItem("accessToken", data.accessToken);
+            if (data.refreshToken) localStorage.setItem("refreshToken", data.refreshToken);
+            if (data.user) localStorage.setItem("user", JSON.stringify(data.user));
             window.location.href = "index.html";
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Login error: " + err.message);
         });
 });
 

@@ -96,8 +96,6 @@ public class OAuthServiceImpl implements OAuthService {
 
             saveUserSession(user, refreshToken);
 
-            saveUserSession(user, refreshToken);
-
             // Login notifications removed as per user request - only show registration
             // notifications
 

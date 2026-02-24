@@ -2,6 +2,128 @@
 <html lang="en">
 
 <head>
+
+    <!-- Global Fetch Interceptor for Token Refresh -->
+    <script>
+        (function() {
+            const originalFetch = window.fetch;
+            let isRefreshing = false;
+            let refreshPromise = null;
+
+            window.fetch = async function(...args) {
+                let response;
+                try {
+                    response = await originalFetch(...args);
+                } catch (error) {
+                    throw error;
+                }
+                
+                // If unauthorized or forbidden (Spring defaults to 403 for expired tokens)
+                if ((response.status === 401 || response.status === 403) && typeof args[0] === 'string' && !args[0].includes('/auth/login') && !args[0].includes('/auth/refresh-token')) {
+                    const refreshToken = localStorage.getItem('refreshToken');
+                    if (refreshToken) {
+                        if (!isRefreshing) {
+                            isRefreshing = true;
+                            refreshPromise = (async () => {
+                                try {
+                                    const refreshResponse = await originalFetch('http://localhost:8080/api/auth/refresh-token', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Refresh-Token': refreshToken
+                                        }
+                                    });
+                                    
+                                    if (refreshResponse.ok) {
+                                        const data = await refreshResponse.json();
+                                        localStorage.setItem('accessToken', data.accessToken);
+                                        localStorage.setItem('refreshToken', data.refreshToken);
+                                        return data.accessToken;
+                                    } else {
+                                        const errText = await refreshResponse.text();
+                                        
+                                        // HIỆN BẢNG LỖI TO ĐÙNG, KHÔNG CHO REDIRECT
+                                        const div = document.createElement('div');
+                                        div.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.95); color:white; z-index:9999999; display:flex; flex-direction:column; justify-content:center; align-items:center; padding: 20px; text-align:center; font-family: monospace; overflow-y:auto;';
+                                        div.innerHTML = '<h1 style="color:#ff4444; font-size:30px; margin-bottom:20px;">LỖI TỪ BACKEND KHI GIA HẠN TOKEN</h1><p style="font-size:20px; margin-bottom:10px;">HTTP Status Code: <b style="color:yellow">' + refreshResponse.status + '</b></p><p style="margin-bottom:10px;">Vui lòng chụp màn hình cái bảng này đưa cho AI xem nha!</p><textarea readonly style="width:80%; max-width:800px; height:400px; background:#222; color:#00ff00; padding:15px; border:2px solid red; border-radius:10px; font-size:16px;">' + errText + '</textarea>';
+                                        document.body.appendChild(div);
+
+                                        localStorage.removeItem('accessToken');
+                                        localStorage.removeItem('refreshToken');
+                                        localStorage.removeItem('user');
+                                        
+                                        // NEVER RESOLVE SO OTHER SCRIPTS HANG FOREVER
+                                        return new Promise(() => {});
+                                    }
+                                } catch (e) {
+                                    console.error('Error during token refresh', e);
+                                    return new Promise(() => {});
+                                } finally {
+                                    isRefreshing = false;
+                                }
+                            })();
+                        }
+
+                        try {
+                            const newAccessToken = await refreshPromise;
+                            // If it hangs, we never reach here
+                            
+                            // Retry the original request with the new token
+                            if (args[1]) {
+                                args[1].headers = args[1].headers || {};
+                                if (args[1].headers instanceof Headers) {
+                                    args[1].headers.set('Authorization', 'Bearer ' + newAccessToken);
+                                } else {
+                                    args[1].headers['Authorization'] = 'Bearer ' + newAccessToken;
+                                }
+                            } else {
+                                args[1] = {
+                                    headers: {
+                                        'Authorization': 'Bearer ' + newAccessToken
+                                    }
+                                };
+                            }
+                            
+                            // Return the retried request
+                            return originalFetch(...args);
+                        } catch (e) {
+                            // If promise rejects? We made it never resolve/reject on error, so it hangs.
+                            return new Promise(() => {});
+                        }
+                    } else {
+                        // No refresh token available
+                        localStorage.removeItem('accessToken');
+                        localStorage.removeItem('user');
+                        window.location.href = 'login.html';
+                        return new Promise(() => {});
+                    }
+                }
+                return response;
+            };
+        })();
+    </script>
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seller Dashboard - GoShop</title>
@@ -1269,7 +1391,7 @@
          JAVASCRIPT - XỬ LÝ LOGIC
          ======================================== -->
     <script>
-        const token = localStorage.getItem('accessToken');
+        
         const baseUrl = 'http://localhost:8080/api';
         let currentShop = null;
         let currentShopId = null;
@@ -1281,9 +1403,9 @@
         let currentShopVouchers = []; // Cache vouchers
         let currentReviews = []; // Cache reviews for viewing
 
-        if (!token) {
+        if (!localStorage.getItem("accessToken")) {
             alert('Please login first!');
-            window.location.href = 'login.html';
+            console.warn('Redirect prevented by script');
         }
 
         // 1. NAVIGATION
@@ -1631,7 +1753,7 @@
             try {
                 const response = await fetch(`${baseUrl}/upload`, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` },
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` },
                     body: formData
                 });
 
@@ -1748,7 +1870,7 @@
 
                 const response = await fetch(url, {
                     method: method,
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` },
                     body: JSON.stringify(finalData)
                 });
 
@@ -1774,7 +1896,7 @@
         async function editProduct(id) {
             try {
                 const response = await fetch(`${baseUrl}/products/${id}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
                 if (!response.ok) throw new Error('Could not fetch product details');
 
@@ -2045,7 +2167,7 @@
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
                     },
                     body: JSON.stringify(requestData)
                 });
@@ -2083,7 +2205,7 @@
                 console.log('🔑 Token exists:', !!token);
 
                 const response = await fetch(apiUrl, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
                 console.log('📡 Response Status:', response.status);
@@ -2165,7 +2287,7 @@
 
             try {
                 const response = await fetch(`${baseUrl}/products/shop/${currentShop.id}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
                 if (response.ok) {
@@ -2244,7 +2366,7 @@
                 // We need to implement this endpoint in the backend.
                 const response = await fetch(`${baseUrl}/products/variant/${variantId}/stock?stock=${newStock}`, {
                     method: 'PATCH',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
                 if (response.ok) {
@@ -2266,7 +2388,7 @@
             if (!currentShop) return;
             try {
                 const response = await fetch(`${baseUrl}/products/shop/${currentShop.id}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
                 if (response.ok) {
                     const products = await response.json();
@@ -2308,7 +2430,7 @@
                     method: method,
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
                     },
                     body: JSON.stringify(voucherData)
                 });
@@ -2381,7 +2503,7 @@
             try {
                 const response = await fetch(`${baseUrl}/shop-vouchers/${id}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
                 if (response.ok) {
@@ -2430,7 +2552,7 @@
 
             try {
                 const response = await fetch(`${baseUrl}/reviews/shop/${currentShop.id}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
                 if (response.ok) {
@@ -2526,7 +2648,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
                     },
                     body: JSON.stringify({ replyComment })
                 });
@@ -2604,7 +2726,7 @@
             if (!currentShop) return;
             try {
                 const response = await fetch(`${baseUrl}/seller/analytics/dashboard-stats`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
                 if (response.ok) {
@@ -2664,7 +2786,7 @@
 
             try {
                 const response = await fetch(`${baseUrl}/shop-vouchers/shop/${currentShop.id}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
                 if (response.ok) {
@@ -2816,7 +2938,7 @@
                 console.log('🔑 Authorization:', `Bearer ${token.substring(0, 20)}...`);
 
                 const response = await fetch(apiUrl, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
                 console.log('📡 Response Status:', response.status);
@@ -3005,7 +3127,7 @@
             try {
                 const response = await fetch(`${baseUrl}/products/${productId}`, {
                     method: 'PATCH',
-                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: newStatus })
                 });
                 if (response.ok) {
@@ -3022,7 +3144,7 @@
             try {
                 const response = await fetch(`${baseUrl}/products/${productId}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
                 if (response.ok) {
                     showToast('Product deleted!', 'success');
@@ -3088,8 +3210,8 @@
             try {
                 const statusParam = status === 'ALL' ? '' : `?status=${status}`;
                 const [ordersRes, returnsRes] = await Promise.all([
-                    fetch(`${baseUrl}/orders/shop/${currentShop.id}${statusParam}`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                    fetch(`${baseUrl}/seller/returns`, { headers: { 'Authorization': `Bearer ${token}` } }).catch(() => null)
+                    fetch(`${baseUrl}/orders/shop/${currentShop.id}${statusParam}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` } }),
+                    fetch(`${baseUrl}/seller/returns`, { headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` } }).catch(() => null)
                 ]);
 
                 if (returnsRes && returnsRes.ok) {
@@ -3221,8 +3343,8 @@
         async function showOrderDetail(orderId) {
             try {
                 const [orderRes, refundRes] = await Promise.all([
-                    fetch(`${baseUrl}/orders/${orderId}`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                    fetch(`${baseUrl}/refunds/${orderId}`, { headers: { 'Authorization': `Bearer ${token}` } }).catch(() => null)
+                    fetch(`${baseUrl}/orders/${orderId}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` } }),
+                    fetch(`${baseUrl}/refunds/${orderId}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` } }).catch(() => null)
                 ]);
 
                 if (!orderRes.ok) throw new Error('Failed to load order details');
@@ -3266,13 +3388,13 @@
                 for (const item of order.items) {
                     try {
                         const variantResp = await fetch(`${baseUrl}/products/variant/${item.variantId}`, {
-                            headers: { 'Authorization': `Bearer ${token}` }
+                            headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                         });
 
                         if (variantResp.ok) {
                             const variant = await variantResp.json();
                             const productResp = await fetch(`${baseUrl}/products/${variant.productId}`, {
-                                headers: { 'Authorization': `Bearer ${token}` }
+                                headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                             });
 
                             if (productResp.ok) {
@@ -3391,7 +3513,7 @@
             try {
                 const response = await fetch(`${baseUrl}/orders/${orderId}/cancel`, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
                 if (response.ok) {
                     showToast('Order cancelled.', 'success');
@@ -3430,7 +3552,7 @@
 
             try {
                 const response = await fetch(`${baseUrl}/seller/returns`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
                 if (!response.ok) throw new Error('Failed to load');
                 const data = await response.json();
@@ -3549,8 +3671,8 @@
 
             try {
                 const [disputeRes, imagesRes] = await Promise.all([
-                    fetch(`${baseUrl}/disputes/${disputeId}`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                    fetch(`${baseUrl}/disputes/${disputeId}/images`, { headers: { 'Authorization': `Bearer ${token}` } })
+                    fetch(`${baseUrl}/disputes/${disputeId}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` } }),
+                    fetch(`${baseUrl}/disputes/${disputeId}/images`, { headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` } })
                 ]);
                 if (!disputeRes.ok) throw new Error('Failed to load dispute');
                 const dispute = await disputeRes.json();
@@ -3559,7 +3681,7 @@
                 let order = null;
                 if (dispute.orderId) {
                     try {
-                        const orderRes = await fetch(`${baseUrl}/orders/${dispute.orderId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                        const orderRes = await fetch(`${baseUrl}/orders/${dispute.orderId}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` } });
                         if (orderRes.ok) order = await orderRes.json();
                     } catch (e) { console.warn('Order fetch failed:', e); }
                 }
@@ -3641,7 +3763,7 @@
             try {
                 const response = await fetch(`${baseUrl}/orders/${orderId}/status?status=${newStatus}`, {
                     method: 'PUT',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
                 if (response.ok) {
@@ -3672,7 +3794,7 @@
                 const params = new URLSearchParams({ trackingCode, providerId: providerInput.value });
                 const response = await fetch(`${baseUrl}/orders/${orderId}/shipping?${params}`, {
                     method: 'PUT',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
                 if (response.ok) {
@@ -4105,7 +4227,7 @@
 
             try {
                 const response = await fetch(`${baseUrl}/flash-sales/campaigns/open`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
                 if (response.ok) {
                     const campaigns = await response.json();
@@ -4159,7 +4281,7 @@
 
             try {
                 const response = await fetch(`${baseUrl}/flash-sales/registrations/my`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
                 if (response.ok) {
                     const registrations = sortSellerRegistrationsForSellerView(await response.json());
@@ -4260,7 +4382,7 @@
                     .catch(err => { clearTimeout(id); throw err; });
             };
 
-            const headers = { 'Authorization': `Bearer ${token}` };
+            const headers = { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` };
 
             try {
                 // Run fetches in parallel
@@ -4369,7 +4491,7 @@
 
             try {
                 const vResp = await fetch(`${baseUrl}/products/${productId}/variants`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
                 if (vResp.ok) {
                     const variants = await vResp.json();
@@ -4483,7 +4605,7 @@
             try {
                 const response = await fetchWithTimeout(`${baseUrl}/flash-sales/registrations`, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
 
@@ -4495,7 +4617,7 @@
                         // RE-FETCH products to show UPDATED stock in the dropdown
                         try {
                             const pResp = await fetch(`${baseUrl}/products/shop/${currentShopId}`, {
-                                headers: { 'Authorization': `Bearer ${token}` }
+                                headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                             });
                             if (pResp.ok) {
                                 const products = await pResp.json();
@@ -4666,7 +4788,7 @@
 
             try {
                 const response = await fetch(`${baseUrl}/chat/shop/${currentShopId}/conversations`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
                 if (response.ok) {
@@ -4736,7 +4858,7 @@
         async function loadShopMessages(conversationId, scroll = true) {
             try {
                 const response = await fetch(`${baseUrl}/chat/${conversationId}/messages`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
                 if (response.ok) {
@@ -4801,7 +4923,7 @@
 
                 const res = await fetch(`${baseUrl}/upload`, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` },
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` },
                     body: formData
                 });
 
@@ -4826,7 +4948,7 @@
                 const response = await fetch(`${baseUrl}/chat/${activeConversationId}/messages`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        'Authorization': `Bearer ${localStorage.getItem("accessToken")}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ content: content })
@@ -4859,7 +4981,7 @@
             try {
                 const response = await fetch(`${baseUrl}/chat/conversations/${conversationId}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
                 if (response.ok) {
@@ -4885,7 +5007,7 @@
             try {
                 const response = await fetch(`${baseUrl}/chat/messages/${messageId}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
                 if (response.ok) {
@@ -4948,7 +5070,7 @@
 
             try {
                 const response = await fetch(`${baseUrl}/follow/shop/${currentShopId}/list`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
                 loading.classList.add('hidden');
@@ -5014,7 +5136,7 @@
                 try {
                     const response = await fetch(`${baseUrl}/chat/start/${currentShopId}?userId=${userId}`, {
                         method: 'POST',
-                        headers: { 'Authorization': `Bearer ${token}` }
+                        headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                     });
                     if (response.ok) {
                         const data = await response.json();

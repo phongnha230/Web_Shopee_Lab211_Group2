@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.Optional;
 
 public interface UserSessionRepository extends MongoRepository<UserSession, String> {
-    Optional<UserSession> findByRefreshToken(String refreshToken);
+    Optional<UserSession> findFirstByRefreshToken(String refreshToken);
+
     void deleteByRefreshToken(String refreshToken);
 }
