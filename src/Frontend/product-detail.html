@@ -368,16 +368,17 @@
                 <div id="quantitySection" class="mb-6">
                     <p class="text-gray-700 font-semibold mb-3">Quantity</p>
                     <div class="flex items-center gap-3">
-                        <button onclick="decreaseQty()"
+                        <button id="decreaseQtyBtn" onclick="decreaseQty()"
                             class="w-10 h-10 border-2 border-gray-300 rounded hover:border-orange-500 transition"><i
                                 class="fas fa-minus text-gray-600"></i></button>
                         <input type="number" id="quantity" value="1" min="1"
                             class="w-20 h-10 text-center border-2 border-gray-300 rounded focus:border-orange-500 focus:outline-none">
-                        <button onclick="increaseQty()"
+                        <button id="increaseQtyBtn" onclick="increaseQty()"
                             class="w-10 h-10 border-2 border-gray-300 rounded hover:border-orange-500 transition"><i
                                 class="fas fa-plus text-gray-600"></i></button>
                         <span class="text-gray-600 ml-2" id="stockCount">Checking stock...</span>
                     </div>
+                    <p id="quantityError" class="text-sm text-red-500 mt-2 hidden"></p>
                 </div>
 
                 <div id="actionButtons" class="flex gap-4 mb-4">
@@ -506,6 +507,7 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             console.log("Initializing Product Page...");
+            setupQuantityGuards();
 
             // 1. UPDATE NAVBAR FIRST (Sync Header)
             updateNavbar();
@@ -1025,57 +1027,6 @@
             updatePriceDisplay();
         }
 
-        function startProductLiveStockSync(productId) {
-            stopProductLiveStockSync();
-            if (!productId) return;
-
-            productLiveStockSyncInterval = setInterval(async () => {
-                if (document.visibilityState !== 'visible') return;
-                if (!window.isCurrentReal || !window.currentProduct || window.currentProduct.id !== productId) return;
-                try {
-                    const res = await fetch(`${API_BASE_URL}/products/${productId}`);
-                    if (!res.ok) return;
-                    const latest = await res.json();
-                    mergeLiveProductState(latest);
-                    updatePriceDisplay();
-                } catch (_) {
-                    // ignore transient polling errors
-                }
-            }, 3000);
-        }
-
-        function stopProductLiveStockSync() {
-            if (productLiveStockSyncInterval) {
-                clearInterval(productLiveStockSyncInterval);
-                productLiveStockSyncInterval = null;
-            }
-        }
-
-        function mergeLiveProductState(latest) {
-            if (!latest || !window.currentProduct) return;
-            const target = window.currentProduct;
-            target.stock = latest.stock;
-            target.totalStock = latest.totalStock;
-            target.isFlashSale = latest.isFlashSale;
-            target.flashSalePrice = latest.flashSalePrice;
-            target.flashSaleEndTime = latest.flashSaleEndTime;
-            target.flashSaleStock = latest.flashSaleStock;
-            target.flashSaleSold = latest.flashSaleSold;
-            if (Array.isArray(target.variants) && Array.isArray(latest.variants)) {
-                const latestById = new Map(latest.variants.map(v => [v.id, v]));
-                target.variants.forEach(v => {
-                    const newV = latestById.get(v.id);
-                    if (!newV) return;
-                    v.stock = newV.stock;
-                    v.isFlashSale = newV.isFlashSale;
-                    v.flashSalePrice = newV.flashSalePrice;
-                    v.flashSaleEndTime = newV.flashSaleEndTime;
-                    v.flashSaleStock = newV.flashSaleStock;
-                    v.flashSaleSold = newV.flashSaleSold;
-                });
-            }
-        }
-
         function updatePriceDisplay() {
             const product = window.currentProduct;
             if (!product) return;
@@ -1173,7 +1124,6 @@
             }
             const stockEl = document.getElementById('stockCount');
             if (stockEl) stockEl.textContent = `${stock} available`;
-            updatePurchaseButtonsState(stock);
 
             // --- SOLD PROGRESS BAR ---
             const soldContainer = document.getElementById('flashSaleSoldContainer');
@@ -1280,11 +1230,16 @@
         function decreaseQty() {
             let q = parseInt(document.getElementById('quantity').value) || 1;
             if (q > 1) document.getElementById('quantity').value = q - 1;
+            syncQuantityUi();
         }
 
         function increaseQty() {
             let q = parseInt(document.getElementById('quantity').value) || 1;
-            document.getElementById('quantity').value = q + 1;
+            const stock = getCurrentAvailableStock();
+            if (stock > 0 && q < stock) {
+                document.getElementById('quantity').value = q + 1;
+            }
+            syncQuantityUi();
         }
 
         async function addToCart(isBuyNow = false) {
@@ -1295,6 +1250,10 @@
             }
             const product = window.currentProduct;
             if (!product) return false;
+            if (!syncQuantityUi()) {
+                alert('Số lượng tồn kho không đủ.');
+                return false;
+            }
 
             const quantity = parseInt(document.getElementById('quantity').value) || 1;
             const selectedColorBtn = document.querySelector('#colorContainer button.border-orange-500');
@@ -1340,6 +1299,10 @@
             const product = window.currentProduct;
             if (!product) {
                 alert('Product data not loaded yet!');
+                return;
+            }
+            if (!syncQuantityUi()) {
+                alert('Số lượng tồn kho không đủ.');
                 return;
             }
             // Ensure productId - fallback to URL id (for mock products or edge cases)
