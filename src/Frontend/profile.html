@@ -18,7 +18,7 @@
                     throw error;
                 }
                 
-                if ((response.status === 401 || response.status === 403) && typeof args[0] === 'string' && !args[0].includes('/auth/login') && !args[0].includes('/auth/refresh-token')) {
+                if (response.status === 401 && typeof args[0] === 'string' && !args[0].includes('/auth/login') && !args[0].includes('/auth/refresh-token')) {
                     const refreshToken = localStorage.getItem('refreshToken');
                     if (refreshToken) {
                         if (!isRefreshing) {
@@ -77,6 +77,9 @@
             };
         })();
     </script>
+
+
+    
 
 
     

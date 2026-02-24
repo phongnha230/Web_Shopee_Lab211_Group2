@@ -20,7 +20,7 @@ const interceptorScript = `
                     throw error;
                 }
                 
-                if ((response.status === 401 || response.status === 403) && typeof args[0] === 'string' && !args[0].includes('/auth/login') && !args[0].includes('/auth/refresh-token')) {
+                if (response.status === 401 && typeof args[0] === 'string' && !args[0].includes('/auth/login') && !args[0].includes('/auth/refresh-token')) {
                     const refreshToken = localStorage.getItem('refreshToken');
                     if (refreshToken) {
                         if (!isRefreshing) {
@@ -100,4 +100,4 @@ for (const file of files) {
     count++;
 }
 
-console.log('Injected stalling interceptor into ' + count + ' files.');
+console.log('Injected non-stalling interceptor (401 only) into ' + count + ' files.');
