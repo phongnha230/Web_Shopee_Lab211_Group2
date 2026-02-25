@@ -1076,14 +1076,13 @@
                     flashSaleEndTime = variantHasFs ? variant.flashSaleEndTime : product.flashSaleEndTime;
                     if (variant) {
                         price = variant.price;
-                        stock = variant.stock ?? 0;
                     } else if (isReal && product.variants && product.variants.length > 0) {
                         price = product.minPrice || product.variants[0].price;
-                        stock = product.totalStock || product.stock || 0;
                     } else {
                         price = product.price;
-                        stock = product.stock ?? 0;
                     }
+                    // Keep UI consistent with the "HET HANG" badge: block purchase when flash-sale stock is depleted.
+                    stock = 0;
                     oldPrice = price * 1.2;
                 }
             } else {
@@ -1123,7 +1122,10 @@
                 `;
             }
             const stockEl = document.getElementById('stockCount');
-            if (stockEl) stockEl.textContent = `${stock} available`;
+            if (stockEl) {
+                stockEl.textContent = `${stock} available`;
+                stockEl.dataset.stock = String(Number(stock) || 0);
+            }
             updatePurchaseButtonsState(stock);
 
             // --- SOLD PROGRESS BAR ---
@@ -1225,6 +1227,100 @@
             }
             update();
             window.fsTimerInterval = setInterval(update, 1000);
+        }
+
+        function showQtyError(message) {
+            const errEl = document.getElementById('quantityError');
+            if (!errEl) return;
+            if (message) {
+                errEl.textContent = message;
+                errEl.classList.remove('hidden');
+            } else {
+                errEl.textContent = '';
+                errEl.classList.add('hidden');
+            }
+        }
+
+        function getCurrentAvailableStock() {
+            const stockEl = document.getElementById('stockCount');
+            const product = window.currentProduct;
+            const fallback = Number(stockEl?.dataset?.stock || 0);
+
+            if (!product) return Math.max(0, fallback);
+
+            const selectedColorBtn = document.querySelector('#colorContainer button.border-orange-500');
+            const selectedSizeBtn = document.querySelector('#sizeContainer button.border-orange-500');
+            const color = selectedColorBtn ? selectedColorBtn.textContent.trim().toLowerCase() : '';
+            const size = selectedSizeBtn ? selectedSizeBtn.textContent.trim().toLowerCase() : '';
+
+            if (window.isCurrentReal && Array.isArray(product.variants) && product.variants.length > 0) {
+                const matchedVariant = product.variants.find(v => {
+                    const colorMatch = !color || !v.color || v.color.trim().toLowerCase() === color;
+                    const sizeMatch = !size || !v.size || v.size.trim().toLowerCase() === size;
+                    return colorMatch && sizeMatch;
+                });
+                if (matchedVariant) {
+                    if (matchedVariant.isFlashSale && matchedVariant.flashSalePrice > 0 && matchedVariant.flashSaleEndTime) {
+                        const remainingFs = Math.max(0, Number(matchedVariant.flashSaleStock || 0) - Number(matchedVariant.flashSaleSold || 0));
+                        return remainingFs;
+                    }
+                    const variantStock = matchedVariant.stock;
+                    return Math.max(0, Number(variantStock || 0));
+                }
+            }
+
+            if (product.isFlashSale && product.flashSalePrice > 0 && product.flashSaleEndTime) {
+                const remainingFs = Math.max(0, Number(product.flashSaleStock || 0) - Number(product.flashSaleSold || 0));
+                return remainingFs;
+            }
+
+            const productStock = product.totalStock ?? product.stock;
+            return Math.max(0, Number(productStock || 0));
+        }
+
+        function syncQuantityUi() {
+            const qtyInput = document.getElementById('quantity');
+            if (!qtyInput) return true;
+
+            const stock = getCurrentAvailableStock();
+            let qty = parseInt(qtyInput.value, 10);
+            if (!Number.isFinite(qty) || qty < 1) qty = 1;
+
+            if (stock <= 0) {
+                qtyInput.value = 0;
+                showQtyError('Product is out of stock.');
+                return false;
+            }
+
+            if (qty > stock) {
+                qty = stock;
+                showQtyError(`Only ${stock} item(s) available.`);
+            } else {
+                showQtyError('');
+            }
+
+            qtyInput.value = String(qty);
+            return true;
+        }
+
+        function setupQuantityGuards() {
+            const qtyInput = document.getElementById('quantity');
+            if (!qtyInput) return;
+
+            qtyInput.addEventListener('input', () => {
+                const raw = qtyInput.value.trim();
+                if (raw === '') return;
+                const qty = parseInt(raw, 10);
+                if (!Number.isFinite(qty) || qty < 1) {
+                    showQtyError('Quantity must be at least 1.');
+                    return;
+                }
+                showQtyError('');
+            });
+
+            qtyInput.addEventListener('blur', () => {
+                syncQuantityUi();
+            });
         }
 
         // --- CART ACTIONS ---

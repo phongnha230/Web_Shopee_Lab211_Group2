@@ -431,6 +431,9 @@
             }
 
             grid.innerHTML = sortedItems.map(item => {
+                let pid = item.productId || item.id || item._id || '';
+                pid = String(pid).trim();
+                if (pid === 'undefined' || pid === 'null') pid = '';
                 const priceDisplay = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.salePrice);
                 const originalPriceDisp = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.originalPrice);
 
@@ -444,9 +447,11 @@
 
                 return `
                 <div onclick="
-                        localStorage.setItem('lastClickedProductId', '${item.productId}');
-                        sessionStorage.setItem('lastClickedProductId', '${item.productId}');
-                        window.location.href='product-detail.html?id=${item.productId}'
+                        if ('${pid}') {
+                            localStorage.setItem('lastClickedProductId', '${pid}');
+                            sessionStorage.setItem('lastClickedProductId', '${pid}');
+                            window.location.href='product-detail.html?id=${encodeURIComponent(pid)}';
+                        }
                      " 
                      class="bg-white rounded-lg shadow hover:shadow-lg transition-all overflow-hidden group cursor-pointer border border-transparent hover:border-orange-500">
                     <div class="relative">

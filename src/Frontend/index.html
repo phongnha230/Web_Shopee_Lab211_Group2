@@ -731,6 +731,8 @@
                 // If it's a normal Product, id is the Product ID.
                 // If it's a FlashSaleItemResponse, productId is the Product ID, and id is the Item ID.
                 let pid = product.productId || product.id || product._id;
+                pid = pid == null ? '' : String(pid).trim();
+                if (pid === 'undefined' || pid === 'null') pid = '';
                 let soldCount = product.sold != null ? product.sold : 0;
                 let rating = product.rating != null ? product.rating.toFixed(1) : '-';
 
@@ -806,8 +808,7 @@
                     if (pid) {
                         localStorage.setItem('lastClickedProductId', pid);
                         sessionStorage.setItem('lastClickedProductId', pid);
-
-                        window.location.href = `product-detail.html?id=${pid}`;
+                        window.location.href = `product-detail.html?id=${encodeURIComponent(pid)}`;
                     }
                 }
 
