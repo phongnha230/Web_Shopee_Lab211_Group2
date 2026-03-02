@@ -3,22 +3,15 @@ package simulator;
 /**
  * Cấu hình toàn bộ cho simulator.
  * Chỉnh sửa tại đây trước khi chạy tool.
+ *
+ * ⚡ v2.0: Variant IDs được tự động lấy từ API —
+ * Không cần sửa tay khi đổi chiến dịch Flash Sale!
  */
 public class SimulatorConfig {
 
     // ─── URL server đang chạy ───────────────────────────────────────────────
     public static final String BASE_URL = "http://localhost:8080";
     public static final String ORDER_ENDPOINT = BASE_URL + "/api/flash-sales/order";
-
-    // ─── ID của sản phẩm muốn test ──────────────────────────────────────────
-    // TODO: Điền danh sách các variantId thật từ bảng flash_sale_items trong
-    // MongoDB
-    public static final String[] VARIANT_IDS = {
-            "699d2182371bf842b00a7164",
-            "699c234900573656b4ee4654",
-            "699d208d6420a004013b8c3b",
-            "699bd2ee9b7f4e08c7210171"
-    };
 
     // ─── Tham số bắn request ────────────────────────────────────────────────
     /** Tổng số request sẽ gửi (mô phỏng số user vào flash sale) */

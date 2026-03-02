@@ -615,6 +615,33 @@ function resetSimulation() {
 // ═══════════════════════════════════════════════════════════
 // MONITOR (Admin / Seller)
 // ═══════════════════════════════════════════════════════════
+function monitorStatusPriority(status) {
+    if (!status) return 9;
+    const normalized = String(status).toUpperCase();
+    if (normalized === 'ONGOING') return 0;
+    if (normalized === 'ACTIVE') return 1;
+    return 9;
+}
+
+function monitorStartTimeValue(startTime) {
+    const timestamp = Date.parse(startTime || '');
+    return Number.isNaN(timestamp) ? Number.NEGATIVE_INFINITY : timestamp;
+}
+
+function pickPreferredFlashSale(list) {
+    if (!Array.isArray(list) || list.length === 0) return null;
+    const sorted = [...list].sort((a, b) => {
+        const statusCmp = monitorStatusPriority(a && a.flashSaleStatus) - monitorStatusPriority(b && b.flashSaleStatus);
+        if (statusCmp !== 0) return statusCmp;
+
+        const timeCmp = monitorStartTimeValue(b && b.startTime) - monitorStartTimeValue(a && a.startTime);
+        if (timeCmp !== 0) return timeCmp;
+
+        return String((b && b.flashSaleId) || '').localeCompare(String((a && a.flashSaleId) || ''));
+    });
+    return sorted[0] || null;
+}
+
 async function loadMonitor() {
     const baseUrl    = document.getElementById('monitorUrl').value.trim().replace(/\/$/, '');
     const jwt        = document.getElementById('jwtToken').value.trim();
@@ -631,17 +658,25 @@ async function loadMonitor() {
         let data;
         if (fsId) {
             // Admin: xem flash sale cụ thể
-            const res = await fetch(`${baseUrl}/api/flash-sales/stats/${fsId}`, { headers });
+            const res = await fetch(`${baseUrl}/api/flash-sales/stats/${fsId}`, {
+                headers,
+                cache: 'no-store'
+            });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             data = await res.json();
             renderMonitorSingle(data);
         } else {
             // Seller: xem flash sale của shop mình
-            const res = await fetch(`${baseUrl}/api/flash-sales/stats/shop/my`, { headers });
+            const res = await fetch(`${baseUrl}/api/flash-sales/stats/shop/my`, {
+                headers,
+                cache: 'no-store'
+            });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const list = await res.json();
             if (list.length === 0) { alert('Shop chưa có sản phẩm trong Flash Sale nào.'); return; }
-            renderMonitorSingle(list[0]); // Hiển thị flash sale đầu tiên
+            const selected = pickPreferredFlashSale(list);
+            if (!selected) { alert('Không tìm thấy dữ liệu Flash Sale hợp lệ.'); return; }
+            renderMonitorSingle(selected);
         }
     } catch (e) {
         alert('Lỗi load: ' + e.message);

@@ -324,7 +324,7 @@
 
         async function loadFlashSaleData() {
             try {
-                const res = await fetch(`${API_BASE_URL}/flash-sales/current`);
+                const res = await fetch(`${API_BASE_URL}/flash-sales/current`, { cache: 'no-store' });
                 if (!res.ok || res.status === 204) {
                     stopFlashSaleItemsAutoRefresh();
                     showNoActiveSale();
@@ -401,7 +401,7 @@
         async function loadFlashSaleItems(slotId) {
             const grid = document.getElementById('productsGrid');
             try {
-                const res = await fetch(`${API_BASE_URL}/flash-sales/${slotId}/items`);
+                const res = await fetch(`${API_BASE_URL}/flash-sales/${slotId}/items`, { cache: 'no-store' });
                 if (!res.ok) throw new Error('Failed to fetch items');
                 currentFlashSaleItems = await res.json();
 

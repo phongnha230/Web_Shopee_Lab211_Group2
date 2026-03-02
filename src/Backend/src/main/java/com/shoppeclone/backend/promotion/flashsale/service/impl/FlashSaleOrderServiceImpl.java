@@ -19,6 +19,7 @@ import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
@@ -182,14 +183,45 @@ public class FlashSaleOrderServiceImpl implements FlashSaleOrderService {
             grouped.computeIfAbsent(item.getFlashSaleId(), k -> new ArrayList<>()).add(item);
         }
 
-        List<FlashSaleStatsResponse> results = new ArrayList<>();
+        List<SlotGroup> slotGroups = new ArrayList<>();
         for (java.util.Map.Entry<String, List<FlashSaleItem>> entry : grouped.entrySet()) {
             FlashSale slot = flashSaleRepository.findById(entry.getKey()).orElse(null);
             if (slot != null) {
-                results.add(buildStatsResponse(slot, entry.getValue()));
+                slotGroups.add(new SlotGroup(slot, entry.getValue()));
             }
         }
+
+        slotGroups.sort(Comparator
+                .comparingInt((SlotGroup g) -> statusPriority(g.slot.getStatus()))
+                .thenComparing(g -> g.slot.getStartTime(), Comparator.nullsLast(Comparator.reverseOrder()))
+                .thenComparing(g -> g.slot.getEndTime(), Comparator.nullsLast(Comparator.reverseOrder()))
+                .thenComparing(g -> g.slot.getId(), Comparator.nullsLast(Comparator.reverseOrder())));
+
+        List<FlashSaleStatsResponse> results = new ArrayList<>();
+        for (SlotGroup group : slotGroups) {
+            results.add(buildStatsResponse(group.slot, group.items));
+        }
         return results;
+    }
+
+    private int statusPriority(String status) {
+        if ("ONGOING".equalsIgnoreCase(status)) {
+            return 0;
+        }
+        if ("ACTIVE".equalsIgnoreCase(status)) {
+            return 1;
+        }
+        return 9;
+    }
+
+    private static class SlotGroup {
+        private final FlashSale slot;
+        private final List<FlashSaleItem> items;
+
+        private SlotGroup(FlashSale slot, List<FlashSaleItem> items) {
+            this.slot = slot;
+            this.items = items;
+        }
     }
 
     // ── Private helpers ───────────────────────────────────────────────────────

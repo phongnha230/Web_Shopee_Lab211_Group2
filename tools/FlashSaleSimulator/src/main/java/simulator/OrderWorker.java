@@ -26,9 +26,10 @@ public class OrderWorker implements Runnable {
         HttpURLConnection conn = null;
 
         try {
-            // Chọn ngẫu nhiên một biến thể trong danh sách
-            int randomIndex = (int) (Math.random() * SimulatorConfig.VARIANT_IDS.length);
-            String selectedVariantId = SimulatorConfig.VARIANT_IDS[randomIndex];
+            // Chọn ngẫu nhiên một biến thể từ danh sách auto-fetched
+            String[] variantIds = FlashSaleSimulator.activeVariantIds;
+            int randomIndex = (int) (Math.random() * variantIds.length);
+            String selectedVariantId = variantIds[randomIndex];
 
             // ── Build request body ─────────────────────────────────────────
             String body = String.format(

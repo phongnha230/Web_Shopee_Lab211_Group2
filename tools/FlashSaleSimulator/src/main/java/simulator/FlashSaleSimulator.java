@@ -7,51 +7,85 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * ╔══════════════════════════════════════════╗
- * ║ FLASH SALE SIMULATOR — MAIN ║
+ * ║ FLASH SALE SIMULATOR — MAIN v2.0 ║
  * ╚══════════════════════════════════════════╝
  *
  * Mô phỏng hàng nghìn user cùng lúc bấm mua Flash Sale.
+ * ⚡ Tự động lấy variant từ API — không cần sửa code khi đổi chiến dịch!
  *
  * CÁCH CHẠY:
- * 1. Sửa SimulatorConfig.java → điền VARIANT_ID thật
- * 2. Chạy backend Spring Boot
+ * 1. Chạy backend Spring Boot
+ * 2. Admin tạo & kích hoạt chiến dịch Flash Sale
  * 3. Trong thư mục tools/FlashSaleSimulator/:
  * mvn compile exec:java
- * Hoặc build fat jar:
- * mvn package
- * java -jar target/flash-sale-simulator-1.0.0-jar-with-dependencies.jar
  */
 public class FlashSaleSimulator {
+
+    /** Variant IDs được fetch từ API — toàn cục để OrderWorker truy cập */
+    static String[] activeVariantIds;
 
     public static void main(String[] args) throws InterruptedException {
         printBanner();
 
-        // ── Validate config ────────────────────────────────────────────────
-        if (SimulatorConfig.VARIANT_IDS == null || SimulatorConfig.VARIANT_IDS.length == 0
-                || "REPLACE_WITH_REAL_VARIANT_ID_1".equals(SimulatorConfig.VARIANT_IDS[0])) {
-            System.err.println("❌ LỖI: Chưa điền danh sách variantId!");
-            System.err.println("   Mở SimulatorConfig.java và thay VARIANT_IDS bằng các ID thật từ MongoDB.");
+        // ── Step 1: Auto-fetch Flash Sale đang active ─────────────────────
+        System.out.println("🔍 Đang lấy Flash Sale đang active từ server...");
+        System.out.println("   URL: " + SimulatorConfig.BASE_URL);
+        System.out.println();
+
+        FlashSaleApiFetcher.FlashSaleInfo flashSaleInfo = FlashSaleApiFetcher.fetchActiveFlashSale();
+
+        if (flashSaleInfo == null || flashSaleInfo.items.isEmpty()) {
+            System.err.println("❌ Không tìm thấy Flash Sale nào đang active!");
+            System.err.println("   → Admin cần tạo và kích hoạt chiến dịch Flash Sale trước.");
+            System.err.println("   → Kiểm tra backend đang chạy tại " + SimulatorConfig.BASE_URL);
             System.exit(1);
         }
 
-        // ── Interactive setup (optional) ───────────────────────────────────
-        int totalRequests = SimulatorConfig.TOTAL_REQUESTS;
-        int threads = SimulatorConfig.CONCURRENT_THREADS;
-        int initialStock = 0;
+        // ── Step 2: Hiển thị thông tin chiến dịch ─────────────────────────
+        activeVariantIds = flashSaleInfo.getVariantIds();
+        int totalStock = flashSaleInfo.getTotalStock();
 
-        System.out.println("📌 Cấu hình hiện tại:");
-        System.out.println("   URL      : " + SimulatorConfig.ORDER_ENDPOINT);
-        System.out.println("   Sản phẩm : test ngẫu nhiên " + SimulatorConfig.VARIANT_IDS.length + " IDs");
-        System.out.println("   Requests : " + totalRequests);
-        System.out.println("   Threads  : " + threads);
+        System.out.println("✅ Tìm thấy Flash Sale đang chạy!");
+        System.out.println("   📦 Flash Sale ID : " + flashSaleInfo.flashSaleId);
+        System.out.println("   ⏰ Kết thúc lúc  : " + flashSaleInfo.endTime);
+        System.out.println("   🛒 Số items      : " + flashSaleInfo.items.size());
         System.out.println();
 
-        System.out.print("Nhập stock ban đầu (để check integrity, nhấn Enter bỏ qua): ");
+        // Bảng sản phẩm
+        System.out.println("   ┌─────┬────────────────────────────────────┬────────────────────────────┬───────┐");
+        System.out.println("   │  #  │ Tên sản phẩm                       │ Variant ID                 │ Stock │");
+        System.out.println("   ├─────┼────────────────────────────────────┼────────────────────────────┼───────┤");
+
+        int idx = 1;
+        for (FlashSaleApiFetcher.ItemInfo item : flashSaleInfo.items) {
+            String name = item.productName != null ? item.productName : "N/A";
+            if (name.length() > 34)
+                name = name.substring(0, 31) + "...";
+            String vid = item.variantId;
+            if (vid.length() > 26)
+                vid = vid.substring(0, 10) + "..." + vid.substring(vid.length() - 10);
+            System.out.printf("   │ %3d │ %-34s │ %-26s │ %5d │%n",
+                    idx++, name, vid, item.saleStock);
+        }
+
+        System.out.println("   └─────┴────────────────────────────────────┴────────────────────────────┴───────┘");
+        System.out.println();
+
+        // ── Step 3: Cấu hình chạy ────────────────────────────────────────
+        int totalRequests = SimulatorConfig.TOTAL_REQUESTS;
+        int threads = SimulatorConfig.CONCURRENT_THREADS;
+
+        System.out.println("📌 Cấu hình:");
+        System.out.println("   URL      : " + SimulatorConfig.ORDER_ENDPOINT);
+        System.out.println("   Sản phẩm : " + activeVariantIds.length + " variants (auto-fetched ✅)");
+        System.out.println("   Requests : " + totalRequests);
+        System.out.println("   Threads  : " + threads);
+        System.out.println("   Tổng stock: " + totalStock);
+        System.out.println();
+
+        System.out.print("Nhấn Enter để bắt đầu (hoặc Ctrl+C để hủy): ");
         try (Scanner scanner = new Scanner(System.in)) {
-            String input = scanner.nextLine().trim();
-            if (!input.isEmpty()) {
-                initialStock = Integer.parseInt(input);
-            }
+            scanner.nextLine();
         } catch (Exception ignored) {
         }
 
@@ -59,7 +93,7 @@ public class FlashSaleSimulator {
         System.out.println("🚀 Bắt đầu bắn " + totalRequests + " request với " + threads + " thread đồng thời...");
         System.out.println("─".repeat(60));
 
-        // ── Run simulation ─────────────────────────────────────────────────
+        // ── Step 4: Run simulation ──────────────────────────────────────
         SimulatorStats stats = new SimulatorStats();
         ExecutorService executor = Executors.newFixedThreadPool(threads);
 
@@ -80,18 +114,19 @@ public class FlashSaleSimulator {
             executor.shutdownNow();
         }
 
-        // ── Print results ──────────────────────────────────────────────────
+        // ── Step 5: Print results ───────────────────────────────────────
         System.out.println("─".repeat(60));
         System.out.println("✅ Tất cả request đã xong!");
-        ResultsPrinter.printResults(stats, wallEnd - wallStart, initialStock);
+        ResultsPrinter.printResults(stats, wallEnd - wallStart, totalStock);
     }
 
     private static void printBanner() {
         System.out.println();
         System.out.println("  ╔══════════════════════════════════════════════════╗");
-        System.out.println("  ║     ⚡ SHOPEE FLASH SALE SIMULATOR v1.0 ⚡       ║");
+        System.out.println("  ║     ⚡ SHOPEE FLASH SALE SIMULATOR v2.0 ⚡       ║");
         System.out.println("  ║        Bắn hàng nghìn request cùng lúc          ║");
         System.out.println("  ║        Test atomic stock — không âm kho          ║");
+        System.out.println("  ║        Auto-fetch variants từ API  🔄            ║");
         System.out.println("  ╚══════════════════════════════════════════════════╝");
         System.out.println();
     }

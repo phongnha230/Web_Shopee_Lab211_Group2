@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -393,7 +394,22 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                 .filter(fs -> fs.getStartTime() != null && fs.getEndTime() != null)
                 .filter(fs -> "ACTIVE".equals(fs.getStatus()) || "ONGOING".equals(fs.getStatus())) // ACTIVE or ONGOING
                 .filter(fs -> !fs.getStartTime().isAfter(now) && !fs.getEndTime().isBefore(now))
+                .sorted(Comparator
+                        .comparingInt((FlashSale fs) -> statusPriority(fs.getStatus()))
+                        .thenComparing(FlashSale::getStartTime, Comparator.nullsLast(Comparator.reverseOrder()))
+                        .thenComparing(FlashSale::getEndTime, Comparator.nullsLast(Comparator.reverseOrder()))
+                        .thenComparing(FlashSale::getId, Comparator.nullsLast(Comparator.reverseOrder())))
                 .findFirst();
+    }
+
+    private int statusPriority(String status) {
+        if ("ONGOING".equalsIgnoreCase(status)) {
+            return 0;
+        }
+        if ("ACTIVE".equalsIgnoreCase(status)) {
+            return 1;
+        }
+        return 9;
     }
 
     @Override

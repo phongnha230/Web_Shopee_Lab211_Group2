@@ -655,11 +655,11 @@
             const flashSaleListEl = document.getElementById('flashSaleList');
             if (!flashSaleListEl) return;
             try {
-                const curFsResp = await fetch(`${API_BASE_URL}/flash-sales/current`);
+                const curFsResp = await fetch(`${API_BASE_URL}/flash-sales/current`, { cache: 'no-store' });
                 if (curFsResp.ok && curFsResp.status !== 204) {
                     const currentFs = await curFsResp.json();
                     if (currentFs && currentFs.id) {
-                        const itemsResp = await fetch(`${API_BASE_URL}/flash-sales/${currentFs.id}/items`);
+                        const itemsResp = await fetch(`${API_BASE_URL}/flash-sales/${currentFs.id}/items`, { cache: 'no-store' });
                         if (itemsResp.ok) {
                             const fsItems = await itemsResp.json();
                             if (fsItems.length > 0) {
