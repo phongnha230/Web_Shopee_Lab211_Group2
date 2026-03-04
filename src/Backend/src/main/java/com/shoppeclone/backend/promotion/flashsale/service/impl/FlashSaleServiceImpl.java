@@ -381,6 +381,13 @@ public class FlashSaleServiceImpl implements FlashSaleService {
     }
 
     @Override
+    public List<FlashSaleItemResponse> getRegistrationDetailsByShopId(String shopId) {
+        return getRegistrationsByShopId(shopId).stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<FlashSaleItemResponse> getCampaignItems(String campaignId) {
         List<String> slotIds = flashSaleRepository.findByCampaignId(campaignId).stream()
                 .map(FlashSale::getId)
@@ -618,7 +625,10 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         resp.setSaleStock(item.getSaleStock());
         resp.setRemainingStock(item.getRemainingStock());
         resp.setStatus(item.getStatus());
+        resp.setAdminNote(item.getAdminNote());
         resp.setShopId(item.getShopId());
+        resp.setCreatedAt(item.getCreatedAt());
+        resp.setUpdatedAt(item.getUpdatedAt());
 
         // Fetch Product Info
         productRepository.findById(item.getProductId()).ifPresent(p -> {
@@ -640,7 +650,11 @@ public class FlashSaleServiceImpl implements FlashSaleService {
 
         // Fetch Approval Deadline from Campaign (via Slot)
         flashSaleRepository.findById(item.getFlashSaleId()).ifPresent(slot -> {
+            resp.setSlotStartTime(slot.getStartTime());
+            resp.setSlotEndTime(slot.getEndTime());
             flashSaleCampaignRepository.findById(slot.getCampaignId()).ifPresent(campaign -> {
+                resp.setCampaignId(campaign.getId());
+                resp.setCampaignName(campaign.getName());
                 resp.setApprovalDeadline(campaign.getApprovalDeadline());
             });
         });

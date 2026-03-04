@@ -8,6 +8,10 @@ import java.time.LocalDateTime;
 public class FlashSaleItemResponse {
     private String id;
     private String flashSaleId;
+    private String campaignId;
+    private String campaignName;
+    private LocalDateTime slotStartTime;
+    private LocalDateTime slotEndTime;
     private String productId;
     private String productName;
     private String productImage;
@@ -18,6 +22,9 @@ public class FlashSaleItemResponse {
     private Integer saleStock;
     private Integer remainingStock;
     private String status;
+    private String adminNote;
     private String shopId;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private LocalDateTime approvalDeadline; // from campaign, for frontend deadline check
 }
