@@ -4364,12 +4364,12 @@
             }
 
             try {
-                const response = await fetch(`${baseUrl}/flash-sales/registrations/my`, {
+                const response = await fetch(`${baseUrl}/flash-sales/registrations/my-detail`, {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
                 if (response.ok) {
                     const registrations = sortSellerRegistrationsForSellerView(await response.json());
-                    renderSellerRegistrations(registrations);
+                    renderSellerRegistrationsV2(registrations);
                 } else {
                     tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-red-500">Failed to load registrations (Status ${response.status})</td></tr>`;
                 }
@@ -4423,6 +4423,70 @@
                     </td>
                     <td class="px-6 py-4 text-xs text-gray-500 italic">
                         ${reg.adminNote || 'No notes yet'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderSellerRegistrationsV2(registrations) {
+            const tableBody = document.getElementById('sellerRegistrationsTableBody');
+            if (!registrations || registrations.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-gray-500">You haven\'t registered for any flash sales yet.</td></tr>';
+                return;
+            }
+
+            const fmtMoney = (value) => {
+                const n = typeof value === 'number' ? value : Number(value);
+                if (!Number.isFinite(n)) return '-';
+                return `₫${n.toLocaleString('vi-VN')}`;
+            };
+
+            const shortId = (value) => {
+                const s = String(value || '');
+                return s ? `${s.substring(0, 8)}...` : '-';
+            };
+
+            const slotText = (reg) => {
+                const start = reg.slotStartTime ? formatVnDateTime(parseVnDateTime(reg.slotStartTime)) : '-';
+                const end = reg.slotEndTime ? formatVnDateTime(parseVnDateTime(reg.slotEndTime)) : '-';
+                return `${start} - ${end}`;
+            };
+
+            tableBody.innerHTML = registrations.map(reg => `
+                <tr class="hover:bg-gray-50 transition border-b border-gray-50 last:border-0 text-sm">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <img src="${reg.productImage || 'https://placehold.co/48x48?text=No+Img'}"
+                                onerror="this.src='https://placehold.co/48x48?text=Err'"
+                                class="w-12 h-12 rounded-lg object-cover border border-gray-200">
+                            <div>
+                                <div class="font-bold text-gray-800">${reg.productName || `Product ID: ${shortId(reg.productId)}`}</div>
+                                <div class="text-xs text-gray-500">${reg.variantName || `Variant ID: ${shortId(reg.variantId)}`}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-gray-800 font-medium">${reg.campaignName || `Campaign ID: ${shortId(reg.campaignId)}`}</div>
+                        <div class="text-xs text-gray-500">${slotText(reg)}</div>
+                        <div class="text-[11px] text-gray-400">Slot: ${shortId(reg.flashSaleId)}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-orange-600 font-bold">${fmtMoney(reg.salePrice)}</div>
+                        <div class="text-xs text-gray-500">Stock: ${reg.saleStock ?? '-'}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase 
+                            ${reg.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
+                    reg.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-red-100 text-red-700'}">
+                            ${reg.status || 'UNKNOWN'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-xs text-gray-500 italic">
+                        <div>${reg.adminNote || 'No notes yet'}</div>
+                        <div class="text-[11px] text-gray-400 not-italic mt-1">
+                            Updated: ${reg.updatedAt ? formatVnDateTime(parseVnDateTime(reg.updatedAt)) : '-'}
+                        </div>
                     </td>
                 </tr>
             `).join('');

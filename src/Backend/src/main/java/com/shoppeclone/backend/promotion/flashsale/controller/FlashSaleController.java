@@ -136,6 +136,13 @@ public class FlashSaleController {
         return ResponseEntity.ok(flashSaleService.getRegistrationsByShopId(shop.getId()));
     }
 
+    @PreAuthorize("hasRole('SELLER')")
+    @GetMapping("/registrations/my-detail")
+    public ResponseEntity<List<FlashSaleItemResponse>> getMyRegistrationsDetail(Authentication auth) {
+        Shop shop = shopService.getMyShop(auth.getName());
+        return ResponseEntity.ok(flashSaleService.getRegistrationDetailsByShopId(shop.getId()));
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/campaigns/{id}/emergency-stop")
     public ResponseEntity<Void> emergencyStopCampaign(@PathVariable String id) {

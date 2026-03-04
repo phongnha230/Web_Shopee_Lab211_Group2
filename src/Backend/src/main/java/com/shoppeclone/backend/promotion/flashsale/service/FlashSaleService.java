@@ -32,6 +32,8 @@ public interface FlashSaleService {
 
     List<FlashSaleItem> getRegistrationsByShopId(String shopId);
 
+    List<FlashSaleItemResponse> getRegistrationDetailsByShopId(String shopId);
+
     // Curation (Admin)
     FlashSaleItem approveRegistration(String registrationId, ApproveRegistrationRequest request);
 
