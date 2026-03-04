@@ -2798,6 +2798,9 @@
                 if (response.ok) {
                     showToast(`Registration ${status.toLowerCase()}!`, 'success');
                     loadRegistrations();
+                } else {
+                    const errText = await response.text();
+                    showToast(errText || `Không thể ${status === 'APPROVED' ? 'duyệt' : 'từ chối'}: Lỗi server`, 'error');
                 }
             } catch (err) { showToast('Error processing registration', 'error'); }
         }

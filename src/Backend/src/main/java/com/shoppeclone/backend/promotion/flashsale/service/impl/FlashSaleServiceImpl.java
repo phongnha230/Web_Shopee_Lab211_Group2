@@ -442,17 +442,8 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         if ("APPROVED".equals(request.getStatus())) {
-            // Inventory Locking Logic
-            ProductVariant variant = productVariantRepository.findById(registration.getVariantId())
-                    .orElseThrow(() -> new RuntimeException("Variant not found"));
-
-            if (variant.getStock() < registration.getSaleStock()) {
-                throw new RuntimeException("Not enough stock in shop inventory. Available: " + variant.getStock());
-            }
-
-            variant.setStock(variant.getStock() - registration.getSaleStock());
-            productVariantRepository.save(variant);
-
+            // Stock was already deducted (locked) during registerProduct phase.
+            // No need to deduct again here — just mark as approved.
             registration.setStatus("APPROVED");
 
             // Notifications
@@ -469,6 +460,13 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                 System.err.println("Failed to send approval email: " + e.getMessage());
             }
         } else {
+            // Restore stock that was locked during registration phase
+            productVariantRepository.findById(registration.getVariantId()).ifPresent(variant -> {
+                variant.setStock(variant.getStock() + registration.getSaleStock());
+                productVariantRepository.save(variant);
+            });
+            syncProductTotalStock(registration.getProductId());
+
             registration.setStatus("REJECTED");
 
             // Notifications
