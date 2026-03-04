@@ -2629,7 +2629,7 @@
                         const slots = await sResp.json();
                         slotsHtml = slots.map(s => `
                             <div class="flex justify-between items-center text-xs bg-gray-50 p-2 rounded group">
-                                <span>${new Date(s.startTime.endsWith('Z') ? s.startTime : s.startTime + 'Z').toLocaleString()}</span>
+                                <span>${new Date(s.startTime).toLocaleString('vi-VN')}</span>
                                 <div class="flex items-center gap-2">
                                     <span class="font-bold text-[#AD3029]">${s.status}</span>
                                     ${s.status === 'ONGOING' || s.status === 'ACTIVE' ? `
@@ -2674,7 +2674,7 @@
                         </div>
                         <div class="mb-4">
                              <div class="text-xs text-gray-500 flex flex-col gap-1">
-                                <span class="flex items-center gap-1"><i class="far fa-calendar-alt w-4"></i> ${new Date(campaign.startDate.endsWith('Z') ? campaign.startDate : campaign.startDate + 'Z').toLocaleDateString()} - ${new Date(campaign.endDate.endsWith('Z') ? campaign.endDate : campaign.endDate + 'Z').toLocaleDateString()}</span>
+                                <span class="flex items-center gap-1"><i class="far fa-calendar-alt w-4"></i> ${new Date(campaign.startDate).toLocaleDateString('vi-VN')} - ${new Date(campaign.endDate).toLocaleDateString('vi-VN')}</span>
                                 <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-1 rounded uppercase w-fit">${campaign.status}</span>
                              </div>
                         </div>
@@ -2715,6 +2715,22 @@
             }
         }
 
+        function parseVnDateTime(dateStr) {
+            if (!dateStr) return null;
+            const clean = String(dateStr).replace('Z', '').trim();
+            const [datePart, timePart = '00:00:00'] = clean.split('T');
+            if (!datePart) return null;
+            const [year, month, day] = datePart.split('-').map(Number);
+            const [hour, minute, second = 0] = timePart.split(':').map(Number);
+            if ([year, month, day, hour, minute, second].some(Number.isNaN)) return null;
+            return new Date(Date.UTC(year, month - 1, day, hour - 7, minute, second));
+        }
+
+        function formatVnDateTime(date) {
+            if (!date || Number.isNaN(date.getTime())) return '-';
+            return date.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+        }
+
         function renderRegistrations(registrations) {
             const tableBody = document.getElementById('registrationsTableBody');
             if (registrations.length === 0) {
@@ -2725,7 +2741,7 @@
             const now = new Date();
             tableBody.innerHTML = registrations.map(reg => {
                 const approvalDeadline = reg.approvalDeadline
-                    ? new Date(reg.approvalDeadline.endsWith ? (reg.approvalDeadline.endsWith('Z') ? reg.approvalDeadline : reg.approvalDeadline + 'Z') : reg.approvalDeadline)
+                    ? parseVnDateTime(reg.approvalDeadline)
                     : null;
                 const isApprovalExpired = approvalDeadline && now > approvalDeadline;
 
@@ -2747,7 +2763,7 @@
                     <td class="px-6 py-4 text-gray-600">${reg.saleStock}</td>
                     <td class="px-6 py-4">
                         <span class="bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-1 rounded uppercase">${reg.status}</span>
-                        ${approvalDeadline ? `<p class="text-[10px] mt-1 ${isApprovalExpired ? 'text-red-500 font-bold' : 'text-gray-400'}">Approve by: ${approvalDeadline.toLocaleString()}${isApprovalExpired ? ' ⚠️ EXPIRED' : ''}</p>` : ''}
+                        ${approvalDeadline ? `<p class="text-[10px] mt-1 ${isApprovalExpired ? 'text-red-500 font-bold' : 'text-gray-400'}">Approve by: ${formatVnDateTime(approvalDeadline)}${isApprovalExpired ? ' ⚠️ EXPIRED' : ''}</p>` : ''}
                     </td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex items-center justify-end gap-2">
@@ -2801,6 +2817,41 @@
             }
         }
 
+        function validateCampaignTimelineOnAdmin(startDate, endDate, registrationDeadline, approvalDeadline, options = {}) {
+            const { enforceFutureRegistrationDeadline = true } = options;
+            const now = new Date();
+
+            if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+                showToast('Please enter valid start/end date time', 'error');
+                return false;
+            }
+            if (endDate <= startDate) {
+                showToast('Campaign end date must be after start date', 'error');
+                return false;
+            }
+            if (registrationDeadline) {
+                if (enforceFutureRegistrationDeadline && registrationDeadline < now) {
+                    showToast('Registration deadline cannot be in the past', 'error');
+                    return false;
+                }
+                if (registrationDeadline > startDate) {
+                    showToast('Registration deadline must be on or before campaign start date', 'error');
+                    return false;
+                }
+            }
+            if (approvalDeadline) {
+                if (approvalDeadline > startDate) {
+                    showToast('Approval deadline must be on or before campaign start date', 'error');
+                    return false;
+                }
+                if (registrationDeadline && approvalDeadline < registrationDeadline) {
+                    showToast('Approval deadline must be after or equal to registration deadline', 'error');
+                    return false;
+                }
+            }
+            return true;
+        }
+
         async function submitCreateCampaign() {
             let name = document.getElementById('fs-campaign-name-select').value;
             if (name === 'custom') name = document.getElementById('fs-campaign-name-custom').value;
@@ -2809,15 +2860,30 @@
             let description = document.getElementById('fs-campaign-desc-select').value;
             if (description === 'custom') description = document.getElementById('fs-campaign-desc-custom').value;
 
+            const startDate = new Date(document.getElementById('fs-campaign-start').value);
+            const endDate = new Date(document.getElementById('fs-campaign-end').value);
+            const registrationDeadline = document.getElementById('fs-campaign-reg-deadline').value
+                ? new Date(document.getElementById('fs-campaign-reg-deadline').value)
+                : null;
+            const approvalDeadline = document.getElementById('fs-campaign-app-deadline').value
+                ? new Date(document.getElementById('fs-campaign-app-deadline').value)
+                : null;
+
+            if (!validateCampaignTimelineOnAdmin(startDate, endDate, registrationDeadline, approvalDeadline, {
+                enforceFutureRegistrationDeadline: true
+            })) {
+                return;
+            }
+
             const data = {
                 name: name,
                 description: description,
-                startDate: new Date(document.getElementById('fs-campaign-start').value).toISOString(),
-                endDate: new Date(document.getElementById('fs-campaign-end').value).toISOString(),
+                startDate: document.getElementById('fs-campaign-start').value + ':00',
+                endDate: document.getElementById('fs-campaign-end').value + ':00',
                 minDiscountPercentage: parseInt(document.getElementById('fs-campaign-min-discount').value) || 10,
                 minStockPerProduct: parseInt(document.getElementById('fs-campaign-min-stock').value) || 5,
-                registrationDeadline: document.getElementById('fs-campaign-reg-deadline').value ? new Date(document.getElementById('fs-campaign-reg-deadline').value).toISOString() : null,
-                approvalDeadline: document.getElementById('fs-campaign-app-deadline').value ? new Date(document.getElementById('fs-campaign-app-deadline').value).toISOString() : null
+                registrationDeadline: document.getElementById('fs-campaign-reg-deadline').value ? document.getElementById('fs-campaign-reg-deadline').value + ':00' : null,
+                approvalDeadline: document.getElementById('fs-campaign-app-deadline').value ? document.getElementById('fs-campaign-app-deadline').value + ':00' : null
             };
             try {
                 const response = await fetch('http://localhost:8080/api/flash-sales/campaigns', {
@@ -2829,6 +2895,9 @@
                     showToast('Campaign created!', 'success');
                     document.getElementById('createCampaignModal').classList.add('hidden');
                     loadCampaigns();
+                } else {
+                    const errorText = await response.text();
+                    showToast(errorText || `Failed to create campaign (Status ${response.status})`, 'error');
                 }
             } catch (err) { showToast('Error creating campaign', 'error'); }
         }
@@ -2839,10 +2908,28 @@
         }
 
         async function submitCreateSlot() {
+            const startRaw = document.getElementById('fs-slot-start').value;
+            const endRaw = document.getElementById('fs-slot-end').value;
+            if (!startRaw || !endRaw) {
+                showToast('Please choose both start and end time', 'error');
+                return;
+            }
+
+            const startDate = new Date(startRaw);
+            const endDate = new Date(endRaw);
+            if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+                showToast('Invalid date/time format', 'error');
+                return;
+            }
+            if (endDate <= startDate) {
+                showToast('End time must be after start time', 'error');
+                return;
+            }
+
             const data = {
                 campaignId: document.getElementById('fs-slot-campaign-id').value,
-                startTime: new Date(document.getElementById('fs-slot-start').value).toISOString(),
-                endTime: new Date(document.getElementById('fs-slot-end').value).toISOString()
+                startTime: startRaw + ':00',
+                endTime: endRaw + ':00'
             };
             try {
                 const response = await fetch('http://localhost:8080/api/flash-sales/slots', {
@@ -2854,6 +2941,9 @@
                     showToast('Slot added!', 'success');
                     document.getElementById('createSlotModal').classList.add('hidden');
                     loadCampaigns();
+                } else {
+                    const errorText = await response.text();
+                    showToast(errorText || `Failed to add slot (Status ${response.status})`, 'error');
                 }
             } catch (err) { showToast('Error adding slot', 'error'); }
         }
@@ -2927,11 +3017,9 @@
 
         function toLocalDatetime(isoString) {
             if (!isoString) return '';
-            // Ensure we treat the input as UTC
-            const date = new Date(isoString.endsWith('Z') ? isoString : isoString + 'Z');
-            const offset = date.getTimezoneOffset() * 60000;
-            const localDate = new Date(date.getTime() - offset);
-            return localDate.toISOString().slice(0, 16);
+            // Dates from API are now in Vietnam time — just slice for datetime-local input
+            const str = String(isoString).replace('Z', '');
+            return str.slice(0, 16);
         }
 
         function openEditCampaignModal(id, name, desc, start, end, minDiscount, minStock, regDeadline, appDeadline) {
@@ -2952,15 +3040,31 @@
 
         async function submitEditCampaign() {
             const id = document.getElementById('edit-campaign-id').value;
+
+            const startDate = new Date(document.getElementById('edit-campaign-start').value);
+            const endDate = new Date(document.getElementById('edit-campaign-end').value);
+            const registrationDeadline = document.getElementById('edit-campaign-reg-deadline').value
+                ? new Date(document.getElementById('edit-campaign-reg-deadline').value)
+                : null;
+            const approvalDeadline = document.getElementById('edit-campaign-app-deadline').value
+                ? new Date(document.getElementById('edit-campaign-app-deadline').value)
+                : null;
+
+            if (!validateCampaignTimelineOnAdmin(startDate, endDate, registrationDeadline, approvalDeadline, {
+                enforceFutureRegistrationDeadline: false
+            })) {
+                return;
+            }
+
             const data = {
                 name: document.getElementById('edit-campaign-name').value,
                 description: document.getElementById('edit-campaign-desc').value,
-                startDate: new Date(document.getElementById('edit-campaign-start').value).toISOString(),
-                endDate: new Date(document.getElementById('edit-campaign-end').value).toISOString(),
+                startDate: document.getElementById('edit-campaign-start').value + ':00',
+                endDate: document.getElementById('edit-campaign-end').value + ':00',
                 minDiscountPercentage: parseInt(document.getElementById('edit-campaign-min-discount').value) || 10,
                 minStockPerProduct: parseInt(document.getElementById('edit-campaign-min-stock').value) || 5,
-                registrationDeadline: document.getElementById('edit-campaign-reg-deadline').value ? new Date(document.getElementById('edit-campaign-reg-deadline').value).toISOString() : null,
-                approvalDeadline: document.getElementById('edit-campaign-app-deadline').value ? new Date(document.getElementById('edit-campaign-app-deadline').value).toISOString() : null
+                registrationDeadline: document.getElementById('edit-campaign-reg-deadline').value ? document.getElementById('edit-campaign-reg-deadline').value + ':00' : null,
+                approvalDeadline: document.getElementById('edit-campaign-app-deadline').value ? document.getElementById('edit-campaign-app-deadline').value + ':00' : null
             };
             try {
                 const res = await fetch(`http://localhost:8080/api/flash-sales/campaigns/${id}`, {
@@ -2972,7 +3076,10 @@
                     showToast('Campaign updated', 'success');
                     document.getElementById('editCampaignModal').classList.add('hidden');
                     loadCampaigns();
-                } else showToast('Failed to update campaign', 'error');
+                } else {
+                    const errorText = await res.text();
+                    showToast(errorText || `Failed to update campaign (Status ${res.status})`, 'error');
+                }
             } catch (e) { showToast('Error updating campaign', 'error'); }
         }
 
@@ -2993,9 +3100,12 @@
                         return;
                     }
                     tbody.innerHTML = items.map(item => {
-                        const statusColor = item.status === 'APPROVED' ? 'bg-green-100 text-green-700'
-                            : item.status === 'REJECTED' ? 'bg-red-100 text-red-700'
-                                : 'bg-yellow-100 text-yellow-700';
+                        const isSoldOut = item.remainingStock !== null && item.remainingStock !== undefined && Number(item.remainingStock) <= 0;
+                        const displayStatus = isSoldOut ? 'SOLD OUT' : (item.status || 'UNKNOWN');
+                        const statusColor = isSoldOut ? 'bg-gray-200 text-gray-700'
+                            : item.status === 'APPROVED' ? 'bg-green-100 text-green-700'
+                                : item.status === 'REJECTED' ? 'bg-red-100 text-red-700'
+                                    : 'bg-yellow-100 text-yellow-700';
                         return `
                         <tr class="border-b border-gray-50 last:border-0 hover:bg-gray-50">
                             <td class="py-3 flex items-center gap-2">
@@ -3006,11 +3116,11 @@
                             <td class="py-3 text-gray-400 line-through">₫${item.originalPrice ? item.originalPrice.toLocaleString() : 'N/A'}</td>
                             <td class="py-3 text-[#AD3029] font-bold">₫${item.salePrice.toLocaleString()}</td>
                             <td class="py-3">
-                                <span class="text-gray-800 font-bold">${item.remainingStock ?? '-'}</span>
+                                <span class="${isSoldOut ? 'text-red-600' : 'text-gray-800'} font-bold">${item.remainingStock ?? '-'}</span>
                                 <span class="text-gray-400 text-xs">/ ${item.saleStock ?? '-'}</span>
                             </td>
                             <td class="py-3">
-                                <span class="text-[10px] font-bold px-2 py-1 rounded uppercase ${statusColor}">${item.status}</span>
+                                <span class="text-[10px] font-bold px-2 py-1 rounded uppercase ${statusColor}">${displayStatus}</span>
                             </td>
                         </tr>
                     `}).join('');
@@ -3028,3 +3138,4 @@
 
 
 </html>
+

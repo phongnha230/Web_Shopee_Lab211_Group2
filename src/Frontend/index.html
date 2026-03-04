@@ -462,6 +462,17 @@
         let flashSaleCountdownInterval = null;
         let homepageFlashSaleRefreshInterval = null;
 
+        function parseVnDateTime(dateStr) {
+            if (!dateStr) return null;
+            const clean = String(dateStr).replace('Z', '').trim();
+            const [datePart, timePart = '00:00:00'] = clean.split('T');
+            if (!datePart) return null;
+            const [year, month, day] = datePart.split('-').map(Number);
+            const [hour, minute, second = 0] = timePart.split(':').map(Number);
+            if ([year, month, day, hour, minute, second].some(Number.isNaN)) return null;
+            return new Date(Date.UTC(year, month - 1, day, hour - 7, minute, second));
+        }
+
         async function loadFlashSaleCountdown() {
             const hoursEl = document.getElementById('flashSaleHours');
             const minutesEl = document.getElementById('flashSaleMinutes');
@@ -483,12 +494,11 @@
                     return;
                 }
 
-                // Ensure endTime is treated as UTC (Backend tends to omit 'Z' in some endpoints)
-                let dateStr = endTime;
-                if (!dateStr.endsWith('Z') && !dateStr.includes('+')) {
-                    dateStr += 'Z';
+                const end = parseVnDateTime(endTime);
+                if (!end) {
+                    setCountdownText(hoursEl, minutesEl, secondsEl, '--', '--', '--');
+                    return;
                 }
-                const end = new Date(dateStr);
 
                 function tick() {
                     const now = new Date();

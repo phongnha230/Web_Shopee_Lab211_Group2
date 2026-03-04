@@ -13,9 +13,7 @@ public class FlashSale {
     private String id;
 
     private String campaignId;
-    @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     private LocalDateTime startTime;
-    @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     private LocalDateTime endTime;
     private String status; // ACTIVE, INACTIVE
 }

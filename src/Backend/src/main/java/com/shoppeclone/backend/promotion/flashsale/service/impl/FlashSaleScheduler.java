@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
 import java.util.List;
 
@@ -34,8 +33,8 @@ public class FlashSaleScheduler {
 
     @Scheduled(fixedRate = 60000) // Run every minute
     public void processFlashSaleTransitions() {
-        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
-        log.debug("FlashSaleScheduler: Running transitions at UTC: {}", now);
+        LocalDateTime now = LocalDateTime.now();
+        log.debug("FlashSaleScheduler: Running transitions at VN time: {}", now);
 
         // 1. Process Campaigns
         List<FlashSaleCampaign> campaigns = flashSaleCampaignRepository.findAll();
@@ -49,9 +48,21 @@ public class FlashSaleScheduler {
                 flashSaleCampaignRepository.save(campaign);
                 log.info("Campaign '{}' moved to ONGOING", campaign.getName());
             } else if (!"FINISHED".equals(status) && end != null && now.isAfter(end)) {
-                campaign.setStatus("FINISHED");
-                flashSaleCampaignRepository.save(campaign);
-                log.info("Campaign '{}' moved to FINISHED", campaign.getName());
+                // Keep campaign open while there are still valid slots to run/register.
+                boolean hasUsableSlot = flashSaleRepository.findByCampaignId(campaign.getId()).stream()
+                        .anyMatch(slot -> {
+                            String slotStatus = slot.getStatus() != null ? slot.getStatus().toUpperCase() : "";
+                            boolean slotOpen = "ACTIVE".equals(slotStatus) || "ONGOING".equals(slotStatus);
+                            return slotOpen
+                                    && slot.getEndTime() != null
+                                    && slot.getEndTime().isAfter(now);
+                        });
+
+                if (!hasUsableSlot) {
+                    campaign.setStatus("FINISHED");
+                    flashSaleCampaignRepository.save(campaign);
+                    log.info("Campaign '{}' moved to FINISHED", campaign.getName());
+                }
             }
         }
 
@@ -73,6 +84,39 @@ public class FlashSaleScheduler {
             }
 
             List<FlashSaleItem> items = flashSaleItemRepository.findByFlashSaleIdAndStatus(slot.getId(), "APPROVED");
+
+            // ── When slot JUST STARTS: reset all flash sale sold counters ──
+            // This prevents stale data from a previous campaign showing "HET HANG"
+            if (isJustStarting) {
+                for (FlashSaleItem item : items) {
+                    // Reset Product level
+                    Product product = productRepository.findById(item.getProductId()).orElse(null);
+                    if (product != null) {
+                        product.setFlashSaleSold(0);
+                        productRepository.save(product);
+
+                        // Reset ALL variants of this product
+                        List<ProductVariant> allVariants = productVariantRepository.findByProductId(product.getId());
+                        for (ProductVariant v : allVariants) {
+                            v.setFlashSaleSold(0);
+                            productVariantRepository.save(v);
+                        }
+                    }
+
+                    // Note: specific variant reset is already covered by the "Reset ALL variants"
+                    // block above.
+
+                    // Reset FlashSaleItem remainingStock to full saleStock for the new campaign
+                    if (item.getRemainingStock() == null || item.getRemainingStock() <= 0) {
+                        item.setRemainingStock(item.getSaleStock());
+                        flashSaleItemRepository.save(item);
+                        log.info("Reset remainingStock to {} for flash sale item: {}", item.getSaleStock(),
+                                item.getId());
+                    }
+                }
+            }
+
+            // ── Sync flash sale data to Product/Variant ──
             for (FlashSaleItem item : items) {
                 Product product = productRepository.findById(item.getProductId()).orElse(null);
                 if (product != null) {

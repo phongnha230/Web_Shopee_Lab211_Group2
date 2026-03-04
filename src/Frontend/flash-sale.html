@@ -363,13 +363,20 @@
             updateCountdownUI(0, 0, 0);
         }
 
+        function parseVnDateTime(dateStr) {
+            if (!dateStr) return null;
+            const clean = String(dateStr).replace('Z', '').trim();
+            const [datePart, timePart = '00:00:00'] = clean.split('T');
+            if (!datePart) return null;
+            const [year, month, day] = datePart.split('-').map(Number);
+            const [hour, minute, second = 0] = timePart.split(':').map(Number);
+            if ([year, month, day, hour, minute, second].some(Number.isNaN)) return null;
+            return new Date(Date.UTC(year, month - 1, day, hour - 7, minute, second));
+        }
+
         function startCountdown(endTime) {
-            // Ensure endTime is treated as UTC
-            let dateStr = endTime;
-            if (dateStr && !dateStr.endsWith('Z') && !dateStr.includes('+')) {
-                dateStr += 'Z';
-            }
-            const end = new Date(dateStr);
+            const end = parseVnDateTime(endTime);
+            if (!end) return;
             const els = document.querySelectorAll('.bg-black.text-white');
 
             function tick() {

@@ -162,32 +162,19 @@ public class EmailService {
                 message.setSubject("Invitation: Join New Flash Sale Campaign! ⚡ - " + campaignName);
 
                 String formattedDeadline = "Mở đến khi đầy slots";
-                if (regDeadline != null) {
+                if (regDeadline != null && !"Open".equals(regDeadline)) {
                         try {
-                                // Ensure format: YYYY-MM-DDTHH:MM:SS
-                                String isoString = regDeadline.endsWith("Z")
-                                                ? regDeadline.substring(0, regDeadline.length() - 1)
-                                                : regDeadline;
+                                // Dates are already in Vietnam time — just format for display
+                                String isoString = regDeadline.replace("Z", "");
                                 if (isoString.length() == 16) { // YYYY-MM-DDTHH:MM
                                         isoString += ":00";
                                 }
-
-                                // Parse as LocalDateTime (assuming DB stores UTC without timezone info
-                                // sometimes)
                                 java.time.LocalDateTime localDateTime = java.time.LocalDateTime.parse(isoString);
-
-                                // Convert to ZonedDateTime (treat as UTC)
-                                java.time.ZonedDateTime utcTime = localDateTime.atZone(java.time.ZoneId.of("UTC"));
-
-                                // Convert to Vietnam Time (GMT+7)
-                                java.time.ZonedDateTime vnTime = utcTime
-                                                .withZoneSameInstant(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));
-
                                 java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter
                                                 .ofPattern("dd/MM/yyyy HH:mm");
-                                formattedDeadline = vnTime.format(formatter);
+                                formattedDeadline = localDateTime.format(formatter);
                         } catch (Exception e) {
-                                // Fallback: attempts basic string formatting if parsing fails entirely
+                                // Fallback
                                 formattedDeadline = regDeadline.replace("T", " ").replace("Z", "");
                         }
                 }

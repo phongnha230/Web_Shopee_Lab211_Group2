@@ -4290,6 +4290,29 @@
             }
         }
 
+        function parseVnDateTime(dateStr) {
+            if (!dateStr) return null;
+            const clean = String(dateStr).replace('Z', '').trim();
+            const [datePart, timePart = '00:00:00'] = clean.split('T');
+            if (!datePart) return null;
+            const [year, month, day] = datePart.split('-').map(Number);
+            const [hour, minute, second = 0] = timePart.split(':').map(Number);
+            if ([year, month, day, hour, minute, second].some(Number.isNaN)) return null;
+
+            // Backend datetimes are in Vietnam local time (UTC+7).
+            return new Date(Date.UTC(year, month - 1, day, hour - 7, minute, second));
+        }
+
+        function formatVnDate(date) {
+            if (!date || Number.isNaN(date.getTime())) return '-';
+            return date.toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+        }
+
+        function formatVnDateTime(date) {
+            if (!date || Number.isNaN(date.getTime())) return '-';
+            return date.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+        }
+
         function renderSellerOpenCampaigns(campaigns) {
             const container = document.getElementById('sellerOpenCampaignsList');
             if (campaigns.length === 0) {
@@ -4299,23 +4322,26 @@
 
             const now = new Date();
             container.innerHTML = campaigns.map(c => {
-                const regDeadline = c.registrationDeadline ? new Date(c.registrationDeadline.endsWith('Z') ? c.registrationDeadline : c.registrationDeadline + 'Z') : null;
+                const regDeadline = c.registrationDeadline ? parseVnDateTime(c.registrationDeadline) : null;
                 const isExpired = regDeadline && now > regDeadline;
                 const deadlineText = regDeadline
-                    ? `<div class="flex justify-between"><span>Register by:</span><span class="${isExpired ? 'text-red-600 font-bold' : 'text-gray-600 font-medium'}">${regDeadline.toLocaleString()}${isExpired ? ' (Expired)' : ''}</span></div>`
+                    ? `<div class="flex justify-between"><span>Register by:</span><span class="${isExpired ? 'text-red-600 font-bold' : 'text-gray-600 font-medium'}">${formatVnDateTime(regDeadline)}${isExpired ? ' (Expired)' : ''}</span></div>`
                     : '';
 
                 return `
-                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition ${isExpired ? 'opacity-70' : ''}">
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition ${isExpired ? 'opacity-60' : ''}">
                     <div class="flex justify-between items-start mb-4">
                         <h3 class="text-lg font-bold text-gray-800">${c.name}</h3>
-                        <span class="bg-green-50 text-green-700 text-[10px] font-bold px-2 py-1 rounded uppercase">OPEN</span>
+                        ${isExpired
+                            ? `<span class="bg-gray-100 text-gray-400 text-[10px] font-bold px-2 py-1 rounded uppercase">REG. CLOSED</span>`
+                            : `<span class="bg-green-50 text-green-700 text-[10px] font-bold px-2 py-1 rounded uppercase">OPEN</span>`
+                        }
                     </div>
                     <p class="text-sm text-gray-500 mb-4">${c.description || 'Boost your sales with this exclusive event!'}</p>
                     <div class="space-y-2 mb-6 text-xs text-gray-400">
                         <div class="flex justify-between">
                             <span>Ends on:</span>
-                            <span class="text-gray-600 font-medium">${new Date(c.endDate.endsWith('Z') ? c.endDate : c.endDate + 'Z').toLocaleDateString()}</span>
+                            <span class="text-gray-600 font-medium">${formatVnDate(parseVnDateTime(c.endDate))}</span>
                         </div>
                         ${deadlineText}
                     </div>
@@ -4462,10 +4488,10 @@
                     if (campaign) {
                         // --- Check Registration Deadline ---
                         if (campaign.registrationDeadline) {
-                            const deadline = new Date(campaign.registrationDeadline.endsWith('Z') ? campaign.registrationDeadline : campaign.registrationDeadline + 'Z');
+                            const deadline = parseVnDateTime(campaign.registrationDeadline);
                             if (new Date() > deadline) {
                                 document.getElementById('sellerFSRegModal').classList.add('hidden');
-                                showToast(`Registration deadline has passed (${deadline.toLocaleString()})`, 'error');
+                                showToast(`Registration deadline has passed (${formatVnDateTime(deadline)})`, 'error');
                                 return;
                             }
                         }
@@ -4483,7 +4509,7 @@
                         slotSelect.innerHTML = '<option value="">No slots available</option>';
                     } else {
                         slotSelect.innerHTML = '<option value="">Choose a slot...</option>' +
-                            slots.map(s => `<option value="${s.id}">${new Date(s.startTime.endsWith('Z') ? s.startTime : s.startTime + 'Z').toLocaleString()} - ${s.status}</option>`).join('');
+                            slots.map(s => `<option value="${s.id}">${formatVnDateTime(parseVnDateTime(s.startTime))} - ${s.status}</option>`).join('');
                     }
                 } else {
                     slotSelect.innerHTML = `<option value="">Error: ${sResp.status}</option>`;

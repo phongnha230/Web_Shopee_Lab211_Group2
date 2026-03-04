@@ -9,6 +9,7 @@ import com.shoppeclone.backend.product.entity.*;
 import com.shoppeclone.backend.product.repository.*;
 import com.shoppeclone.backend.product.service.ProductService;
 import com.shoppeclone.backend.product.util.CategoryDetectionUtil;
+import com.shoppeclone.backend.promotion.flashsale.entity.FlashSale;
 import com.shoppeclone.backend.promotion.flashsale.entity.FlashSaleItem;
 import com.shoppeclone.backend.promotion.flashsale.repository.FlashSaleItemRepository;
 import com.shoppeclone.backend.promotion.flashsale.service.FlashSaleService;
@@ -22,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -534,10 +536,7 @@ public class ProductServiceImpl implements ProductService {
                 List<FlashSaleItem> fsItems = flashSaleItemRepository.findByProductIdAndStatus(product.getId(),
                         "APPROVED");
                 if (!fsItems.isEmpty()) {
-                    int totalSold = fsItems.stream()
-                            .mapToInt(item -> (item.getSaleStock() != null ? item.getSaleStock() : 0)
-                                    - (item.getRemainingStock() != null ? item.getRemainingStock() : 0))
-                            .sum();
+                    int totalSold = calculateCurrentFlashSaleSold(fsItems);
                     response.setFlashSaleSold(totalSold);
                 } else {
                     response.setFlashSaleSold(product.getFlashSaleSold() != null ? product.getFlashSaleSold() : 0);
@@ -595,10 +594,7 @@ public class ProductServiceImpl implements ProductService {
                 List<FlashSaleItem> fsItems = flashSaleItemRepository.findByVariantIdAndStatus(variant.getId(),
                         "APPROVED");
                 if (!fsItems.isEmpty()) {
-                    int totalSold = fsItems.stream()
-                            .mapToInt(item -> (item.getSaleStock() != null ? item.getSaleStock() : 0)
-                                    - (item.getRemainingStock() != null ? item.getRemainingStock() : 0))
-                            .sum();
+                    int totalSold = calculateCurrentFlashSaleSold(fsItems);
                     response.setFlashSaleSold(totalSold);
                 } else {
                     response.setFlashSaleSold(variant.getFlashSaleSold() != null ? variant.getFlashSaleSold() : 0);
@@ -613,6 +609,20 @@ public class ProductServiceImpl implements ProductService {
 
         response.setFlashSaleEndTime(variant.getFlashSaleEndTime());
         return response;
+    }
+
+    private int calculateCurrentFlashSaleSold(List<FlashSaleItem> fsItems) {
+        Optional<FlashSale> currentFlashSale = flashSaleService.getCurrentFlashSale();
+        if (currentFlashSale.isEmpty()) {
+            return 0;
+        }
+
+        String currentSlotId = currentFlashSale.get().getId();
+        return fsItems.stream()
+                .filter(item -> currentSlotId.equals(item.getFlashSaleId()))
+                .mapToInt(item -> (item.getSaleStock() != null ? item.getSaleStock() : 0)
+                        - (item.getRemainingStock() != null ? item.getRemainingStock() : 0))
+                .sum();
     }
 
     @Override

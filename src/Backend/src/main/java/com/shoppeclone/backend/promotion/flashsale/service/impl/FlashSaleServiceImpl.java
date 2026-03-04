@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
 import java.util.Comparator;
 import java.util.List;
@@ -45,6 +44,8 @@ public class FlashSaleServiceImpl implements FlashSaleService {
 
     @Override
     public FlashSaleCampaign createCampaign(FlashSaleCampaignRequest request) {
+        validateCampaignTimeline(request, null);
+
         FlashSaleCampaign campaign = new FlashSaleCampaign();
         campaign.setName(request.getName());
         campaign.setDescription(request.getDescription());
@@ -56,8 +57,8 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         campaign.setRegistrationDeadline(request.getRegistrationDeadline());
         campaign.setApprovalDeadline(request.getApprovalDeadline());
         campaign.setStatus("REGISTRATION_OPEN");
-        campaign.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
-        campaign.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
+        campaign.setCreatedAt(LocalDateTime.now());
+        campaign.setUpdatedAt(LocalDateTime.now());
         FlashSaleCampaign saved = flashSaleCampaignRepository.save(campaign);
 
         // Auto-broadcast invitation to all active shops
@@ -74,6 +75,8 @@ public class FlashSaleServiceImpl implements FlashSaleService {
     public FlashSaleCampaign updateCampaign(String id, FlashSaleCampaignRequest request) {
         FlashSaleCampaign campaign = flashSaleCampaignRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Campaign not found"));
+        validateCampaignTimeline(request, campaign);
+
         campaign.setName(request.getName());
         campaign.setDescription(request.getDescription());
         campaign.setStartDate(request.getStartDate());
@@ -86,8 +89,54 @@ public class FlashSaleServiceImpl implements FlashSaleService {
             campaign.setRegistrationDeadline(request.getRegistrationDeadline());
         if (request.getApprovalDeadline() != null)
             campaign.setApprovalDeadline(request.getApprovalDeadline());
-        campaign.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
+        campaign.setUpdatedAt(LocalDateTime.now());
         return flashSaleCampaignRepository.save(campaign);
+    }
+
+    private void validateCampaignTimeline(FlashSaleCampaignRequest request, FlashSaleCampaign existingCampaign) {
+        LocalDateTime now = LocalDateTime.now();
+
+        LocalDateTime startDate = request.getStartDate() != null ? request.getStartDate()
+                : existingCampaign != null ? existingCampaign.getStartDate() : null;
+        LocalDateTime endDate = request.getEndDate() != null ? request.getEndDate()
+                : existingCampaign != null ? existingCampaign.getEndDate() : null;
+        LocalDateTime registrationDeadline = request.getRegistrationDeadline() != null
+                ? request.getRegistrationDeadline()
+                : existingCampaign != null ? existingCampaign.getRegistrationDeadline() : null;
+        LocalDateTime approvalDeadline = request.getApprovalDeadline() != null ? request.getApprovalDeadline()
+                : existingCampaign != null ? existingCampaign.getApprovalDeadline() : null;
+
+        if (startDate == null || endDate == null) {
+            throw new RuntimeException("Campaign start/end date is required.");
+        }
+        if (!endDate.isAfter(startDate)) {
+            throw new RuntimeException("Campaign end date must be after start date.");
+        }
+
+        if (registrationDeadline != null) {
+            LocalDateTime oldRegistrationDeadline = existingCampaign != null
+                    ? existingCampaign.getRegistrationDeadline()
+                    : null;
+            boolean isUpdatedRegistrationDeadline = existingCampaign == null
+                    || oldRegistrationDeadline == null
+                    || !registrationDeadline.equals(oldRegistrationDeadline);
+
+            if (isUpdatedRegistrationDeadline && registrationDeadline.isBefore(now)) {
+                throw new RuntimeException("Registration deadline must be in the future (Vietnam time).");
+            }
+            if (registrationDeadline.isAfter(startDate)) {
+                throw new RuntimeException("Registration deadline must be on or before campaign start date.");
+            }
+        }
+
+        if (approvalDeadline != null) {
+            if (approvalDeadline.isAfter(startDate)) {
+                throw new RuntimeException("Approval deadline must be on or before campaign start date.");
+            }
+            if (registrationDeadline != null && approvalDeadline.isBefore(registrationDeadline)) {
+                throw new RuntimeException("Approval deadline must be after or equal to registration deadline.");
+            }
+        }
     }
 
     @Override
@@ -97,7 +146,39 @@ public class FlashSaleServiceImpl implements FlashSaleService {
 
     @Override
     public List<FlashSaleCampaign> getOpenCampaigns() {
-        return flashSaleCampaignRepository.findByStatusIn(java.util.Arrays.asList("REGISTRATION_OPEN", "ONGOING"));
+        LocalDateTime now = LocalDateTime.now();
+
+        return flashSaleCampaignRepository.findAll().stream()
+                .filter(campaign -> {
+                    String status = campaign.getStatus() != null ? campaign.getStatus().toUpperCase() : "";
+
+                    // Only hide campaigns that are truly FINISHED (admin-confirmed end or all slots
+                    // done).
+                    // Campaigns where registration deadline has passed should still be visible to
+                    // sellers
+                    // as "Registration Closed" — they are only removed when admin explicitly
+                    // deletes them.
+                    if ("FINISHED".equals(status)) {
+                        return false;
+                    }
+
+                    // Show REGISTRATION_OPEN or ONGOING campaigns
+                    if ("REGISTRATION_OPEN".equals(status) || "ONGOING".equals(status)) {
+                        return true;
+                    }
+
+                    // Fallback: if campaign status is stale but has a usable slot, still expose to
+                    // seller.
+                    List<FlashSale> slots = flashSaleRepository.findByCampaignId(campaign.getId());
+                    return slots.stream().anyMatch(slot -> {
+                        String slotStatus = slot.getStatus() != null ? slot.getStatus().toUpperCase() : "";
+                        boolean slotOpen = "ACTIVE".equals(slotStatus) || "ONGOING".equals(slotStatus);
+                        return slotOpen
+                                && slot.getEndTime() != null
+                                && slot.getEndTime().isAfter(now);
+                    });
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -117,12 +198,51 @@ public class FlashSaleServiceImpl implements FlashSaleService {
 
     @Override
     public FlashSale createSlot(FlashSaleSlotRequest request) {
+        FlashSaleCampaign campaign = flashSaleCampaignRepository.findById(request.getCampaignId())
+                .orElseThrow(() -> new RuntimeException("Campaign not found"));
+
+        LocalDateTime now = LocalDateTime.now();
+        log.info("[createSlot] VN now = {}, slotStart = {}, slotEnd = {}, campaignStatus = {}, regDeadline = {}",
+                now, request.getStartTime(), request.getEndTime(), campaign.getStatus(),
+                campaign.getRegistrationDeadline());
+
+        if (request.getStartTime() == null || request.getEndTime() == null) {
+            throw new RuntimeException("Cannot add slot: start/end time is required.");
+        }
+        if (!request.getEndTime().isAfter(request.getStartTime())) {
+            throw new RuntimeException("Cannot add slot: end time must be after start time.");
+        }
+        if (campaign.getRegistrationDeadline() != null && now.isAfter(campaign.getRegistrationDeadline())) {
+            log.warn("[createSlot] BLOCKED: registration deadline passed. now={} > deadline={}", now,
+                    campaign.getRegistrationDeadline());
+            throw new RuntimeException("Cannot add slot: registration deadline has passed.");
+        }
+        if (request.getEndTime() != null && !request.getEndTime().isAfter(now)) {
+            log.warn("[createSlot] BLOCKED: slot end time not in future. endTime={} <= now={}", request.getEndTime(),
+                    now);
+            throw new RuntimeException("Cannot add slot: slot end time must be in the future.");
+        }
+
         FlashSale slot = new FlashSale();
         slot.setCampaignId(request.getCampaignId());
         slot.setStartTime(request.getStartTime());
         slot.setEndTime(request.getEndTime());
         slot.setStatus("ACTIVE");
-        return flashSaleRepository.save(slot);
+        FlashSale savedSlot = flashSaleRepository.save(slot);
+        log.info("[createSlot] Slot saved successfully: id={}", savedSlot.getId());
+
+        // Re-open stale campaign status so seller can see/register after admin adds
+        // slot.
+        String status = campaign.getStatus() != null ? campaign.getStatus().toUpperCase() : "";
+        if ("FINISHED".equals(status)) {
+            campaign.setStatus("REGISTRATION_OPEN");
+            campaign.setUpdatedAt(now);
+            flashSaleCampaignRepository.save(campaign);
+            log.info(
+                    "[createSlot] Campaign re-opened from FINISHED to REGISTRATION_OPEN (no broadcast — admin must trigger manually)");
+        }
+
+        return savedSlot;
     }
 
     @Override
@@ -139,13 +259,14 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                 .orElseThrow(() -> new RuntimeException("Campaign not found"));
 
         // --- DEADLINE VALIDATION ---
-        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        LocalDateTime now = LocalDateTime.now();
 
         // Only check registration deadline (not status, because campaign may
         // auto-transition to ONGOING while deadline is still valid)
         if (campaign.getRegistrationDeadline() != null && now.isAfter(campaign.getRegistrationDeadline())) {
             throw new RuntimeException(
-                    "Registration deadline has passed. Deadline was: " + campaign.getRegistrationDeadline() + " UTC");
+                    "Registration deadline has passed. Deadline was: " + campaign.getRegistrationDeadline()
+                            + " (Vietnam time)");
         }
         // --- END VALIDATION ---
 
@@ -196,8 +317,8 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         registration.setSaleStock(request.getSaleStock());
         registration.setRemainingStock(request.getSaleStock());
         registration.setStatus("PENDING");
-        registration.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
-        registration.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
+        registration.setCreatedAt(LocalDateTime.now());
+        registration.setUpdatedAt(LocalDateTime.now());
 
         // Inventory Locking: Deduct from base stock
         variant.setStock(variant.getStock() - request.getSaleStock());
@@ -214,7 +335,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
             List<ProductVariant> variants = productVariantRepository.findByProductId(productId);
             int total = variants.stream().mapToInt(ProductVariant::getStock).sum();
             product.setTotalStock(total);
-            product.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
+            product.setUpdatedAt(LocalDateTime.now());
             productRepository.save(product);
         });
     }
@@ -261,25 +382,29 @@ public class FlashSaleServiceImpl implements FlashSaleService {
 
     @Override
     public List<FlashSaleItemResponse> getCampaignItems(String campaignId) {
-        List<FlashSale> slots = flashSaleRepository.findByCampaignId(campaignId);
-
-        // Only include slots that are currently ACTIVE
-        List<String> activeSlotIds = slots.stream()
-                .filter(slot -> "ACTIVE".equals(slot.getStatus()))
+        List<String> slotIds = flashSaleRepository.findByCampaignId(campaignId).stream()
                 .map(FlashSale::getId)
                 .collect(Collectors.toList());
 
-        if (activeSlotIds.isEmpty()) {
-            return List.of(); // No active slots → nothing to show
+        if (slotIds.isEmpty()) {
+            return List.of();
         }
 
-        // Only return APPROVED items belonging to active slots
-        List<FlashSaleItem> items = flashSaleItemRepository.findAll().stream()
-                .filter(item -> activeSlotIds.contains(item.getFlashSaleId())
-                        && "APPROVED".equals(item.getStatus()))
-                .collect(Collectors.toList());
+        java.util.Map<String, Integer> statusPriority = java.util.Map.of(
+                "APPROVED", 0,
+                "PENDING", 1,
+                "REJECTED", 2);
 
-        return items.stream().map(this::convertToResponse).collect(Collectors.toList());
+        return flashSaleItemRepository.findAll().stream()
+                .filter(item -> slotIds.contains(item.getFlashSaleId()))
+                .sorted(Comparator
+                        .comparingInt((FlashSaleItem item) -> statusPriority.getOrDefault(
+                                item.getStatus() != null ? item.getStatus().toUpperCase() : "", 99))
+                        .thenComparing(FlashSaleItem::getUpdatedAt, Comparator.nullsLast(Comparator.reverseOrder()))
+                        .thenComparing(FlashSaleItem::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder()))
+                        .thenComparing(FlashSaleItem::getId, Comparator.nullsLast(Comparator.reverseOrder())))
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -294,11 +419,11 @@ public class FlashSaleServiceImpl implements FlashSaleService {
             if (slot != null) {
                 FlashSaleCampaign campaign = flashSaleCampaignRepository.findById(slot.getCampaignId()).orElse(null);
                 if (campaign != null && campaign.getApprovalDeadline() != null) {
-                    LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+                    LocalDateTime now = LocalDateTime.now();
                     if (now.isAfter(campaign.getApprovalDeadline())) {
                         throw new RuntimeException(
                                 "Approval deadline has passed. You can no longer approve registrations for this campaign. Deadline was: "
-                                        + campaign.getApprovalDeadline() + " UTC");
+                                        + campaign.getApprovalDeadline() + " (Vietnam time)");
                     }
                 }
             }
@@ -381,14 +506,14 @@ public class FlashSaleServiceImpl implements FlashSaleService {
 
     @Override
     public List<FlashSale> getActiveFlashSales() {
-        // Use UTC time as Frontend sends ISO strings
-        return flashSaleRepository.findByStartTimeAfter(LocalDateTime.now(ZoneOffset.UTC).minusDays(1));
+        // Use Vietnam time — JVM timezone forced to Asia/Ho_Chi_Minh
+        return flashSaleRepository.findByStartTimeAfter(LocalDateTime.now().minusDays(1));
     }
 
     @Override
     public Optional<FlashSale> getCurrentFlashSale() {
-        // Use UTC time to match ISO strings from Frontend
-        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        // Use Vietnam time — JVM timezone forced to Asia/Ho_Chi_Minh
+        LocalDateTime now = LocalDateTime.now();
         List<FlashSale> all = flashSaleRepository.findAll();
         return all.stream()
                 .filter(fs -> fs.getStartTime() != null && fs.getEndTime() != null)
@@ -526,12 +651,22 @@ public class FlashSaleServiceImpl implements FlashSaleService {
     @Override
     @Transactional
     public void broadcastCampaignInvitation(FlashSaleCampaign campaign) {
-        log.info("Broadcasting invitation for campaign: {}", campaign.getName());
+        log.info("[broadcastCampaignInvitation] Broadcasting invitation for campaign: '{}' (id={})", campaign.getName(),
+                campaign.getId());
 
         List<com.shoppeclone.backend.shop.dto.response.ShopAdminResponse> activeShops = shopService.getActiveShops();
+        log.info("[broadcastCampaignInvitation] Found {} active shops to notify", activeShops.size());
+
+        if (activeShops.isEmpty()) {
+            log.warn("[broadcastCampaignInvitation] No active shops found — no emails will be sent!");
+            return;
+        }
+
         String regDeadline = campaign.getRegistrationDeadline() != null ? campaign.getRegistrationDeadline().toString()
                 : "Open";
 
+        int emailsSent = 0;
+        int emailsFailed = 0;
         for (com.shoppeclone.backend.shop.dto.response.ShopAdminResponse shopResp : activeShops) {
             // Send In-app Notification
             notificationService.createNotification(
@@ -542,10 +677,18 @@ public class FlashSaleServiceImpl implements FlashSaleService {
 
             // Send Email
             try {
-                emailService.sendCampaignInvitationEmail(shopResp.getEmail(), campaign.getName(), regDeadline);
+                if (shopResp.getEmail() != null && !shopResp.getEmail().isBlank()) {
+                    emailService.sendCampaignInvitationEmail(shopResp.getEmail(), campaign.getName(), regDeadline);
+                    emailsSent++;
+                } else {
+                    log.warn("[broadcastCampaignInvitation] Shop '{}' has no email — skipped", shopResp.getOwnerId());
+                }
             } catch (Exception e) {
+                emailsFailed++;
                 log.warn("Failed to send invitation email to {}: {}", shopResp.getEmail(), e.getMessage());
             }
         }
+        log.info("[broadcastCampaignInvitation] Done: {} emails sent, {} failed, {} shops total",
+                emailsSent, emailsFailed, activeShops.size());
     }
 }

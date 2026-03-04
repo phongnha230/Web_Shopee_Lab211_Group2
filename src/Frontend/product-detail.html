@@ -505,6 +505,37 @@
 
         let productLiveStockSyncInterval = null;
 
+        function stopProductLiveStockSync() {
+            if (productLiveStockSyncInterval) {
+                clearInterval(productLiveStockSyncInterval);
+                productLiveStockSyncInterval = null;
+            }
+        }
+
+        async function syncProductLiveStockOnce(productId) {
+            if (!productId || !window.isCurrentReal) return;
+            try {
+                const response = await fetch(`${API_BASE_URL}/products/${productId}`, { cache: 'no-store' });
+                if (!response.ok) return;
+                const freshProduct = await response.json();
+                if (!freshProduct.id) freshProduct.id = productId;
+
+                window.currentProduct = freshProduct;
+                window.isCurrentReal = true;
+                updatePriceDisplay();
+            } catch (_) {
+                // Ignore transient polling errors; UI keeps last known state.
+            }
+        }
+
+        function startProductLiveStockSync(productId) {
+            stopProductLiveStockSync();
+            syncProductLiveStockOnce(productId);
+            productLiveStockSyncInterval = setInterval(() => {
+                syncProductLiveStockOnce(productId);
+            }, 5000);
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             console.log("Initializing Product Page...");
             setupQuantityGuards();
@@ -1027,6 +1058,41 @@
             updatePriceDisplay();
         }
 
+        function logFlashSaleResolution(ctx) {
+            try {
+                const product = ctx.product || {};
+                const variant = ctx.variant || null;
+                const variantsOnFlashSale = Array.isArray(product.variants)
+                    ? product.variants.filter(v => v && v.isFlashSale).map(v => v.id)
+                    : [];
+
+                console.info('[FS-DEBUG] product-detail resolution', {
+                    productId: product.id || null,
+                    selectedColor: ctx.color || null,
+                    selectedSize: ctx.size || null,
+                    selectedVariantId: variant ? variant.id : null,
+                    selectedVariantStock: variant ? variant.stock : null,
+                    productIsFlashSale: !!product.isFlashSale,
+                    productFlashSaleStock: product.flashSaleStock ?? null,
+                    productFlashSaleSold: product.flashSaleSold ?? null,
+                    selectedVariantIsFlashSale: variant ? !!variant.isFlashSale : false,
+                    selectedVariantFlashSaleStock: variant ? (variant.flashSaleStock ?? null) : null,
+                    selectedVariantFlashSaleSold: variant ? (variant.flashSaleSold ?? null) : null,
+                    variantsOnFlashSale,
+                    productHasFs: !!ctx.productHasFs,
+                    variantHasFs: !!ctx.variantHasFs,
+                    isFlashSale: !!ctx.isFlashSale,
+                    isFlashSaleSoldOut: !!ctx.isFlashSaleSoldOut,
+                    resolvedPrice: ctx.price ?? null,
+                    resolvedOldPrice: ctx.oldPrice ?? null,
+                    resolvedAvailableStock: ctx.stock ?? null,
+                    resolvedFlashSaleEndTime: ctx.flashSaleEndTime || null
+                });
+            } catch (_) {
+                // Debug logging must never break purchase flow.
+            }
+        }
+
         function updatePriceDisplay() {
             const product = window.currentProduct;
             if (!product) return;
@@ -1163,6 +1229,22 @@
             } else {
                 if (window.fsTimerInterval) clearInterval(window.fsTimerInterval);
             }
+
+            logFlashSaleResolution({
+                product,
+                variant,
+                isReal,
+                color,
+                size,
+                productHasFs,
+                variantHasFs,
+                isFlashSale,
+                isFlashSaleSoldOut,
+                stock,
+                price,
+                oldPrice,
+                flashSaleEndTime
+            });
         }
 
         function updatePurchaseButtonsState(stock) {
@@ -1188,16 +1270,23 @@
         }
 
         window.fsTimerInterval = null;
+        function parseVnDateTimeForFlashSale(dateStr) {
+            if (!dateStr) return null;
+            const clean = String(dateStr).replace('Z', '').trim();
+            const [datePart, timePart = '00:00:00'] = clean.split('T');
+            if (!datePart) return null;
+            const [year, month, day] = datePart.split('-').map(Number);
+            const [hour, minute, second = 0] = timePart.split(':').map(Number);
+            if ([year, month, day, hour, minute, second].some(Number.isNaN)) return null;
+            return new Date(Date.UTC(year, month - 1, day, hour - 7, minute, second));
+        }
+
         function startFlashSaleTimer(endTimeStr) {
             if (window.fsTimerInterval) clearInterval(window.fsTimerInterval);
             if (!endTimeStr) return;
 
-            // Ensure endTimeStr is treated as UTC (Backend sends UTC, but sometimes omits 'Z')
-            let dateStr = endTimeStr;
-            if (!dateStr.endsWith('Z') && !dateStr.includes('+')) {
-                dateStr += 'Z';
-            }
-            const endTime = new Date(dateStr).getTime();
+            const endTime = parseVnDateTimeForFlashSale(endTimeStr)?.getTime();
+            if (!endTime) return;
 
             function update() {
                 const now = Date.now();
@@ -1469,6 +1558,11 @@
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') closeLightbox();
+        });
+
+        window.addEventListener('beforeunload', () => {
+            stopProductLiveStockSync();
+            if (window.fsTimerInterval) clearInterval(window.fsTimerInterval);
         });
     </script>
 </body>
