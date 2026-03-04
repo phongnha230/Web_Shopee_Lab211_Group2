@@ -625,6 +625,13 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         resp.setStatus(item.getStatus());
         resp.setAdminNote(item.getAdminNote());
         resp.setShopId(item.getShopId());
+        // Fetch Shop Name
+        try {
+            com.shoppeclone.backend.shop.entity.Shop shop = shopService.getShopById(item.getShopId());
+            if (shop != null)
+                resp.setShopName(shop.getName());
+        } catch (Exception ignored) {
+        }
         resp.setCreatedAt(item.getCreatedAt());
         resp.setUpdatedAt(item.getUpdatedAt());
 

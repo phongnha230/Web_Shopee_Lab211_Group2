@@ -6,19 +6,19 @@
 
     <!-- Global Fetch Interceptor for Token Refresh -->
     <script>
-        (function() {
+        (function () {
             const originalFetch = window.fetch;
             let isRefreshing = false;
             let refreshPromise = null;
 
-            window.fetch = async function(...args) {
+            window.fetch = async function (...args) {
                 let response;
                 try {
                     response = await originalFetch(...args);
                 } catch (error) {
                     throw error;
                 }
-                
+
                 if (response.status === 401 && typeof args[0] === 'string' && !args[0].includes('/auth/login') && !args[0].includes('/auth/refresh-token')) {
                     const refreshToken = localStorage.getItem('refreshToken');
                     if (refreshToken) {
@@ -33,7 +33,7 @@
                                             'Refresh-Token': refreshToken
                                         }
                                     });
-                                    
+
                                     if (refreshResponse.ok) {
                                         const data = await refreshResponse.json();
                                         localStorage.setItem('accessToken', data.accessToken);
@@ -42,12 +42,12 @@
                                     } else {
                                         localStorage.clear();
                                         window.location.href = 'login.html';
-                                        return new Promise(() => {});
+                                        return new Promise(() => { });
                                     }
                                 } catch (e) {
                                     localStorage.clear();
                                     window.location.href = 'login.html';
-                                    return new Promise(() => {});
+                                    return new Promise(() => { });
                                 } finally {
                                     isRefreshing = false;
                                 }
@@ -66,12 +66,12 @@
                             }
                             return originalFetch(...args);
                         } catch (e) {
-                            return new Promise(() => {});
+                            return new Promise(() => { });
                         }
                     } else {
                         localStorage.clear();
                         window.location.href = 'login.html';
-                        return new Promise(() => {});
+                        return new Promise(() => { });
                     }
                 }
                 return response;
@@ -80,7 +80,7 @@
     </script>
 
 
-    
+
 
 
 
@@ -745,7 +745,7 @@
                                 <thead class="bg-gray-50 text-gray-500 font-semibold uppercase text-xs">
                                     <tr>
                                         <th class="px-6 py-4">Product</th>
-                                        <th class="px-6 py-4">Shop</th>
+                                        <th class="px-6 py-4">Shop & Campaign</th>
                                         <th class="px-6 py-4">Price</th>
                                         <th class="px-6 py-4">Stock</th>
                                         <th class="px-6 py-4">Status</th>
@@ -2745,20 +2745,42 @@
                     : null;
                 const isApprovalExpired = approvalDeadline && now > approvalDeadline;
 
+                // Product image: dùng ảnh thực nếu có, fallback về icon
+                const productImgHtml = reg.productImage
+                    ? `<img src="${reg.productImage}" alt="product" class="w-12 h-12 object-cover rounded-lg border border-gray-100 flex-shrink-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                       <div class="w-12 h-12 bg-gray-100 rounded-lg items-center justify-center text-gray-400 flex-shrink-0 hidden" style="display:none"><i class="fas fa-box"></i></div>`
+                    : `<div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 flex-shrink-0"><i class="fas fa-box"></i></div>`;
+
+                // Product name: dùng tên thực nếu có, fallback về ID rút gọn
+                const productName = reg.productName || ('ID: ' + reg.productId.substring(0, 8) + '...');
+                const variantLabel = reg.variantName && reg.variantName.trim()
+                    ? reg.variantName.trim()
+                    : (reg.variantId ? reg.variantId.substring(0, 8) + '...' : 'N/A');
+
+                // Shop
+                const shopLabel = reg.shopName || (reg.shopId ? reg.shopId.substring(0, 8) + '...' : '—');
+
+                // Campaign
+                const campaignLabel = reg.campaignName || '—';
+
                 return `
                 <tr class="hover:bg-gray-50 transition ${isApprovalExpired ? 'bg-red-50/30' : ''}">
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-gray-100 rounded flex items-center justify-center text-gray-400">
-                                <i class="fas fa-box"></i>
-                            </div>
+                            ${productImgHtml}
                             <div>
-                                <p class="font-bold text-gray-800 line-clamp-1">Product ID: ${reg.productId.substring(0, 8)}...</p>
-                                <p class="text-xs text-gray-500">Variant: ${reg.variantId ? reg.variantId.substring(0, 8) + '...' : 'N/A'}</p>
+                                <p class="font-bold text-gray-800">${productName}</p>
+                                <p class="text-xs text-gray-500">Variant: ${variantLabel}</p>
                             </div>
                         </div>
                     </td>
-                    <td class="px-6 py-4 text-gray-600">${reg.shopId.substring(0, 8)}...</td>
+                    <td class="px-6 py-4">
+                        <div>
+                            <p class="text-xs text-gray-500 font-mono">${shopLabel}</p>
+                            <p class="text-xs font-semibold text-[#AD3029] mt-0.5">⚡ ${campaignLabel}</p>
+                            ${reg.slotStartTime ? `<p class="text-[10px] text-gray-400 mt-0.5">🕐 ${formatVnDateTime(parseVnDateTime(reg.slotStartTime))} → ${reg.slotEndTime ? formatVnDateTime(parseVnDateTime(reg.slotEndTime)) : '?'}</p>` : ''}
+                        </div>
+                    </td>
                     <td class="px-6 py-4 font-medium text-gray-800">₫${reg.salePrice.toLocaleString()}</td>
                     <td class="px-6 py-4 text-gray-600">${reg.saleStock}</td>
                     <td class="px-6 py-4">
@@ -3141,4 +3163,3 @@
 
 
 </html>
-

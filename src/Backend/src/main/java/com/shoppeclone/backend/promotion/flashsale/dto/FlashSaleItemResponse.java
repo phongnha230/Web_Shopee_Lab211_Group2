@@ -24,6 +24,7 @@ public class FlashSaleItemResponse {
     private String status;
     private String adminNote;
     private String shopId;
+    private String shopName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime approvalDeadline; // from campaign, for frontend deadline check
