@@ -2035,7 +2035,7 @@
                 const response = await fetch(`${baseUrl}/categories`);
                 if (response.ok) {
                     const categories = await response.json();
-                    
+
                     // Build category map for product table
                     categoryMap = {};
                     categories.forEach(cat => {
@@ -4333,9 +4333,9 @@
                     <div class="flex justify-between items-start mb-4">
                         <h3 class="text-lg font-bold text-gray-800">${c.name}</h3>
                         ${isExpired
-                            ? `<span class="bg-gray-100 text-gray-400 text-[10px] font-bold px-2 py-1 rounded uppercase">REG. CLOSED</span>`
-                            : `<span class="bg-green-50 text-green-700 text-[10px] font-bold px-2 py-1 rounded uppercase">OPEN</span>`
-                        }
+                        ? `<span class="bg-gray-100 text-gray-400 text-[10px] font-bold px-2 py-1 rounded uppercase">REG. CLOSED</span>`
+                        : `<span class="bg-green-50 text-green-700 text-[10px] font-bold px-2 py-1 rounded uppercase">OPEN</span>`
+                    }
                     </div>
                     <p class="text-sm text-gray-500 mb-4">${c.description || 'Boost your sales with this exclusive event!'}</p>
                     <div class="space-y-2 mb-6 text-xs text-gray-400">
@@ -4527,7 +4527,7 @@
                 }
             }
 
-            const fetchWithTimeout = (url, options = {}, timeout = 5000) => {
+            const fetchWithTimeout = (url, options = {}, timeout = 30000) => {
                 const controller = new AbortController();
                 const id = setTimeout(() => controller.abort(), timeout);
                 return fetch(url, { ...options, signal: controller.signal })
@@ -4764,30 +4764,32 @@
 
                 if (response.ok) {
                     showToast('Registration successful! ⚡', 'success');
-                    await loadSellerRegistrations(); // Refresh list
+
+                    // Re-enable buttons NGAY, không chờ refresh
+                    if (btnClose) { btnClose.disabled = false; btnClose.innerHTML = originalTextClose; }
+                    if (btnContinue) { btnContinue.disabled = false; btnContinue.innerHTML = originalTextContinue; }
 
                     if (keepOpen) {
-                        // RE-FETCH products to show UPDATED stock in the dropdown
-                        try {
-                            const pResp = await fetch(`${baseUrl}/products/shop/${currentShopId}`, {
-                                headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
-                            });
-                            if (pResp.ok) {
-                                const products = await pResp.json();
-                                const prodSelect = document.getElementById('reg-product-id');
-                                prodSelect.innerHTML = '<option value="">Choose a product...</option>' +
-                                    products.map(p => `<option value="${p.id}" data-min-price="${p.minPrice}" data-stock="${p.totalStock}">${p.name}</option>`).join('');
-                            }
-                        } catch (e) { console.error('Error refreshing products:', e); }
-
-                        // Reset Stock only (Price resets on product select)
+                        // Reset form fields ngay
                         document.getElementById('reg-product-id').value = '';
                         document.getElementById('reg-variant-wrap').classList.add('hidden');
                         document.getElementById('reg-sale-price').value = '';
                         document.getElementById('reg-sale-stock').value = '';
                         document.getElementById('current-stock-display').textContent = '---';
+
+                        // Refresh danh sách & products chạy ngầm (không block UI)
+                        loadSellerRegistrations().catch(e => console.error(e));
+                        fetch(`${baseUrl}/products/shop/${currentShopId}`, {
+                            headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
+                        }).then(r => r.ok ? r.json() : null).then(products => {
+                            if (!products) return;
+                            const prodSelect = document.getElementById('reg-product-id');
+                            prodSelect.innerHTML = '<option value="">Choose a product...</option>' +
+                                products.map(p => `<option value="${p.id}" data-min-price="${p.minPrice}" data-stock="${p.totalStock}">${p.name}</option>`).join('');
+                        }).catch(e => console.error('Error refreshing products:', e));
                     } else {
                         document.getElementById('sellerFSRegModal').classList.add('hidden');
+                        loadSellerRegistrations().catch(e => console.error(e)); // refresh ngầm
                     }
                 } else {
                     const text = await response.text();
@@ -4801,7 +4803,7 @@
                     showToast('Connection error. Please check your network.', 'error');
                 }
             } finally {
-                // Re-enable buttons
+                // Re-enable buttons (backup — trong trường hợp lỗi)
                 if (btnClose) { btnClose.disabled = false; btnClose.innerHTML = originalTextClose; }
                 if (btnContinue) { btnContinue.disabled = false; btnContinue.innerHTML = originalTextContinue; }
             }
