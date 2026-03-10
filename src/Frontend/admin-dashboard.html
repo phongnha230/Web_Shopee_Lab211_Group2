@@ -6,19 +6,19 @@
 
     <!-- Global Fetch Interceptor for Token Refresh -->
     <script>
-        (function() {
+        (function () {
             const originalFetch = window.fetch;
             let isRefreshing = false;
             let refreshPromise = null;
 
-            window.fetch = async function(...args) {
+            window.fetch = async function (...args) {
                 let response;
                 try {
                     response = await originalFetch(...args);
                 } catch (error) {
                     throw error;
                 }
-                
+
                 if (response.status === 401 && typeof args[0] === 'string' && !args[0].includes('/auth/login') && !args[0].includes('/auth/refresh-token')) {
                     const refreshToken = localStorage.getItem('refreshToken');
                     if (refreshToken) {
@@ -33,7 +33,7 @@
                                             'Refresh-Token': refreshToken
                                         }
                                     });
-                                    
+
                                     if (refreshResponse.ok) {
                                         const data = await refreshResponse.json();
                                         localStorage.setItem('accessToken', data.accessToken);
@@ -42,12 +42,12 @@
                                     } else {
                                         localStorage.clear();
                                         window.location.href = 'login.html';
-                                        return new Promise(() => {});
+                                        return new Promise(() => { });
                                     }
                                 } catch (e) {
                                     localStorage.clear();
                                     window.location.href = 'login.html';
-                                    return new Promise(() => {});
+                                    return new Promise(() => { });
                                 } finally {
                                     isRefreshing = false;
                                 }
@@ -66,12 +66,12 @@
                             }
                             return originalFetch(...args);
                         } catch (e) {
-                            return new Promise(() => {});
+                            return new Promise(() => { });
                         }
                     } else {
                         localStorage.clear();
                         window.location.href = 'login.html';
-                        return new Promise(() => {});
+                        return new Promise(() => { });
                     }
                 }
                 return response;
@@ -80,7 +80,7 @@
     </script>
 
 
-    
+
 
 
 
@@ -277,10 +277,11 @@
                 <!-- Stats Cards Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <!-- Active Users Card -->
-                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
+                    <div
+                        class="bg-white p-5 rounded-2xl border border-gray-100 border-l-4 border-l-[#AD3029] shadow-sm hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-4">
                             <div
-                                class="w-10 h-10 bg-[#FEEFCD] text-[#AD3029] rounded-lg flex items-center justify-center text-lg">
+                                class="w-10 h-10 bg-[#AD3029] text-white rounded-lg flex items-center justify-center text-lg">
                                 <i class="fas fa-users"></i>
                             </div>
                             <span class="bg-green-50 text-green-600 text-xs font-bold px-2 py-1 rounded-full">+8.1% <i
@@ -292,10 +293,11 @@
 
 
                     <!-- Active Shops Card -->
-                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
+                    <div
+                        class="bg-white p-5 rounded-2xl border border-gray-100 border-l-4 border-l-[#AD3029] shadow-sm hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-4">
                             <div
-                                class="w-10 h-10 bg-[#FEEFCD] text-[#AD3029] rounded-lg flex items-center justify-center text-lg">
+                                class="w-10 h-10 bg-[#AD3029] text-white rounded-lg flex items-center justify-center text-lg">
                                 <i class="fas fa-store"></i>
                             </div>
                             <span class="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-1 rounded-full">0.0% <i
@@ -307,7 +309,8 @@
 
 
                     <!-- Total Disputes Card -->
-                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
+                    <div
+                        class="bg-white p-5 rounded-2xl border border-gray-100 border-l-4 border-l-[#AD3029] shadow-sm hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-4">
                             <div
                                 class="w-10 h-10 bg-[#AD3029]/10 text-[#AD3029] rounded-lg flex items-center justify-center text-lg">
@@ -319,15 +322,16 @@
                     </div>
 
                     <!-- Flash Sale Card -->
-                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
+                    <div
+                        class="bg-white p-5 rounded-2xl border border-gray-100 border-l-4 border-l-[#AD3029] shadow-sm hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-4">
                             <div
-                                class="w-10 h-10 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center text-lg">
+                                class="w-10 h-10 bg-[#AD3029] text-white rounded-lg flex items-center justify-center text-lg">
                                 <i class="fas fa-bolt"></i>
                             </div>
                             <span id="flashSaleIndicator"
-                                class="bg-orange-50 text-orange-600 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
-                                LIVE <span class="flex h-1.5 w-1.5 rounded-full bg-orange-600 animate-pulse"></span>
+                                class="bg-[#AD3029]/10 text-[#AD3029] text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                                LIVE <span class="flex h-1.5 w-1.5 rounded-full bg-[#AD3029] animate-pulse"></span>
                             </span>
                         </div>
                         <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Ongoing Flash Sales</p>
@@ -442,39 +446,38 @@
                             <div>
                                 <div class="flex justify-between text-sm font-medium text-gray-700 mb-2">
                                     <div class="flex items-center gap-2">
-                                        <span class="w-3 h-3 rounded-full bg-[#AD3029]"></span> Electronics
+                                        <span class="w-3 h-3 rounded-full bg-[#AD3029]"></span> Buyers
                                     </div>
-                                    <span>$1.2M (35%)</span>
+                                    <span id="buyersCount">—</span>
                                 </div>
                                 <div class="w-full bg-gray-100 rounded-full h-2">
-                                    <div class="bg-[#AD3029] h-2 rounded-full" style="width: 35%"></div>
+                                    <div id="buyersBar" class="bg-[#AD3029] h-2 rounded-full" style="width: 0%"></div>
                                 </div>
                             </div>
                             <!-- Item 2 -->
                             <div>
                                 <div class="flex justify-between text-sm font-medium text-gray-700 mb-2">
                                     <div class="flex items-center gap-2">
-                                        <span class="w-3 h-3 rounded-full bg-orange-400"></span> Fashion
+                                        <span class="w-3 h-3 rounded-full bg-[#AD3029]/60"></span> Sellers
                                     </div>
-                                    <span>$850K (25%)</span>
+                                    <span id="sellersCount">—</span>
                                 </div>
                                 <div class="w-full bg-gray-100 rounded-full h-2">
-                                    <div class="bg-orange-400 h-2 rounded-full" style="width: 25%"></div>
+                                    <div id="sellersBar" class="bg-[#AD3029]/60 h-2 rounded-full" style="width: 0%">
+                                    </div>
                                 </div>
                             </div>
                             <!-- Item 3 -->
                             <div>
                                 <div class="flex justify-between text-sm font-medium text-gray-700 mb-2">
                                     <div class="flex items-center gap-2">
-                                        <span
-                                            class="w-3 h-3 rounded-full bg-[#FEEFCD] border border-[#AD3029]/20"></span>
-                                        Home & Living
+                                        <span class="w-3 h-3 rounded-full bg-[#AD3029]/30"></span> Admins
                                     </div>
-                                    <span>$500K (15%)</span>
+                                    <span id="adminsCount">—</span>
                                 </div>
                                 <div class="w-full bg-gray-100 rounded-full h-2">
-                                    <div class="bg-[#FEEFCD] h-2 rounded-full border border-[#AD3029]/10"
-                                        style="width: 15%"></div>
+                                    <div id="adminsBar" class="bg-[#AD3029]/30 h-2 rounded-full" style="width: 0%">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -490,7 +493,8 @@
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm text-gray-600">
-                                <thead class="bg-gray-50 text-gray-500 font-semibold uppercase text-xs">
+                                <thead
+                                    class="bg-[#AD3029]/5 text-[#AD3029] font-semibold uppercase text-xs border-b border-[#AD3029]/10">
                                     <tr>
                                         <th class="px-4 py-3 rounded-l-lg">#</th>
                                         <th class="px-4 py-3">Product Name</th>
@@ -500,36 +504,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="topProductsTableBody" class="divide-y divide-gray-100">
-                                    <tr class="hover:bg-gray-50 transition">
-                                        <td class="px-4 py-3 font-medium text-[#AD3029]">01</td>
-                                        <td class="px-4 py-3 flex items-center gap-3">
-                                            <div class="w-8 h-8 bg-gray-200 rounded flex-shrink-0"></div>
-                                            <div>
-                                                <p class="font-bold text-gray-800">Wireless Earbuds</p>
-                                                <p class="text-xs text-gray-400">Electronics</p>
-                                            </div>
-                                        </td>
-                                        <td class="px-4 py-3 font-medium">$129.00</td>
-                                        <td class="px-4 py-3 text-green-600 font-bold">+12%</td>
-                                        <td class="px-4 py-3"><span
-                                                class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">IN
-                                                STOCK</span></td>
-                                    </tr>
-                                    <tr class="hover:bg-gray-50 transition">
-                                        <td class="px-4 py-3 font-medium text-[#AD3029]">02</td>
-                                        <td class="px-4 py-3 flex items-center gap-3">
-                                            <div class="w-8 h-8 bg-gray-200 rounded flex-shrink-0"></div>
-                                            <div>
-                                                <p class="font-bold text-gray-800">Smart Watch 4</p>
-                                                <p class="text-xs text-gray-400">Wearables</p>
-                                            </div>
-                                        </td>
-                                        <td class="px-4 py-3 font-medium">$299.00</td>
-                                        <td class="px-4 py-3 text-green-600 font-bold">+8%</td>
-                                        <td class="px-4 py-3"><span
-                                                class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">IN
-                                                STOCK</span></td>
-                                    </tr>
+                                    <!-- Loaded via JS -->
                                 </tbody>
                             </table>
                         </div>
@@ -555,7 +530,7 @@
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr
-                                    class="bg-gray-50 border-b border-gray-100 text-xs uppercase text-gray-500 font-semibold">
+                                    class="bg-[#AD3029]/5 border-b border-[#AD3029]/10 text-xs uppercase text-[#AD3029] font-semibold">
                                     <th class="px-6 py-4">#</th>
                                     <th class="px-6 py-4">ID</th>
                                     <th class="px-6 py-4">Product Name</th>
@@ -641,7 +616,8 @@
                 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm text-gray-600">
-                            <thead class="bg-gray-50 text-gray-500 font-semibold uppercase text-xs">
+                            <thead
+                                class="bg-[#AD3029]/5 text-[#AD3029] font-semibold uppercase text-xs border-b border-[#AD3029]/10">
                                 <tr>
                                     <th class="px-6 py-4">Dispute ID</th>
                                     <th class="px-6 py-4">Order ID</th>
@@ -681,7 +657,8 @@
                 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm text-gray-600">
-                            <thead class="bg-gray-50 text-gray-500 font-semibold uppercase text-xs">
+                            <thead
+                                class="bg-[#AD3029]/5 text-[#AD3029] font-semibold uppercase text-xs border-b border-[#AD3029]/10">
                                 <tr>
                                     <th class="px-6 py-4">User</th>
                                     <th class="px-6 py-4">Contact</th>
@@ -698,8 +675,13 @@
                     <div id="userLoading" class="text-center py-10 text-gray-500 hidden">
                         <i class="fas fa-spinner fa-spin text-2xl"></i> Loading users...
                     </div>
-                    <div id="userEmpty" class="text-center py-10 text-gray-500 hidden">
-                        No users found.
+                    <div id="userEmpty" class="text-center py-16 hidden">
+                        <div class="flex flex-col items-center gap-3">
+                            <span
+                                class="w-14 h-14 bg-[#AD3029]/10 rounded-full flex items-center justify-center text-[#AD3029] text-2xl"><i
+                                    class="fas fa-users"></i></span>
+                            <p class="text-gray-500 font-medium">No users found.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -742,10 +724,11 @@
                     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm text-gray-600">
-                                <thead class="bg-gray-50 text-gray-500 font-semibold uppercase text-xs">
+                                <thead
+                                    class="bg-[#AD3029]/5 text-[#AD3029] font-semibold uppercase text-xs border-b border-[#AD3029]/10">
                                     <tr>
                                         <th class="px-6 py-4">Product</th>
-                                        <th class="px-6 py-4">Shop</th>
+                                        <th class="px-6 py-4">Shop &amp; Campaign</th>
                                         <th class="px-6 py-4">Price</th>
                                         <th class="px-6 py-4">Stock</th>
                                         <th class="px-6 py-4">Status</th>
@@ -938,8 +921,12 @@
     <!-- Flash Sale Campaign Modal -->
     <div id="createCampaignModal"
         class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <h3 class="text-xl font-bold text-gray-800 mb-6">Create New Campaign</h3>
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border-t-4 border-[#AD3029]">
+            <div class="flex items-center gap-2 mb-6">
+                <span class="w-8 h-8 bg-[#AD3029]/10 rounded-lg flex items-center justify-center text-[#AD3029]"><i
+                        class="fas fa-bolt text-sm"></i></span>
+                <h3 class="text-xl font-bold text-gray-800">Create New Campaign</h3>
+            </div>
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Campaign Name</label>
@@ -1044,9 +1031,10 @@
                 </div>
                 <div class="flex gap-3 pt-4">
                     <button onclick="document.getElementById('createCampaignModal').classList.add('hidden')"
-                        class="flex-1 bg-gray-100 py-2 rounded-lg font-bold">Cancel</button>
+                        class="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg font-bold hover:bg-gray-200 transition">Cancel</button>
                     <button onclick="submitCreateCampaign()"
-                        class="flex-1 bg-[#AD3029] text-white py-2 rounded-lg font-bold">Create</button>
+                        class="flex-1 bg-[#AD3029] text-white py-2 rounded-lg font-bold hover:opacity-90 transition">⚡
+                        Create</button>
                 </div>
             </div>
         </div>
@@ -1079,8 +1067,12 @@
     <!-- Edit Campaign Modal -->
     <div id="editCampaignModal"
         class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6">
-            <h3 class="text-xl font-bold text-gray-800 mb-6">Edit Campaign</h3>
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 border-t-4 border-[#AD3029]">
+            <div class="flex items-center gap-2 mb-6">
+                <span class="w-8 h-8 bg-[#AD3029]/10 rounded-lg flex items-center justify-center text-[#AD3029]"><i
+                        class="fas fa-edit text-sm"></i></span>
+                <h3 class="text-xl font-bold text-gray-800">Edit Campaign</h3>
+            </div>
             <input type="hidden" id="edit-campaign-id">
             <div class="space-y-4">
                 <div>
@@ -1130,9 +1122,10 @@
                 </div>
                 <div class="flex gap-3 pt-4">
                     <button onclick="document.getElementById('editCampaignModal').classList.add('hidden')"
-                        class="flex-1 bg-gray-100 py-2 rounded-lg font-bold">Cancel</button>
+                        class="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg font-bold hover:bg-gray-200 transition">Cancel</button>
                     <button onclick="submitEditCampaign()"
-                        class="flex-1 bg-[#AD3029] text-white py-2 rounded-lg font-bold">Save Changes</button>
+                        class="flex-1 bg-[#AD3029] text-white py-2 rounded-lg font-bold hover:opacity-90 transition">💾
+                        Save Changes</button>
                 </div>
             </div>
         </div>
@@ -1413,11 +1406,11 @@
 
 
             container.innerHTML = shops.map(shop => `
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition overflow-hidden">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-yellow-400 hover:shadow-md transition overflow-hidden">
                     <div class="p-5">
                         <div class="flex justify-between items-start mb-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-[#FEEFCD] text-[#AD3029] font-bold text-lg flex items-center justify-center">
+                                <div class="w-10 h-10 rounded-full bg-yellow-400 text-white font-bold text-lg flex items-center justify-center">
                                     ${shop.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div>
@@ -1425,20 +1418,22 @@
                                     <p class="text-xs text-gray-500">ID: ...${shop.id.substr(-6)}</p>
                                 </div>
                             </div>
-                            <span class="bg-yellow-50 text-yellow-700 text-[10px] font-bold px-2 py-1 rounded border border-yellow-200 uppercase">Pending</span>
+                            <span class="inline-flex items-center gap-1 bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-1 rounded-full border border-yellow-200 uppercase">
+                                <span class="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse"></span>Pending
+                            </span>
                         </div>
                         
                         <div class="space-y-3 mb-6 bg-gray-50 p-4 rounded-lg">
                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <i class="fas fa-user-circle w-4 text-gray-400"></i>
+                                <i class="fas fa-user-circle w-4 text-[#AD3029]"></i>
                                 <span class="truncate">${shop.ownerFullName || 'Unknown Owner'}</span>
                            </div>
                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <i class="fas fa-phone w-4 text-gray-400"></i>
+                                <i class="fas fa-phone w-4 text-[#AD3029]"></i>
                                 <span>${shop.phone}</span>
                            </div>
                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <i class="fas fa-map-marker-alt w-4 text-gray-400"></i>
+                                <i class="fas fa-map-marker-alt w-4 text-[#AD3029]"></i>
                                 <span class="truncate w-full">${shop.address}</span>
                            </div>
                         </div>
@@ -1625,11 +1620,11 @@
 
 
             container.innerHTML = shops.map(shop => `
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition overflow-hidden flex flex-col h-full">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-[#AD3029] hover:shadow-md transition overflow-hidden flex flex-col h-full">
                     <div class="p-5 flex flex-col h-full">
                         <div class="flex justify-between items-start mb-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-[#FEEFCD] text-[#AD3029] font-bold text-lg flex items-center justify-center min-w-[2.5rem]">
+                                <div class="w-10 h-10 rounded-full bg-[#AD3029] text-white font-bold text-lg flex items-center justify-center min-w-[2.5rem]">
                                     ${shop.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div class="min-w-0">
@@ -1637,24 +1632,26 @@
                                     <p class="text-xs text-gray-500">ID: ...${shop.id.substr(-6)}</p>
                                 </div>
                             </div>
-                            <span class="bg-[#FEEFCD] text-[#AD3029] text-[10px] font-bold px-2 py-1 rounded border border-[#AD3029]/20 uppercase shrink-0">Active</span>
+                            <span class="inline-flex items-center gap-1 bg-[#AD3029]/10 text-[#AD3029] text-[10px] font-bold px-2 py-1 rounded-full border border-[#AD3029]/20 uppercase shrink-0">
+                                <span class="w-1.5 h-1.5 bg-[#AD3029] rounded-full animate-pulse"></span>Active
+                            </span>
                         </div>
                         
                         <div class="space-y-3 mb-6 bg-gray-50 p-4 rounded-lg flex-1">
                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <i class="fas fa-user-circle w-4 text-gray-400"></i>
+                                <i class="fas fa-user-circle w-4 text-[#AD3029]"></i>
                                 <span class="truncate">${shop.identityFullName || 'Unknown Owner'}</span>
                            </div>
                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <i class="fas fa-phone w-4 text-gray-400"></i>
+                                <i class="fas fa-phone w-4 text-[#AD3029]"></i>
                                 <span>${shop.phone}</span>
                            </div>
                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <i class="fas fa-map-marker-alt w-4 text-gray-400"></i>
+                                <i class="fas fa-map-marker-alt w-4 text-[#AD3029]"></i>
                                 <span class="truncate w-full block">${shop.address}</span>
                            </div>
                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <i class="fas fa-box w-4 text-gray-400"></i>
+                                <i class="fas fa-box w-4 text-[#AD3029]"></i>
                                 <span>${shop.productCount || 0} Products</span>
                            </div>
                         </div>
@@ -1665,7 +1662,7 @@
                     ? `<button onclick="deleteShop('${shop.id}')" class="w-full bg-white border border-red-200 text-red-600 hover:bg-red-50 font-bold py-2 rounded-lg text-sm transition text-center">
                                     <i class="fas fa-trash-alt mr-1"></i> Delete Shop
                                    </button>`
-                    : `<button class="w-full bg-[#FEEFCD]/50 text-[#AD3029] font-bold py-2 rounded-lg text-sm cursor-not-allowed text-center" disabled>
+                    : `<button class="w-full bg-[#AD3029] text-white font-bold py-2 rounded-lg text-sm cursor-not-allowed text-center opacity-90" disabled>
                                     <i class="fas fa-check-circle mr-1"></i> Running
                                    </button>`
                 }
@@ -1802,7 +1799,7 @@
                 <tr class="hover:bg-gray-50 transition">
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-[#FEEFCD] text-[#AD3029] font-bold text-lg flex items-center justify-center">
+                            <div class="w-10 h-10 rounded-full bg-[#AD3029] text-white font-bold text-lg flex items-center justify-center">
                                 ${user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
                             </div>
                             <div>
@@ -1817,14 +1814,17 @@
                     <td class="px-6 py-4">
                         <div class="flex flex-wrap gap-1">
                             ${roles.map(role => {
-                    const color = role === 'ROLE_ADMIN' ? 'bg-[#AD3029] text-white' : (role === 'ROLE_SELLER' ? 'bg-[#FEEFCD] text-[#AD3029]' : 'bg-gray-100 text-gray-700');
-                    return `<span class="${color} text-xs font-bold px-2 py-1 rounded border border-opacity-20">${role.replace('ROLE_', '')}</span>`;
+                    const color = role === 'ROLE_ADMIN' ? 'bg-[#AD3029] text-white' : (role === 'ROLE_SELLER' ? 'bg-[#AD3029]/10 text-[#AD3029] border border-[#AD3029]/30' : 'bg-gray-100 text-gray-700');
+                    return `<span class="${color} text-xs font-bold px-2 py-1 rounded">${role.replace('ROLE_', '')}</span>`;
                 }).join('')}
                         </div>
                     </td>
                     <td class="px-6 py-4">
-                         <span class="${active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'} text-xs font-bold px-2 py-1 rounded flex items-center w-fit gap-1">
-                            <i class="fas fa-circle text-[8px]"></i> ${active ? 'Active' : 'Locked'}
+                         <span class="${active
+                        ? 'bg-[#AD3029]/10 text-[#AD3029] border border-[#AD3029]/20'
+                        : 'bg-red-100 text-red-700 border border-red-200'} text-xs font-bold px-2 py-1 rounded-full flex items-center w-fit gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full ${active ? 'bg-[#AD3029] animate-pulse' : 'bg-red-500'}"></span>
+                            ${active ? 'Active' : 'Locked'}
                         </span>
                     </td>
                     <td class="px-6 py-4 text-right">
@@ -2040,8 +2040,8 @@
             if (!container) return;
 
 
-            const colors = ['bg-[#AD3029]', 'bg-orange-400', 'bg-yellow-400'];
-            const dotColors = ['bg-[#AD3029]', 'bg-orange-400', 'bg-yellow-100 border border-orange-200'];
+            const colors = ['bg-[#AD3029]', 'bg-[#AD3029]/60', 'bg-[#AD3029]/30'];
+            const dotColors = ['bg-[#AD3029]', 'bg-[#AD3029]/60', 'bg-[#AD3029]/30'];
 
 
             container.innerHTML = distribution.map((item, index) => {
@@ -2085,7 +2085,7 @@
                 <tr class="hover:bg-gray-50 transition">
                     <td class="px-4 py-3 font-medium text-[#AD3029]">${(index + 1).toString().padStart(2, '0')}</td>
                     <td class="px-4 py-3 flex items-center gap-3">
-                        <div class="w-8 h-8 bg-gray-200 rounded flex-shrink-0 flex items-center justify-center text-gray-400">
+                        <div class="w-8 h-8 bg-[#AD3029]/10 rounded flex-shrink-0 flex items-center justify-center text-[#AD3029]">
                              <i class="fas fa-box"></i>
                         </div>
                         <div>
@@ -2093,9 +2093,10 @@
                         </div>
                     </td>
                     <td class="px-4 py-3 font-medium">$${product.price.toLocaleString()}</td>
-                    <td class="px-4 py-3 text-green-600 font-bold">${product.sold} sold</td>
+                    <td class="px-4 py-3 text-[#AD3029] font-bold">${product.sold} sold</td>
                     <td class="px-4 py-3">
-                        <span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded uppercase">
+                        <span class="inline-flex items-center gap-1 bg-[#AD3029]/10 text-[#AD3029] text-xs font-bold px-2 py-1 rounded-full uppercase">
+                            <span class="w-1.5 h-1.5 bg-[#AD3029] rounded-full"></span>
                             ${product.status.replace('_', ' ')}
                         </span>
                     </td>
@@ -2555,8 +2556,11 @@
                     <td class="px-6 py-4 text-gray-800 font-medium">$${(product.minPrice || 0).toLocaleString()}</td>
                     <td class="px-6 py-4 text-gray-600 max-w-[200px] truncate" title="${product.description || ''}">${product.description || 'N/A'}</td>
                     <td class="px-6 py-4">
-                        <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase 
-                            ${product.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}">
+                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold uppercase 
+                            ${product.status === 'ACTIVE'
+                    ? 'bg-[#AD3029]/10 text-[#AD3029] border border-[#AD3029]/20'
+                    : 'bg-gray-100 text-gray-700'}">
+                            ${product.status === 'ACTIVE' ? '<span class="w-1.5 h-1.5 bg-[#AD3029] rounded-full animate-pulse"></span>' : ''}
                             ${product.status}
                         </span>
                     </td>
@@ -2646,8 +2650,25 @@
                     }
                 } catch (e) { slotsHtml = 'Error loading slots'; }
 
+                // Xác định màu/border theo trạng thái campaign
+                const st = (campaign.status || '').toUpperCase();
+                const borderColor = st === 'ONGOING' ? 'border-l-4 border-l-[#AD3029]'
+                    : st === 'REGISTRATION_OPEN' ? 'border-l-4 border-l-green-500'
+                        : st === 'FINISHED' ? 'border-l-4 border-l-gray-300'
+                            : 'border-l-4 border-l-gray-200';
+
+                const statusBadge = st === 'ONGOING'
+                    ? `<span class="inline-flex items-center gap-1 bg-[#AD3029] text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase">
+                           <span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>ONGOING
+                       </span>`
+                    : st === 'REGISTRATION_OPEN'
+                        ? `<span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-full uppercase">✅ OPEN</span>`
+                        : st === 'FINISHED'
+                            ? `<span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-1 rounded-full uppercase">🏁 FINISHED</span>`
+                            : `<span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-1 rounded-full uppercase">${campaign.status}</span>`;
+
                 html += `
-                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition relative group">
+                    <div class="bg-white rounded-2xl border border-gray-100 ${borderColor} shadow-sm p-6 hover:shadow-md transition relative group">
                         <!-- Admin Actions -->
                          <div class="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition">
                             <button onclick="openEditCampaignModal('${campaign.id}', '${encodeURIComponent(campaign.name)}', '${encodeURIComponent(campaign.description || '')}', '${campaign.startDate}', '${campaign.endDate}', ${campaign.minDiscountPercentage || 10}, ${campaign.minStockPerProduct || 5}, '${campaign.registrationDeadline || ''}', '${campaign.approvalDeadline || ''}')" 
@@ -2673,20 +2694,20 @@
                             </div>
                         </div>
                         <div class="mb-4">
-                             <div class="text-xs text-gray-500 flex flex-col gap-1">
-                                <span class="flex items-center gap-1"><i class="far fa-calendar-alt w-4"></i> ${new Date(campaign.startDate).toLocaleDateString('vi-VN')} - ${new Date(campaign.endDate).toLocaleDateString('vi-VN')}</span>
-                                <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-1 rounded uppercase w-fit">${campaign.status}</span>
+                             <div class="text-xs text-gray-500 flex flex-col gap-2">
+                                <span class="flex items-center gap-1"><i class="far fa-calendar-alt w-4 text-[#AD3029]"></i> ${new Date(campaign.startDate).toLocaleDateString('vi-VN')} - ${new Date(campaign.endDate).toLocaleDateString('vi-VN')}</span>
+                                ${statusBadge}
                              </div>
                         </div>
 
                         <div class="space-y-2 mb-6">
-                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Time Slots</h4>
+                            <h4 class="text-xs font-bold text-[#AD3029] uppercase tracking-wider"><i class="fas fa-bolt mr-1"></i>Time Slots</h4>
                             <div class="max-h-32 overflow-y-auto space-y-1">
                                 ${slotsHtml}
                             </div>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="openCreateSlotModal('${campaign.id}')" class="flex-1 text-xs border border-[#AD3029] text-[#AD3029] py-2 rounded-lg font-bold hover:bg-[#AD3029]/5">Add Slot</button>
+                            <button onclick="openCreateSlotModal('${campaign.id}')" class="flex-1 text-xs border border-[#AD3029] text-[#AD3029] py-2 rounded-lg font-bold hover:bg-[#AD3029] hover:text-white transition">Add Slot</button>
                             <button onclick="openCampaignDetailsModal('${campaign.id}')" class="flex-1 text-xs bg-gray-50 text-gray-600 py-2 rounded-lg font-bold hover:bg-gray-100">Details</button>
                         </div>
                     </div>
@@ -2734,7 +2755,13 @@
         function renderRegistrations(registrations) {
             const tableBody = document.getElementById('registrationsTableBody');
             if (registrations.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-10 text-center text-gray-500">No pending registrations found.</td></tr>';
+                tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-16 text-center">
+                    <div class="flex flex-col items-center gap-3">
+                        <span class="w-14 h-14 bg-[#AD3029]/10 rounded-full flex items-center justify-center text-[#AD3029] text-2xl"><i class="fas fa-bolt"></i></span>
+                        <p class="text-gray-500 font-medium">No pending registrations found.</p>
+                        <p class="text-xs text-gray-400">Seller registrations will appear here for review.</p>
+                    </div>
+                </td></tr>`;
                 return;
             }
 
@@ -2745,31 +2772,59 @@
                     : null;
                 const isApprovalExpired = approvalDeadline && now > approvalDeadline;
 
+                // Product image: dùng ảnh thực nếu có, fallback về icon
+                const productImgHtml = reg.productImage
+                    ? `<img src="${reg.productImage}" alt="product" class="w-12 h-12 object-cover rounded-lg border border-gray-100 flex-shrink-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                       <div class="w-12 h-12 bg-gray-100 rounded-lg items-center justify-center text-gray-400 flex-shrink-0 hidden" style="display:none"><i class="fas fa-box"></i></div>`
+                    : `<div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 flex-shrink-0"><i class="fas fa-box"></i></div>`;
+
+                // Product name: dùng tên thực nếu có, fallback về ID rút gọn
+                const productName = reg.productName || ('ID: ' + reg.productId.substring(0, 8) + '...');
+                const variantLabel = reg.variantName && reg.variantName.trim()
+                    ? reg.variantName.trim()
+                    : (reg.variantId ? reg.variantId.substring(0, 8) + '...' : 'N/A');
+
+                // Shop
+                const shopLabel = reg.shopName || (reg.shopId ? reg.shopId.substring(0, 8) + '...' : '—');
+
+                // Campaign
+                const campaignLabel = reg.campaignName || '—';
+
                 return `
                 <tr class="hover:bg-gray-50 transition ${isApprovalExpired ? 'bg-red-50/30' : ''}">
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-gray-100 rounded flex items-center justify-center text-gray-400">
-                                <i class="fas fa-box"></i>
-                            </div>
+                            ${productImgHtml}
                             <div>
-                                <p class="font-bold text-gray-800 line-clamp-1">Product ID: ${reg.productId.substring(0, 8)}...</p>
-                                <p class="text-xs text-gray-500">Variant: ${reg.variantId ? reg.variantId.substring(0, 8) + '...' : 'N/A'}</p>
+                                <p class="font-bold text-gray-800">${productName}</p>
+                                <p class="text-xs text-gray-500">Variant: ${variantLabel}</p>
                             </div>
                         </div>
                     </td>
-                    <td class="px-6 py-4 text-gray-600">${reg.shopId.substring(0, 8)}...</td>
+                    <td class="px-6 py-4">
+                        <div>
+                            <p class="text-xs text-gray-500 font-mono">${shopLabel}</p>
+                            <p class="text-xs font-semibold text-[#AD3029] mt-0.5">⚡ ${campaignLabel}</p>
+                            ${reg.slotStartTime ? `<p class="text-[10px] text-gray-400 mt-0.5">🕐 ${formatVnDateTime(parseVnDateTime(reg.slotStartTime))} → ${reg.slotEndTime ? formatVnDateTime(parseVnDateTime(reg.slotEndTime)) : '?'}</p>` : ''}
+                        </div>
+                    </td>
                     <td class="px-6 py-4 font-medium text-gray-800">₫${reg.salePrice.toLocaleString()}</td>
                     <td class="px-6 py-4 text-gray-600">${reg.saleStock}</td>
                     <td class="px-6 py-4">
-                        <span class="bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-1 rounded uppercase">${reg.status}</span>
+                         <span class="${reg.status === 'PENDING'
+                        ? 'bg-[#AD3029]/10 text-[#AD3029] border border-[#AD3029]/20'
+                        : reg.status === 'APPROVED' ? 'bg-green-100 text-green-700'
+                            : 'bg-red-100 text-red-700'} text-[10px] font-bold px-2 py-1 rounded-full uppercase inline-flex items-center gap-1">
+                            ${reg.status === 'PENDING' ? '<span class="w-1.5 h-1.5 bg-[#AD3029] rounded-full animate-pulse"></span>' : ''}
+                            ${reg.status}
+                        </span>
                         ${approvalDeadline ? `<p class="text-[10px] mt-1 ${isApprovalExpired ? 'text-red-500 font-bold' : 'text-gray-400'}">Approve by: ${formatVnDateTime(approvalDeadline)}${isApprovalExpired ? ' ⚠️ EXPIRED' : ''}</p>` : ''}
                     </td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex items-center justify-end gap-2">
                             ${isApprovalExpired
                         ? `<span class="text-[10px] bg-red-100 text-red-500 font-bold px-2 py-1 rounded" title="Approval deadline has passed">🔒 Expired</span>`
-                        : `<button onclick="reviewRegistration('${reg.id}', 'APPROVED')" class="text-green-600 hover:bg-green-50 p-2 rounded-lg transition" title="Approve"><i class="fas fa-check"></i></button>`
+                        : `<button onclick="reviewRegistration('${reg.id}', 'APPROVED')" class="text-[#AD3029] hover:bg-[#AD3029]/10 p-2 rounded-lg transition" title="Approve"><i class="fas fa-check"></i></button>`
                     }
                             <button onclick="reviewRegistration('${reg.id}', 'REJECTED')" class="text-red-600 hover:bg-red-50 p-2 rounded-lg transition" title="Reject">
                                 <i class="fas fa-times"></i>
@@ -3141,4 +3196,3 @@
 
 
 </html>
-
