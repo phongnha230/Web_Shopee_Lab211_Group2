@@ -11,11 +11,11 @@ import com.shoppeclone.backend.promotion.flashsale.repository.FlashSaleRepositor
 import com.shoppeclone.backend.promotion.flashsale.service.FlashSaleOrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -30,21 +30,8 @@ public class FlashSaleOrderServiceImpl implements FlashSaleOrderService {
     private final MongoTemplate mongoTemplate;
     private final FlashSaleItemRepository flashSaleItemRepository;
     private final FlashSaleRepository flashSaleRepository;
+    private final FlashSaleRuntimeMetricsTracker runtimeMetricsTracker;
 
-    /**
-     * ✅ ATOMIC Flash Sale Order — Không bao giờ âm kho
-     *
-     * Cơ chế:
-     * 1. Tìm FlashSaleItem APPROVED cho variantId trong flash sale ONGOING
-     * 2. Dùng MongoDB findAndModify: IF remainingStock >= quantity THEN decrement
-     * ATOMICALLY
-     * 3. Đồng thời trừ stock trong ProductVariant cũng atomic
-     *
-     * Tại sao không dùng @Transactional thông thường?
-     * - MongoDB single-document operation là ATOMIC by nature
-     * - findAndModify = 1 lệnh duy nhất, thread-safe, không cần lock
-     * - Hiệu năng tốt hơn Pessimistic Lock khi flash sale lớn
-     */
     @Override
     public FlashSaleOrderResult placeOrder(FlashSaleOrderRequest request) {
         long startTime = System.currentTimeMillis();
@@ -53,12 +40,11 @@ public class FlashSaleOrderServiceImpl implements FlashSaleOrderService {
 
         log.debug("FlashSale order attempt: variantId={}, qty={}", variantId, quantity);
 
+        String monitoredFlashSaleId = null;
         try {
-            // ── Step 1: Tìm active FlashSaleItem cho variant này ──────────────
             List<FlashSaleItem> candidates = flashSaleItemRepository
                     .findByVariantIdAndStatus(variantId, "APPROVED");
 
-            // Lọc chỉ lấy item thuộc flash sale đang ONGOING
             FlashSaleItem targetItem = null;
             for (FlashSaleItem item : candidates) {
                 FlashSale slot = flashSaleRepository.findById(item.getFlashSaleId()).orElse(null);
@@ -70,19 +56,13 @@ public class FlashSaleOrderServiceImpl implements FlashSaleOrderService {
 
             if (targetItem == null) {
                 log.warn("No active flash sale for variant: {}", variantId);
-                return FlashSaleOrderResult.builder()
-                        .success(false)
-                        .status("ERROR")
-                        .message("Không có chương trình Flash Sale đang diễn ra cho sản phẩm này")
-                        .variantId(variantId)
-                        .responseTimeMs(System.currentTimeMillis() - startTime)
-                        .build();
+                return buildOrderResult(null, false, "ERROR",
+                        "Khong co chuong trinh Flash Sale dang dien ra cho san pham nay",
+                        0, variantId, startTime);
             }
 
-            // ── Step 2: Atomic decrement FlashSaleItem.remainingStock ─────────
-            // Điều kiện: remainingStock >= quantity (không cho phép âm kho)
-            // findAndModify trả về document SAU KHI update (hoặc null nếu không thỏa điều
-            // kiện)
+            monitoredFlashSaleId = targetItem.getFlashSaleId();
+
             Query flashItemQuery = new Query(
                     Criteria.where("_id").is(targetItem.getId())
                             .and("remainingStock").gte(quantity));
@@ -93,20 +73,12 @@ public class FlashSaleOrderServiceImpl implements FlashSaleOrderService {
                     flashItemQuery, flashItemUpdate, opts, FlashSaleItem.class);
 
             if (updatedItem == null) {
-                // Stock không đủ hoặc vừa hết — không được update
                 log.info("OUT_OF_STOCK: flash sale item {} for variant {}", targetItem.getId(), variantId);
-                return FlashSaleOrderResult.builder()
-                        .success(false)
-                        .status("OUT_OF_STOCK")
-                        .message("Hết hàng Flash Sale! Bạn đến muộn rồi 😢")
-                        .remainingStock(0)
-                        .variantId(variantId)
-                        .responseTimeMs(System.currentTimeMillis() - startTime)
-                        .build();
+                return buildOrderResult(monitoredFlashSaleId, false, "OUT_OF_STOCK",
+                        "Het hang Flash Sale! Ban den muon roi",
+                        0, variantId, startTime);
             }
 
-            // ── Step 3: Atomic decrement ProductVariant.stock ─────────────────
-            // Cũng dùng findAndModify để đảm bảo không âm stock thật
             Query variantQuery = new Query(
                     Criteria.where("_id").is(variantId)
                             .and("stock").gte(quantity));
@@ -115,72 +87,63 @@ public class FlashSaleOrderServiceImpl implements FlashSaleOrderService {
                     variantQuery, variantUpdate, opts, ProductVariant.class);
 
             if (updatedVariant == null) {
-                // Rollback flash sale item stock nếu variant bị lỗi
-                log.warn("Variant stock insufficient after flash sale decrement — rolling back flash sale item");
+                log.warn("Variant stock insufficient after flash sale decrement - rolling back flash sale item");
                 mongoTemplate.findAndModify(
                         new Query(Criteria.where("_id").is(targetItem.getId())),
                         new Update().inc("remainingStock", quantity),
                         FlashSaleItem.class);
-                return FlashSaleOrderResult.builder()
-                        .success(false)
-                        .status("OUT_OF_STOCK")
-                        .message("Hết hàng! (variant stock depleted)")
-                        .remainingStock(0)
-                        .variantId(variantId)
-                        .responseTimeMs(System.currentTimeMillis() - startTime)
-                        .build();
+                return buildOrderResult(monitoredFlashSaleId, false, "OUT_OF_STOCK",
+                        "Het hang! (variant stock depleted)",
+                        0, variantId, startTime);
             }
 
             int remaining = updatedItem.getRemainingStock() != null ? updatedItem.getRemainingStock() : 0;
-            log.info("✅ FlashSale SUCCESS: variant={}, remaining={}", variantId, remaining);
+            log.info("FlashSale SUCCESS: variant={}, remaining={}", variantId, remaining);
 
-            return FlashSaleOrderResult.builder()
-                    .success(true)
-                    .status("SUCCESS")
-                    .message("Đặt hàng thành công! Còn " + remaining + " sản phẩm")
-                    .remainingStock(remaining)
-                    .variantId(variantId)
-                    .responseTimeMs(System.currentTimeMillis() - startTime)
-                    .build();
+            return buildOrderResult(monitoredFlashSaleId, true, "SUCCESS",
+                    "Dat hang thanh cong! Con " + remaining + " san pham",
+                    remaining, variantId, startTime);
 
         } catch (Exception e) {
             log.error("Flash sale order error for variant {}: {}", variantId, e.getMessage(), e);
-            return FlashSaleOrderResult.builder()
-                    .success(false)
-                    .status("ERROR")
-                    .message("Lỗi server: " + e.getMessage())
-                    .variantId(variantId)
-                    .responseTimeMs(System.currentTimeMillis() - startTime)
-                    .build();
+            return buildOrderResult(monitoredFlashSaleId, false, "ERROR",
+                    "Loi server: " + e.getMessage(),
+                    null, variantId, startTime);
         }
     }
 
-    /**
-     * Lấy thống kê flash sale slot cho Admin xem
-     */
     @Override
     public FlashSaleStatsResponse getStatsByFlashSaleId(String flashSaleId) {
         FlashSale slot = flashSaleRepository.findById(flashSaleId)
                 .orElseThrow(() -> new RuntimeException("Flash sale not found: " + flashSaleId));
 
-        List<FlashSaleItem> items = flashSaleItemRepository.findByFlashSaleId(flashSaleId);
-
+        List<FlashSaleItem> items = flashSaleItemRepository.findByFlashSaleIdAndStatus(flashSaleId, "APPROVED");
         return buildStatsResponse(slot, items);
     }
 
-    /**
-     * Lấy stats flash sale của shop — Seller xem sản phẩm của mình
-     */
+    @Override
+    public FlashSaleStatsResponse getStatsByCampaignId(String campaignId) {
+        FlashSale slot = selectPreferredSlot(flashSaleRepository.findByCampaignId(campaignId));
+        if (slot == null) {
+            throw new RuntimeException("Flash sale slot not found for campaign: " + campaignId);
+        }
+        List<FlashSaleItem> items = flashSaleItemRepository.findByFlashSaleIdAndStatus(slot.getId(), "APPROVED");
+        return buildStatsResponse(slot, items);
+    }
+
     @Override
     public List<FlashSaleStatsResponse> getStatsByShopId(String shopId) {
         List<FlashSaleItem> shopItems = flashSaleItemRepository.findByShopId(shopId);
-        if (shopItems.isEmpty())
+        if (shopItems.isEmpty()) {
             return new ArrayList<>();
+        }
 
-        // Group by flashSaleId
         java.util.Map<String, List<FlashSaleItem>> grouped = new java.util.HashMap<>();
         for (FlashSaleItem item : shopItems) {
-            grouped.computeIfAbsent(item.getFlashSaleId(), k -> new ArrayList<>()).add(item);
+            if (!"APPROVED".equalsIgnoreCase(item.getStatus())) {
+                continue;
+            }
+            grouped.computeIfAbsent(item.getFlashSaleId(), ignored -> new ArrayList<>()).add(item);
         }
 
         List<SlotGroup> slotGroups = new ArrayList<>();
@@ -204,27 +167,19 @@ public class FlashSaleOrderServiceImpl implements FlashSaleOrderService {
         return results;
     }
 
-    private int statusPriority(String status) {
-        if ("ONGOING".equalsIgnoreCase(status)) {
-            return 0;
-        }
-        if ("ACTIVE".equalsIgnoreCase(status)) {
-            return 1;
-        }
-        return 9;
+    private FlashSaleOrderResult buildOrderResult(String flashSaleId, boolean success, String status,
+            String message, Integer remainingStock, String variantId, long startTime) {
+        long responseMs = System.currentTimeMillis() - startTime;
+        runtimeMetricsTracker.record(flashSaleId, status, responseMs);
+        return FlashSaleOrderResult.builder()
+                .success(success)
+                .status(status)
+                .message(message)
+                .remainingStock(remainingStock)
+                .variantId(variantId)
+                .responseTimeMs(responseMs)
+                .build();
     }
-
-    private static class SlotGroup {
-        private final FlashSale slot;
-        private final List<FlashSaleItem> items;
-
-        private SlotGroup(FlashSale slot, List<FlashSaleItem> items) {
-            this.slot = slot;
-            this.items = items;
-        }
-    }
-
-    // ── Private helpers ───────────────────────────────────────────────────────
 
     private FlashSaleStatsResponse buildStatsResponse(FlashSale slot, List<FlashSaleItem> items) {
         int totalSaleStock = 0;
@@ -257,6 +212,8 @@ public class FlashSaleOrderServiceImpl implements FlashSaleOrderService {
 
         int totalSold = totalSaleStock - totalRemaining;
         double overallPct = totalSaleStock > 0 ? (double) totalSold / totalSaleStock * 100 : 0;
+        boolean integrityCheckPassed = totalSold + totalRemaining == totalSaleStock;
+        FlashSaleRuntimeMetricsTracker.Snapshot snapshot = runtimeMetricsTracker.snapshot(slot.getId());
 
         return FlashSaleStatsResponse.builder()
                 .flashSaleId(slot.getId())
@@ -269,7 +226,49 @@ public class FlashSaleOrderServiceImpl implements FlashSaleOrderService {
                 .totalRemainingStock(totalRemaining)
                 .totalSold(totalSold)
                 .soldPercentage(Math.round(overallPct * 10.0) / 10.0)
+                .totalRequests(snapshot.getTotalRequests())
+                .successCount(snapshot.getSuccessCount())
+                .outOfStockCount(snapshot.getOutOfStockCount())
+                .errorCount(snapshot.getErrorCount())
+                .avgResponseMs(snapshot.getAvgResponseMs())
+                .minResponseMs(snapshot.getMinResponseMs())
+                .maxResponseMs(snapshot.getMaxResponseMs())
+                .integrityCheckPassed(integrityCheckPassed)
+                .monitorStatus(snapshot.getMonitorStatus())
+                .monitorStartedAt(snapshot.getMonitorStartedAt())
+                .lastRequestAt(snapshot.getLastRequestAt())
                 .items(itemStatsList)
                 .build();
+    }
+
+    private FlashSale selectPreferredSlot(List<FlashSale> slots) {
+        return slots.stream()
+                .sorted(Comparator
+                        .comparingInt((FlashSale slot) -> statusPriority(slot.getStatus()))
+                        .thenComparing(FlashSale::getStartTime, Comparator.nullsLast(Comparator.reverseOrder()))
+                        .thenComparing(FlashSale::getEndTime, Comparator.nullsLast(Comparator.reverseOrder()))
+                        .thenComparing(FlashSale::getId, Comparator.nullsLast(Comparator.reverseOrder())))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private int statusPriority(String status) {
+        if ("ONGOING".equalsIgnoreCase(status)) {
+            return 0;
+        }
+        if ("ACTIVE".equalsIgnoreCase(status)) {
+            return 1;
+        }
+        return 9;
+    }
+
+    private static class SlotGroup {
+        private final FlashSale slot;
+        private final List<FlashSaleItem> items;
+
+        private SlotGroup(FlashSale slot, List<FlashSaleItem> items) {
+            this.slot = slot;
+            this.items = items;
+        }
     }
 }

@@ -49,7 +49,6 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public CartResponse addToCart(String userId, String variantId, int quantity) {
-        // Verify variant exists
         if (!productVariantRepository.existsById(variantId)) {
             throw new RuntimeException("Product variant not found: " + variantId);
         }
@@ -124,13 +123,15 @@ public class CartServiceImpl implements CartService {
 
     private CartItemResponse toCartItemResponse(CartItem item) {
         Optional<ProductVariant> variantOpt = productVariantRepository.findById(item.getVariantId());
-        if (variantOpt.isEmpty())
+        if (variantOpt.isEmpty()) {
             return null;
+        }
 
         ProductVariant variant = variantOpt.get();
         Optional<Product> productOpt = productRepository.findById(variant.getProductId());
-        if (productOpt.isEmpty())
+        if (productOpt.isEmpty()) {
             return null;
+        }
 
         Product product = productOpt.get();
         List<ProductImage> images = productImageRepository.findByProductIdOrderByDisplayOrderAsc(product.getId());
@@ -139,12 +140,15 @@ public class CartServiceImpl implements CartService {
         String variantName = (variant.getColor() != null ? variant.getColor() : "")
                 + (variant.getSize() != null ? " - " + variant.getSize() : "");
         variantName = variantName.trim();
-        if (variantName.startsWith("- "))
+        if (variantName.startsWith("- ")) {
             variantName = variantName.substring(2);
+        }
 
         List<String> categoryIds = productCategoryRepository.findByProductId(product.getId()).stream()
                 .map(ProductCategory::getCategoryId)
                 .collect(Collectors.toList());
+
+        BigDecimal unitPrice = resolveCartItemPrice(product, variant);
 
         return CartItemResponse.builder()
                 .variantId(item.getVariantId())
@@ -153,12 +157,66 @@ public class CartServiceImpl implements CartService {
                 .productName(product.getName())
                 .productImage(imageUrl)
                 .variantName(variantName.isEmpty() ? "Default" : variantName)
-                .price(variant.getPrice())
+                .price(unitPrice)
                 .quantity(item.getQuantity())
                 .stock(variant.getStock())
-                .totalPrice(variant.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .totalPrice(unitPrice.multiply(BigDecimal.valueOf(item.getQuantity())))
                 .shopId(product.getShopId())
                 .build();
+    }
+
+    private BigDecimal resolveCartItemPrice(Product product, ProductVariant variant) {
+        LocalDateTime now = LocalDateTime.now();
+
+        if (isVariantFlashSaleActive(variant, now)) {
+            return variant.getFlashSalePrice();
+        }
+
+        if (isProductFlashSaleActive(product, now)) {
+            return product.getFlashSalePrice();
+        }
+
+        return variant.getPrice();
+    }
+
+    private boolean isVariantFlashSaleActive(ProductVariant variant, LocalDateTime now) {
+        if (!Boolean.TRUE.equals(variant.getIsFlashSale())
+                || variant.getFlashSalePrice() == null
+                || variant.getFlashSaleEndTime() == null) {
+            return false;
+        }
+
+        if (variant.getFlashSaleEndTime().isBefore(now)) {
+            return false;
+        }
+
+        Integer flashSaleStock = variant.getFlashSaleStock();
+        if (flashSaleStock == null) {
+            return true;
+        }
+
+        int sold = variant.getFlashSaleSold() == null ? 0 : variant.getFlashSaleSold();
+        return flashSaleStock - sold > 0;
+    }
+
+    private boolean isProductFlashSaleActive(Product product, LocalDateTime now) {
+        if (!Boolean.TRUE.equals(product.getIsFlashSale())
+                || product.getFlashSalePrice() == null
+                || product.getFlashSaleEndTime() == null) {
+            return false;
+        }
+
+        if (product.getFlashSaleEndTime().isBefore(now)) {
+            return false;
+        }
+
+        Integer flashSaleStock = product.getFlashSaleStock();
+        if (flashSaleStock == null) {
+            return true;
+        }
+
+        int sold = product.getFlashSaleSold() == null ? 0 : product.getFlashSaleSold();
+        return flashSaleStock - sold > 0;
     }
 
     private CartResponse mapToCartResponse(Cart cart) {

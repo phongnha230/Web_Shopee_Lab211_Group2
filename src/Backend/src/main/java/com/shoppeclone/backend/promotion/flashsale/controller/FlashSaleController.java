@@ -1,6 +1,13 @@
 package com.shoppeclone.backend.promotion.flashsale.controller;
 
-import com.shoppeclone.backend.promotion.flashsale.dto.*;
+import com.shoppeclone.backend.promotion.flashsale.dto.ApproveRegistrationRequest;
+import com.shoppeclone.backend.promotion.flashsale.dto.FlashSaleCampaignRequest;
+import com.shoppeclone.backend.promotion.flashsale.dto.FlashSaleItemResponse;
+import com.shoppeclone.backend.promotion.flashsale.dto.FlashSaleOrderRequest;
+import com.shoppeclone.backend.promotion.flashsale.dto.FlashSaleOrderResult;
+import com.shoppeclone.backend.promotion.flashsale.dto.FlashSaleRegistrationRequest;
+import com.shoppeclone.backend.promotion.flashsale.dto.FlashSaleSlotRequest;
+import com.shoppeclone.backend.promotion.flashsale.dto.FlashSaleStatsResponse;
 import com.shoppeclone.backend.promotion.flashsale.entity.FlashSale;
 import com.shoppeclone.backend.promotion.flashsale.entity.FlashSaleCampaign;
 import com.shoppeclone.backend.promotion.flashsale.entity.FlashSaleItem;
@@ -12,7 +19,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -24,8 +38,6 @@ public class FlashSaleController {
     private final FlashSaleService flashSaleService;
     private final FlashSaleOrderService flashSaleOrderService;
     private final ShopService shopService;
-
-    // --- PUBLIC ENDPOINTS ---
 
     @GetMapping("/current")
     public ResponseEntity<FlashSale> getCurrentFlashSale() {
@@ -39,15 +51,11 @@ public class FlashSaleController {
         return ResponseEntity.ok(flashSaleService.getItemsByFlashSaleId(flashSaleId));
     }
 
-    // --- PUBLIC ENDPOINTS ---
-
     @GetMapping("/campaigns/open")
     @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<List<FlashSaleCampaign>> getOpenCampaigns() {
         return ResponseEntity.ok(flashSaleService.getOpenCampaigns());
     }
-
-    // --- ADMIN ENDPOINTS ---
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/campaigns")
@@ -79,6 +87,12 @@ public class FlashSaleController {
     @GetMapping("/campaigns/{id}/items")
     public ResponseEntity<List<FlashSaleItemResponse>> getCampaignItems(@PathVariable String id) {
         return ResponseEntity.ok(flashSaleService.getCampaignItems(id));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/campaigns/{id}/monitor")
+    public ResponseEntity<FlashSaleStatsResponse> getCampaignMonitor(@PathVariable String id) {
+        return ResponseEntity.ok(flashSaleOrderService.getStatsByCampaignId(id));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -119,8 +133,6 @@ public class FlashSaleController {
         return ResponseEntity.ok(flashSaleService.getRegistrationsBySlotId(slotId));
     }
 
-    // --- SHOP ENDPOINTS ---
-
     @PreAuthorize("hasRole('SELLER')")
     @PostMapping("/registrations")
     public ResponseEntity<FlashSaleItem> registerProduct(@RequestBody FlashSaleRegistrationRequest request,
@@ -157,8 +169,6 @@ public class FlashSaleController {
         return ResponseEntity.ok().build();
     }
 
-    // --- LEGACY/CLEANUP (Keep or replace as needed) ---
-
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFlashSale(@PathVariable String id) {
@@ -166,46 +176,21 @@ public class FlashSaleController {
         return ResponseEntity.noContent().build();
     }
 
-    // =========================================================================
-    // FLASH SALE ORDER — Dùng cho Simulator Tool bắn request
-    // =========================================================================
-
-    /**
-     * PUBLIC endpoint — Không cần JWT để Simulator Tool có thể bắn trực tiếp.
-     * Dùng MongoDB atomic findAndModify → đảm bảo không âm kho.
-     *
-     * Body: { "variantId": "xxx", "quantity": 1 }
-     */
     @PostMapping("/order")
-    public ResponseEntity<FlashSaleOrderResult> placeFlashSaleOrder(
-            @RequestBody FlashSaleOrderRequest request) {
+    public ResponseEntity<FlashSaleOrderResult> placeFlashSaleOrder(@RequestBody FlashSaleOrderRequest request) {
         FlashSaleOrderResult result = flashSaleOrderService.placeOrder(request);
         return ResponseEntity.ok(result);
     }
 
-    // =========================================================================
-    // STATS ENDPOINTS — Admin & Seller xem dashboard
-    // =========================================================================
-
-    /**
-     * ADMIN: Xem thống kê toàn bộ flash sale slot.
-     * GET /api/flash-sales/stats/{flashSaleId}
-     */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/stats/{flashSaleId}")
-    public ResponseEntity<FlashSaleStatsResponse> getFlashSaleStats(
-            @PathVariable String flashSaleId) {
+    public ResponseEntity<FlashSaleStatsResponse> getFlashSaleStats(@PathVariable String flashSaleId) {
         return ResponseEntity.ok(flashSaleOrderService.getStatsByFlashSaleId(flashSaleId));
     }
 
-    /**
-     * SELLER: Xem thống kê sản phẩm của shop mình trong flash sale.
-     * GET /api/flash-sales/stats/shop/my
-     */
     @PreAuthorize("hasRole('SELLER')")
     @GetMapping("/stats/shop/my")
-    public ResponseEntity<java.util.List<FlashSaleStatsResponse>> getMyShopFlashSaleStats(
-            Authentication auth) {
+    public ResponseEntity<List<FlashSaleStatsResponse>> getMyShopFlashSaleStats(Authentication auth) {
         Shop shop = shopService.getMyShop(auth.getName());
         return ResponseEntity.ok(flashSaleOrderService.getStatsByShopId(shop.getId()));
     }

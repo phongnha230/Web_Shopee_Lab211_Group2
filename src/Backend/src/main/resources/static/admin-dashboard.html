@@ -3,9 +3,112 @@
 
 
 <head>
+
+    <!-- Global Fetch Interceptor for Token Refresh -->
+    <script>
+        (function () {
+            const originalFetch = window.fetch;
+            let isRefreshing = false;
+            let refreshPromise = null;
+
+            window.fetch = async function (...args) {
+                let response;
+                try {
+                    response = await originalFetch(...args);
+                } catch (error) {
+                    throw error;
+                }
+
+                if (response.status === 401 && typeof args[0] === 'string' && !args[0].includes('/auth/login') && !args[0].includes('/auth/refresh-token')) {
+                    const refreshToken = localStorage.getItem('refreshToken');
+                    if (refreshToken) {
+                        if (!isRefreshing) {
+                            isRefreshing = true;
+                            refreshPromise = (async () => {
+                                try {
+                                    const refreshResponse = await originalFetch('http://localhost:8080/api/auth/refresh-token', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Refresh-Token': refreshToken
+                                        }
+                                    });
+
+                                    if (refreshResponse.ok) {
+                                        const data = await refreshResponse.json();
+                                        localStorage.setItem('accessToken', data.accessToken);
+                                        localStorage.setItem('refreshToken', data.refreshToken);
+                                        return data.accessToken;
+                                    } else {
+                                        localStorage.clear();
+                                        window.location.href = 'login.html';
+                                        return new Promise(() => { });
+                                    }
+                                } catch (e) {
+                                    localStorage.clear();
+                                    window.location.href = 'login.html';
+                                    return new Promise(() => { });
+                                } finally {
+                                    isRefreshing = false;
+                                }
+                            })();
+                        }
+
+                        try {
+                            const newAccessToken = await refreshPromise;
+                            if (args[1]) {
+                                args[1].headers = args[1].headers || {};
+                                if (args[1].headers instanceof Headers) {
+                                    args[1].headers.set('Authorization', 'Bearer ' + newAccessToken);
+                                } else {
+                                    args[1].headers['Authorization'] = 'Bearer ' + newAccessToken;
+                                }
+                            }
+                            return originalFetch(...args);
+                        } catch (e) {
+                            return new Promise(() => { });
+                        }
+                    } else {
+                        localStorage.clear();
+                        window.location.href = 'login.html';
+                        return new Promise(() => { });
+                    }
+                }
+                return response;
+            };
+        })();
+    </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - ShoppeClone</title>
+    <title>Admin Dashboard - GoShop</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
@@ -59,6 +162,10 @@
             <a href="#" onclick="switchView('users')" id="nav-users"
                 class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-[#FEEFCD]/50 rounded-lg font-medium transition">
                 <i class="fas fa-users w-5"></i> Users
+            </a>
+            <a href="#" onclick="switchView('flash-sale')" id="nav-flash-sale"
+                class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-[#FEEFCD]/50 rounded-lg font-medium transition">
+                <i class="fas fa-bolt w-5"></i> Flash Sale
             </a>
 
 
@@ -155,6 +262,9 @@
                             <button id="btn-7days" onclick="handleTimeFilter(7)"
                                 class="px-4 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded">Last 7
                                 Days</button>
+                            <button id="btn-30days" onclick="handleTimeFilter(30)"
+                                class="px-4 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded">Last 30
+                                Days</button>
                         </div>
                         <button
                             class="bg-white border border-gray-200 text-gray-700 px-4 py-1.5 rounded-lg text-sm font-medium shadow-sm hover:bg-gray-50 flex items-center gap-2">
@@ -167,10 +277,11 @@
                 <!-- Stats Cards Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <!-- Active Users Card -->
-                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
+                    <div
+                        class="bg-white p-5 rounded-2xl border border-gray-100 border-l-4 border-l-[#AD3029] shadow-sm hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-4">
                             <div
-                                class="w-10 h-10 bg-[#FEEFCD] text-[#AD3029] rounded-lg flex items-center justify-center text-lg">
+                                class="w-10 h-10 bg-[#AD3029] text-white rounded-lg flex items-center justify-center text-lg">
                                 <i class="fas fa-users"></i>
                             </div>
                             <span class="bg-green-50 text-green-600 text-xs font-bold px-2 py-1 rounded-full">+8.1% <i
@@ -182,10 +293,11 @@
 
 
                     <!-- Active Shops Card -->
-                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
+                    <div
+                        class="bg-white p-5 rounded-2xl border border-gray-100 border-l-4 border-l-[#AD3029] shadow-sm hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-4">
                             <div
-                                class="w-10 h-10 bg-[#FEEFCD] text-[#AD3029] rounded-lg flex items-center justify-center text-lg">
+                                class="w-10 h-10 bg-[#AD3029] text-white rounded-lg flex items-center justify-center text-lg">
                                 <i class="fas fa-store"></i>
                             </div>
                             <span class="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-1 rounded-full">0.0% <i
@@ -197,7 +309,8 @@
 
 
                     <!-- Total Disputes Card -->
-                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
+                    <div
+                        class="bg-white p-5 rounded-2xl border border-gray-100 border-l-4 border-l-[#AD3029] shadow-sm hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-4">
                             <div
                                 class="w-10 h-10 bg-[#AD3029]/10 text-[#AD3029] rounded-lg flex items-center justify-center text-lg">
@@ -206,6 +319,23 @@
                         </div>
                         <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Total Disputes</p>
                         <h3 id="totalDisputesCount" class="text-2xl font-bold text-gray-800 mt-1">Loading...</h3>
+                    </div>
+
+                    <!-- Flash Sale Card -->
+                    <div
+                        class="bg-white p-5 rounded-2xl border border-gray-100 border-l-4 border-l-[#AD3029] shadow-sm hover:shadow-md transition">
+                        <div class="flex justify-between items-start mb-4">
+                            <div
+                                class="w-10 h-10 bg-[#AD3029] text-white rounded-lg flex items-center justify-center text-lg">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <span id="flashSaleIndicator"
+                                class="bg-[#AD3029]/10 text-[#AD3029] text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                                LIVE <span class="flex h-1.5 w-1.5 rounded-full bg-[#AD3029] animate-pulse"></span>
+                            </span>
+                        </div>
+                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Ongoing Flash Sales</p>
+                        <h3 id="activeFlashSalesCount" class="text-2xl font-bold text-gray-800 mt-1">Loading...</h3>
                     </div>
                 </div>
 
@@ -217,7 +347,7 @@
                         <div class="flex justify-between items-center mb-6">
                             <div>
                                 <h3 class="text-lg font-bold text-gray-800">Registration Trend</h3>
-                                <p class="text-xs text-gray-500">Daily new users & shops (Last 7 days)</p>
+                                <p class="text-xs text-gray-500">Daily new users, shops & disputes (Last 7 days)</p>
                             </div>
                             <div class="bg-gray-100 rounded-lg p-1 flex text-xs font-medium">
                                 <button class="px-3 py-1 bg-white shadow-sm rounded">Volume</button>
@@ -230,38 +360,67 @@
                     </div>
 
 
-                    <!-- Operations Summary Card -->
+                    <!-- Flash Sale Overview Card (Replaces Operations Summary) -->
                     <div
                         class="bg-[#AD3029] text-white p-6 rounded-2xl shadow-lg flex flex-col justify-between relative overflow-hidden group">
-                        <div class="relative z-10">
-                            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
-                                <i class="fas fa-clipboard-list"></i> Operations Summary
-                            </h2>
+                        <div class="relative z-10 w-full">
+                            <div class="flex justify-between items-start mb-4">
+                                <h2 class="text-xl font-bold flex items-center gap-2">
+                                    <i class="fas fa-bolt"></i> Flash Sale Management Hub
+                                </h2>
+                                <span id="urgentBadge"
+                                    class="hidden bg-yellow-400 text-[#AD3029] text-[10px] font-black px-2 py-0.5 rounded-full animate-bounce">URGENT</span>
+                            </div>
                             <div class="space-y-3">
-
-
-                                <!-- Open Disputes -->
-                                <div
-                                    class="flex justify-between items-center bg-white/10 p-3 rounded-lg backdrop-blur-sm hover:bg-white/20 transition cursor-pointer">
+                                <!-- Priority Action: Deadlines -->
+                                <div onclick="switchView('flash-sale')"
+                                    class="flex justify-between items-center bg-white/10 p-3 rounded-lg backdrop-blur-sm hover:bg-white/20 transition cursor-pointer border border-white/5">
                                     <div class="flex items-center gap-3">
                                         <div class="bg-white/20 p-2 rounded">
-                                            <i class="fas fa-exclamation-circle text-orange-300"></i>
+                                            <i class="fas fa-hourglass-half text-orange-300"></i>
                                         </div>
-                                        <div class="text-sm font-medium">New Disputes</div>
+                                        <div>
+                                            <div class="text-xs text-white/60">Nearing Deadlines</div>
+                                            <div class="text-sm font-bold">Review Campaigns</div>
+                                        </div>
                                     </div>
-                                    <div id="openDisputesCount" class="text-xl font-bold">0</div>
+                                    <div id="upcomingFlashCount" class="text-xl font-bold">0</div>
                                 </div>
-                                <!-- Pending Shops -->
-                                <div
-                                    class="flex justify-between items-center bg-white/10 p-3 rounded-lg backdrop-blur-sm hover:bg-white/20 transition cursor-pointer">
+
+                                <!-- Priority Action: Approvals -->
+                                <div onclick="switchView('flash-sale'); showFlashSaleTab('registrations')"
+                                    class="flex justify-between items-center bg-white/10 p-3 rounded-lg backdrop-blur-sm hover:bg-white/20 transition cursor-pointer border border-white/5">
                                     <div class="flex items-center gap-3">
                                         <div class="bg-white/20 p-2 rounded">
-                                            <i class="fas fa-store text-blue-300"></i>
+                                            <i class="fas fa-user-check text-green-300"></i>
                                         </div>
-                                        <div class="text-sm font-medium">Pending Shops</div>
+                                        <div>
+                                            <div class="text-xs text-white/60">Pending Approvals</div>
+                                            <div class="text-sm font-bold">Needs Review</div>
+                                        </div>
                                     </div>
-                                    <div id="pendingShopsCountSummary" class="text-xl font-bold">0</div>
+                                    <div id="pendingFlashRegsCount" class="text-xl font-bold text-yellow-300">0</div>
                                 </div>
+
+                                <!-- Live Status -->
+                                <div onclick="switchView('flash-sale')"
+                                    class="flex justify-between items-center bg-white/10 p-3 rounded-lg backdrop-blur-sm hover:bg-white/20 transition cursor-pointer border border-white/5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="bg-white/20 p-2 rounded">
+                                            <i class="fas fa-broadcast-tower text-blue-300"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-xs text-white/60">Live/Approved Items</div>
+                                            <div class="text-sm font-bold">On-Air Status</div>
+                                        </div>
+                                    </div>
+                                    <div id="approvedFlashCount" class="text-xl font-bold">0</div>
+                                </div>
+
+                                <button onclick="switchView('flash-sale');"
+                                    class="w-full mt-2 bg-white/10 hover:bg-white/20 text-xs font-bold py-2 rounded-lg transition border border-white/10 uppercase tracking-wider">
+                                    Management Center <i class="fas fa-arrow-right ml-1"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -287,39 +446,38 @@
                             <div>
                                 <div class="flex justify-between text-sm font-medium text-gray-700 mb-2">
                                     <div class="flex items-center gap-2">
-                                        <span class="w-3 h-3 rounded-full bg-[#AD3029]"></span> Electronics
+                                        <span class="w-3 h-3 rounded-full bg-[#AD3029]"></span> Buyers
                                     </div>
-                                    <span>$1.2M (35%)</span>
+                                    <span id="buyersCount">—</span>
                                 </div>
                                 <div class="w-full bg-gray-100 rounded-full h-2">
-                                    <div class="bg-[#AD3029] h-2 rounded-full" style="width: 35%"></div>
+                                    <div id="buyersBar" class="bg-[#AD3029] h-2 rounded-full" style="width: 0%"></div>
                                 </div>
                             </div>
                             <!-- Item 2 -->
                             <div>
                                 <div class="flex justify-between text-sm font-medium text-gray-700 mb-2">
                                     <div class="flex items-center gap-2">
-                                        <span class="w-3 h-3 rounded-full bg-orange-400"></span> Fashion
+                                        <span class="w-3 h-3 rounded-full bg-[#AD3029]/60"></span> Sellers
                                     </div>
-                                    <span>$850K (25%)</span>
+                                    <span id="sellersCount">—</span>
                                 </div>
                                 <div class="w-full bg-gray-100 rounded-full h-2">
-                                    <div class="bg-orange-400 h-2 rounded-full" style="width: 25%"></div>
+                                    <div id="sellersBar" class="bg-[#AD3029]/60 h-2 rounded-full" style="width: 0%">
+                                    </div>
                                 </div>
                             </div>
                             <!-- Item 3 -->
                             <div>
                                 <div class="flex justify-between text-sm font-medium text-gray-700 mb-2">
                                     <div class="flex items-center gap-2">
-                                        <span
-                                            class="w-3 h-3 rounded-full bg-[#FEEFCD] border border-[#AD3029]/20"></span>
-                                        Home & Living
+                                        <span class="w-3 h-3 rounded-full bg-[#AD3029]/30"></span> Admins
                                     </div>
-                                    <span>$500K (15%)</span>
+                                    <span id="adminsCount">—</span>
                                 </div>
                                 <div class="w-full bg-gray-100 rounded-full h-2">
-                                    <div class="bg-[#FEEFCD] h-2 rounded-full border border-[#AD3029]/10"
-                                        style="width: 15%"></div>
+                                    <div id="adminsBar" class="bg-[#AD3029]/30 h-2 rounded-full" style="width: 0%">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -330,12 +488,13 @@
                     <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                         <div class="flex justify-between items-center mb-6">
                             <h3 class="text-lg font-bold text-gray-800">Top Selling Products</h3>
-                            <a href="#" onclick="switchView('products')"
+                            <a href="#" onclick="loadProducts('sold_desc'); switchView('products')"
                                 class="text-sm font-bold text-[#AD3029] hover:underline">View All</a>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm text-gray-600">
-                                <thead class="bg-gray-50 text-gray-500 font-semibold uppercase text-xs">
+                                <thead
+                                    class="bg-[#AD3029]/5 text-[#AD3029] font-semibold uppercase text-xs border-b border-[#AD3029]/10">
                                     <tr>
                                         <th class="px-4 py-3 rounded-l-lg">#</th>
                                         <th class="px-4 py-3">Product Name</th>
@@ -345,36 +504,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="topProductsTableBody" class="divide-y divide-gray-100">
-                                    <tr class="hover:bg-gray-50 transition">
-                                        <td class="px-4 py-3 font-medium text-[#AD3029]">01</td>
-                                        <td class="px-4 py-3 flex items-center gap-3">
-                                            <div class="w-8 h-8 bg-gray-200 rounded flex-shrink-0"></div>
-                                            <div>
-                                                <p class="font-bold text-gray-800">Wireless Earbuds</p>
-                                                <p class="text-xs text-gray-400">Electronics</p>
-                                            </div>
-                                        </td>
-                                        <td class="px-4 py-3 font-medium">$129.00</td>
-                                        <td class="px-4 py-3 text-green-600 font-bold">+12%</td>
-                                        <td class="px-4 py-3"><span
-                                                class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">IN
-                                                STOCK</span></td>
-                                    </tr>
-                                    <tr class="hover:bg-gray-50 transition">
-                                        <td class="px-4 py-3 font-medium text-[#AD3029]">02</td>
-                                        <td class="px-4 py-3 flex items-center gap-3">
-                                            <div class="w-8 h-8 bg-gray-200 rounded flex-shrink-0"></div>
-                                            <div>
-                                                <p class="font-bold text-gray-800">Smart Watch 4</p>
-                                                <p class="text-xs text-gray-400">Wearables</p>
-                                            </div>
-                                        </td>
-                                        <td class="px-4 py-3 font-medium">$299.00</td>
-                                        <td class="px-4 py-3 text-green-600 font-bold">+8%</td>
-                                        <td class="px-4 py-3"><span
-                                                class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">IN
-                                                STOCK</span></td>
-                                    </tr>
+                                    <!-- Loaded via JS -->
                                 </tbody>
                             </table>
                         </div>
@@ -400,7 +530,7 @@
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr
-                                    class="bg-gray-50 border-b border-gray-100 text-xs uppercase text-gray-500 font-semibold">
+                                    class="bg-[#AD3029]/5 border-b border-[#AD3029]/10 text-xs uppercase text-[#AD3029] font-semibold">
                                     <th class="px-6 py-4">#</th>
                                     <th class="px-6 py-4">ID</th>
                                     <th class="px-6 py-4">Product Name</th>
@@ -486,7 +616,8 @@
                 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm text-gray-600">
-                            <thead class="bg-gray-50 text-gray-500 font-semibold uppercase text-xs">
+                            <thead
+                                class="bg-[#AD3029]/5 text-[#AD3029] font-semibold uppercase text-xs border-b border-[#AD3029]/10">
                                 <tr>
                                     <th class="px-6 py-4">Dispute ID</th>
                                     <th class="px-6 py-4">Order ID</th>
@@ -526,7 +657,8 @@
                 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm text-gray-600">
-                            <thead class="bg-gray-50 text-gray-500 font-semibold uppercase text-xs">
+                            <thead
+                                class="bg-[#AD3029]/5 text-[#AD3029] font-semibold uppercase text-xs border-b border-[#AD3029]/10">
                                 <tr>
                                     <th class="px-6 py-4">User</th>
                                     <th class="px-6 py-4">Contact</th>
@@ -543,8 +675,75 @@
                     <div id="userLoading" class="text-center py-10 text-gray-500 hidden">
                         <i class="fas fa-spinner fa-spin text-2xl"></i> Loading users...
                     </div>
-                    <div id="userEmpty" class="text-center py-10 text-gray-500 hidden">
-                        No users found.
+                    <div id="userEmpty" class="text-center py-16 hidden">
+                        <div class="flex flex-col items-center gap-3">
+                            <span
+                                class="w-14 h-14 bg-[#AD3029]/10 rounded-full flex items-center justify-center text-[#AD3029] text-2xl"><i
+                                    class="fas fa-users"></i></span>
+                            <p class="text-gray-500 font-medium">No users found.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: FLASH SALE -->
+            <div id="view-flash-sale" class="hidden space-y-8">
+                <div class="flex justify-between items-center gap-3 flex-wrap">
+                    <h1 class="text-3xl font-bold text-gray-800">Flash Sale Management</h1>
+                    <div class="flex gap-2 flex-wrap justify-end">
+                        <button id="stressMonitorToggleBtn" onclick="toggleStressMonitor()"
+                            class="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-50 transition">
+                            Stress Monitor: OFF
+                        </button>
+                        <button onclick="openCreateCampaignModal()"
+                            class="bg-[#AD3029] text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition">
+                            <i class="fas fa-plus mr-2"></i> Create Campaign
+                        </button>
+                        <button onclick="loadFlashSaleData()"
+                            class="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-50 transition">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Flash Sale Tabs -->
+                <div class="flex border-b border-gray-200">
+                    <button onclick="showFlashSaleTab('campaigns')"
+                        class="px-6 py-3 border-b-2 border-[#AD3029] text-[#AD3029] font-bold fs-tab-btn">Campaigns
+                        & Slots</button>
+                    <button onclick="showFlashSaleTab('registrations')"
+                        class="px-6 py-3 text-gray-500 hover:text-gray-700 fs-tab-btn">Product
+                        Registrations</button>
+                </div>
+
+                <!-- Campaigns Content -->
+                <div id="fs-tab-campaigns" class="fs-tab-content space-y-6">
+                    <div id="campaignsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Loaded via JS -->
+                    </div>
+                </div>
+
+                <!-- Registrations Content -->
+                <div id="fs-tab-registrations" class="fs-tab-content hidden space-y-6">
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm text-gray-600">
+                                <thead
+                                    class="bg-[#AD3029]/5 text-[#AD3029] font-semibold uppercase text-xs border-b border-[#AD3029]/10">
+                                    <tr>
+                                        <th class="px-6 py-4">Product</th>
+                                        <th class="px-6 py-4">Shop &amp; Campaign</th>
+                                        <th class="px-6 py-4">Price</th>
+                                        <th class="px-6 py-4">Stock</th>
+                                        <th class="px-6 py-4">Status</th>
+                                        <th class="px-6 py-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="registrationsTableBody" class="divide-y divide-gray-100">
+                                    <!-- Loaded via JS -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -555,7 +754,8 @@
 
 
     <!-- Dispute Detail Modal -->
-    <div id="disputeDetailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div id="disputeDetailModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div class="sticky top-0 bg-white border-b border-gray-100 p-6 flex justify-between items-center z-10">
                 <h3 class="text-xl font-bold text-gray-800">Chi tiết khiếu nại</h3>
@@ -564,13 +764,15 @@
                 </button>
             </div>
             <div id="disputeDetailContent" class="p-6">
-                <div class="text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin text-2xl"></i> Đang tải...</div>
+                <div class="text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin text-2xl"></i> Đang tải...
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Dispute Review Modal -->
-    <div id="disputeReviewModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div id="disputeReviewModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 m-4">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-xl font-bold text-gray-800">Xử lý khiếu nại</h3>
@@ -581,8 +783,8 @@
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Trạng thái</label>
-                    <select id="disputeReviewStatus" onchange="toggleRefundOption()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#AD3029]/20 outline-none">
-                        <option value="IN_REVIEW">IN_REVIEW - Đang xem xét</option>
+                    <select id="disputeReviewStatus" onchange="toggleRefundOption()"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#AD3029]/20 outline-none">
                         <option value="RESOLVED">RESOLVED - Đã giải quyết</option>
                         <option value="REJECTED">REJECTED - Từ chối</option>
                     </select>
@@ -599,12 +801,16 @@
                     </label>
                     <div id="disputeRefundAmountWrap" class="mt-2 hidden">
                         <label class="block text-sm text-gray-600 mb-1">Số tiền (₫) - để trống = full đơn hàng</label>
-                        <input type="number" id="disputeRefundAmount" placeholder="VD: 1113000" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                        <input type="number" id="disputeRefundAmount" placeholder="VD: 1113000"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg">
                     </div>
                 </div>
                 <div class="flex gap-3 pt-4">
-                    <button onclick="closeDisputeReviewModal()" class="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg font-bold hover:bg-gray-200 transition">Hủy</button>
-                    <button onclick="confirmDisputeReview()" class="flex-1 bg-[#AD3029] text-white py-2 rounded-lg font-bold hover:opacity-90 transition">Xác nhận</button>
+                    <button onclick="closeDisputeReviewModal()"
+                        class="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg font-bold hover:bg-gray-200 transition">Hủy</button>
+                    <button onclick="confirmDisputeReview()"
+                        class="flex-1 bg-[#AD3029] text-white py-2 rounded-lg font-bold hover:opacity-90 transition">Xác
+                        nhận</button>
                 </div>
             </div>
         </div>
@@ -716,18 +922,351 @@
     </div>
 
 
-    <!-- MAIN SCRIPT -->
+    <!-- Flash Sale Campaign Modal -->
+    <div id="createCampaignModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border-t-4 border-[#AD3029]">
+            <div class="flex items-center gap-2 mb-6">
+                <span class="w-8 h-8 bg-[#AD3029]/10 rounded-lg flex items-center justify-center text-[#AD3029]"><i
+                        class="fas fa-bolt text-sm"></i></span>
+                <h3 class="text-xl font-bold text-gray-800">Create New Campaign</h3>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Campaign Name</label>
+                    <select id="fs-campaign-name-select" onchange="toggleFSCustomInput('name')"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#AD3029]/20 outline-none mb-2">
+                        <option value="">-- Select a Campaign Name --</option>
+
+                        <!-- Tháng 2 -->
+                        <option value="Valentine Sale 14.02">Valentine Sale 14.02</option>
+                        <option value="Lương Về Tháng 2">Lương Về Tháng 2</option>
+                        <option value="Khai Xuân Như Ý">Khai Xuân Như Ý</option>
+                        <option value="Gom Lộc Đầu Năm">Gom Lộc Đầu Năm</option>
+
+                        <!-- Tháng 3 -->
+                        <option value="Siêu Sale 3.3">Siêu Sale 3.3</option>
+                        <option value="Quốc Tế Phụ Nữ 8.3">Quốc Tế Phụ Nữ 8.3</option>
+                        <option value="Siêu Hội Đồ Gia Dụng">Siêu Hội Đồ Gia Dụng</option>
+
+                        <!-- Tháng 4 -->
+                        <option value="Siêu Sale 4.4">Siêu Sale 4.4</option>
+                        <option value="Mừng Đại Lễ 30.4 - 1.5">Mừng Đại Lễ 30.4 - 1.5</option>
+                        <option value="Sắm Đồ Đi Du Lịch">Sắm Đồ Đi Du Lịch</option>
+                        <option value="Giải Nhiệt Mùa Hè">Giải Nhiệt Mùa Hè</option>
+
+                        <option value="--------------" disabled>--------------</option>
+                        <option value="Siêu Sale 11.11">Siêu Sale 11.11</option>
+                        <option value="Siêu Sale 12.12">Siêu Sale 12.12</option>
+                        <option value="Mừng Lương Về">Mừng Lương Về</option>
+                        <option value="Xả Kho Cuối Mùa">Xả Kho Cuối Mùa</option>
+                        <option value="Black Friday">Black Friday</option>
+                        <option value="Flash Sale Giờ Vàng">Flash Sale Giờ Vàng</option>
+                        <option value="Tết Sale">Tết Sale</option>
+                        <option value="Giáng Sinh Sale">Giáng Sinh Sale</option>
+                        <option value="custom">Other (Enter custom name)...</option>
+                    </select>
+                    <input type="text" id="fs-campaign-name-custom" placeholder="Enter custom campaign name"
+                        class="hidden w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-[#AD3029]/20">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description / Reason</label>
+                    <select id="fs-campaign-desc-select" onchange="toggleFSCustomInput('desc')"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#AD3029]/20 outline-none mb-2">
+                        <option value="">-- Select a Description/Reason --</option>
+
+                        <option value="Quà tặng ngọt ngào mùa yêu thương (Valentine)">Quà tặng ngọt ngào mùa yêu thương
+                            (Valentine)</option>
+                        <option value="Dành tặng một nửa thế giới (8.3)">Dành tặng một nửa thế giới (8.3)</option>
+                        <option value="Chào hè rực rỡ - Sale hết cỡ (Tháng 4)">Chào hè rực rỡ - Sale hết cỡ (Tháng 4)
+                        </option>
+                        <option value="Mừng ngày giải phóng - Sale tưng bừng (30.4)">Mừng ngày giải phóng - Sale tưng
+                            bừng (30.4)</option>
+                        <option value="Khai xuân rước lộc - Vạn sự như ý">Khai xuân rước lộc - Vạn sự như ý</option>
+                        <option value="Tận hưởng kỳ nghỉ - Sắm đồ cực hời">Tận hưởng kỳ nghỉ - Sắm đồ cực hời</option>
+                        <option value="Lên đồ đi biển - Chẳng ngại nắng hè">Lên đồ đi biển - Chẳng ngại nắng hè</option>
+
+                        <option value="--------------" disabled>--------------</option>
+                        <option value="Giảm giá đặc biệt ngành hàng điện tử">Giảm giá đặc biệt ngành hàng điện tử
+                        </option>
+                        <option value="Ưu đãi cho khách hàng thân thiết">Ưu đãi cho khách hàng thân thiết</option>
+                        <option value="Dọn kho đón mẫu mới">Dọn kho đón mẫu mới</option>
+                        <option value="Kích cầu mua sắm cuối tháng">Kích cầu mua sắm cuối tháng</option>
+                        <option value="Tri ân khách hàng VIP">Tri ân khách hàng VIP</option>
+                        <option value="Sự kiện ra mắt sản phẩm mới">Sự kiện ra mắt sản phẩm mới</option>
+                        <option value="custom">Other (Enter custom description)...</option>
+                    </select>
+                    <textarea id="fs-campaign-desc-custom" rows="2" placeholder="Enter custom description"
+                        class="hidden w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-[#AD3029]/20"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                        <input type="datetime-local" id="fs-campaign-start" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                        <input type="datetime-local" id="fs-campaign-end" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Min Discount (%)</label>
+                        <input type="number" id="fs-campaign-min-discount" value="10" min="1" max="99"
+                            class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Min Stock</label>
+                        <input type="number" id="fs-campaign-min-stock" value="5" min="1"
+                            class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Registration Deadline</label>
+                        <input type="datetime-local" id="fs-campaign-reg-deadline"
+                            class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Approval Deadline</label>
+                        <input type="datetime-local" id="fs-campaign-app-deadline"
+                            class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button onclick="document.getElementById('createCampaignModal').classList.add('hidden')"
+                        class="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg font-bold hover:bg-gray-200 transition">Cancel</button>
+                    <button onclick="submitCreateCampaign()"
+                        class="flex-1 bg-[#AD3029] text-white py-2 rounded-lg font-bold hover:opacity-90 transition">⚡
+                        Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash Sale Slot Modal -->
+    <div id="createSlotModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-6">Add Time Slot</h3>
+            <input type="hidden" id="fs-slot-campaign-id">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                    <input type="datetime-local" id="fs-slot-start" class="w-full px-4 py-2 border rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                    <input type="datetime-local" id="fs-slot-end" class="w-full px-4 py-2 border rounded-lg">
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button onclick="document.getElementById('createSlotModal').classList.add('hidden')"
+                        class="flex-1 bg-gray-100 py-2 rounded-lg font-bold">Cancel</button>
+                    <button onclick="submitCreateSlot()"
+                        class="flex-1 bg-[#AD3029] text-white py-2 rounded-lg font-bold">Add Slot</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Edit Campaign Modal -->
+    <div id="editCampaignModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 border-t-4 border-[#AD3029]">
+            <div class="flex items-center gap-2 mb-6">
+                <span class="w-8 h-8 bg-[#AD3029]/10 rounded-lg flex items-center justify-center text-[#AD3029]"><i
+                        class="fas fa-edit text-sm"></i></span>
+                <h3 class="text-xl font-bold text-gray-800">Edit Campaign</h3>
+            </div>
+            <input type="hidden" id="edit-campaign-id">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Campaign Name</label>
+                    <input type="text" id="edit-campaign-name"
+                        class="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-[#AD3029]/20">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea id="edit-campaign-desc" rows="2"
+                        class="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-[#AD3029]/20"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                        <input type="datetime-local" id="edit-campaign-start"
+                            class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                        <input type="datetime-local" id="edit-campaign-end" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Min Discount (%)</label>
+                        <input type="number" id="edit-campaign-min-discount" min="1" max="99"
+                            class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Min Stock</label>
+                        <input type="number" id="edit-campaign-min-stock" min="1"
+                            class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Registration Deadline</label>
+                        <input type="datetime-local" id="edit-campaign-reg-deadline"
+                            class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Approval Deadline</label>
+                        <input type="datetime-local" id="edit-campaign-app-deadline"
+                            class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button onclick="document.getElementById('editCampaignModal').classList.add('hidden')"
+                        class="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg font-bold hover:bg-gray-200 transition">Cancel</button>
+                    <button onclick="submitEditCampaign()"
+                        class="flex-1 bg-[#AD3029] text-white py-2 rounded-lg font-bold hover:opacity-90 transition">💾
+                        Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Campaign Details Modal -->
+    <div id="campaignDetailsModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full p-6 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-start mb-4 gap-4">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <h3 class="text-xl font-bold text-gray-800">Campaign Details</h3>
+                        <span id="campaignDetailsStatusBadge"
+                            class="hidden text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide"></span>
+                    </div>
+                    <p id="campaignDetailsMonitorSubtitle" class="text-xs text-gray-500 mt-1">Flash Sale monitor auto refreshes every second while this popup is open.</p>
+                </div>
+                <button onclick="closeCampaignDetailsModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <div class="overflow-y-auto flex-1 space-y-4 pr-1">
+                <div id="campaignDetailsMonitor" class="bg-[#F9F6F1] border border-[#E9D9C8] rounded-2xl p-4">
+                    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+                        <div class="bg-white border border-gray-100 rounded-xl p-3">
+                            <div class="text-[11px] uppercase tracking-wide text-gray-400 font-bold">Total Requests</div>
+                            <div id="campaignDetailsTotalRequests" class="text-2xl font-extrabold text-gray-800 mt-2">0</div>
+                        </div>
+                        <div class="bg-white border border-gray-100 rounded-xl p-3">
+                            <div class="text-[11px] uppercase tracking-wide text-gray-400 font-bold">Success</div>
+                            <div id="campaignDetailsSuccess" class="text-2xl font-extrabold text-green-600 mt-2">0</div>
+                        </div>
+                        <div class="bg-white border border-gray-100 rounded-xl p-3">
+                            <div class="text-[11px] uppercase tracking-wide text-gray-400 font-bold">Out Of Stock</div>
+                            <div id="campaignDetailsOutOfStock" class="text-2xl font-extrabold text-[#AD3029] mt-2">0</div>
+                        </div>
+                        <div class="bg-white border border-gray-100 rounded-xl p-3">
+                            <div class="text-[11px] uppercase tracking-wide text-gray-400 font-bold">Error</div>
+                            <div id="campaignDetailsError" class="text-2xl font-extrabold text-amber-500 mt-2">0</div>
+                        </div>
+                        <div class="bg-white border border-gray-100 rounded-xl p-3">
+                            <div class="text-[11px] uppercase tracking-wide text-gray-400 font-bold">Avg Response</div>
+                            <div id="campaignDetailsAvgResponse" class="text-2xl font-extrabold text-gray-800 mt-2">0 ms</div>
+                        </div>
+                        <div class="bg-white border border-gray-100 rounded-xl p-3">
+                            <div class="text-[11px] uppercase tracking-wide text-gray-400 font-bold">Integrity</div>
+                            <div id="campaignDetailsIntegrity" class="text-2xl font-extrabold text-gray-800 mt-2">PASS</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 bg-white border border-gray-100 rounded-2xl p-4">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-3">
+                            <div>
+                                <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wide">Campaign Progress</h4>
+                                <p class="text-xs text-gray-500">Server-side metrics + DB stock integrity for the slot being monitored.</p>
+                            </div>
+                            <div id="campaignDetailsSlotMeta" class="text-xs text-gray-500">Waiting for requests...</div>
+                        </div>
+                        <div class="flex items-center justify-between text-sm font-semibold text-gray-700 mb-2">
+                            <span id="campaignDetailsProgressLabel">Sold 0 / 0</span>
+                            <span id="campaignDetailsRemainingLabel">Remaining 0</span>
+                        </div>
+                        <div class="w-full h-3 rounded-full bg-gray-100 overflow-hidden">
+                            <div id="campaignDetailsProgressBar" class="h-full rounded-full bg-gradient-to-r from-[#AD3029] to-[#D87343] transition-all duration-700" style="width:0%"></div>
+                        </div>
+                        <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 mt-3">
+                            <span>Monitor: <strong id="campaignDetailsMonitorStatus" class="text-gray-700">IDLE</strong></span>
+                            <span>Started: <strong id="campaignDetailsStartedAt" class="text-gray-700">-</strong></span>
+                            <span>Last request: <strong id="campaignDetailsLastRequestAt" class="text-gray-700">-</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="text-xs text-gray-400 uppercase border-b border-gray-100">
+                            <th class="py-3 font-medium">Product</th>
+                            <th class="py-3 font-medium">Variant</th>
+                            <th class="py-3 font-medium">Original Price</th>
+                            <th class="py-3 font-medium text-[#AD3029]">Sale Price</th>
+                            <th class="py-3 font-medium">Stock (Sale/Rem)</th>
+                            <th class="py-3 font-medium">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="campaignDetailsBody" class="text-sm">
+                        <!-- Items rendered here -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-100 text-right">
+                <button onclick="closeCampaignDetailsModal()"
+                    class="bg-gray-100 px-6 py-2 rounded-lg font-bold text-gray-600 hover:bg-gray-200">Close</button>
+            </div>
+        </div>
+    </div>
     <script>
-        const token = localStorage.getItem('accessToken');
+
         const user = localStorage.getItem('userName') || 'Admin';
+        const stressMonitorParams = new URLSearchParams(window.location.search);
+        const STRESS_MONITOR_ENABLED = stressMonitorParams.get('stressMonitor') === '1'
+            || localStorage.getItem('enableStressMonitor') === '1';
 
 
-        if (!token) window.location.href = 'login.html';
+        if (!localStorage.getItem("accessToken")) {
+            alert('Please login first!');
+            window.location.href = 'login.html';
+        }
+
 
 
         // Update Sidebar Profile
         document.getElementById('adminName').textContent = user;
         document.getElementById('adminAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user)}&background=AD3029&color=fff`;
+        syncCampaignMonitorVisibility();
+
+        function updateStressMonitorToggleButton() {
+            const btn = document.getElementById('stressMonitorToggleBtn');
+            if (!btn) return;
+            const enabled = STRESS_MONITOR_ENABLED;
+            btn.textContent = `Stress Monitor: ${enabled ? 'ON' : 'OFF'}`;
+            btn.className = enabled
+                ? 'bg-[#AD3029] text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition'
+                : 'bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-50 transition';
+        }
+
+        function toggleStressMonitor() {
+            localStorage.setItem('enableStressMonitor', STRESS_MONITOR_ENABLED ? '0' : '1');
+            window.location.reload();
+        }
+
+        window.setStressMonitorEnabled = function (enabled) {
+            localStorage.setItem('enableStressMonitor', enabled ? '1' : '0');
+            window.location.reload();
+        };
+        updateStressMonitorToggleButton();
 
 
         // --- NAVIGATION LOGIC ---
@@ -759,6 +1298,8 @@
                 loadUsers();
             } else if (viewName === 'disputes') {
                 loadDisputes();
+            } else if (viewName === 'flash-sale') {
+                loadFlashSaleData();
             } else if (viewName === 'dashboard') {
                 loadDashboardStats();
             }
@@ -771,7 +1312,8 @@
             const buttons = {
                 1: document.getElementById('btn-today'),
                 0: document.getElementById('btn-yesterday'),
-                7: document.getElementById('btn-7days')
+                7: document.getElementById('btn-7days'),
+                30: document.getElementById('btn-30days')
             };
 
 
@@ -787,6 +1329,15 @@
                 activeBtn.classList.add('bg-[#AD3029]', 'text-white', 'shadow-sm');
             }
 
+
+            // Update Title
+            const labels = {
+                1: 'Today',
+                0: 'Yesterday',
+                7: 'Last 7 Days',
+                30: 'Last 30 Days'
+            };
+            document.querySelector('#view-dashboard h3.text-lg').nextElementSibling.textContent = `Daily new users, shops & disputes (${labels[days]})`;
 
             // Reload stats
             loadDashboardStats(days);
@@ -809,7 +1360,7 @@
                         {
                             label: 'New Users',
                             data: [],
-                            borderColor: '#AD3029', // Shopee red
+                            borderColor: '#AD3029', // GoShop red
                             backgroundColor: 'rgba(173, 48, 41, 0.1)',
                             borderWidth: 3,
                             tension: 0.4,
@@ -821,6 +1372,26 @@
                             data: [],
                             borderColor: '#F97316', // Orange
                             backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            fill: true
+                        },
+                        {
+                            label: 'New Disputes',
+                            data: [],
+                            borderColor: '#9333EA', // Purple
+                            backgroundColor: 'rgba(147, 51, 234, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            fill: true
+                        },
+                        {
+                            label: 'Flash Sale Regs',
+                            data: [],
+                            borderColor: '#EAB308', // Yellow
+                            backgroundColor: 'rgba(234, 179, 8, 0.1)',
                             borderWidth: 3,
                             tension: 0.4,
                             pointRadius: 4,
@@ -853,18 +1424,22 @@
         }
 
 
-        function updateRegistrationChart(userTrend, shopTrend) {
+        function updateRegistrationChart(userTrend, shopTrend, disputeTrend, flashSaleTrend) {
             if (!registrationChart) return;
 
 
             const labels = userTrend.map(t => t.date);
             const userData = userTrend.map(t => t.count);
             const shopData = shopTrend.map(t => t.count);
+            const disputeData = disputeTrend ? disputeTrend.map(t => t.count) : [];
+            const flashData = flashSaleTrend ? flashSaleTrend.map(t => t.count) : [];
 
 
             registrationChart.data.labels = labels;
             registrationChart.data.datasets[0].data = userData;
             registrationChart.data.datasets[1].data = shopData;
+            registrationChart.data.datasets[2].data = disputeData;
+            registrationChart.data.datasets[3].data = flashData;
             registrationChart.update();
         }
 
@@ -876,7 +1451,7 @@
         async function loadPendingShops() {
             try {
                 const response = await fetch('http://localhost:8080/api/shop/admin/pending', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -917,11 +1492,11 @@
 
 
             container.innerHTML = shops.map(shop => `
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition overflow-hidden">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-yellow-400 hover:shadow-md transition overflow-hidden">
                     <div class="p-5">
                         <div class="flex justify-between items-start mb-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-[#FEEFCD] text-[#AD3029] font-bold text-lg flex items-center justify-center">
+                                <div class="w-10 h-10 rounded-full bg-yellow-400 text-white font-bold text-lg flex items-center justify-center">
                                     ${shop.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div>
@@ -929,20 +1504,22 @@
                                     <p class="text-xs text-gray-500">ID: ...${shop.id.substr(-6)}</p>
                                 </div>
                             </div>
-                            <span class="bg-yellow-50 text-yellow-700 text-[10px] font-bold px-2 py-1 rounded border border-yellow-200 uppercase">Pending</span>
+                            <span class="inline-flex items-center gap-1 bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-1 rounded-full border border-yellow-200 uppercase">
+                                <span class="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse"></span>Pending
+                            </span>
                         </div>
                         
                         <div class="space-y-3 mb-6 bg-gray-50 p-4 rounded-lg">
                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <i class="fas fa-user-circle w-4 text-gray-400"></i>
+                                <i class="fas fa-user-circle w-4 text-[#AD3029]"></i>
                                 <span class="truncate">${shop.ownerFullName || 'Unknown Owner'}</span>
                            </div>
                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <i class="fas fa-phone w-4 text-gray-400"></i>
+                                <i class="fas fa-phone w-4 text-[#AD3029]"></i>
                                 <span>${shop.phone}</span>
                            </div>
                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <i class="fas fa-map-marker-alt w-4 text-gray-400"></i>
+                                <i class="fas fa-map-marker-alt w-4 text-[#AD3029]"></i>
                                 <span class="truncate w-full">${shop.address}</span>
                            </div>
                         </div>
@@ -981,7 +1558,7 @@
             try {
                 const response = await fetch(endpoint, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1097,7 +1674,7 @@
         async function loadActiveShops() {
             try {
                 const response = await fetch('http://localhost:8080/api/shop/admin/active', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1129,11 +1706,11 @@
 
 
             container.innerHTML = shops.map(shop => `
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition overflow-hidden flex flex-col h-full">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-[#AD3029] hover:shadow-md transition overflow-hidden flex flex-col h-full">
                     <div class="p-5 flex flex-col h-full">
                         <div class="flex justify-between items-start mb-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-[#FEEFCD] text-[#AD3029] font-bold text-lg flex items-center justify-center min-w-[2.5rem]">
+                                <div class="w-10 h-10 rounded-full bg-[#AD3029] text-white font-bold text-lg flex items-center justify-center min-w-[2.5rem]">
                                     ${shop.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div class="min-w-0">
@@ -1141,24 +1718,26 @@
                                     <p class="text-xs text-gray-500">ID: ...${shop.id.substr(-6)}</p>
                                 </div>
                             </div>
-                            <span class="bg-[#FEEFCD] text-[#AD3029] text-[10px] font-bold px-2 py-1 rounded border border-[#AD3029]/20 uppercase shrink-0">Active</span>
+                            <span class="inline-flex items-center gap-1 bg-[#AD3029]/10 text-[#AD3029] text-[10px] font-bold px-2 py-1 rounded-full border border-[#AD3029]/20 uppercase shrink-0">
+                                <span class="w-1.5 h-1.5 bg-[#AD3029] rounded-full animate-pulse"></span>Active
+                            </span>
                         </div>
                         
                         <div class="space-y-3 mb-6 bg-gray-50 p-4 rounded-lg flex-1">
                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <i class="fas fa-user-circle w-4 text-gray-400"></i>
+                                <i class="fas fa-user-circle w-4 text-[#AD3029]"></i>
                                 <span class="truncate">${shop.identityFullName || 'Unknown Owner'}</span>
                            </div>
                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <i class="fas fa-phone w-4 text-gray-400"></i>
+                                <i class="fas fa-phone w-4 text-[#AD3029]"></i>
                                 <span>${shop.phone}</span>
                            </div>
                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <i class="fas fa-map-marker-alt w-4 text-gray-400"></i>
+                                <i class="fas fa-map-marker-alt w-4 text-[#AD3029]"></i>
                                 <span class="truncate w-full block">${shop.address}</span>
                            </div>
                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <i class="fas fa-box w-4 text-gray-400"></i>
+                                <i class="fas fa-box w-4 text-[#AD3029]"></i>
                                 <span>${shop.productCount || 0} Products</span>
                            </div>
                         </div>
@@ -1169,7 +1748,7 @@
                     ? `<button onclick="deleteShop('${shop.id}')" class="w-full bg-white border border-red-200 text-red-600 hover:bg-red-50 font-bold py-2 rounded-lg text-sm transition text-center">
                                     <i class="fas fa-trash-alt mr-1"></i> Delete Shop
                                    </button>`
-                    : `<button class="w-full bg-[#FEEFCD]/50 text-[#AD3029] font-bold py-2 rounded-lg text-sm cursor-not-allowed text-center" disabled>
+                    : `<button class="w-full bg-[#AD3029] text-white font-bold py-2 rounded-lg text-sm cursor-not-allowed text-center opacity-90" disabled>
                                     <i class="fas fa-check-circle mr-1"></i> Running
                                    </button>`
                 }
@@ -1183,7 +1762,7 @@
         async function loadRejectedShops() {
             try {
                 const response = await fetch('http://localhost:8080/api/shop/admin/rejected', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1268,7 +1847,7 @@
             try {
                 // Fetch first 100 users (Paged API)
                 const response = await fetch('http://localhost:8080/api/admin/users?page=0&size=100', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1306,7 +1885,7 @@
                 <tr class="hover:bg-gray-50 transition">
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-[#FEEFCD] text-[#AD3029] font-bold text-lg flex items-center justify-center">
+                            <div class="w-10 h-10 rounded-full bg-[#AD3029] text-white font-bold text-lg flex items-center justify-center">
                                 ${user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
                             </div>
                             <div>
@@ -1321,14 +1900,17 @@
                     <td class="px-6 py-4">
                         <div class="flex flex-wrap gap-1">
                             ${roles.map(role => {
-                    const color = role === 'ROLE_ADMIN' ? 'bg-[#AD3029] text-white' : (role === 'ROLE_SELLER' ? 'bg-[#FEEFCD] text-[#AD3029]' : 'bg-gray-100 text-gray-700');
-                    return `<span class="${color} text-xs font-bold px-2 py-1 rounded border border-opacity-20">${role.replace('ROLE_', '')}</span>`;
+                    const color = role === 'ROLE_ADMIN' ? 'bg-[#AD3029] text-white' : (role === 'ROLE_SELLER' ? 'bg-[#AD3029]/10 text-[#AD3029] border border-[#AD3029]/30' : 'bg-gray-100 text-gray-700');
+                    return `<span class="${color} text-xs font-bold px-2 py-1 rounded">${role.replace('ROLE_', '')}</span>`;
                 }).join('')}
                         </div>
                     </td>
                     <td class="px-6 py-4">
-                         <span class="${active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'} text-xs font-bold px-2 py-1 rounded flex items-center w-fit gap-1">
-                            <i class="fas fa-circle text-[8px]"></i> ${active ? 'Active' : 'Locked'}
+                         <span class="${active
+                        ? 'bg-[#AD3029]/10 text-[#AD3029] border border-[#AD3029]/20'
+                        : 'bg-red-100 text-red-700 border border-red-200'} text-xs font-bold px-2 py-1 rounded-full flex items-center w-fit gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full ${active ? 'bg-[#AD3029] animate-pulse' : 'bg-red-500'}"></span>
+                            ${active ? 'Active' : 'Locked'}
                         </span>
                     </td>
                     <td class="px-6 py-4 text-right">
@@ -1374,7 +1956,7 @@
         async function openEditModal(userId) {
             try {
                 const response = await fetch(`http://localhost:8080/api/admin/users/${userId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1418,7 +2000,7 @@
                 const response = await fetch(`http://localhost:8080/api/admin/users/${userId}`, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        'Authorization': `Bearer ${localStorage.getItem("accessToken")}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(data)
@@ -1450,7 +2032,7 @@
             try {
                 const response = await fetch(`http://localhost:8080/api/admin/users/${userId}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1472,7 +2054,7 @@
         async function loadDashboardStats(days = 1) {
             try {
                 const response = await fetch(`http://localhost:8080/api/admin/dashboard/stats?days=${days}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1484,20 +2066,33 @@
                     document.getElementById('totalUsersCount').textContent = stats.totalUsers.toLocaleString();
                     document.getElementById('activeShopsCount').textContent = stats.activeShops.toLocaleString();
                     document.getElementById('totalDisputesCount').textContent = stats.totalDisputes.toLocaleString();
-
-
-                    // Update Operations Summary
-                    if (document.getElementById('openDisputesCount')) {
-                        document.getElementById('openDisputesCount').textContent = (stats.openDisputes || 0).toLocaleString();
-                    }
-                    if (document.getElementById('pendingShopsCountSummary')) {
-                        document.getElementById('pendingShopsCountSummary').textContent = (stats.pendingShops || 0).toLocaleString();
+                    if (document.getElementById('activeFlashSalesCount')) {
+                        document.getElementById('activeFlashSalesCount').textContent = (stats.activeFlashSales || 0).toLocaleString();
                     }
 
+                    if (document.getElementById('upcomingFlashCount')) {
+                        document.getElementById('upcomingFlashCount').textContent = (stats.upcomingFlashSales || 0).toLocaleString();
+                    }
+                    if (document.getElementById('pendingFlashRegsCount')) {
+                        document.getElementById('pendingFlashRegsCount').textContent = (stats.pendingFlashRegistrations || 0).toLocaleString();
+                    }
+                    if (document.getElementById('approvedFlashCount')) {
+                        document.getElementById('approvedFlashCount').textContent = (stats.approvedFlashSaleItems || 0).toLocaleString();
+                    }
+
+                    // Toggle Urgent Badge
+                    const urgentBadge = document.getElementById('urgentBadge');
+                    if (urgentBadge) {
+                        if (stats.urgentActionsCount > 0) {
+                            urgentBadge.classList.remove('hidden');
+                        } else {
+                            urgentBadge.classList.add('hidden');
+                        }
+                    }
 
                     // Update Chart with real trend data
                     if (stats.userTrend && stats.shopTrend) {
-                        updateRegistrationChart(stats.userTrend, stats.shopTrend);
+                        updateRegistrationChart(stats.userTrend, stats.shopTrend, stats.disputeTrend, stats.flashSaleTrend);
                     }
 
 
@@ -1531,8 +2126,8 @@
             if (!container) return;
 
 
-            const colors = ['bg-[#AD3029]', 'bg-orange-400', 'bg-yellow-400'];
-            const dotColors = ['bg-[#AD3029]', 'bg-orange-400', 'bg-yellow-100 border border-orange-200'];
+            const colors = ['bg-[#AD3029]', 'bg-[#AD3029]/60', 'bg-[#AD3029]/30'];
+            const dotColors = ['bg-[#AD3029]', 'bg-[#AD3029]/60', 'bg-[#AD3029]/30'];
 
 
             container.innerHTML = distribution.map((item, index) => {
@@ -1576,7 +2171,7 @@
                 <tr class="hover:bg-gray-50 transition">
                     <td class="px-4 py-3 font-medium text-[#AD3029]">${(index + 1).toString().padStart(2, '0')}</td>
                     <td class="px-4 py-3 flex items-center gap-3">
-                        <div class="w-8 h-8 bg-gray-200 rounded flex-shrink-0 flex items-center justify-center text-gray-400">
+                        <div class="w-8 h-8 bg-[#AD3029]/10 rounded flex-shrink-0 flex items-center justify-center text-[#AD3029]">
                              <i class="fas fa-box"></i>
                         </div>
                         <div>
@@ -1584,9 +2179,10 @@
                         </div>
                     </td>
                     <td class="px-4 py-3 font-medium">$${product.price.toLocaleString()}</td>
-                    <td class="px-4 py-3 text-green-600 font-bold">${product.sold} sold</td>
+                    <td class="px-4 py-3 text-[#AD3029] font-bold">${product.sold} sold</td>
                     <td class="px-4 py-3">
-                        <span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded uppercase">
+                        <span class="inline-flex items-center gap-1 bg-[#AD3029]/10 text-[#AD3029] text-xs font-bold px-2 py-1 rounded-full uppercase">
+                            <span class="w-1.5 h-1.5 bg-[#AD3029] rounded-full"></span>
                             ${product.status.replace('_', ' ')}
                         </span>
                     </td>
@@ -1596,6 +2192,130 @@
 
 
         // --- DISPUTES LOGIC ---
+        const disputeBuyerNameCache = new Map();
+        const disputeSellerShopCache = new Map();
+        const disputeOrderShopIdCache = new Map();
+
+        function shortenId(id, head = 8, tail = 4) {
+            const s = String(id || '').trim();
+            if (!s) return '—';
+            if (s.length <= head + tail + 3) return s;
+            return `${s.slice(0, head)}...${s.slice(-tail)}`;
+        }
+
+        async function fetchBuyerDisplayName(userId) {
+            const key = String(userId || '').trim();
+            if (!key) return null;
+            if (disputeBuyerNameCache.has(key)) return disputeBuyerNameCache.get(key);
+
+            try {
+                const res = await fetch(`http://localhost:8080/api/admin/users/${encodeURIComponent(key)}`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
+                });
+                if (!res.ok) throw new Error('buyer fetch failed');
+                const user = await res.json();
+                const name = (user.fullName || user.email || '').trim() || null;
+                disputeBuyerNameCache.set(key, name);
+                return name;
+            } catch (e) {
+                disputeBuyerNameCache.set(key, null);
+                return null;
+            }
+        }
+
+        async function fetchSellerShopName(shopId) {
+            const key = String(shopId || '').trim();
+            if (!key) return null;
+            if (disputeSellerShopCache.has(key)) return disputeSellerShopCache.get(key);
+
+            try {
+                const res = await fetch(`http://localhost:8080/api/shop/${encodeURIComponent(key)}`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
+                });
+                if (!res.ok) throw new Error('shop fetch failed');
+                const shop = await res.json();
+                const name = (shop.name || '').trim() || null;
+                disputeSellerShopCache.set(key, name);
+                return name;
+            } catch (e) {
+                disputeSellerShopCache.set(key, null);
+                return null;
+            }
+        }
+
+        async function fetchOrderShopId(orderId) {
+            const key = String(orderId || '').trim();
+            if (!key) return null;
+            if (disputeOrderShopIdCache.has(key)) return disputeOrderShopIdCache.get(key);
+
+            try {
+                const res = await fetch(`http://localhost:8080/api/orders/${encodeURIComponent(key)}`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
+                });
+                if (!res.ok) throw new Error('order fetch failed');
+                const order = await res.json();
+                const shopId = (order?.shopId || order?.shop?.id || '').trim() || null;
+                disputeOrderShopIdCache.set(key, shopId);
+                return shopId;
+            } catch (e) {
+                disputeOrderShopIdCache.set(key, null);
+                return null;
+            }
+        }
+
+        async function enrichDisputePartyNames(disputes) {
+            const buyerIds = [...new Set(disputes.map(d => d?.buyerId).filter(Boolean))];
+            const sellerIds = [...new Set(disputes.map(d => d?.sellerId).filter(Boolean))];
+            const missingSellerOrderIds = [...new Set(
+                disputes
+                    .filter(d => !d?.sellerId && d?.orderId)
+                    .map(d => d.orderId)
+                    .filter(Boolean)
+            )];
+
+            await Promise.all([
+                ...buyerIds.map(id => fetchBuyerDisplayName(id)),
+                ...sellerIds.map(id => fetchSellerShopName(id)),
+                ...missingSellerOrderIds.map(id => fetchOrderShopId(id))
+            ]);
+
+            const fallbackSellerIds = [...new Set(
+                missingSellerOrderIds
+                    .map(orderId => disputeOrderShopIdCache.get(String(orderId || '').trim()))
+                    .filter(Boolean)
+            )];
+
+            await Promise.all(fallbackSellerIds.map(id => fetchSellerShopName(id)));
+
+            return disputes.map(d => ({
+                ...(() => {
+                    const originalSellerId = String(d.sellerId || '').trim() || null;
+                    const fallbackSellerId = !originalSellerId
+                        ? (disputeOrderShopIdCache.get(String(d.orderId || '').trim()) || null)
+                        : null;
+                    const resolvedSellerId = originalSellerId || fallbackSellerId;
+                    return {
+                        resolvedSellerId,
+                        sellerDisplayName: resolvedSellerId
+                            ? (disputeSellerShopCache.get(String(resolvedSellerId).trim()) || null)
+                            : null
+                    };
+                })(),
+                ...d,
+                buyerDisplayName: disputeBuyerNameCache.get(String(d.buyerId || '').trim()) || null,
+                sellerDisplayName: (() => {
+                    const originalSellerId = String(d.sellerId || '').trim() || null;
+                    const fallbackSellerId = !originalSellerId
+                        ? (disputeOrderShopIdCache.get(String(d.orderId || '').trim()) || null)
+                        : null;
+                    const resolvedSellerId = originalSellerId || fallbackSellerId;
+                    return resolvedSellerId
+                        ? (disputeSellerShopCache.get(String(resolvedSellerId).trim()) || null)
+                        : null;
+                })()
+            }));
+        }
+
         async function loadDisputes() {
             const tableBody = document.getElementById('disputeTableBody');
             const loading = document.getElementById('disputeLoading');
@@ -1607,13 +2327,14 @@
 
             try {
                 const response = await fetch('http://localhost:8080/api/admin/disputes', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
                 if (response.ok) {
                     const disputes = await response.json();
-                    renderDisputes(disputes);
+                    const disputesWithNames = await enrichDisputePartyNames(disputes);
+                    renderDisputes(disputesWithNames);
                 } else {
                     showToast('Failed to load disputes', 'error');
                 }
@@ -1638,14 +2359,17 @@
                 <tr class="hover:bg-gray-50 transition">
                     <td class="px-6 py-4 font-mono text-xs text-gray-500">#${dispute.id.substring(0, 8)}</td>
                     <td class="px-6 py-4 font-medium text-gray-800">${dispute.orderId}</td>
-                    <td class="px-6 py-4">
-                        <div class="text-xs text-gray-500">B: ${dispute.buyerId}</div>
-                        <div class="text-xs text-gray-500">S: ${dispute.sellerId}</div>
+                    <td class="px-6 py-4 group">
+                        <div class="text-sm text-gray-800 font-medium">Buyer: ${dispute.buyerDisplayName || 'Người mua không xác định'}</div>
+                        <div class="text-sm text-gray-800 font-medium">Seller: ${dispute.sellerDisplayName || 'Chưa có shop'}</div>
+                        <div class="text-xs text-gray-400 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            ID: B ${shortenId(dispute.buyerId)} | S ${shortenId(dispute.resolvedSellerId || dispute.sellerId)}
+                        </div>
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-600">${dispute.reason}</td>
                     <td class="px-6 py-4">
                         <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusBadgeClass(dispute.status)}">
-                            ${dispute.status}
+                            ${dispute.status === 'OPEN' ? 'IN_REVIEW' : dispute.status}
                         </span>
                     </td>
                     <td class="px-6 py-4 text-right flex gap-2 justify-end">
@@ -1678,8 +2402,8 @@
 
             try {
                 const [disputeRes, imagesRes] = await Promise.all([
-                    fetch(`http://localhost:8080/api/disputes/${disputeId}`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                    fetch(`http://localhost:8080/api/disputes/${disputeId}/images`, { headers: { 'Authorization': `Bearer ${token}` } })
+                    fetch(`http://localhost:8080/api/disputes/${disputeId}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` } }),
+                    fetch(`http://localhost:8080/api/disputes/${disputeId}/images`, { headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` } })
                 ]);
                 if (!disputeRes.ok) throw new Error('Failed to load dispute');
                 const dispute = await disputeRes.json();
@@ -1688,7 +2412,7 @@
                 let order = null;
                 if (dispute.orderId) {
                     try {
-                        const orderRes = await fetch(`http://localhost:8080/api/orders/${dispute.orderId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                        const orderRes = await fetch(`http://localhost:8080/api/orders/${dispute.orderId}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` } });
                         if (orderRes.ok) order = await orderRes.json();
                     } catch (e) { console.warn('Order fetch failed:', e); }
                 }
@@ -1740,7 +2464,7 @@
                             <p><span class="text-gray-600">Buyer:</span> ${dispute.buyerId || '-'}</p>
                             <p><span class="text-gray-600">Lý do:</span> <span class="font-semibold text-[#AD3029]">${dispute.reason || '-'}</span></p>
                             <p><span class="text-gray-600">Mô tả:</span> ${dispute.description || '-'}</p>
-                            <p><span class="text-gray-600">Trạng thái:</span> <span class="px-2 py-1 rounded-full text-xs font-bold ${getStatusBadgeClass(dispute.status)}">${dispute.status}</span></p>
+                            <p><span class="text-gray-600">Trạng thái:</span> <span class="px-2 py-1 rounded-full text-xs font-bold ${getStatusBadgeClass(dispute.status)}">${dispute.status === 'OPEN' ? 'IN_REVIEW' : dispute.status}</span></p>
                             ${dispute.adminNote ? `<p><span class="text-gray-600">Ghi chú Admin:</span> ${dispute.adminNote}</p>` : ''}
                             <p><span class="text-gray-600">Ngày tạo:</span> ${dispute.createdAt ? new Date(dispute.createdAt).toLocaleString('vi-VN') : '-'}</p>
                         </div>
@@ -1841,7 +2565,7 @@
             try {
                 const response = await fetch(`http://localhost:8080/api/admin/disputes/${currentReviewDisputeId}/review`, {
                     method: 'PUT',
-                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)
                 });
                 if (response.ok) {
@@ -1863,7 +2587,7 @@
 
 
         // --- PRODUCTS LOGIC ---
-        async function loadProducts() {
+        async function loadProducts(sortBy = null) {
             const container = document.getElementById('productsList');
             if (!container) return;
 
@@ -1872,8 +2596,11 @@
 
 
             try {
-                const response = await fetch('http://localhost:8080/api/products', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                let url = 'http://localhost:8080/api/products';
+                if (sortBy) url += `?sort=${sortBy}`;
+
+                const response = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
 
@@ -1915,8 +2642,11 @@
                     <td class="px-6 py-4 text-gray-800 font-medium">$${(product.minPrice || 0).toLocaleString()}</td>
                     <td class="px-6 py-4 text-gray-600 max-w-[200px] truncate" title="${product.description || ''}">${product.description || 'N/A'}</td>
                     <td class="px-6 py-4">
-                        <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase 
-                            ${product.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}">
+                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold uppercase 
+                            ${product.status === 'ACTIVE'
+                    ? 'bg-[#AD3029]/10 text-[#AD3029] border border-[#AD3029]/20'
+                    : 'bg-gray-100 text-gray-700'}">
+                            ${product.status === 'ACTIVE' ? '<span class="w-1.5 h-1.5 bg-[#AD3029] rounded-full animate-pulse"></span>' : ''}
                             ${product.status}
                         </span>
                     </td>
@@ -1930,26 +2660,768 @@
 
 
 
-        async function deleteShop(id) {
-            if (!confirm("Are you sure you want to delete this shop? This action cannot be undone.")) return;
+        // --- FLASH SALE LOGIC ---
+        function showFlashSaleTab(tab) {
+            document.querySelectorAll('.fs-tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`fs-tab-${tab}`).classList.remove('hidden');
+
+            document.querySelectorAll('.fs-tab-btn').forEach(btn => {
+                btn.classList.remove('border-b-2', 'border-[#AD3029]', 'text-[#AD3029]', 'font-bold');
+                btn.classList.add('text-gray-500');
+            });
+            event.currentTarget.classList.add('border-b-2', 'border-[#AD3029]', 'text-[#AD3029]', 'font-bold');
+            event.currentTarget.classList.remove('text-gray-500');
+        }
+
+        async function loadFlashSaleData() {
+            await Promise.all([loadCampaigns(), loadRegistrations()]);
+        }
+
+        async function loadCampaigns() {
+            const container = document.getElementById('campaignsList');
+            // Only show loading if empty
+            if (!container.innerHTML.trim() || container.textContent.includes('No campaigns') || container.textContent.includes('Loading')) {
+                container.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin text-2xl"></i> Loading...</div>';
+            }
 
             try {
-                const response = await fetch(`http://localhost:8080/api/shop/admin/delete/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                const response = await fetch('http://localhost:8080/api/flash-sales/campaigns', {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
-
                 if (response.ok) {
-                    showToast("Shop deleted successfully!", "success");
-                    loadActiveShops();
+                    const campaigns = await response.json();
+                    renderCampaigns(campaigns);
                 } else {
-                    const text = await response.text();
-                    showToast(`Failed: ${text}`, "error");
+                    container.innerHTML = `<div class="col-span-3 text-center py-10 text-red-500">Failed to load campaigns. Status: ${response.status}</div>`;
                 }
             } catch (err) {
                 console.error(err);
-                showToast("Connection error", "error");
+                container.innerHTML = '<div class="col-span-3 text-center py-10 text-red-500">Connection error. Check console.</div>';
             }
+        }
+
+        async function renderCampaigns(campaigns) {
+            const container = document.getElementById('campaignsList');
+            if (campaigns.length === 0) {
+                container.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-500">No campaigns found.</div>';
+                return;
+            }
+
+            let html = '';
+            for (const campaign of campaigns) {
+                // Fetch slots for each campaign
+                let slotsHtml = '<p class="text-xs text-gray-400">Loading slots...</p>';
+                try {
+                    const sResp = await fetch(`http://localhost:8080/api/flash-sales/slots/${campaign.id}`, {
+                        headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
+                    });
+                    if (sResp.ok) {
+                        const slots = await sResp.json();
+                        slotsHtml = slots.map(s => `
+                            <div class="flex justify-between items-center text-xs bg-gray-50 p-2 rounded group">
+                                <span>${new Date(s.startTime).toLocaleString('vi-VN')}</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-[#AD3029]">${s.status}</span>
+                                    ${s.status === 'ONGOING' || s.status === 'ACTIVE' ? `
+                                        <button onclick="emergencyStopSlot('${s.id}')" class="text-orange-500 hover:bg-orange-50 p-1 rounded transition hidden group-hover:block" title="Emergency Stop Slot">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </button>
+                                    ` : ''}
+                                    <button onclick="deleteSlot('${s.id}')" class="text-gray-400 hover:text-red-500 hidden group-hover:block transition" title="Delete Slot">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('') || '<p class="text-xs text-gray-500 italic">No slots added</p>';
+                    }
+                } catch (e) { slotsHtml = 'Error loading slots'; }
+
+                // Xác định màu/border theo trạng thái campaign
+                const st = (campaign.status || '').toUpperCase();
+                const borderColor = st === 'ONGOING' ? 'border-l-4 border-l-[#AD3029]'
+                    : st === 'REGISTRATION_OPEN' ? 'border-l-4 border-l-green-500'
+                        : st === 'FINISHED' ? 'border-l-4 border-l-gray-300'
+                            : 'border-l-4 border-l-gray-200';
+
+                const statusBadge = st === 'ONGOING'
+                    ? `<span class="inline-flex items-center gap-1 bg-[#AD3029] text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase">
+                           <span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>ONGOING
+                       </span>`
+                    : st === 'REGISTRATION_OPEN'
+                        ? `<span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-full uppercase">✅ OPEN</span>`
+                        : st === 'FINISHED'
+                            ? `<span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-1 rounded-full uppercase">🏁 FINISHED</span>`
+                            : `<span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-1 rounded-full uppercase">${campaign.status}</span>`;
+
+                html += `
+                    <div class="bg-white rounded-2xl border border-gray-100 ${borderColor} shadow-sm p-6 hover:shadow-md transition relative group">
+                        <!-- Admin Actions -->
+                         <div class="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                            <button onclick="openEditCampaignModal('${campaign.id}', '${encodeURIComponent(campaign.name)}', '${encodeURIComponent(campaign.description || '')}', '${campaign.startDate}', '${campaign.endDate}', ${campaign.minDiscountPercentage || 10}, ${campaign.minStockPerProduct || 5}, '${campaign.registrationDeadline || ''}', '${campaign.approvalDeadline || ''}')" 
+                                class="text-blue-500 hover:bg-blue-50 p-1 rounded">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            ${campaign.status === 'ONGOING' || campaign.status === 'REGISTRATION_OPEN' ? `
+                                <button onclick="emergencyStopCampaign('${campaign.id}')" 
+                                    class="text-orange-600 hover:bg-orange-50 p-1 rounded font-bold" title="Emergency Stop Campaign">
+                                    <i class="fas fa-hand-paper"></i>
+                                </button>
+                            ` : ''}
+                            <button onclick="deleteCampaign('${campaign.id}')" 
+                                class="text-red-500 hover:bg-red-50 p-1 rounded">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+
+                        <div class="flex justify-between items-start mb-4 pr-16">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800">${campaign.name}</h3>
+                                <p class="text-xs text-gray-500 line-clamp-2" title="${campaign.description || ''}">${campaign.description || ''}</p>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                             <div class="text-xs text-gray-500 flex flex-col gap-2">
+                                <span class="flex items-center gap-1"><i class="far fa-calendar-alt w-4 text-[#AD3029]"></i> ${new Date(campaign.startDate).toLocaleDateString('vi-VN')} - ${new Date(campaign.endDate).toLocaleDateString('vi-VN')}</span>
+                                ${statusBadge}
+                             </div>
+                        </div>
+
+                        <div class="space-y-2 mb-6">
+                            <h4 class="text-xs font-bold text-[#AD3029] uppercase tracking-wider"><i class="fas fa-bolt mr-1"></i>Time Slots</h4>
+                            <div class="max-h-32 overflow-y-auto space-y-1">
+                                ${slotsHtml}
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="openCreateSlotModal('${campaign.id}')" class="flex-1 text-xs border border-[#AD3029] text-[#AD3029] py-2 rounded-lg font-bold hover:bg-[#AD3029] hover:text-white transition">Add Slot</button>
+                            <button onclick="openCampaignDetailsModal('${campaign.id}')" class="flex-1 text-xs bg-gray-50 text-gray-600 py-2 rounded-lg font-bold hover:bg-gray-100">Details</button>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        async function loadRegistrations() {
+            const tableBody = document.getElementById('registrationsTableBody');
+            tableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-10 text-center text-gray-500"><i class="fas fa-spinner fa-spin text-2xl"></i> Loading registrations...</td></tr>';
+
+            try {
+                const response = await fetch('http://localhost:8080/api/flash-sales/registrations/status/PENDING', {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
+                });
+                if (response.ok) {
+                    const registrations = await response.json();
+                    renderRegistrations(registrations);
+                } else {
+                    tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-10 text-center text-red-500">Failed to load registrations. Status: ${response.status}</td></tr>`;
+                }
+            } catch (err) {
+                console.error(err);
+                tableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-10 text-center text-red-500">Connection error. Check console.</td></tr>';
+            }
+        }
+
+        function parseVnDateTime(dateStr) {
+            if (!dateStr) return null;
+            const clean = String(dateStr).replace('Z', '').trim();
+            const [datePart, timePart = '00:00:00'] = clean.split('T');
+            if (!datePart) return null;
+            const [year, month, day] = datePart.split('-').map(Number);
+            const [hour, minute, second = 0] = timePart.split(':').map(Number);
+            if ([year, month, day, hour, minute, second].some(Number.isNaN)) return null;
+            return new Date(Date.UTC(year, month - 1, day, hour - 7, minute, second));
+        }
+
+        function formatVnDateTime(date) {
+            if (!date || Number.isNaN(date.getTime())) return '-';
+            return date.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+        }
+
+        function renderRegistrations(registrations) {
+            const tableBody = document.getElementById('registrationsTableBody');
+            if (registrations.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-16 text-center">
+                    <div class="flex flex-col items-center gap-3">
+                        <span class="w-14 h-14 bg-[#AD3029]/10 rounded-full flex items-center justify-center text-[#AD3029] text-2xl"><i class="fas fa-bolt"></i></span>
+                        <p class="text-gray-500 font-medium">No pending registrations found.</p>
+                        <p class="text-xs text-gray-400">Seller registrations will appear here for review.</p>
+                    </div>
+                </td></tr>`;
+                return;
+            }
+
+            const now = new Date();
+            tableBody.innerHTML = registrations.map(reg => {
+                const approvalDeadline = reg.approvalDeadline
+                    ? parseVnDateTime(reg.approvalDeadline)
+                    : null;
+                const isApprovalExpired = approvalDeadline && now > approvalDeadline;
+
+                // Product image: dùng ảnh thực nếu có, fallback về icon
+                const productImgHtml = reg.productImage
+                    ? `<img src="${reg.productImage}" alt="product" class="w-12 h-12 object-cover rounded-lg border border-gray-100 flex-shrink-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                       <div class="w-12 h-12 bg-gray-100 rounded-lg items-center justify-center text-gray-400 flex-shrink-0 hidden" style="display:none"><i class="fas fa-box"></i></div>`
+                    : `<div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 flex-shrink-0"><i class="fas fa-box"></i></div>`;
+
+                // Product name: dùng tên thực nếu có, fallback về ID rút gọn
+                const productName = reg.productName || ('ID: ' + reg.productId.substring(0, 8) + '...');
+                const variantLabel = reg.variantName && reg.variantName.trim()
+                    ? reg.variantName.trim()
+                    : (reg.variantId ? reg.variantId.substring(0, 8) + '...' : 'N/A');
+
+                // Shop
+                const shopLabel = reg.shopName || (reg.shopId ? reg.shopId.substring(0, 8) + '...' : '—');
+
+                // Campaign
+                const campaignLabel = reg.campaignName || '—';
+
+                return `
+                <tr class="hover:bg-gray-50 transition ${isApprovalExpired ? 'bg-red-50/30' : ''}">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            ${productImgHtml}
+                            <div>
+                                <p class="font-bold text-gray-800">${productName}</p>
+                                <p class="text-xs text-gray-500">Variant: ${variantLabel}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div>
+                            <p class="text-xs text-gray-500 font-mono">${shopLabel}</p>
+                            <p class="text-xs font-semibold text-[#AD3029] mt-0.5">⚡ ${campaignLabel}</p>
+                            ${reg.slotStartTime ? `<p class="text-[10px] text-gray-400 mt-0.5">🕐 ${formatVnDateTime(parseVnDateTime(reg.slotStartTime))} → ${reg.slotEndTime ? formatVnDateTime(parseVnDateTime(reg.slotEndTime)) : '?'}</p>` : ''}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 font-medium text-gray-800">₫${reg.salePrice.toLocaleString()}</td>
+                    <td class="px-6 py-4 text-gray-600">${reg.saleStock}</td>
+                    <td class="px-6 py-4">
+                         <span class="${reg.status === 'PENDING'
+                        ? 'bg-[#AD3029]/10 text-[#AD3029] border border-[#AD3029]/20'
+                        : reg.status === 'APPROVED' ? 'bg-green-100 text-green-700'
+                            : 'bg-red-100 text-red-700'} text-[10px] font-bold px-2 py-1 rounded-full uppercase inline-flex items-center gap-1">
+                            ${reg.status === 'PENDING' ? '<span class="w-1.5 h-1.5 bg-[#AD3029] rounded-full animate-pulse"></span>' : ''}
+                            ${reg.status}
+                        </span>
+                        ${approvalDeadline ? `<p class="text-[10px] mt-1 ${isApprovalExpired ? 'text-red-500 font-bold' : 'text-gray-400'}">Approve by: ${formatVnDateTime(approvalDeadline)}${isApprovalExpired ? ' ⚠️ EXPIRED' : ''}</p>` : ''}
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex items-center justify-end gap-2">
+                            ${isApprovalExpired
+                        ? `<span class="text-[10px] bg-red-100 text-red-500 font-bold px-2 py-1 rounded" title="Approval deadline has passed">🔒 Expired</span>`
+                        : `<button onclick="reviewRegistration('${reg.id}', 'APPROVED')" class="text-[#AD3029] hover:bg-[#AD3029]/10 p-2 rounded-lg transition" title="Approve"><i class="fas fa-check"></i></button>`
+                    }
+                            <button onclick="reviewRegistration('${reg.id}', 'REJECTED')" class="text-red-600 hover:bg-red-50 p-2 rounded-lg transition" title="Reject">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        async function reviewRegistration(id, status) {
+            let note = '';
+            if (status === 'REJECTED') {
+                note = prompt("Please enter rejection reason:");
+                if (note === null) return;
+            } else {
+                note = "Approved by Admin";
+            }
+
+            try {
+                const response = await fetch(`http://localhost:8080/api/flash-sales/registrations/${id}/approve`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status, adminNote: note })
+                });
+                if (response.ok) {
+                    showToast(`Registration ${status.toLowerCase()}!`, 'success');
+                    loadRegistrations();
+                } else {
+                    const errText = await response.text();
+                    showToast(errText || `Không thể ${status === 'APPROVED' ? 'duyệt' : 'từ chối'}: Lỗi server`, 'error');
+                }
+            } catch (err) { showToast('Error processing registration', 'error'); }
+        }
+
+        function openCreateCampaignModal() {
+            document.getElementById('createCampaignModal').classList.remove('hidden');
+        }
+
+        function toggleFSCustomInput(type) {
+            const select = document.getElementById(`fs-campaign-${type}-select`);
+            const custom = document.getElementById(`fs-campaign-${type}-custom`);
+            if (select.value === 'custom') {
+                custom.classList.remove('hidden');
+                custom.focus();
+            } else {
+                custom.classList.add('hidden');
+            }
+        }
+
+        function validateCampaignTimelineOnAdmin(startDate, endDate, registrationDeadline, approvalDeadline, options = {}) {
+            const { enforceFutureRegistrationDeadline = true } = options;
+            const now = new Date();
+
+            if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+                showToast('Please enter valid start/end date time', 'error');
+                return false;
+            }
+            if (endDate <= startDate) {
+                showToast('Campaign end date must be after start date', 'error');
+                return false;
+            }
+            if (registrationDeadline) {
+                if (enforceFutureRegistrationDeadline && registrationDeadline < now) {
+                    showToast('Registration deadline cannot be in the past', 'error');
+                    return false;
+                }
+                if (registrationDeadline > startDate) {
+                    showToast('Registration deadline must be on or before campaign start date', 'error');
+                    return false;
+                }
+            }
+            if (approvalDeadline) {
+                if (approvalDeadline > startDate) {
+                    showToast('Approval deadline must be on or before campaign start date', 'error');
+                    return false;
+                }
+                if (registrationDeadline && approvalDeadline < registrationDeadline) {
+                    showToast('Approval deadline must be after or equal to registration deadline', 'error');
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        async function submitCreateCampaign() {
+            let name = document.getElementById('fs-campaign-name-select').value;
+            if (name === 'custom') name = document.getElementById('fs-campaign-name-custom').value;
+            if (!name) { showToast('Please select or enter a campaign name', 'error'); return; }
+
+            let description = document.getElementById('fs-campaign-desc-select').value;
+            if (description === 'custom') description = document.getElementById('fs-campaign-desc-custom').value;
+
+            const startDate = new Date(document.getElementById('fs-campaign-start').value);
+            const endDate = new Date(document.getElementById('fs-campaign-end').value);
+            const registrationDeadline = document.getElementById('fs-campaign-reg-deadline').value
+                ? new Date(document.getElementById('fs-campaign-reg-deadline').value)
+                : null;
+            const approvalDeadline = document.getElementById('fs-campaign-app-deadline').value
+                ? new Date(document.getElementById('fs-campaign-app-deadline').value)
+                : null;
+
+            if (!validateCampaignTimelineOnAdmin(startDate, endDate, registrationDeadline, approvalDeadline, {
+                enforceFutureRegistrationDeadline: true
+            })) {
+                return;
+            }
+
+            const data = {
+                name: name,
+                description: description,
+                startDate: document.getElementById('fs-campaign-start').value + ':00',
+                endDate: document.getElementById('fs-campaign-end').value + ':00',
+                minDiscountPercentage: parseInt(document.getElementById('fs-campaign-min-discount').value) || 10,
+                minStockPerProduct: parseInt(document.getElementById('fs-campaign-min-stock').value) || 5,
+                registrationDeadline: document.getElementById('fs-campaign-reg-deadline').value ? document.getElementById('fs-campaign-reg-deadline').value + ':00' : null,
+                approvalDeadline: document.getElementById('fs-campaign-app-deadline').value ? document.getElementById('fs-campaign-app-deadline').value + ':00' : null
+            };
+            try {
+                const response = await fetch('http://localhost:8080/api/flash-sales/campaigns', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (response.ok) {
+                    showToast('Campaign created!', 'success');
+                    document.getElementById('createCampaignModal').classList.add('hidden');
+                    loadCampaigns();
+                } else {
+                    const errorText = await response.text();
+                    showToast(errorText || `Failed to create campaign (Status ${response.status})`, 'error');
+                }
+            } catch (err) { showToast('Error creating campaign', 'error'); }
+        }
+
+        function openCreateSlotModal(campaignId) {
+            document.getElementById('fs-slot-campaign-id').value = campaignId;
+            document.getElementById('createSlotModal').classList.remove('hidden');
+        }
+
+        async function submitCreateSlot() {
+            const startRaw = document.getElementById('fs-slot-start').value;
+            const endRaw = document.getElementById('fs-slot-end').value;
+            if (!startRaw || !endRaw) {
+                showToast('Please choose both start and end time', 'error');
+                return;
+            }
+
+            const startDate = new Date(startRaw);
+            const endDate = new Date(endRaw);
+            if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+                showToast('Invalid date/time format', 'error');
+                return;
+            }
+            if (endDate <= startDate) {
+                showToast('End time must be after start time', 'error');
+                return;
+            }
+
+            const data = {
+                campaignId: document.getElementById('fs-slot-campaign-id').value,
+                startTime: startRaw + ':00',
+                endTime: endRaw + ':00'
+            };
+            try {
+                const response = await fetch('http://localhost:8080/api/flash-sales/slots', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (response.ok) {
+                    showToast('Slot added!', 'success');
+                    document.getElementById('createSlotModal').classList.add('hidden');
+                    loadCampaigns();
+                } else {
+                    const errorText = await response.text();
+                    showToast(errorText || `Failed to add slot (Status ${response.status})`, 'error');
+                }
+            } catch (err) { showToast('Error adding slot', 'error'); }
+        }
+
+        async function emergencyStopCampaign(id) {
+            if (!confirm('CRITICAL: This will halt all active slots in this campaign and revert item prices! Proceed?')) return;
+            try {
+                const response = await fetch(`http://localhost:8080/api/flash-sales/campaigns/${id}/emergency-stop`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
+                });
+                if (response.ok) {
+                    showToast('Emergency Stop executed for Campaign', 'success');
+                    loadCampaigns();
+                } else {
+                    showToast('Failed to execute Emergency Stop', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Connection error', 'error');
+            }
+        }
+
+        async function emergencyStopSlot(id) {
+            if (!confirm('This will deactivate this slot and revert product prices. Proceed?')) return;
+            try {
+                const response = await fetch(`http://localhost:8080/api/flash-sales/slots/${id}/emergency-stop`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
+                });
+                if (response.ok) {
+                    showToast('Emergency Stop executed for Slot', 'success');
+                    loadCampaigns();
+                } else {
+                    showToast('Failed to execute Emergency Stop', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Connection error', 'error');
+            }
+        }
+
+        // --- ADMIN ENHANCEMENTS ---
+        async function deleteCampaign(id) {
+            if (!confirm('Are you sure you want to delete this campaign? All slots and items will be deleted.')) return;
+            try {
+                const res = await fetch(`http://localhost:8080/api/flash-sales/campaigns/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
+                });
+                if (res.ok) {
+                    showToast('Campaign deleted', 'success');
+                    loadCampaigns();
+                } else showToast('Failed to delete campaign', 'error');
+            } catch (e) { showToast('Error deleting campaign', 'error'); }
+        }
+
+        async function deleteSlot(id) {
+            if (!confirm('Delete this time slot?')) return;
+            try {
+                const res = await fetch(`http://localhost:8080/api/flash-sales/slots/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
+                });
+                if (res.ok) {
+                    showToast('Slot deleted', 'success');
+                    loadCampaigns(); // Refresh to update slot list
+                } else showToast('Failed to delete slot', 'error');
+            } catch (e) { showToast('Error deleting slot', 'error'); }
+        }
+
+        function toLocalDatetime(isoString) {
+            if (!isoString) return '';
+            // Dates from API are now in Vietnam time — just slice for datetime-local input
+            const str = String(isoString).replace('Z', '');
+            return str.slice(0, 16);
+        }
+
+        function openEditCampaignModal(id, name, desc, start, end, minDiscount, minStock, regDeadline, appDeadline) {
+            document.getElementById('edit-campaign-id').value = id;
+            document.getElementById('edit-campaign-name').value = decodeURIComponent(name);
+            document.getElementById('edit-campaign-desc').value = decodeURIComponent(desc);
+            document.getElementById('edit-campaign-start').value = toLocalDatetime(start);
+            document.getElementById('edit-campaign-end').value = toLocalDatetime(end);
+
+            document.getElementById('edit-campaign-min-discount').value = minDiscount || 10;
+            document.getElementById('edit-campaign-min-stock').value = minStock || 5;
+
+            document.getElementById('edit-campaign-reg-deadline').value = toLocalDatetime(regDeadline);
+            document.getElementById('edit-campaign-app-deadline').value = toLocalDatetime(appDeadline);
+
+            document.getElementById('editCampaignModal').classList.remove('hidden');
+        }
+
+        async function submitEditCampaign() {
+            const id = document.getElementById('edit-campaign-id').value;
+
+            const startDate = new Date(document.getElementById('edit-campaign-start').value);
+            const endDate = new Date(document.getElementById('edit-campaign-end').value);
+            const registrationDeadline = document.getElementById('edit-campaign-reg-deadline').value
+                ? new Date(document.getElementById('edit-campaign-reg-deadline').value)
+                : null;
+            const approvalDeadline = document.getElementById('edit-campaign-app-deadline').value
+                ? new Date(document.getElementById('edit-campaign-app-deadline').value)
+                : null;
+
+            if (!validateCampaignTimelineOnAdmin(startDate, endDate, registrationDeadline, approvalDeadline, {
+                enforceFutureRegistrationDeadline: false
+            })) {
+                return;
+            }
+
+            const data = {
+                name: document.getElementById('edit-campaign-name').value,
+                description: document.getElementById('edit-campaign-desc').value,
+                startDate: document.getElementById('edit-campaign-start').value + ':00',
+                endDate: document.getElementById('edit-campaign-end').value + ':00',
+                minDiscountPercentage: parseInt(document.getElementById('edit-campaign-min-discount').value) || 10,
+                minStockPerProduct: parseInt(document.getElementById('edit-campaign-min-stock').value) || 5,
+                registrationDeadline: document.getElementById('edit-campaign-reg-deadline').value ? document.getElementById('edit-campaign-reg-deadline').value + ':00' : null,
+                approvalDeadline: document.getElementById('edit-campaign-app-deadline').value ? document.getElementById('edit-campaign-app-deadline').value + ':00' : null
+            };
+            try {
+                const res = await fetch(`http://localhost:8080/api/flash-sales/campaigns/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    showToast('Campaign updated', 'success');
+                    document.getElementById('editCampaignModal').classList.add('hidden');
+                    loadCampaigns();
+                } else {
+                    const errorText = await res.text();
+                    showToast(errorText || `Failed to update campaign (Status ${res.status})`, 'error');
+                }
+            } catch (e) { showToast('Error updating campaign', 'error'); }
+        }
+
+        let campaignDetailsRefreshInterval = null;
+        let activeCampaignDetailsId = null;
+
+        function syncCampaignMonitorVisibility() {
+            const monitor = document.getElementById('campaignDetailsMonitor');
+            const badge = document.getElementById('campaignDetailsStatusBadge');
+            const subtitle = document.getElementById('campaignDetailsMonitorSubtitle');
+            if (!monitor || !badge || !subtitle) return;
+            if (STRESS_MONITOR_ENABLED) {
+                monitor.classList.remove('hidden');
+                subtitle.classList.remove('hidden');
+            } else {
+                monitor.classList.add('hidden');
+                badge.classList.add('hidden');
+                subtitle.classList.add('hidden');
+            }
+        }
+
+        function closeCampaignDetailsModal() {
+            activeCampaignDetailsId = null;
+            if (campaignDetailsRefreshInterval) {
+                clearInterval(campaignDetailsRefreshInterval);
+                campaignDetailsRefreshInterval = null;
+            }
+            document.getElementById('campaignDetailsModal').classList.add('hidden');
+        }
+
+        function formatMonitorNumber(value) {
+            return Number(value || 0).toLocaleString();
+        }
+
+        function resetCampaignMonitor(message = 'Waiting for requests...') {
+            if (!STRESS_MONITOR_ENABLED) {
+                return;
+            }
+            document.getElementById('campaignDetailsTotalRequests').textContent = '0';
+            document.getElementById('campaignDetailsSuccess').textContent = '0';
+            document.getElementById('campaignDetailsOutOfStock').textContent = '0';
+            document.getElementById('campaignDetailsError').textContent = '0';
+            document.getElementById('campaignDetailsAvgResponse').textContent = '0 ms';
+            document.getElementById('campaignDetailsIntegrity').textContent = 'PASS';
+            document.getElementById('campaignDetailsIntegrity').className = 'text-2xl font-extrabold text-green-600 mt-2';
+            document.getElementById('campaignDetailsProgressLabel').textContent = 'Sold 0 / 0';
+            document.getElementById('campaignDetailsRemainingLabel').textContent = 'Remaining 0';
+            document.getElementById('campaignDetailsProgressBar').style.width = '0%';
+            document.getElementById('campaignDetailsMonitorStatus').textContent = 'IDLE';
+            document.getElementById('campaignDetailsStartedAt').textContent = '-';
+            document.getElementById('campaignDetailsLastRequestAt').textContent = '-';
+            document.getElementById('campaignDetailsSlotMeta').textContent = message;
+            const badge = document.getElementById('campaignDetailsStatusBadge');
+            badge.textContent = 'IDLE';
+            badge.className = 'text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide bg-gray-100 text-gray-600';
+            document.getElementById('campaignDetailsMonitorSubtitle').textContent = 'Flash Sale monitor auto refreshes every second while this popup is open.';
+        }
+
+        function renderCampaignMonitor(data) {
+            if (!STRESS_MONITOR_ENABLED) {
+                return;
+            }
+            const totalRequests = Number(data.totalRequests || 0);
+            const successCount = Number(data.successCount || 0);
+            const outOfStockCount = Number(data.outOfStockCount || 0);
+            const errorCount = Number(data.errorCount || 0);
+            const avgResponseMs = Number(data.avgResponseMs || 0);
+            const totalSaleStock = Number(data.totalSaleStock || 0);
+            const totalSold = Number(data.totalSold || 0);
+            const totalRemainingStock = Number(data.totalRemainingStock || 0);
+            const soldPercentage = Number(data.soldPercentage || 0);
+            const monitorStatus = data.monitorStatus || 'IDLE';
+            const badge = document.getElementById('campaignDetailsStatusBadge');
+            const integrityEl = document.getElementById('campaignDetailsIntegrity');
+            const integrityPassed = !!data.integrityCheckPassed;
+            const slotShortId = data.flashSaleId ? `...${String(data.flashSaleId).slice(-6)}` : 'N/A';
+
+            document.getElementById('campaignDetailsTotalRequests').textContent = formatMonitorNumber(totalRequests);
+            document.getElementById('campaignDetailsSuccess').textContent = formatMonitorNumber(successCount);
+            document.getElementById('campaignDetailsOutOfStock').textContent = formatMonitorNumber(outOfStockCount);
+            document.getElementById('campaignDetailsError').textContent = formatMonitorNumber(errorCount);
+            document.getElementById('campaignDetailsAvgResponse').textContent = `${formatMonitorNumber(avgResponseMs)} ms`;
+            integrityEl.textContent = integrityPassed ? 'PASS' : 'FAIL';
+            integrityEl.className = `text-2xl font-extrabold mt-2 ${integrityPassed ? 'text-green-600' : 'text-[#AD3029]'}`;
+            document.getElementById('campaignDetailsProgressLabel').textContent = `Sold ${formatMonitorNumber(totalSold)} / ${formatMonitorNumber(totalSaleStock)}`;
+            document.getElementById('campaignDetailsRemainingLabel').textContent = `Remaining ${formatMonitorNumber(totalRemainingStock)}`;
+            document.getElementById('campaignDetailsProgressBar').style.width = `${Math.max(0, Math.min(100, soldPercentage))}%`;
+            document.getElementById('campaignDetailsMonitorStatus').textContent = monitorStatus;
+            document.getElementById('campaignDetailsStartedAt').textContent = data.monitorStartedAt || '-';
+            document.getElementById('campaignDetailsLastRequestAt').textContent = data.lastRequestAt || '-';
+            document.getElementById('campaignDetailsSlotMeta').textContent = `Monitoring slot ${slotShortId} � ${data.flashSaleStatus || 'UNKNOWN'} � min/max ${formatMonitorNumber(data.minResponseMs || 0)} / ${formatMonitorNumber(data.maxResponseMs || 0)} ms`;
+            document.getElementById('campaignDetailsMonitorSubtitle').textContent = totalRequests > 0
+                ? 'Live stress-test monitor sourced from server-side flash sale metrics.'
+                : 'Flash Sale monitor auto refreshes every second while this popup is open.';
+
+            badge.textContent = monitorStatus;
+            badge.className = `text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide ${monitorStatus === 'LIVE' ? 'bg-red-50 text-[#AD3029] border border-[#AD3029]/20' : 'bg-gray-100 text-gray-600'}`;
+        }
+
+        function renderCampaignItems(items) {
+            const tbody = document.getElementById('campaignDetailsBody');
+            if (!items || items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-500">No items registered in this campaign yet.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = items.map(item => {
+                const isSoldOut = item.remainingStock !== null && item.remainingStock !== undefined && Number(item.remainingStock) <= 0;
+                const displayStatus = isSoldOut ? 'SOLD OUT' : (item.status || 'UNKNOWN');
+                const statusColor = isSoldOut ? 'bg-gray-200 text-gray-700'
+                    : item.status === 'APPROVED' ? 'bg-green-100 text-green-700'
+                        : item.status === 'REJECTED' ? 'bg-red-100 text-red-700'
+                            : 'bg-yellow-100 text-yellow-700';
+                return `
+                        <tr class="border-b border-gray-50 last:border-0 hover:bg-gray-50">
+                            <td class="py-3 flex items-center gap-2">
+                                <img src="${item.productImage || 'https://via.placeholder.com/32'}" class="w-8 h-8 rounded object-cover" onerror="this.src='https://via.placeholder.com/32'">
+                                <span class="truncate max-w-[150px]" title="${item.productName || ''}">${item.productName || 'N/A'}</span>
+                            </td>
+                            <td class="py-3 text-gray-500">${item.variantName || 'N/A'}</td>
+                            <td class="py-3 text-gray-400 line-through">₫${item.originalPrice ? item.originalPrice.toLocaleString() : 'N/A'}</td>
+                            <td class="py-3 text-[#AD3029] font-bold">₫${item.salePrice.toLocaleString()}</td>
+                            <td class="py-3">
+                                <span class="${isSoldOut ? 'text-red-600' : 'text-gray-800'} font-bold">${item.remainingStock ?? '-'}</span>
+                                <span class="text-gray-400 text-xs">/ ${item.saleStock ?? '-'}</span>
+                            </td>
+                            <td class="py-3">
+                                <span class="text-[10px] font-bold px-2 py-1 rounded uppercase ${statusColor}">${displayStatus}</span>
+                            </td>
+                        </tr>
+                    `;
+            }).join('');
+        }
+
+        async function refreshCampaignDetailsModal(id) {
+            const tbody = document.getElementById('campaignDetailsBody');
+            const headers = { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` };
+            try {
+                const itemsRes = await fetch(`http://localhost:8080/api/flash-sales/campaigns/${id}/items`, { headers });
+
+                if (activeCampaignDetailsId !== id) {
+                    return;
+                }
+
+                if (itemsRes.ok) {
+                    renderCampaignItems(await itemsRes.json());
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-red-500">Failed to load details (${itemsRes.status}).</td></tr>`;
+                }
+
+                if (!STRESS_MONITOR_ENABLED) {
+                    return;
+                }
+
+                const monitorRes = await fetch(`http://localhost:8080/api/flash-sales/campaigns/${id}/monitor`, { headers, cache: 'no-store' });
+                if (activeCampaignDetailsId !== id) {
+                    return;
+                }
+                if (monitorRes.ok) {
+                    renderCampaignMonitor(await monitorRes.json());
+                } else {
+                    resetCampaignMonitor(`Monitor unavailable (${monitorRes.status}).`);
+                }
+            } catch (e) {
+                console.error(e);
+                if (activeCampaignDetailsId === id) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-red-500">Connection error.</td></tr>';
+                    if (STRESS_MONITOR_ENABLED) {
+                        resetCampaignMonitor('Connection error while loading monitor.');
+                    }
+                }
+            }
+        }
+
+        async function openCampaignDetailsModal(id) {
+            const modal = document.getElementById('campaignDetailsModal');
+            const tbody = document.getElementById('campaignDetailsBody');
+            activeCampaignDetailsId = id;
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>';
+            syncCampaignMonitorVisibility();
+            resetCampaignMonitor();
+            modal.classList.remove('hidden');
+
+            if (campaignDetailsRefreshInterval) {
+                clearInterval(campaignDetailsRefreshInterval);
+            }
+
+            await refreshCampaignDetailsModal(id);
+            if (!STRESS_MONITOR_ENABLED) {
+                return;
+            }
+            campaignDetailsRefreshInterval = setInterval(() => {
+                if (!activeCampaignDetailsId) {
+                    clearInterval(campaignDetailsRefreshInterval);
+                    campaignDetailsRefreshInterval = null;
+                    return;
+                }
+                refreshCampaignDetailsModal(id);
+            }, 1000);
         }
     </script>
     <script src="js/notification.js"></script>
@@ -1957,3 +3429,13 @@
 
 
 </html>
+
+
+
+
+
+
+
+
+
+

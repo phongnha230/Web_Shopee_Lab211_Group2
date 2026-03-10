@@ -1,7 +1,8 @@
 ========== DATABASE INSPECTION START ==========
-Total Shops Found: 3
-Total Products Found: 25
+Total Shops Found: 4
+Total Products Found: 27
 Shop: 'Arina' (ID: 697d92b28929569335e85fe5) has 5 products
-Shop: 'PaPaPee' (ID: 6987fca7fe6fb0680294ed8a) has 8 products
+Shop: 'PaPaPee' (ID: 6987fca7fe6fb0680294ed8a) has 9 products
 Shop: 'bibabibo' (ID: 699dd706f26f2f45cbf60ade) has 0 products
+Shop: 'Ngoc Nga Shop' (ID: 69b00ef1aa4b1a3f03c370b0) has 1 products
 ========== DATABASE INSPECTION END ==========

@@ -14,21 +14,29 @@ import java.util.List;
 @AllArgsConstructor
 public class FlashSaleStatsResponse {
 
-    // === Tổng quan chiến dịch ===
     private String flashSaleId;
     private String campaignId;
-    private String flashSaleStatus; // ONGOING, ENDED, UPCOMING
+    private String flashSaleStatus;
     private String startTime;
     private String endTime;
 
-    // === Thống kê tổng ===
-    private int totalItems; // Tổng sản phẩm trong flash sale
-    private int totalSaleStock; // Tổng stock phân bổ cho flash sale
-    private int totalRemainingStock; // Tổng stock còn lại
-    private int totalSold; // Tổng đã bán = totalSaleStock - totalRemainingStock
-    private double soldPercentage; // % đã bán
+    private int totalItems;
+    private int totalSaleStock;
+    private int totalRemainingStock;
+    private int totalSold;
+    private double soldPercentage;
+    private long totalRequests;
+    private long successCount;
+    private long outOfStockCount;
+    private long errorCount;
+    private long avgResponseMs;
+    private long minResponseMs;
+    private long maxResponseMs;
+    private boolean integrityCheckPassed;
+    private String monitorStatus;
+    private String monitorStartedAt;
+    private String lastRequestAt;
 
-    // === Chi tiết từng sản phẩm ===
     private List<ItemStats> items;
 
     @Data
@@ -45,6 +53,6 @@ public class FlashSaleStatsResponse {
         private int remainingStock;
         private int sold;
         private double soldPercentage;
-        private String status; // PENDING / APPROVED / REJECTED
+        private String status;
     }
 }
