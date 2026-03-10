@@ -1,5 +1,6 @@
 package com.shoppeclone.backend.promotion.flashsale.service.impl;
 
+import com.shoppeclone.backend.product.entity.Product;
 import com.shoppeclone.backend.product.entity.ProductVariant;
 import com.shoppeclone.backend.promotion.flashsale.dto.FlashSaleOrderRequest;
 import com.shoppeclone.backend.promotion.flashsale.dto.FlashSaleOrderResult;
@@ -97,6 +98,8 @@ public class FlashSaleOrderServiceImpl implements FlashSaleOrderService {
                         0, variantId, startTime);
             }
 
+            syncFlashSaleSoldCounters(updatedVariant.getId(), updatedVariant.getProductId(), quantity);
+
             int remaining = updatedItem.getRemainingStock() != null ? updatedItem.getRemainingStock() : 0;
             log.info("FlashSale SUCCESS: variant={}, remaining={}", variantId, remaining);
 
@@ -165,6 +168,20 @@ public class FlashSaleOrderServiceImpl implements FlashSaleOrderService {
             results.add(buildStatsResponse(group.slot, group.items));
         }
         return results;
+    }
+
+    private void syncFlashSaleSoldCounters(String variantId, String productId, int quantity) {
+        mongoTemplate.findAndModify(
+                new Query(Criteria.where("_id").is(variantId)),
+                new Update().inc("flashSaleSold", quantity),
+                ProductVariant.class);
+
+        if (productId != null && !productId.isBlank()) {
+            mongoTemplate.findAndModify(
+                    new Query(Criteria.where("_id").is(productId)),
+                    new Update().inc("flashSaleSold", quantity),
+                    Product.class);
+        }
     }
 
     private FlashSaleOrderResult buildOrderResult(String flashSaleId, boolean success, String status,
@@ -272,3 +289,5 @@ public class FlashSaleOrderServiceImpl implements FlashSaleOrderService {
         }
     }
 }
+
+

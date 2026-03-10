@@ -20,8 +20,13 @@ public interface OrderService {
 
     Order cancelOrder(String orderId);
 
+    Order markOrderAsReturned(String orderId);
+
+    Order markOrderAsDeliveryFailed(String orderId, String reason);
+
     Order updateShipment(String orderId, String trackingCode, String providerId);
 
     /** Delete all orders for a user (e.g. clear virtual/test shop data). Restores stock for non-cancelled orders. */
     void deleteAllUserOrders(String userId);
 }
+

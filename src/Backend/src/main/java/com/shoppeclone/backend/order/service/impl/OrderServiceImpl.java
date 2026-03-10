@@ -137,9 +137,6 @@ public class OrderServiceImpl implements OrderService {
                     (product != null && Boolean.TRUE.equals(product.getIsFlashSale()));
 
             if (isActuallyFlashSale) {
-                variant.setFlashSaleSold(
-                        (variant.getFlashSaleSold() != null ? variant.getFlashSaleSold() : 0) + cartItem.getQuantity());
-
                 // Ensure variant flag is synced if product flag is true (self-healing)
                 if (product != null && Boolean.TRUE.equals(product.getIsFlashSale())) {
                     variant.setIsFlashSale(true);
@@ -663,23 +660,22 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("Cannot cancel order in state: " + order.getOrderStatus());
         }
 
-        // Restore Stock
-        for (OrderItem item : order.getItems()) {
-            ProductVariant variant = productVariantRepository.findById(item.getVariantId()).orElse(null);
-            if (variant != null) {
-                variant.setStock(variant.getStock() + item.getQuantity());
+        return restoreStockAndResolveOrder(order, OrderStatus.CANCELLED, null);
+    }
 
-                // Restore Flash Sale Stock if applicable
-                restoreFlashSaleItemStock(variant.getProductId(), variant.getId(), item.getQuantity());
+    @Override
+    @Transactional
+    public Order markOrderAsReturned(String orderId) {
+        return restoreStockAndResolveOrder(getOrder(orderId), OrderStatus.RETURNED, null);
+    }
 
-                productVariantRepository.save(variant);
-            }
-        }
-
-        order.setOrderStatus(OrderStatus.CANCELLED);
-        order.setCancelledAt(LocalDateTime.now()); // Set cancelledAt
-        order.setUpdatedAt(LocalDateTime.now());
-        return orderRepository.save(order);
+    @Override
+    @Transactional
+    public Order markOrderAsDeliveryFailed(String orderId, String reason) {
+        String resolvedReason = (reason != null && !reason.isBlank())
+                ? reason.trim()
+                : "Order was rejected or could not be delivered";
+        return restoreStockAndResolveOrder(getOrder(orderId), OrderStatus.CANCELLED, resolvedReason);
     }
 
     @Override
@@ -783,6 +779,66 @@ public class OrderServiceImpl implements OrderService {
         return false;
     }
 
+    private Order restoreStockAndResolveOrder(Order order, OrderStatus targetStatus, String cancelReason) {
+        if (order.getOrderStatus() == targetStatus) {
+            if (targetStatus == OrderStatus.CANCELLED && cancelReason != null && !cancelReason.isBlank()
+                    && (order.getCancelReason() == null || order.getCancelReason().isBlank())) {
+                order.setCancelReason(cancelReason);
+            }
+            return order;
+        }
+
+        if (order.getOrderStatus() == OrderStatus.CANCELLED || order.getOrderStatus() == OrderStatus.RETURNED) {
+            if (targetStatus == OrderStatus.CANCELLED && cancelReason != null && !cancelReason.isBlank()
+                    && (order.getCancelReason() == null || order.getCancelReason().isBlank())) {
+                order.setCancelReason(cancelReason);
+                order.setUpdatedAt(LocalDateTime.now());
+                return orderRepository.save(order);
+            }
+            return order;
+        }
+
+        OrderStatus previousStatus = order.getOrderStatus();
+        LocalDateTime now = LocalDateTime.now();
+
+        for (OrderItem item : order.getItems()) {
+            ProductVariant variant = productVariantRepository.findById(item.getVariantId()).orElse(null);
+            if (variant == null) {
+                continue;
+            }
+
+            variant.setStock(variant.getStock() + item.getQuantity());
+            restoreFlashSaleItemStock(variant.getProductId(), variant.getId(), item.getQuantity());
+            productVariantRepository.save(variant);
+
+            if (previousStatus == OrderStatus.COMPLETED) {
+                com.shoppeclone.backend.product.entity.Product product = productRepository
+                        .findById(variant.getProductId()).orElse(null);
+                if (product != null) {
+                    int currentSold = product.getSold() != null ? product.getSold() : 0;
+                    product.setSold(Math.max(0, currentSold - item.getQuantity()));
+                    product.setUpdatedAt(now);
+                    productRepository.save(product);
+                }
+            }
+        }
+
+        order.setOrderStatus(targetStatus);
+        if (targetStatus == OrderStatus.RETURNED) {
+            if (order.getReturnedAt() == null) {
+                order.setReturnedAt(now);
+            }
+            order.setCancelReason(null);
+        } else if (targetStatus == OrderStatus.CANCELLED) {
+            if (order.getCancelledAt() == null) {
+                order.setCancelledAt(now);
+            }
+            order.setCancelReason(cancelReason);
+        }
+        order.setUpdatedAt(now);
+        return orderRepository.save(order);
+    }
+
     private void restoreFlashSaleItemStock(String productId, String variantId, int quantity) {
         // Find active Flash Sale Item
         List<com.shoppeclone.backend.promotion.flashsale.entity.FlashSaleItem> items = flashSaleItemRepository
@@ -820,3 +876,5 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 }
+
+
