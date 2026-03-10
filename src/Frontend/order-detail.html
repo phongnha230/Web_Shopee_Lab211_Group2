@@ -356,6 +356,26 @@
             </div>
         </div>
 
+        <!-- Order Summary -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Order Summary</h2>
+            <div class="space-y-3 text-sm mb-4 pb-4 border-b text-gray-700">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Subtotal (<span id="summaryItemCount">0</span> items)</span>
+                    <span id="summarySubtotal" class="font-medium">₫0</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Shipping Fee</span>
+                    <span id="summaryShippingFee" class="font-medium">₫0</span>
+                </div>
+            </div>
+            <div id="summaryDiscountRows" class="space-y-2 mb-4 text-sm"></div>
+            <div class="flex justify-between items-center pt-2">
+                <span class="text-lg font-bold text-gray-800">Total</span>
+                <span id="summaryTotal" class="text-2xl font-bold text-[#AD3029]">₫0</span>
+            </div>
+        </div>
+
         <!-- Shipping Address -->
         <div class="bg-white rounded-lg shadow-md p-6">
             <h2 class="text-xl font-bold text-gray-800 mb-4">Shipping Address</h2>
@@ -830,6 +850,61 @@
                 <p>${[addr.address, addr.city, addr.district, addr.ward].filter(Boolean).join(', ') || '-'}</p>
                 <p>Phone: ${addr.phone || '-'}</p>
             ` : '<p class="text-gray-500">No shipping address</p>';
+
+            // Calculate Order Summary
+            let subtotal = 0;
+            let itemCount = 0;
+            items.forEach(item => {
+                subtotal += Number(item.price || 0) * Number(item.quantity || 1);
+                itemCount += Number(item.quantity || 1);
+            });
+            
+            let shippingFee = order.shipping ? Number(order.shipping.shippingFee || 0) : 0;
+            
+            document.getElementById('summaryItemCount').textContent = itemCount;
+            document.getElementById('summarySubtotal').textContent = `₫${formatVND(subtotal)}`;
+            document.getElementById('summaryShippingFee').textContent = `₫${formatVND(shippingFee)}`;
+            
+            let discountHtml = '';
+            
+            // GoShop Voucher (Platform discount)
+            const goShopDiscount = Number(order.discount || 0);
+            if (goShopDiscount > 0) {
+                const codeLabel = order.voucherCode ? ` (${order.voucherCode})` : '';
+                discountHtml += `
+                    <div class="flex justify-between text-orange-600">
+                        <span class="flex items-center"><i class="fas fa-ticket-alt mr-2"></i>GoShop Voucher${codeLabel}</span>
+                        <span class="font-medium">-₫${formatVND(goShopDiscount)}</span>
+                    </div>`;
+            }
+            
+            // Shop Voucher
+            const shopDiscount = Number(order.shopDiscount || 0);
+            if (shopDiscount > 0) {
+                const codeLabel = order.shopVoucherCode ? ` (${order.shopVoucherCode})` : '';
+                discountHtml += `
+                    <div class="flex justify-between text-orange-600">
+                        <span class="flex items-center"><i class="fas fa-store mr-2"></i>Shop Voucher${codeLabel}</span>
+                        <span class="font-medium">-₫${formatVND(shopDiscount)}</span>
+                    </div>`;
+            }
+            
+            // Shipping Discount
+            const shippingDiscount = Number(order.shippingDiscount || 0);
+            if (shippingDiscount > 0) {
+                const codeLabel = order.shippingVoucherCode ? ` (${order.shippingVoucherCode})` : '';
+                discountHtml += `
+                    <div class="flex justify-between text-green-600">
+                        <span class="flex items-center"><i class="fas fa-shipping-fast mr-2"></i>Shipping Discount${codeLabel}</span>
+                        <span class="font-medium">-₫${formatVND(shippingDiscount)}</span>
+                    </div>`;
+            }
+            
+            document.getElementById('summaryDiscountRows').innerHTML = discountHtml;
+            
+            // Calculate final total 
+            const finalTotal = Number(order.totalPrice || 0);
+            document.getElementById('summaryTotal').textContent = `₫${formatVND(finalTotal)}`;
 
             renderDisputeActions(order);
         }

@@ -181,6 +181,11 @@
         .voucher-teal {
             background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
         }
+
+        .voucher-gray {
+            background: linear-gradient(135deg, #9ca3af 0%, #d1d5db 100%);
+            opacity: 0.8;
+        }
     </style>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -437,8 +442,29 @@
                 return;
             }
 
-            container.innerHTML = filteredVouchers.map(v => `
-                <div class="voucher-card ${v.color} rounded-lg p-3 text-white shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-1 relative">
+            container.innerHTML = filteredVouchers.map(v => {
+                const isUsed = usedVoucherCodes.includes(v.code);
+                const cardColor = isUsed ? 'voucher-gray filter grayscale' : v.color;
+                
+                let buttonHtml = '';
+                if (isUsed) {
+                    buttonHtml = `<button disabled class="bg-gray-200 text-gray-500 w-full py-2 rounded-lg text-sm font-bold shadow-sm cursor-not-allowed">
+                                    Đã sử dụng
+                                  </button>`;
+                } else if (v.collected) {
+                    buttonHtml = `<button onclick="handleClickUse('${v.code}', '${v.expiry}', ${v.stock})" 
+                                    class="bg-white text-orange-600 hover:bg-orange-50 w-full py-2 rounded-lg text-sm font-bold transition-all transform active:scale-95 shadow-sm">
+                                    Use Now
+                                  </button>`;
+                } else {
+                    buttonHtml = `<button onclick="collectVoucher('${v.id}')" 
+                                    class="bg-white/90 text-orange-600 hover:bg-white w-full py-2 rounded-lg text-sm font-bold transition-all transform active:scale-95 shadow-sm">
+                                    Collect Now
+                                  </button>`;
+                }
+
+                return `
+                <div class="voucher-card ${cardColor} rounded-lg p-3 text-white shadow-lg ${isUsed ? '' : 'hover:shadow-2xl transition-all transform hover:-translate-y-1'} relative">
                     <div class="relative z-10">
                         <div class="flex items-start justify-between mb-2">
                             <div class="text-2xl">${v.icon}</div>
@@ -467,27 +493,12 @@
                         </div>
                         ${v.categoryRestriction ? `<div class="text-xs opacity-80 mb-1"><i class="fas fa-tag mr-1"></i>Chỉ áp dụng: ${v.categoryRestriction}</div>` : ''}
                         
-                        ${(() => {
-                    // Cleaner UI: No red warnings here
-                    return '';
-                })()}
-                        
                         <div class="mt-2">
-                            ${v.collected ?
-                    `<button onclick="handleClickUse('${v.code}', '${v.expiry}', ${v.stock})" 
-                                    class="bg-white text-orange-600 hover:bg-orange-50 w-full py-2 rounded-lg text-sm font-bold transition-all transform active:scale-95 shadow-sm">
-                                    Use Now
-                                </button>`
-                    :
-                    `<button onclick="collectVoucher('${v.id}')" 
-                                    class="bg-white/90 text-orange-600 hover:bg-white w-full py-2 rounded-lg text-sm font-bold transition-all transform active:scale-95 shadow-sm">
-                                    Collect Now
-                                </button>`
-                }
+                            ${buttonHtml}
                         </div>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function handleClickUse(code, expiry, stock) {

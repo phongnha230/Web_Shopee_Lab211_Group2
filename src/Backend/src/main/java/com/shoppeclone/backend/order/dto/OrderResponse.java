@@ -25,12 +25,16 @@ public class OrderResponse {
     private BigDecimal totalPrice;
     private BigDecimal discount;
     private String voucherCode;
+    private String shippingVoucherCode;
+    private String shopVoucherCode;
+    private BigDecimal shopDiscount;
+    private BigDecimal shippingDiscount;
     private OrderStatus orderStatus;
     private PaymentStatus paymentStatus;
     private List<OrderItem> items;
     private List<OrderItemDisplayDto> displayItems; // Enriched for frontend (productName, image, etc.)
     private String paymentMethod; // COD, MOMO, VNPAY, etc.
-    private Boolean collectCash;  // true = shipper thu tiền COD, false = đã thanh toán online
+    private Boolean collectCash; // true = shipper thu tiền COD, false = đã thanh toán online
     private OrderShipping shipping;
 
     // Shipper-related fields
@@ -52,12 +56,29 @@ public class OrderResponse {
     private List<OrderItemReviewInfo> itemReviewInfo = new ArrayList<>();
     private boolean canReviewAny;
 
-    public String getPaymentMethod() { return paymentMethod; }
-    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
-    public Boolean getCollectCash() { return collectCash; }
-    public void setCollectCash(Boolean collectCash) { this.collectCash = collectCash; }
-    public List<OrderItemDisplayDto> getDisplayItems() { return displayItems; }
-    public void setDisplayItems(List<OrderItemDisplayDto> displayItems) { this.displayItems = displayItems; }
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public Boolean getCollectCash() {
+        return collectCash;
+    }
+
+    public void setCollectCash(Boolean collectCash) {
+        this.collectCash = collectCash;
+    }
+
+    public List<OrderItemDisplayDto> getDisplayItems() {
+        return displayItems;
+    }
+
+    public void setDisplayItems(List<OrderItemDisplayDto> displayItems) {
+        this.displayItems = displayItems;
+    }
 
     public static OrderResponse fromOrder(Order order) {
         return OrderResponse.builder()
@@ -66,6 +87,10 @@ public class OrderResponse {
                 .totalPrice(order.getTotalPrice())
                 .discount(order.getDiscount())
                 .voucherCode(order.getVoucherCode())
+                .shippingVoucherCode(order.getShippingVoucherCode())
+                .shopVoucherCode(order.getShopVoucherCode())
+                .shopDiscount(order.getShopDiscount())
+                .shippingDiscount(order.getShippingDiscount())
                 .orderStatus(order.getOrderStatus())
                 .paymentStatus(order.getPaymentStatus())
                 .items(order.getItems())
