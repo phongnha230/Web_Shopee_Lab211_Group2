@@ -3588,6 +3588,30 @@
         // ========================================
         let returnsData = { disputes: [], refunds: [] };
 
+        function safeTime(value) {
+            if (!value) return 0;
+            const time = new Date(value).getTime();
+            return Number.isFinite(time) ? time : 0;
+        }
+
+        function sortDisputesNewestFirst(disputes) {
+            return [...(disputes || [])].sort((a, b) => {
+                const aTime = Math.max(safeTime(a?.updatedAt), safeTime(a?.createdAt));
+                const bTime = Math.max(safeTime(b?.updatedAt), safeTime(b?.createdAt));
+                if (bTime !== aTime) return bTime - aTime;
+                return String(b?.id || '').localeCompare(String(a?.id || ''));
+            });
+        }
+
+        function sortRefundsNewestFirst(refunds) {
+            return [...(refunds || [])].sort((a, b) => {
+                const aTime = Math.max(safeTime(a?.processedAt), safeTime(a?.updatedAt), safeTime(a?.createdAt));
+                const bTime = Math.max(safeTime(b?.processedAt), safeTime(b?.updatedAt), safeTime(b?.createdAt));
+                if (bTime !== aTime) return bTime - aTime;
+                return String(b?.id || '').localeCompare(String(a?.id || ''));
+            });
+        }
+
         async function loadReturns() {
             if (!currentShop) return;
 
@@ -3605,7 +3629,10 @@
                 });
                 if (!response.ok) throw new Error('Failed to load');
                 const data = await response.json();
-                returnsData = { disputes: data.disputes || [], refunds: data.refunds || [] };
+                returnsData = {
+                    disputes: sortDisputesNewestFirst(data.disputes || []),
+                    refunds: sortRefundsNewestFirst(data.refunds || [])
+                };
                 renderReturnsDisputes(returnsData.disputes);
                 renderReturnsRefunds(returnsData.refunds);
                 renderReturnsReturned(returnsData.refunds);
