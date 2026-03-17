@@ -30,4 +30,12 @@ public interface ProductRepository extends MongoRepository<Product, String> {
     // Simple text search by name or description (case-insensitive)
     List<Product> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String nameKeyword,
             String descriptionKeyword);
+
+    // Suggestion search: match name only, active products, limited via Pageable
+    @Query(value = "{ 'name': { '$regex': ?0, '$options': 'i' }, 'status': ?1 }",
+           countQuery = "{ 'name': { '$regex': ?0, '$options': 'i' }, 'status': ?1 }")
+    org.springframework.data.domain.Page<Product> findByNameRegexAndStatus(
+            String nameRegex,
+            ProductStatus status,
+            org.springframework.data.domain.Pageable pageable);
 }

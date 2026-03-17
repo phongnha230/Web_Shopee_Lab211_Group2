@@ -52,6 +52,7 @@ public class SecurityConfig {
                                                                 "/api/shipping-providers/**",
                                                                 "/api/vouchers",
                                                                 "/api/vouchers/code/**",
+                                                                "/api/search/**",
                                                                 "/api/debug/**")
                                                 .permitAll()
 
