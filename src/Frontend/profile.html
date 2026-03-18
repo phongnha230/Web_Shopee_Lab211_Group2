@@ -642,7 +642,7 @@
                 localStorage.clear();
                 showToast('👋 Logged out!', 'info');
                 setTimeout(() => {
-                    console.warn('Redirect prevented by script');
+                    window.location.href = 'index.html';
                 }, 1000);
             }
         }
