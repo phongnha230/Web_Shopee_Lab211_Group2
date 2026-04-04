@@ -754,7 +754,7 @@
                 card.onclick = () => {
                     localStorage.setItem('lastClickedProductId', pid);
                     sessionStorage.setItem('lastClickedProductId', pid);
-                    window.location.href = `product-detail.html?id=${pid}`;
+                    window.location.href = `/product-detail?id=${pid}`;
                 };
                 card.innerHTML = `
                     <div class="relative aspect-square">

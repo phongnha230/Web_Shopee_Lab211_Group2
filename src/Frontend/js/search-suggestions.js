@@ -37,7 +37,7 @@
             const kw = (keyword || searchInput.value).trim();
             if (!kw) return;
             closeDropdown();
-            window.location.href = `category.html?search=${encodeURIComponent(kw)}`;
+            window.location.href = `/category?search=${encodeURIComponent(kw)}`;
         };
 
         searchButton.addEventListener('click', () => goSearch());
@@ -96,10 +96,10 @@
                     const { keyword: kw, id, type } = el.dataset;
                     if (type === 'PRODUCT' && id) {
                         closeDropdown();
-                        window.location.href = `product-detail.html?id=${id}`;
+                        window.location.href = `/product-detail?id=${id}`;
                     } else if (type === 'CATEGORY' && id) {
                         closeDropdown();
-                        window.location.href = `category.html?categoryId=${id}`;
+                        window.location.href = `/category?id=${id}`;
                     } else if (kw) {
                         searchInput.value = kw;
                         goSearch(kw);
@@ -119,7 +119,8 @@
                 );
             const esc = (s) =>
                 (s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            const attr = `data-type="${item.type}" data-id="${item.id || ''}" data-keyword="${esc(item.label)}"`;
+            const encodedId = (item.id == null ? '' : String(item.id)).replace(/"/g, '&quot;');
+            const attr = `data-type="${item.type}" data-id="${encodedId}" data-keyword="${esc(item.label)}"`;
             const base = `sugg-item flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0`;
 
             if (item.type === 'PRODUCT') {

@@ -924,7 +924,7 @@
             if (productId && productId !== 'undefined' && productId !== 'null') {
                 sessionStorage.setItem('viewReviewProductId', productId);
                 const base = window.location.href.replace(/[#?].*$/, '').replace(/\/[^/]*$/, '/');
-                window.location.href = base + 'product-detail.html?id=' + encodeURIComponent(productId) + '#reviews';
+                window.location.href = '/product-detail?id=' + encodeURIComponent(productId) + '#reviews';
             }
         }
 

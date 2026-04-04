@@ -111,6 +111,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <!-- Unified Search Suggestions -->
+    <script src="js/search-suggestions.js"></script>
     <style>
         @keyframes bounceGoShop {
 
@@ -482,21 +484,6 @@
 
     <script src="js/services/api.js"></script>
     <script>
-        // --- MOCK DATA FOR FRONTEND TESTING ---
-        const MOCK_PRODUCTS = {
-            '1': { name: "Wireless Headphones - Premium Bass", cat: "Electronics > Audio", price: 99, oldPrice: 198, discount: "50%", stock: 156, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=800&fit=crop", thumbnails: ["https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200", "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=200"], colors: ["Black", "Silver", "Red"], sizes: [], desc: "Experience sound like never before." },
-            '2': { name: "Urban Sneakers", cat: "Fashion > Shoes", price: 102, oldPrice: 204, discount: "50%", stock: 89, image: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=800&h=800&fit=crop", thumbnails: [], colors: ["White/Red", "Black"], sizes: ["40", "41", "42"], desc: "Top urban design sneakers." },
-            '3': { name: "Classic Wrist Watch", cat: "Accessories", price: 15, oldPrice: 30, discount: "50%", stock: 44, image: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800&h=800&fit=crop", thumbnails: [], colors: ["Gold"], sizes: [], desc: "Timeless elegance." },
-            '4': { name: "Running Sport Shoes", cat: "Fashion > Shoes", price: 120, oldPrice: 240, discount: "50%", stock: 200, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&h=800&fit=crop", thumbnails: [], colors: ["Red", "Blue"], sizes: ["38", "39", "40"], desc: "Professional grade running shoes." },
-            '5': { name: "Smart Phone 12 Pro", cat: "Electronics > Mobile", price: 199, oldPrice: 398, discount: "50%", stock: 12, image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=800&fit=crop", thumbnails: [], colors: ["Graphite", "Silver"], sizes: ["128GB", "256GB"], desc: "Latest smartphone technology." },
-            '6': { name: "Compact Headphones", cat: "Electronics > Audio", price: 45, oldPrice: 90, discount: "50%", stock: 330, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=800&fit=crop", thumbnails: [], colors: ["Black"], sizes: [], desc: "Compact and powerful." },
-            '101': { name: "Nikon D3500 DSLR", cat: "Electronics > Cameras", price: 36, oldPrice: 48, discount: "25%", stock: 5, image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=800&fit=crop", thumbnails: [], colors: ["Black"], sizes: [], desc: "Capture moments." },
-            '102': { name: "Nike Air Max", cat: "Fashion > Shoes", price: 210, oldPrice: 420, discount: "50%", stock: 540, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&h=800&fit=crop", thumbnails: [], colors: ["Red", "Black"], sizes: ["38", "39", "40"], desc: "Classic Nike Air Max." },
-            '103': { name: "Sport Water Bottle 1L", cat: "Sports > Accessories", price: 15.69, oldPrice: 20, discount: "20%", stock: 980, image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop", thumbnails: [], colors: ["Silver"], sizes: ["1L"], desc: "Stay hydrated." },
-            '104': { name: "Blue Water Bottle", cat: "Sports > Accessories", price: 14.50, oldPrice: 18, discount: "15%", stock: 760, image: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&h=400&fit=crop", thumbnails: [], colors: ["Blue"], sizes: ["500ml"], desc: "Premium quality." },
-            '105': { name: "Modern Chair", cat: "Home > Furniture", price: 25.00, oldPrice: 50.00, discount: "50%", stock: 120, image: "https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?w=800&h=800&fit=crop", thumbnails: [], colors: ["Brown"], sizes: [], desc: "Comfortable modern chair." },
-            '106': { name: "Canvas Sneakers", cat: "Fashion > Shoes", price: 18.00, oldPrice: 25.00, discount: "28%", stock: 230, image: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=800&h=800&fit=crop", thumbnails: [], colors: ["White"], sizes: ["38", "39"], desc: "Casual everyday wear." }
-        };
 
         // API_BASE_URL được định nghĩa trong api.js (đã load ở trên)
 
@@ -548,41 +535,9 @@
             updateNavbar();
             updateCartBadge();
 
-            // 2. GET PRODUCT ID - from ?id=, #id=, /product-detail/ID, or localStorage
+            // 2. GET PRODUCT ID - from URL ?id=
             const params = new URLSearchParams(window.location.search);
             let id = params.get('id');
-            const urlHasExplicitId = id !== null;
-
-            if (!id && window.location.hash) {
-                const hashStr = window.location.hash.substring(1);
-                const hashParams = new URLSearchParams(hashStr);
-                id = hashParams.get('id');
-            }
-            if (!id && window.location.pathname) {
-                const match = window.location.pathname.match(/\/product-detail(?:\.html)?\/([a-zA-Z0-9\-]+)/);
-                if (match) id = match[1];
-            }
-
-            if (!id || id === 'null' || id === 'undefined') {
-                id = sessionStorage.getItem('viewReviewProductId');
-                if (id) sessionStorage.removeItem('viewReviewProductId');
-            }
-            if (!id || id === 'null' || id === 'undefined') {
-                const hasReviewsHash = (window.location.hash || '').includes('reviews');
-                if (!urlHasExplicitId && !hasReviewsHash) {
-                    id = localStorage.getItem('lastClickedProductId');
-                }
-                if (!id || id === 'null' || id === 'undefined') {
-                    id = sessionStorage.getItem('lastClickedProductId');
-                }
-            }
-
-            // Restore URL if ID exists in storage but lost during redirect
-            if (id && !params.get('id') && !window.location.hash) {
-                try {
-                    history.replaceState({}, '', window.location.pathname + '?id=' + encodeURIComponent(id));
-                } catch (e) { /* ignore */ }
-            }
 
             // 3. CHECK ID EXISTENCE
             if (!id || id === 'null' || id === 'undefined') {
@@ -611,12 +566,6 @@
                 connectionError = true;
             }
 
-            // Fallback to Mock
-            if (!product && MOCK_PRODUCTS[id]) {
-                product = MOCK_PRODUCTS[id];
-                product.id = id;
-                console.log("Fetched from Mock:", product);
-            }
 
             // 5. RENDER PRODUCT
             if (product) {
@@ -1569,7 +1518,6 @@
             if (window.fsTimerInterval) clearInterval(window.fsTimerInterval);
         });
     </script>
-    <script src="js/search-suggestions.js"></script>
 </body>
 
 </html>

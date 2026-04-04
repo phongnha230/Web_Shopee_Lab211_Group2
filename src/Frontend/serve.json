@@ -1,0 +1,11 @@
+{
+  "cleanUrls": false,
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/auth/callback/google", "destination": "/auth/callback/google/index.html" },
+    { "source": "/product-detail", "destination": "/product-detail.html" },
+    { "source": "/category", "destination": "/category.html" },
+    { "source": "/profile", "destination": "/profile.html" },
+    { "source": "/my-orders-backend", "destination": "/my-orders-backend.html" }
+  ]
+}
