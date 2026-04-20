@@ -134,6 +134,7 @@ Trong `src/Backend`, tạo file `.env` dựa trên:
 Các biến quan trọng:
 
 ```env
+MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.exxxxxx.mongodb.net/web_shoppe?retryWrites=true&w=majority
 JWT_SECRET=YourSuperSecretKeyForJWTTokenGenerationAndValidation123456
 JWT_EXPIRATION=900000
 JWT_REFRESH_EXPIRATION=604800000
@@ -149,10 +150,8 @@ CLOUDINARY_API_SECRET=your_api_secret
 
 ### 3. 🗄️ Cấu hình MongoDB
 
-Hiện tại `src/Backend/src/main/resources/application.properties` đang chứa `spring.data.mongodb.uri` trực tiếp. Với môi trường riêng, nên làm một trong hai cách:
-
-- sửa giá trị `spring.data.mongodb.uri` trong file properties.
-- hoặc override bằng biến môi trường `SPRING_DATA_MONGODB_URI`.
+MongoDB URI nên đặt trong `src/Backend/.env` qua biến `MONGODB_URI`.
+`application.properties` sẽ đọc lại biến này khi app khởi động, nên backend vẫn kết nối MongoDB Atlas bình thường mà không lộ password trong source.
 
 Port mặc định của ứng dụng là `8080`.
 
