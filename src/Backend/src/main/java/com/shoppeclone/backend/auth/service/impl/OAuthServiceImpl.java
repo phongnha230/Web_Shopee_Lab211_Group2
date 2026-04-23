@@ -26,7 +26,8 @@ import java.util.*;
 public class OAuthServiceImpl implements OAuthService {
 
     // 🔥 FIX: Khớp với Google Cloud Console redirect URI
-    private static final String GOOGLE_REDIRECT_URI = "http://localhost:3000/auth/callback/google";
+    @Value("${app.oauth.google.redirect-uri:http://localhost:3000/auth/callback/google}")
+    private String GOOGLE_REDIRECT_URI;
 
     private final UserRepository userRepository;
     private final OAuthAccountRepository oauthAccountRepository;
