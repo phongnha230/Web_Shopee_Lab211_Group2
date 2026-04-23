@@ -1,6 +1,5 @@
 package com.shoppeclone.backend.search.service.impl;
 
-import com.shoppeclone.backend.product.entity.Category;
 import com.shoppeclone.backend.product.entity.Product;
 import com.shoppeclone.backend.product.entity.ProductImage;
 import com.shoppeclone.backend.product.entity.ProductStatus;

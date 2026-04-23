@@ -7,12 +7,7 @@ import com.shoppeclone.backend.shop.entity.Shop;
 import com.shoppeclone.backend.shop.entity.ShopStatus;
 import com.shoppeclone.backend.shop.repository.ShopRepository;
 import com.shoppeclone.backend.product.repository.ProductRepository;
-import com.shoppeclone.backend.product.entity.Product;
-import com.shoppeclone.backend.order.entity.OrderStatus;
 import com.shoppeclone.backend.dispute.entity.DisputeStatus;
-import com.shoppeclone.backend.promotion.flashsale.entity.FlashSaleItem;
-import com.shoppeclone.backend.promotion.flashsale.repository.FlashSaleCampaignRepository;
-import com.shoppeclone.backend.promotion.flashsale.repository.FlashSaleItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -5,6 +5,9 @@ import com.shoppeclone.backend.auth.dto.request.LoginRequest;
 import com.shoppeclone.backend.auth.dto.request.RegisterRequest;
 import com.shoppeclone.backend.auth.dto.response.AuthResponse;
 import com.shoppeclone.backend.auth.dto.response.UserDto;
+import com.shoppeclone.backend.auth.exception.DuplicateEmailException;
+import com.shoppeclone.backend.auth.exception.InvalidCredentialsException;
+import com.shoppeclone.backend.auth.exception.InvalidOtpException;
 import com.shoppeclone.backend.auth.model.OtpCode;
 import com.shoppeclone.backend.auth.model.Role;
 import com.shoppeclone.backend.auth.model.User;
@@ -50,7 +53,7 @@ public class AuthServiceImpl implements AuthService {
         // Kiểm tra email đã tồn tại
         if (userRepository.existsByEmail(request.getEmail())) {
             System.out.println("ERROR: Email already exists!");
-            throw new RuntimeException("Email already exists");
+            throw new DuplicateEmailException("Email already exists");
         }
 
         // Tạo user mới - PENDING STATE
@@ -101,12 +104,12 @@ public class AuthServiceImpl implements AuthService {
 
         // Tìm user
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Email does not exist"));
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
 
         // Kiểm tra password
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             System.out.println("ERROR: Wrong password!");
-            throw new RuntimeException("Incorrect password");
+            throw new InvalidCredentialsException("Invalid email or password");
         }
 
         // 🚨 BLOCK NẾU CHƯA VERIFY OTP (dùng emailVerified)
@@ -213,8 +216,11 @@ public class AuthServiceImpl implements AuthService {
         System.out.println("Email: " + email);
 
         // Tìm user
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Email does not exist"));
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            System.out.println("Password reset requested for a non-existing email. Returning generic success response.");
+            return;
+        }
 
         // Xóa OTP cũ (PASSWORD_RESET type)
         otpCodeRepository.deleteByUser(user);
@@ -265,11 +271,11 @@ public class AuthServiceImpl implements AuthService {
         // Tìm OTP với type PASSWORD_RESET
         OtpCode otpCode = otpCodeRepository.findByUserAndCodeAndTypeAndUsed(
                 user, otp, "PASSWORD_RESET", false)
-                .orElseThrow(() -> new RuntimeException("Invalid or used OTP code"));
+                .orElseThrow(() -> new InvalidOtpException("Invalid or used OTP code"));
 
         // Kiểm tra hết hạn
         if (otpCode.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("OTP code has expired");
+            throw new InvalidOtpException("OTP code has expired");
         }
 
         // Cập nhật mật khẩu

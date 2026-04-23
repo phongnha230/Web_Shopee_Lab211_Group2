@@ -1,5 +1,6 @@
 package com.shoppeclone.backend.auth.service.impl;
 
+import com.shoppeclone.backend.auth.exception.InvalidOtpException;
 import com.shoppeclone.backend.auth.model.OtpCode;
 import com.shoppeclone.backend.auth.model.User;
 import com.shoppeclone.backend.auth.repository.OtpCodeRepository;
@@ -30,8 +31,11 @@ public class OtpServiceImpl implements OtpService {
         System.out.println("🔍 SEND OTP - Email: " + email);
 
         // Tìm user
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            System.out.println("OTP requested for a non-existing email. Returning generic success response.");
+            return;
+        }
 
         // Xóa OTP cũ nếu có
         otpCodeRepository.deleteByUser(user);
@@ -75,7 +79,7 @@ public class OtpServiceImpl implements OtpService {
                     System.out.println("  Code: " + code);
                     System.out.println("  Type: EMAIL_VERIFICATION");
                     System.out.println("  Used: false");
-                    return new RuntimeException("Invalid OTP code");
+                    return new InvalidOtpException("Invalid OTP code");
                 });
 
         System.out.println("✅ OTP FOUND - Expires: " + otp.getExpiresAt());
@@ -83,7 +87,7 @@ public class OtpServiceImpl implements OtpService {
         // Kiểm tra hết hạn
         if (otp.getExpiresAt().isBefore(LocalDateTime.now())) {
             System.out.println("❌ OTP EXPIRED");
-            throw new RuntimeException("OTP code expired");
+            throw new InvalidOtpException("OTP code expired");
         }
 
         System.out.println("✅ OTP VALID - Marking as used");
@@ -135,10 +139,10 @@ public class OtpServiceImpl implements OtpService {
         // Tìm OTP type PASSWORD_RESET
         OtpCode otp = otpCodeRepository.findByUserAndCodeAndTypeAndUsed(
                 user, code, "PASSWORD_RESET", false)
-                .orElseThrow(() -> new RuntimeException("Invalid OTP code"));
+                .orElseThrow(() -> new InvalidOtpException("Invalid OTP code"));
 
         if (otp.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("OTP code expired");
+            throw new InvalidOtpException("OTP code expired");
         }
 
         System.out.println("✅ RESET OTP IS VALID (Not yet used)");
