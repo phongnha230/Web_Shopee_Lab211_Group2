@@ -6,6 +6,7 @@ import com.shoppeclone.backend.auth.repository.RateLimitRecordRepository;
 import com.shoppeclone.backend.auth.service.AuthRateLimitService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -14,6 +15,7 @@ import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "app.auth.rate-limit.store", havingValue = "mongo", matchIfMissing = true)
 public class AuthRateLimitServiceImpl implements AuthRateLimitService {
     @Value("${auth.rate-limit.login.email.max-failures:5}")
     private int loginEmailMaxFailures;
