@@ -13,6 +13,8 @@ import com.shoppeclone.backend.promotion.flashsale.entity.FlashSale;
 import com.shoppeclone.backend.promotion.flashsale.entity.FlashSaleItem;
 import com.shoppeclone.backend.promotion.flashsale.repository.FlashSaleItemRepository;
 import com.shoppeclone.backend.promotion.flashsale.service.FlashSaleService;
+import com.shoppeclone.backend.search.entity.ProductDocument;
+import com.shoppeclone.backend.search.repository.ElasticsearchProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -42,6 +44,7 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final FlashSaleService flashSaleService;
     private final FlashSaleItemRepository flashSaleItemRepository;
+    private final ElasticsearchProductRepository elasticsearchProductRepository;
 
     @Override
     @Transactional
@@ -123,6 +126,7 @@ public class ProductServiceImpl implements ProductService {
             productCategoryRepository.save(productCategory);
         }
 
+        syncToElasticsearch(savedProduct);
         return mapToResponse(savedProduct);
     }
 
@@ -168,15 +172,27 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductResponse> searchProducts(String keyword) {
         if (keyword == null || keyword.trim().isEmpty()) {
-            // If no keyword is provided, return an empty list instead of all products
             return java.util.List.of();
         }
 
         String trimmed = keyword.trim();
 
-        return productRepository
-                .searchByNameOrDescriptionAndStatus(trimmed, ProductStatus.ACTIVE)
-                .stream()
+        // 1. Dùng Elasticsearch để tìm kiếm Fuzzy và trả về danh sách Document
+        List<ProductDocument> docs = elasticsearchProductRepository
+                .searchByNameOrDescriptionFuzzyAndStatus(trimmed, ProductStatus.ACTIVE.name());
+
+        // 2. Lấy danh sách ID từ Document
+        List<String> productIds = docs.stream().map(ProductDocument::getId).collect(Collectors.toList());
+
+        if (productIds.isEmpty()) return java.util.List.of();
+
+        // 3. Truy vấn chi tiết sản phẩm từ MongoDB dựa trên ID và giữ đúng thứ tự sắp xếp của Elasticsearch
+        List<Product> products = productRepository.findAllById(productIds);
+        Map<String, Product> productMap = products.stream().collect(Collectors.toMap(Product::getId, p -> p));
+
+        return productIds.stream()
+                .map(productMap::get)
+                .filter(p -> p != null)
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
@@ -342,6 +358,7 @@ public class ProductServiceImpl implements ProductService {
 
         product.setUpdatedAt(LocalDateTime.now());
         Product updatedProduct = productRepository.save(product);
+        syncToElasticsearch(updatedProduct);
         return mapToResponse(updatedProduct);
     }
 
@@ -358,6 +375,7 @@ public class ProductServiceImpl implements ProductService {
         productCategoryRepository.deleteByProductId(id);
 
         productRepository.deleteById(id);
+        elasticsearchProductRepository.deleteById(id);
     }
 
     @Override
@@ -641,7 +659,8 @@ public class ProductServiceImpl implements ProductService {
         // But the requirement here is mainly for "Delete" which sets it to false.
 
         product.setUpdatedAt(LocalDateTime.now());
-        productRepository.save(product);
+        Product saved = productRepository.save(product);
+        syncToElasticsearch(saved);
     }
 
     @Override
@@ -651,6 +670,37 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new RuntimeException("Product not found"));
         product.setStatus(status);
         product.setUpdatedAt(LocalDateTime.now());
-        productRepository.save(product);
+        Product saved = productRepository.save(product);
+        syncToElasticsearch(saved);
+    }
+
+    private void syncToElasticsearch(Product product) {
+        try {
+            ProductDocument doc = ProductDocument.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .shopId(product.getShopId())
+                .status(product.getStatus() != null ? product.getStatus().name() : null)
+                .minPrice(product.getMinPrice())
+                .maxPrice(product.getMaxPrice())
+                .sold(product.getSold())
+                .isFlashSale(product.getIsFlashSale())
+                .build();
+            
+            // Populate image and categories
+            imageRepository.findByProductIdOrderByDisplayOrderAsc(product.getId()).stream()
+                .findFirst()
+                .ifPresent(img -> doc.setImageUrl(img.getImageUrl()));
+
+            List<String> categories = productCategoryRepository.findByProductId(product.getId()).stream()
+                .map(ProductCategory::getCategoryId)
+                .collect(Collectors.toList());
+            doc.setCategories(categories);
+
+            elasticsearchProductRepository.save(doc);
+        } catch (Exception e) {
+            log.error("Lỗi đồng bộ sản phẩm sang Elasticsearch: {}", e.getMessage());
+        }
     }
 }

@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8080/api";
+const API_URL = "http://localhost:8088/api";
 
 document.getElementById("loginForm").addEventListener("submit", function (e) {
     e.preventDefault();

@@ -27,7 +27,7 @@ const interceptorScript = `
                             isRefreshing = true;
                             refreshPromise = (async () => {
                                 try {
-                                    const refreshResponse = await originalFetch('http://localhost:8080/api/auth/refresh-token', {
+                                    const refreshResponse = await originalFetch('http://localhost:8088/api/auth/refresh-token', {
                                         method: 'POST',
                                         headers: {
                                             'Content-Type': 'application/json',

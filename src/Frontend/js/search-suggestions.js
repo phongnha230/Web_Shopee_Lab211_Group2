@@ -26,7 +26,7 @@
 
         let debounceTimer  = null;
         let currentKeyword = '';
-        const API_BASE     = window.API_BASE_URL || 'http://localhost:8080/api';
+        const API_BASE     = window.API_BASE_URL || 'http://localhost:8088/api';
 
         // Pre-fill from ?search= URL param if present
         const urlKw = new URLSearchParams(window.location.search).get('search');

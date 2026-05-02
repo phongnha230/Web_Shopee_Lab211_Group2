@@ -1,6 +1,6 @@
 async function checkCategories() {
     try {
-        const response = await fetch('http://localhost:8080/api/categories');
+        const response = await fetch('http://localhost:8088/api/categories');
         const categories = await response.json();
 
         if (categories.length > 0) {

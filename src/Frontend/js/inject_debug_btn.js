@@ -13,7 +13,7 @@ const testBtn = `
         try {
             const token = localStorage.getItem('refreshToken');
             alert('Bắt đầu gửi Refresh Token: ' + token.substr(-10));
-            const refreshResponse = await window.fetch('http://localhost:8080/api/auth/refresh-token', {
+            const refreshResponse = await window.fetch('http://localhost:8088/api/auth/refresh-token', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

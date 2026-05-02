@@ -25,7 +25,7 @@
                             isRefreshing = true;
                             refreshPromise = (async () => {
                                 try {
-                                    const refreshResponse = await originalFetch('http://localhost:8080/api/auth/refresh-token', {
+                                    const refreshResponse = await originalFetch('http://localhost:8088/api/auth/refresh-token', {
                                         method: 'POST',
                                         headers: {
                                             'Content-Type': 'application/json',
@@ -260,7 +260,7 @@
 
         try {
             // Call Register API (Backend will send OTP automatically)
-            const res = await fetch('http://localhost:8080/api/auth/register', {
+            const res = await fetch('http://localhost:8088/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -282,7 +282,7 @@
                     const confirmResend = confirm('⚠️ Email already registered. Do you want to receive a new OTP to verify this account?');
                     if (confirmResend) {
                         try {
-                            const otpRes = await fetch('http://localhost:8080/api/auth/send-otp', {
+                            const otpRes = await fetch('http://localhost:8088/api/auth/send-otp', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ email })
@@ -319,7 +319,7 @@
 
         try {
             const res = await fetch(
-                'http://localhost:8080/api/auth/oauth/google/url?redirect_uri=http://localhost:3000/auth/callback/google.html'
+                'http://localhost:8088/api/auth/oauth/google/url?redirect_uri=http://localhost:3000/auth/callback/google.html'
             );
 
             const data = await res.json();

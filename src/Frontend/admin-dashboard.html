@@ -26,7 +26,7 @@
                             isRefreshing = true;
                             refreshPromise = (async () => {
                                 try {
-                                    const refreshResponse = await originalFetch('http://localhost:8080/api/auth/refresh-token', {
+                                    const refreshResponse = await originalFetch('http://localhost:8088/api/auth/refresh-token', {
                                         method: 'POST',
                                         headers: {
                                             'Content-Type': 'application/json',
@@ -1450,7 +1450,7 @@
         // --- SHOP APPROVAL LOGIC (EXISTING) ---
         async function loadPendingShops() {
             try {
-                const response = await fetch('http://localhost:8080/api/shop/admin/pending', {
+                const response = await fetch('http://localhost:8088/api/shop/admin/pending', {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
@@ -1551,8 +1551,8 @@
 
 
             const endpoint = action === 'approve'
-                ? `http://localhost:8080/api/shop/admin/approve/${id}`
-                : `http://localhost:8080/api/shop/admin/reject/${id}?reason=${encodeURIComponent(reason)}`;
+                ? `http://localhost:8088/api/shop/admin/approve/${id}`
+                : `http://localhost:8088/api/shop/admin/reject/${id}?reason=${encodeURIComponent(reason)}`;
 
 
             try {
@@ -1673,7 +1673,7 @@
 
         async function loadActiveShops() {
             try {
-                const response = await fetch('http://localhost:8080/api/shop/admin/active', {
+                const response = await fetch('http://localhost:8088/api/shop/admin/active', {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
@@ -1761,7 +1761,7 @@
 
         async function loadRejectedShops() {
             try {
-                const response = await fetch('http://localhost:8080/api/shop/admin/rejected', {
+                const response = await fetch('http://localhost:8088/api/shop/admin/rejected', {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
@@ -1846,7 +1846,7 @@
 
             try {
                 // Fetch first 100 users (Paged API)
-                const response = await fetch('http://localhost:8080/api/admin/users?page=0&size=100', {
+                const response = await fetch('http://localhost:8088/api/admin/users?page=0&size=100', {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
@@ -1955,7 +1955,7 @@
         // --- EDIT USER FUNCTIONS ---
         async function openEditModal(userId) {
             try {
-                const response = await fetch(`http://localhost:8080/api/admin/users/${userId}`, {
+                const response = await fetch(`http://localhost:8088/api/admin/users/${userId}`, {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
@@ -1997,7 +1997,7 @@
 
 
             try {
-                const response = await fetch(`http://localhost:8080/api/admin/users/${userId}`, {
+                const response = await fetch(`http://localhost:8088/api/admin/users/${userId}`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem("accessToken")}`,
@@ -2030,7 +2030,7 @@
 
 
             try {
-                const response = await fetch(`http://localhost:8080/api/admin/users/${userId}`, {
+                const response = await fetch(`http://localhost:8088/api/admin/users/${userId}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
@@ -2053,7 +2053,7 @@
         // Load Dashboard Statistics
         async function loadDashboardStats(days = 1) {
             try {
-                const response = await fetch(`http://localhost:8080/api/admin/dashboard/stats?days=${days}`, {
+                const response = await fetch(`http://localhost:8088/api/admin/dashboard/stats?days=${days}`, {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
@@ -2209,7 +2209,7 @@
             if (disputeBuyerNameCache.has(key)) return disputeBuyerNameCache.get(key);
 
             try {
-                const res = await fetch(`http://localhost:8080/api/admin/users/${encodeURIComponent(key)}`, {
+                const res = await fetch(`http://localhost:8088/api/admin/users/${encodeURIComponent(key)}`, {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
                 if (!res.ok) throw new Error('buyer fetch failed');
@@ -2229,7 +2229,7 @@
             if (disputeSellerShopCache.has(key)) return disputeSellerShopCache.get(key);
 
             try {
-                const res = await fetch(`http://localhost:8080/api/shop/${encodeURIComponent(key)}`, {
+                const res = await fetch(`http://localhost:8088/api/shop/${encodeURIComponent(key)}`, {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
                 if (!res.ok) throw new Error('shop fetch failed');
@@ -2249,7 +2249,7 @@
             if (disputeOrderShopIdCache.has(key)) return disputeOrderShopIdCache.get(key);
 
             try {
-                const res = await fetch(`http://localhost:8080/api/orders/${encodeURIComponent(key)}`, {
+                const res = await fetch(`http://localhost:8088/api/orders/${encodeURIComponent(key)}`, {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
                 if (!res.ok) throw new Error('order fetch failed');
@@ -2326,7 +2326,7 @@
 
 
             try {
-                const response = await fetch('http://localhost:8080/api/admin/disputes', {
+                const response = await fetch('http://localhost:8088/api/admin/disputes', {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
@@ -2402,8 +2402,8 @@
 
             try {
                 const [disputeRes, imagesRes] = await Promise.all([
-                    fetch(`http://localhost:8080/api/disputes/${disputeId}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` } }),
-                    fetch(`http://localhost:8080/api/disputes/${disputeId}/images`, { headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` } })
+                    fetch(`http://localhost:8088/api/disputes/${disputeId}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` } }),
+                    fetch(`http://localhost:8088/api/disputes/${disputeId}/images`, { headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` } })
                 ]);
                 if (!disputeRes.ok) throw new Error('Failed to load dispute');
                 const dispute = await disputeRes.json();
@@ -2412,7 +2412,7 @@
                 let order = null;
                 if (dispute.orderId) {
                     try {
-                        const orderRes = await fetch(`http://localhost:8080/api/orders/${dispute.orderId}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` } });
+                        const orderRes = await fetch(`http://localhost:8088/api/orders/${dispute.orderId}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` } });
                         if (orderRes.ok) order = await orderRes.json();
                     } catch (e) { console.warn('Order fetch failed:', e); }
                 }
@@ -2563,7 +2563,7 @@
             }
 
             try {
-                const response = await fetch(`http://localhost:8080/api/admin/disputes/${currentReviewDisputeId}/review`, {
+                const response = await fetch(`http://localhost:8088/api/admin/disputes/${currentReviewDisputeId}/review`, {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)
@@ -2596,7 +2596,7 @@
 
 
             try {
-                let url = 'http://localhost:8080/api/products';
+                let url = 'http://localhost:8088/api/products';
                 if (sortBy) url += `?sort=${sortBy}`;
 
                 const response = await fetch(url, {
@@ -2685,7 +2685,7 @@
             }
 
             try {
-                const response = await fetch('http://localhost:8080/api/flash-sales/campaigns', {
+                const response = await fetch('http://localhost:8088/api/flash-sales/campaigns', {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
                 if (response.ok) {
@@ -2712,7 +2712,7 @@
                 // Fetch slots for each campaign
                 let slotsHtml = '<p class="text-xs text-gray-400">Loading slots...</p>';
                 try {
-                    const sResp = await fetch(`http://localhost:8080/api/flash-sales/slots/${campaign.id}`, {
+                    const sResp = await fetch(`http://localhost:8088/api/flash-sales/slots/${campaign.id}`, {
                         headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                     });
                     if (sResp.ok) {
@@ -2807,7 +2807,7 @@
             tableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-10 text-center text-gray-500"><i class="fas fa-spinner fa-spin text-2xl"></i> Loading registrations...</td></tr>';
 
             try {
-                const response = await fetch('http://localhost:8080/api/flash-sales/registrations/status/PENDING', {
+                const response = await fetch('http://localhost:8088/api/flash-sales/registrations/status/PENDING', {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
                 if (response.ok) {
@@ -2931,7 +2931,7 @@
             }
 
             try {
-                const response = await fetch(`http://localhost:8080/api/flash-sales/registrations/${id}/approve`, {
+                const response = await fetch(`http://localhost:8088/api/flash-sales/registrations/${id}/approve`, {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status, adminNote: note })
@@ -3030,7 +3030,7 @@
                 approvalDeadline: document.getElementById('fs-campaign-app-deadline').value ? document.getElementById('fs-campaign-app-deadline').value + ':00' : null
             };
             try {
-                const response = await fetch('http://localhost:8080/api/flash-sales/campaigns', {
+                const response = await fetch('http://localhost:8088/api/flash-sales/campaigns', {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
@@ -3076,7 +3076,7 @@
                 endTime: endRaw + ':00'
             };
             try {
-                const response = await fetch('http://localhost:8080/api/flash-sales/slots', {
+                const response = await fetch('http://localhost:8088/api/flash-sales/slots', {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
@@ -3095,7 +3095,7 @@
         async function emergencyStopCampaign(id) {
             if (!confirm('CRITICAL: This will halt all active slots in this campaign and revert item prices! Proceed?')) return;
             try {
-                const response = await fetch(`http://localhost:8080/api/flash-sales/campaigns/${id}/emergency-stop`, {
+                const response = await fetch(`http://localhost:8088/api/flash-sales/campaigns/${id}/emergency-stop`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
@@ -3114,7 +3114,7 @@
         async function emergencyStopSlot(id) {
             if (!confirm('This will deactivate this slot and revert product prices. Proceed?')) return;
             try {
-                const response = await fetch(`http://localhost:8080/api/flash-sales/slots/${id}/emergency-stop`, {
+                const response = await fetch(`http://localhost:8088/api/flash-sales/slots/${id}/emergency-stop`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
@@ -3134,7 +3134,7 @@
         async function deleteCampaign(id) {
             if (!confirm('Are you sure you want to delete this campaign? All slots and items will be deleted.')) return;
             try {
-                const res = await fetch(`http://localhost:8080/api/flash-sales/campaigns/${id}`, {
+                const res = await fetch(`http://localhost:8088/api/flash-sales/campaigns/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
@@ -3148,7 +3148,7 @@
         async function deleteSlot(id) {
             if (!confirm('Delete this time slot?')) return;
             try {
-                const res = await fetch(`http://localhost:8080/api/flash-sales/slots/${id}`, {
+                const res = await fetch(`http://localhost:8088/api/flash-sales/slots/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
@@ -3211,7 +3211,7 @@
                 approvalDeadline: document.getElementById('edit-campaign-app-deadline').value ? document.getElementById('edit-campaign-app-deadline').value + ':00' : null
             };
             try {
-                const res = await fetch(`http://localhost:8080/api/flash-sales/campaigns/${id}`, {
+                const res = await fetch(`http://localhost:8088/api/flash-sales/campaigns/${id}`, {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
@@ -3314,7 +3314,7 @@
             document.getElementById('campaignDetailsMonitorStatus').textContent = monitorStatus;
             document.getElementById('campaignDetailsStartedAt').textContent = data.monitorStartedAt || '-';
             document.getElementById('campaignDetailsLastRequestAt').textContent = data.lastRequestAt || '-';
-            document.getElementById('campaignDetailsSlotMeta').textContent = `Monitoring slot ${slotShortId} • ${data.flashSaleStatus || 'UNKNOWN'} • min/max ${formatMonitorNumber(data.minResponseMs || 0)} / ${formatMonitorNumber(data.maxResponseMs || 0)} ms`;
+            document.getElementById('campaignDetailsSlotMeta').textContent = `Monitoring slot ${slotShortId} ï¿½ ${data.flashSaleStatus || 'UNKNOWN'} ï¿½ min/max ${formatMonitorNumber(data.minResponseMs || 0)} / ${formatMonitorNumber(data.maxResponseMs || 0)} ms`;
             document.getElementById('campaignDetailsMonitorSubtitle').textContent = totalRequests > 0
                 ? 'Live stress-test monitor sourced from server-side flash sale metrics.'
                 : 'Flash Sale monitor auto refreshes every second while this popup is open.';
@@ -3361,7 +3361,7 @@
             const tbody = document.getElementById('campaignDetailsBody');
             const headers = { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` };
             try {
-                const itemsRes = await fetch(`http://localhost:8080/api/flash-sales/campaigns/${id}/items`, { headers });
+                const itemsRes = await fetch(`http://localhost:8088/api/flash-sales/campaigns/${id}/items`, { headers });
 
                 if (activeCampaignDetailsId !== id) {
                     return;
@@ -3377,7 +3377,7 @@
                     return;
                 }
 
-                const monitorRes = await fetch(`http://localhost:8080/api/flash-sales/campaigns/${id}/monitor`, { headers, cache: 'no-store' });
+                const monitorRes = await fetch(`http://localhost:8088/api/flash-sales/campaigns/${id}/monitor`, { headers, cache: 'no-store' });
                 if (activeCampaignDetailsId !== id) {
                     return;
                 }

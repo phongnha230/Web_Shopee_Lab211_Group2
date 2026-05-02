@@ -2,7 +2,7 @@
 async function test() {
     try {
         console.log("Logging in as user@gmail.com / 123456");
-        const loginRes = await fetch('http://localhost:8080/api/auth/login', {
+        const loginRes = await fetch('http://localhost:8088/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: 'user@gmail.com', password: '1' })
@@ -14,7 +14,7 @@ async function test() {
 
             // Try another common user
             console.log("Trying admin@example.com / admin123");
-            const loginRes2 = await fetch('http://localhost:8080/api/auth/login', {
+            const loginRes2 = await fetch('http://localhost:8088/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: 'admin@webshoppe.com', password: '1' })
@@ -29,7 +29,7 @@ async function test() {
         console.log("We have a valid refresh token:", data.refreshToken ? "YES" : "NO");
         if (data.refreshToken) {
             console.log("Requesting refresh...");
-            const refreshRes = await fetch('http://localhost:8080/api/auth/refresh-token', {
+            const refreshRes = await fetch('http://localhost:8088/api/auth/refresh-token', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

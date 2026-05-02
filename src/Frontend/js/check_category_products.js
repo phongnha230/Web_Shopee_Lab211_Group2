@@ -12,8 +12,8 @@ function fetchData(url) {
 
 async function check() {
     try {
-        const categories = await fetchData('http://localhost:8080/api/categories');
-        const products = await fetchData('http://localhost:8080/api/products');
+        const categories = await fetchData('http://localhost:8088/api/categories');
+        const products = await fetchData('http://localhost:8088/api/products');
 
         const catMap = {};
         categories.forEach(c => catMap[c.id] = c.name);

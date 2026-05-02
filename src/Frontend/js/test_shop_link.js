@@ -1,5 +1,5 @@
 // Test script to verify product has shopId
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = 'http://localhost:8088/api';
 
 async function testProductShopId() {
     try {

@@ -819,7 +819,7 @@
         // --- SHOP APPROVAL LOGIC (EXISTING) ---
         async function loadPendingShops() {
             try {
-                const response = await fetch('http://localhost:8080/api/shop/admin/pending', {
+                const response = await fetch('http://localhost:8088/api/shop/admin/pending', {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
@@ -918,8 +918,8 @@
 
 
             const endpoint = action === 'approve'
-                ? `http://localhost:8080/api/shop/admin/approve/${id}`
-                : `http://localhost:8080/api/shop/admin/reject/${id}?reason=${encodeURIComponent(reason)}`;
+                ? `http://localhost:8088/api/shop/admin/approve/${id}`
+                : `http://localhost:8088/api/shop/admin/reject/${id}?reason=${encodeURIComponent(reason)}`;
 
 
             try {
@@ -1040,7 +1040,7 @@
 
         async function loadActiveShops() {
             try {
-                const response = await fetch('http://localhost:8080/api/shop/admin/active', {
+                const response = await fetch('http://localhost:8088/api/shop/admin/active', {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
@@ -1117,7 +1117,7 @@
 
         async function loadRejectedShops() {
             try {
-                const response = await fetch('http://localhost:8080/api/shop/admin/rejected', {
+                const response = await fetch('http://localhost:8088/api/shop/admin/rejected', {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
@@ -1202,7 +1202,7 @@
 
             try {
                 // Fetch first 100 users (Paged API)
-                const response = await fetch('http://localhost:8080/api/admin/users?page=0&size=100', {
+                const response = await fetch('http://localhost:8088/api/admin/users?page=0&size=100', {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
@@ -1308,7 +1308,7 @@
         // --- EDIT USER FUNCTIONS ---
         async function openEditModal(userId) {
             try {
-                const response = await fetch(`http://localhost:8080/api/admin/users/${userId}`, {
+                const response = await fetch(`http://localhost:8088/api/admin/users/${userId}`, {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
@@ -1350,7 +1350,7 @@
 
 
             try {
-                const response = await fetch(`http://localhost:8080/api/admin/users/${userId}`, {
+                const response = await fetch(`http://localhost:8088/api/admin/users/${userId}`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem("accessToken")}`,
@@ -1383,7 +1383,7 @@
 
 
             try {
-                const response = await fetch(`http://localhost:8080/api/admin/users/${userId}`, {
+                const response = await fetch(`http://localhost:8088/api/admin/users/${userId}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
@@ -1406,7 +1406,7 @@
         // Load Dashboard Statistics
         async function loadDashboardStats(days = 1) {
             try {
-                const response = await fetch(`http://localhost:8080/api/admin/dashboard/stats?days=${days}`, {
+                const response = await fetch(`http://localhost:8088/api/admin/dashboard/stats?days=${days}`, {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
@@ -1541,7 +1541,7 @@
 
 
             try {
-                const response = await fetch('http://localhost:8080/api/admin/disputes', {
+                const response = await fetch('http://localhost:8088/api/admin/disputes', {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 
@@ -1613,7 +1613,7 @@
 
 
             try {
-                const response = await fetch(`http://localhost:8080/api/admin/disputes/${id}/review`, {
+                const response = await fetch(`http://localhost:8088/api/admin/disputes/${id}/review`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem("accessToken")}`,
@@ -1650,7 +1650,7 @@
 
 
             try {
-                const response = await fetch('http://localhost:8080/api/products', {
+                const response = await fetch('http://localhost:8088/api/products', {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("accessToken")}` }
                 });
 

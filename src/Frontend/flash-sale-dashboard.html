@@ -24,7 +24,7 @@
                             isRefreshing = true;
                             refreshPromise = (async () => {
                                 try {
-                                    const refreshResponse = await originalFetch('http://localhost:8080/api/auth/refresh-token', {
+                                    const refreshResponse = await originalFetch('http://localhost:8088/api/auth/refresh-token', {
                                         method: 'POST',
                                         headers: {
                                             'Content-Type': 'application/json',
@@ -272,7 +272,7 @@
 
             <div class="input-group">
                 <label>Backend URL</label>
-                <input id="baseUrl" type="text" value="http://localhost:8080" placeholder="http://localhost:8080">
+                <input id="baseUrl" type="text" value="http://localhost:8088" placeholder="http://localhost:8088">
             </div>
             <div class="input-group">
                 <label>Variant ID</label>
@@ -377,7 +377,7 @@
 
             <div class="input-group">
                 <label>Backend URL</label>
-                <input id="monitorUrl" type="text" value="http://localhost:8080">
+                <input id="monitorUrl" type="text" value="http://localhost:8088">
             </div>
             <div class="input-group">
                 <label>JWT Token (Admin hoặc Seller)</label>

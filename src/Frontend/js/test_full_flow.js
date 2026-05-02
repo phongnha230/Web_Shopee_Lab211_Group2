@@ -3,7 +3,7 @@ const password = 'Password@123';
 
 async function test() {
     console.log("1. Registering...");
-    const regRes = await fetch('http://localhost:8080/api/auth/register', {
+    const regRes = await fetch('http://localhost:8088/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, fullName: 'Test User' })
@@ -12,7 +12,7 @@ async function test() {
 
     // Attempting login directly. Wait, if they need OTP verification, maybe we can't login directly!
     // But let's try.
-    const loginRes = await fetch('http://localhost:8080/api/auth/login', {
+    const loginRes = await fetch('http://localhost:8088/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -28,7 +28,7 @@ async function test() {
     console.log("Login Success! Refresh Token ending in:", data.refreshToken.slice(-10));
 
     console.log("\n3. Testing Refresh Endpoint...");
-    const refreshRes = await fetch('http://localhost:8080/api/auth/refresh-token', {
+    const refreshRes = await fetch('http://localhost:8088/api/auth/refresh-token', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

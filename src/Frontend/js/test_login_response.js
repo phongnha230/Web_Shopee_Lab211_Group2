@@ -3,7 +3,7 @@ async function test() {
         const email = 'test' + Date.now() + '@example.com';
         const password = 'Password@123';
         console.log("Registering newly created user:", email);
-        let res = await fetch('http://localhost:8080/api/auth/register', {
+        let res = await fetch('http://localhost:8088/api/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password, fullName: 'Test Name' })
@@ -11,7 +11,7 @@ async function test() {
         console.log("Register response:", res.status, await res.text());
 
         console.log("Logging in via API...");
-        res = await fetch('http://localhost:8080/api/auth/login', {
+        res = await fetch('http://localhost:8088/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: 'lenguyenanhmai05@gmail.com', password: '1' })

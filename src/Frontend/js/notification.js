@@ -1,5 +1,5 @@
 // Use existing API_BASE_URL from page scope to avoid duplicate declaration
-const NOTIFICATION_API = (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : 'http://localhost:8080/api');
+const NOTIFICATION_API = (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : 'http://localhost:8088/api');
 
 document.addEventListener('DOMContentLoaded', () => {
     loadNotifications();

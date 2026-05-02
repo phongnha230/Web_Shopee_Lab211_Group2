@@ -83,7 +83,7 @@ products.forEach(p => {
             const catId = catMap[catName];
             if (catId) {
                 // Add category
-                commands.push(`Invoke-RestMethod -Method Post -Uri "http://localhost:8080/api/products/${p.id}/categories/${catId}"`);
+                commands.push(`Invoke-RestMethod -Method Post -Uri "http://localhost:8088/api/products/${p.id}/categories/${catId}"`);
                 matched = true;
             }
         }

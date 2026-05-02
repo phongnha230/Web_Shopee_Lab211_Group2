@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -57,7 +57,7 @@
 
             try {
                 // Call promoted endpoint
-                const response = await fetch(`http://localhost:8080/api/user/promote?email=${encodeURIComponent(email)}&roleName=${roleName}`, {
+                const response = await fetch(`http://localhost:8088/api/user/promote?email=${encodeURIComponent(email)}&roleName=${roleName}`, {
                     method: 'POST'
                 });
 
