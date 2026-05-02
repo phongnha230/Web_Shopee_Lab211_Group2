@@ -16,6 +16,7 @@ import java.util.Map;
 
 import com.shoppeclone.backend.shop.repository.ShopRepository;
 import com.shoppeclone.backend.shop.entity.Shop;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -24,6 +25,7 @@ public class ChatController {
     private final ChatService chatService;
     private final UserRepository userRepository;
     private final ShopRepository shopRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @PostMapping("/start/{shopId}")
     public ResponseEntity<?> startConversation(@PathVariable String shopId,
@@ -97,6 +99,10 @@ public class ChatController {
         }
 
         Message message = chatService.sendMessage(conversationId, user.getId(), content, isShopMessage);
+        
+        // Broadcast message to WebSocket subscribers
+        messagingTemplate.convertAndSend("/topic/chat/" + conversationId, message);
+        
         return ResponseEntity.ok(message);
     }
 

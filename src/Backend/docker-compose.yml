@@ -1,5 +1,32 @@
 version: '3.8'
 services:
+  backend:
+    build: .
+    container_name: shoppeclone-backend
+    ports:
+      - "8088:8088"
+    env_file:
+      - .env
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - SPRING_ELASTICSEARCH_URIS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+      - redis
+    networks:
+      - shoppeclone-network
+
+  redis:
+    image: redis:alpine
+    container_name: shoppeclone-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - shoppeclone-network
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.12.1
     container_name: shoppeclone-elasticsearch
@@ -17,6 +44,7 @@ services:
 
 volumes:
   elasticsearch-data:
+  redis-data:
 
 networks:
   shoppeclone-network:

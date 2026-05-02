@@ -77,39 +77,13 @@
             };
         })();
     </script>
-
-
-    
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat - GoShop</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <style>
         .text-orange-500,
         .text-orange-600 {
@@ -238,6 +212,7 @@
         let currentConversationId = null;
         let shopId = null;
         let currentUserId = null; // Need to know who I am to align messages (right/left)
+        let stompClient = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
 
@@ -298,6 +273,7 @@
                 if (shopId) localStorage.setItem('pendingChatShopId', shopId);
 
                 loadMessages(currentConversationId);
+                connectWebSocket(currentConversationId);
             } else if (shopId) {
                 console.log("Found Shop ID:", shopId);
                 // Update URL if missing
@@ -329,12 +305,39 @@
                     sendMessage();
                 }
             });
-
-            // Poll for new messages every 3 seconds
-            setInterval(() => {
-                if (currentConversationId) loadMessages(currentConversationId, false);
-            }, 3000);
         });
+
+        function connectWebSocket(convId) {
+            if (stompClient && stompClient.connected) return;
+
+            const jwtToken = localStorage.getItem("accessToken");
+            if (!jwtToken) return;
+
+            const socket = new SockJS('http://localhost:8088/ws/chat');
+            stompClient = Stomp.over(socket);
+            
+            stompClient.debug = null;
+
+            stompClient.connect({ 'Authorization': 'Bearer ' + jwtToken }, function(frame) {
+                console.log('Connected to WebSocket STOMP');
+                
+                stompClient.subscribe('/topic/chat/' + convId, function(response) {
+                    const newMessage = JSON.parse(response.body);
+                    console.log('New real-time message:', newMessage);
+                    
+                    // Lấy tọa độ cuộn hiện tại
+                    const container = document.getElementById('chatContainer');
+                    const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
+                    
+                    // Tải lại tin nhắn và tự cuộn xuống nếu đang ở dưới cùng
+                    loadMessages(convId, isAtBottom || newMessage.senderId === currentUserId);
+                });
+            }, function(error) {
+                console.error('STOMP error: ', error);
+                // Thử kết nối lại sau 5s nếu bị mất kết nối
+                setTimeout(() => connectWebSocket(convId), 5000);
+            });
+        }
 
         async function loadUserProfile(token) {
             try {
@@ -384,6 +387,7 @@
                     // Update URL without reload
                     try { history.replaceState({}, '', `?id=${currentConversationId}`); } catch (e) { }
                     loadMessages(currentConversationId);
+                    connectWebSocket(currentConversationId);
                 } else {
                     document.getElementById('loadingMsg').textContent = 'Failed to start conversation.';
                 }
@@ -496,7 +500,6 @@
             const content = contentOverride || input.value.trim();
             if (!content || !currentConversationId) return;
 
-
             input.value = ''; // Clear immediately
 
             try {
@@ -510,7 +513,8 @@
                 });
 
                 if (res.ok) {
-                    loadMessages(currentConversationId, true);
+                    // Không cần gọi loadMessages ở đây nữa vì STOMP sẽ trả về tin nhắn
+                    // loadMessages(currentConversationId, true);
                 } else {
                     alert('Failed to send message');
                 }
@@ -554,7 +558,6 @@
         }
         async function deleteMessage(messageId) {
             if (!confirm('Bạn có chắc muốn thu hồi tin nhắn này không?')) return;
-
 
             try {
                 const res = await fetch(`${API_BASE_URL}/chat/messages/${messageId}`, {
